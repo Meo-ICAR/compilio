@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\TrainingSessions;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\TrainingSessions\Pages\CreateTrainingSession;
 use App\Filament\Resources\TrainingSessions\Pages\EditTrainingSession;
 use App\Filament\Resources\TrainingSessions\Pages\ListTrainingSessions;
+use App\Filament\Resources\TrainingSessions\RelationManagers\TrainingRecordsRelationManager;
 use App\Filament\Resources\TrainingSessions\Schemas\TrainingSessionForm;
 use App\Filament\Resources\TrainingSessions\Tables\TrainingSessionsTable;
 use App\Models\TrainingSession;
@@ -37,6 +39,7 @@ class TrainingSessionResource extends Resource
     {
         return [
             \App\Filament\Resources\TrainingSessions\RelationManagers\TrainingRecordsRelationManager::class,
+            DocumentsRelationManager::class,
         ];
     }
 

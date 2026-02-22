@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Principals;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Principals\Imports\PrincipalsImport;
 use App\Filament\Resources\Principals\Pages\CreatePrincipal;
 use App\Filament\Resources\Principals\Pages\EditPrincipal;
 use App\Filament\Resources\Principals\Pages\ListPrincipals;
+use App\Filament\Resources\Principals\RelationManagers\ContactsRelationManager;
 use App\Filament\Resources\Principals\RelationManagers\PrincipalMandatesRelationManager;
 use App\Filament\Resources\Principals\RelationManagers\PrincipalScopesRelationManager;
 use App\Filament\Resources\Principals\Schemas\PrincipalForm;
@@ -42,6 +44,7 @@ class PrincipalResource extends Resource
             \App\Filament\Resources\Principals\RelationManagers\ContactsRelationManager::class,
             PrincipalMandatesRelationManager::class,
             PrincipalScopesRelationManager::class,
+            DocumentsRelationManager::class,
             //
         ];
     }

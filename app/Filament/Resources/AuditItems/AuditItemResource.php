@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AuditItems;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\AuditItems\Pages\CreateAuditItem;
 use App\Filament\Resources\AuditItems\Pages\EditAuditItem;
 use App\Filament\Resources\AuditItems\Pages\ListAuditItems;

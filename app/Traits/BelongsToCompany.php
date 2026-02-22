@@ -12,7 +12,7 @@ trait BelongsToCompany
     {
         static::addGlobalScope('company', function (Builder $builder) {
             if ($tenant = Filament::getTenant()) {
-                $builder->where('company_id', $tenant->id);
+                $builder->where($builder->getModel()->getTable() . '.company_id', $tenant->id);
             }
         });
 

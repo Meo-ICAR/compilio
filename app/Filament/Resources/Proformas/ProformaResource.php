@@ -2,17 +2,18 @@
 
 namespace App\Filament\Resources\Proformas;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Proformas\Pages\CreateProforma;
 use App\Filament\Resources\Proformas\Pages\EditProforma;
 use App\Filament\Resources\Proformas\Pages\ListProformas;
 use App\Filament\Resources\Proformas\Schemas\ProformaForm;
 use App\Filament\Resources\Proformas\Tables\ProformasTable;
 use App\Models\Proforma;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class ProformaResource extends Resource
@@ -22,7 +23,6 @@ class ProformaResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
     protected static string|UnitEnum|null $navigationGroup = 'Amministrazione';
-
 
     public static function form(Schema $schema): Schema
     {
@@ -37,7 +37,7 @@ class ProformaResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            DocumentsRelationManager::class
         ];
     }
 

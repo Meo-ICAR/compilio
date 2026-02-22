@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Practices;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Practices\Pages\CreatePractice;
 use App\Filament\Resources\Practices\Pages\EditPractice;
 use App\Filament\Resources\Practices\Pages\ListPractices;
+use App\Filament\Resources\Practices\RelationManagers\ClientsRelationManager;
+use App\Filament\Resources\Practices\RelationManagers\PracticeCommissionsRelationManager;
 use App\Filament\Resources\Practices\Schemas\PracticeForm;
 use App\Filament\Resources\Practices\Tables\PracticesTable;
 use App\Models\Practice;
@@ -36,8 +39,9 @@ class PracticeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\Practices\RelationManagers\ClientsRelationManager::class,
-            \App\Filament\Resources\Practices\RelationManagers\PracticeCommissionsRelationManager::class,
+            ClientsRelationManager::class,
+            PracticeCommissionsRelationManager::class,
+            DocumentsRelationManager::class,
         ];
     }
 

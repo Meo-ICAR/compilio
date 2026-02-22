@@ -10,6 +10,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -36,6 +37,10 @@ class ClientsRelationManager extends RelationManager
             ->modifyQueryUsing(fn($query) => $query->with('clientType'))
             ->recordTitleAttribute('name')
             ->columns([
+                TextColumn::make('pivot.role')
+                    ->label('Ruolo')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('name')
                     ->label('Nome Cliente')
                     ->searchable()
@@ -57,17 +62,20 @@ class ClientsRelationManager extends RelationManager
                     ->label('Telefono')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('pivot.role')
-                    ->label('Ruolo')
-                    ->searchable()
-                    ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
+                // Permette di collegare un cliente esistente alla pratica
+                // Permette di creare un nuovo cliente e collegarlo subito
                 CreateAction::make(),
                 AttachAction::make(),
+            ])
+            ->actions([
+                ViewAction::make(),
+                // Permette di scollegare il cliente dalla pratica senza eliminarlo dal DB
+                DetachAction::make(),
             ])
             ->recordActions([
                 EditAction::make(),

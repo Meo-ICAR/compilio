@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SoftwareApplications;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\SoftwareApplications\Pages\CreateSoftwareApplication;
 use App\Filament\Resources\SoftwareApplications\Pages\EditSoftwareApplication;
 use App\Filament\Resources\SoftwareApplications\Pages\ListSoftwareApplications;
@@ -43,6 +44,7 @@ class SoftwareApplicationResource extends Resource
         return [
             ApiConfigurationsRelationManager::class,
             SoftwareMappingsRelationManager::class,
+            DocumentsRelationManager::class,
         ];
     }
 
