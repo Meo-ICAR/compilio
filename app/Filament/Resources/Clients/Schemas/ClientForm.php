@@ -12,8 +12,6 @@ class ClientForm
     {
         return $schema
             ->components([
-                TextInput::make('company_id')
-                    ->required(),
                 Toggle::make('is_person')
                     ->required(),
                 TextInput::make('name')

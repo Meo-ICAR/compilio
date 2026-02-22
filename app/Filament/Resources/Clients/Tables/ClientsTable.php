@@ -15,8 +15,6 @@ class ClientsTable
     {
         return $table
             ->columns([
-                TextColumn::make('company_id')
-                    ->searchable(),
                 IconColumn::make('is_person')
                     ->boolean(),
                 TextColumn::make('name')
@@ -38,10 +36,6 @@ class ClientsTable
                 TextColumn::make('is_sanctioned')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

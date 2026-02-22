@@ -14,8 +14,6 @@ class ProformasTable
     {
         return $table
             ->columns([
-                TextColumn::make('company_id')
-                    ->searchable(),
                 TextColumn::make('agent_id')
                     ->numeric()
                     ->sortable(),
@@ -55,10 +53,6 @@ class ProformasTable
                     ->sortable(),
                 TextColumn::make('status')
                     ->badge(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

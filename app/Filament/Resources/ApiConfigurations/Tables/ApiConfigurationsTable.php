@@ -15,8 +15,6 @@ class ApiConfigurationsTable
     {
         return $table
             ->columns([
-                TextColumn::make('company_id')
-                    ->searchable(),
                 TextColumn::make('software_application_id')
                     ->numeric()
                     ->sortable(),
@@ -36,10 +34,6 @@ class ApiConfigurationsTable
                 TextColumn::make('last_sync_at')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

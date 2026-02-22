@@ -14,8 +14,6 @@ class EmployeesTable
     {
         return $table
             ->columns([
-                TextColumn::make('company_id')
-                    ->searchable(),
                 TextColumn::make('user_id')
                     ->numeric()
                     ->sortable(),
@@ -45,10 +43,6 @@ class EmployeesTable
                 TextColumn::make('company_branche_id')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

@@ -38,6 +38,29 @@ class LookupSeeder extends Seeder
             \App\Models\DocumentScope::firstOrCreate(['name' => $scope['name']], $scope);
         }
 
+        // Document Types & Scope Linking
+        $privacyScope = \App\Models\DocumentScope::where('name', 'Privacy')->first();
+        $amlScope = \App\Models\DocumentScope::where('name', 'AML')->first();
+        $oamScope = \App\Models\DocumentScope::where('name', 'OAM')->first();
+        $istruttoriaScope = \App\Models\DocumentScope::where('name', 'Istruttoria')->first();
+
+        $types = [
+            ['name' => 'Carta d\'Identità', 'scopes' => [$privacyScope->id, $amlScope->id]],
+            ['name' => 'Codice Fiscale', 'scopes' => [$privacyScope->id]],
+            ['name' => 'Modulo Privacy Firmato', 'scopes' => [$privacyScope->id]],
+            ['name' => 'Questionario AML', 'scopes' => [$amlScope->id]],
+            ['name' => 'Modulo Segnalazione OAM', 'scopes' => [$oamScope->id]],
+            ['name' => 'Busta Paga', 'scopes' => [$istruttoriaScope->id]],
+            ['name' => 'Contratto di Lavoro', 'scopes' => [$istruttoriaScope->id]],
+        ];
+
+        foreach ($types as $t) {
+            $type = \App\Models\DocumentType::firstOrCreate(['name' => $t['name']]);
+            if (isset($t['scopes'])) {
+                $type->scopes()->syncWithoutDetaching($t['scopes']);
+            }
+        }
+
         // Employment Types
         $employmentTypes = ['Dipendente Tempo Indeterminato', 'Dipendente Tempo Determinato', 'Autonomo', 'Pensionato'];
         foreach ($employmentTypes as $type) {

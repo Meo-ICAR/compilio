@@ -13,8 +13,6 @@ class AuditForm
     {
         return $schema
             ->components([
-                TextInput::make('company_id')
-                    ->required(),
                 Select::make('requester_type')
                     ->options([
             'OAM' => 'O a m',

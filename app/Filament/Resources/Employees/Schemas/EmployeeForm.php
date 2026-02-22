@@ -12,8 +12,6 @@ class EmployeeForm
     {
         return $schema
             ->components([
-                TextInput::make('company_id')
-                    ->required(),
                 TextInput::make('user_id')
                     ->numeric(),
                 TextInput::make('name'),

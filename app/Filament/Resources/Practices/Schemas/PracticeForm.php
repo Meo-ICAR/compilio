@@ -13,8 +13,6 @@ class PracticeForm
     {
         return $schema
             ->components([
-                TextInput::make('company_id')
-                    ->required(),
                 TextInput::make('client_id')
                     ->required()
                     ->numeric(),

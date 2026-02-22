@@ -12,8 +12,6 @@ class ProformaForm
     {
         return $schema
             ->components([
-                TextInput::make('company_id')
-                    ->required(),
                 TextInput::make('agent_id')
                     ->required()
                     ->numeric(),

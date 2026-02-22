@@ -27,8 +27,6 @@ class PrincipalForm
                 TextInput::make('ivass'),
                 Toggle::make('is_active')
                     ->required(),
-                TextInput::make('company_id')
-                    ->required(),
                 TextInput::make('mandate_number')
                     ->required(),
                 DatePicker::make('start_date')

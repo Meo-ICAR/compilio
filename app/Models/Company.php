@@ -16,4 +16,14 @@ class Company extends Model implements HasCurrentTenantLabel
     {
         return 'Company';
     }
+
+    public function branches()
+    {
+        return $this->hasMany(CompanyBranch::class);
+    }
+
+    public function websites()
+    {
+        return $this->hasMany(CompanyWebsite::class);
+    }
 }

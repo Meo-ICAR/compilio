@@ -52,12 +52,6 @@ class AgentsTable
                     ->searchable(),
                 IconColumn::make('is_active')
                     ->boolean(),
-                TextColumn::make('company_id')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

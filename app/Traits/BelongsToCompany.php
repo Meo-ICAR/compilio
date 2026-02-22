@@ -11,14 +11,14 @@ trait BelongsToCompany
     protected static function bootBelongsToCompany()
     {
         static::addGlobalScope('company', function (Builder $builder) {
-            if (Filament::hasTenant()) {
-                $builder->where('company_id', Filament::getTenant()->id);
+            if ($tenant = Filament::getTenant()) {
+                $builder->where('company_id', $tenant->id);
             }
         });
 
         static::creating(function ($model) {
-            if (Filament::hasTenant() && empty($model->company_id)) {
-                $model->company_id = Filament::getTenant()->id;
+            if (($tenant = Filament::getTenant()) && empty($model->company_id)) {
+                $model->company_id = $tenant->id;
             }
         });
     }

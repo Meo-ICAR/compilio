@@ -6,7 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class ClientPractice extends Model
 {
-    public $timestamps = false;
+    protected $table = 'client_practice';
 
-    //
+    protected $fillable = [
+        'practice_id',
+        'client_id',
+        'role',
+        'name',
+        'notes',
+        'company_id',
+    ];
 }

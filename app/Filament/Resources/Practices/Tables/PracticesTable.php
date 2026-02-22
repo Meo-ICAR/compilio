@@ -15,8 +15,6 @@ class PracticesTable
     {
         return $table
             ->columns([
-                TextColumn::make('company_id')
-                    ->searchable(),
                 TextColumn::make('client_id')
                     ->numeric()
                     ->sortable(),
@@ -51,10 +49,6 @@ class PracticesTable
                     ->sortable(),
                 IconColumn::make('is_active')
                     ->boolean(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

@@ -48,7 +48,7 @@ class OperationalSeeder extends Seeder
                 'city' => 'Milano',
                 'zip_code' => '20100'
             ]);
-            $client->addressable()->save($address);
+            $client->addresses()->save($address);
         }
 
         // Create Practice

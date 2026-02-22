@@ -15,5 +15,10 @@ class Practice extends Model implements HasMedia
         'status' => \App\Enums\PracticeStatus::class,
     ];
 
+    public function documents(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Document::class);
+    }
+
     public function clients() { return $this->belongsToMany(Client::class, 'client_practice')->withPivot(['role', 'name', 'notes'])->withTimestamps(); }
 }

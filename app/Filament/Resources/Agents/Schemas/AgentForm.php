@@ -34,8 +34,6 @@ class AgentForm
                 TextInput::make('vat_name'),
                 Toggle::make('is_active')
                     ->required(),
-                TextInput::make('company_id')
-                    ->required(),
             ]);
     }
 }

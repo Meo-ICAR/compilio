@@ -14,8 +14,6 @@ class AuditsTable
     {
         return $table
             ->columns([
-                TextColumn::make('company_id')
-                    ->searchable(),
                 TextColumn::make('requester_type')
                     ->badge(),
                 TextColumn::make('principal_id')
@@ -40,10 +38,6 @@ class AuditsTable
                     ->badge(),
                 TextColumn::make('overall_score')
                     ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

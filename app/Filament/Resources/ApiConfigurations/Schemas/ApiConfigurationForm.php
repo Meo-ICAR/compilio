@@ -15,8 +15,6 @@ class ApiConfigurationForm
     {
         return $schema
             ->components([
-                TextInput::make('company_id')
-                    ->required(),
                 TextInput::make('software_application_id')
                     ->required()
                     ->numeric(),
