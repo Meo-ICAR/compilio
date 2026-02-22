@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Practices\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -13,40 +14,60 @@ class PracticeForm
     {
         return $schema
             ->components([
-                TextInput::make('client_id')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('principal_id')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('bank_id')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('agent_id')
-                    ->required()
-                    ->numeric(),
+                Select::make('principal_id')
+                    ->label('Mandante')
+                    ->relationship('principal', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+                Select::make('agent_id')
+                    ->label('Agente')
+                    ->relationship('agent', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                 TextInput::make('name')
+                    ->label('Nome Pratica')
                     ->required(),
                 TextInput::make('CRM_code')
+                    ->label('Codice CRM')
                     ->required(),
                 TextInput::make('principal_code')
+                    ->label('Codice Mandante')
                     ->required(),
                 TextInput::make('amount')
-                    ->required()
-                    ->numeric(),
+                    ->label('Importo')
+                    ->numeric()
+                    ->prefix('€')
+                    ->required(),
                 TextInput::make('net')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('practice_scope_id')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('status')
-                    ->required()
-                    ->default('istruttoria'),
+                    ->label('Netto')
+                    ->numeric()
+                    ->prefix('€')
+                    ->required(),
+                Select::make('practice_scope_id')
+                    ->label('Ambito')
+                    ->relationship('practiceScope', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+                Select::make('status')
+                    ->label('Stato')
+                    ->options([
+                        'istruttoria' => 'Istruttoria',
+                        'deliberata' => 'Deliberata',
+                        'erogata' => 'Erogata',
+                        'respinta' => 'Respinta',
+                        'annullata' => 'Annullata',
+                    ])
+                    ->default('istruttoria')
+                    ->required(),
                 DatePicker::make('perfected_at')
+                    ->label('Data Perfezionamento')
                     ->required(),
                 Toggle::make('is_active')
-                    ->required(),
+                    ->label('Attiva')
+                    ->default(true),
             ]);
     }
 }

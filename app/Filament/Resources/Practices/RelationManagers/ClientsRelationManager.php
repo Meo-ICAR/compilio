@@ -33,10 +33,34 @@ class ClientsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with('clientType'))
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->label('Nome Cliente')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('first_name')
+                    ->label('Nome')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('clientType.name')
+                    ->label('Tipo Cliente')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Nessun tipo'),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('phone')
+                    ->label('Telefono')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('pivot.role')
+                    ->label('Ruolo')
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 //

@@ -25,7 +25,7 @@ class CompanyResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Nucleo Centrale';
+    protected static string|UnitEnum|null $navigationGroup = 'Organizzazione';
 
     public static function form(Schema $schema): Schema
     {

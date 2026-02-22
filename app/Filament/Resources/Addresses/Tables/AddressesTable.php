@@ -13,19 +13,35 @@ class AddressesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->orderBy('created_at', 'desc'))
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->label('Nome Indirizzo')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('street')
-                    ->searchable(),
+                    ->label('Via')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('city')
-                    ->searchable(),
+                    ->label('Città')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('zip_code')
-                    ->searchable(),
+                    ->label('CAP')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('address_type_id')
+                    ->label('Tipo')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('created_at')
+                    ->label('Data Creazione')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Data Aggiornamento')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

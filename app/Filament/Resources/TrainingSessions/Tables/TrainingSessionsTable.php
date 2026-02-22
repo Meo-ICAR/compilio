@@ -13,26 +13,35 @@ class TrainingSessionsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with('trainingTemplate'))
             ->columns([
-                TextColumn::make('training_template_id')
-                    ->numeric()
+                TextColumn::make('trainingTemplate.name')
+                    ->label('Template Corso')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('name')
+                    ->label('Nome Sessione')
                     ->searchable(),
                 TextColumn::make('total_hours')
+                    ->label('Ore Totali')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('trainer_name')
+                    ->label('Docente')
                     ->searchable(),
                 TextColumn::make('start_date')
+                    ->label('Data Inizio')
                     ->date()
                     ->sortable(),
                 TextColumn::make('end_date')
+                    ->label('Data Fine')
                     ->date()
                     ->sortable(),
                 TextColumn::make('location')
+                    ->label('Location')
                     ->badge(),
                 TextColumn::make('updated_at')
+                    ->label('Data Aggiornamento')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

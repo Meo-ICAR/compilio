@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Clients\Schemas;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class ClientForm
@@ -25,10 +27,12 @@ class ClientForm
                 TextInput::make('phone')
                     ->tel(),
                 Toggle::make('is_pep'),
-                TextInput::make('client_type_id')
-                    ->numeric(),
-                TextInput::make('is_sanctioned')
-                    ->numeric(),
+                Toggle::make('is_sanctioned'),
+                Select::make('client_type_id')
+                    ->label('Tipo Cliente')
+                    ->options(\App\Models\ClientType::pluck('name', 'id'))
+                    ->searchable()
+                    ->required(),
             ]);
     }
 }

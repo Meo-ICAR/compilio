@@ -8,11 +8,11 @@ use App\Filament\Resources\TrainingSessions\Pages\ListTrainingSessions;
 use App\Filament\Resources\TrainingSessions\Schemas\TrainingSessionForm;
 use App\Filament\Resources\TrainingSessions\Tables\TrainingSessionsTable;
 use App\Models\TrainingSession;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class TrainingSessionResource extends Resource
@@ -22,7 +22,6 @@ class TrainingSessionResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
     protected static string|UnitEnum|null $navigationGroup = 'Formazione';
-
 
     public static function form(Schema $schema): Schema
     {
@@ -37,7 +36,7 @@ class TrainingSessionResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            \App\Filament\Resources\TrainingSessions\RelationManagers\TrainingRecordsRelationManager::class,
         ];
     }
 

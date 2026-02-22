@@ -15,42 +15,64 @@ class PracticesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'practiceScope']))
             ->columns([
-                TextColumn::make('client_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('principal_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('bank_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('agent_id')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('clients_names')
+                    ->label('Clienti')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Nessun cliente'),
+                TextColumn::make('principal.name')
+                    ->label('Mandante')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Nessun mandante'),
+                TextColumn::make('agent.name')
+                    ->label('Agente')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Nessun agente'),
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->label('Nome Pratica')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('CRM_code')
-                    ->searchable(),
+                    ->label('Codice CRM')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('principal_code')
-                    ->searchable(),
+                    ->label('Codice Mandante')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('amount')
-                    ->numeric()
+                    ->label('Importo')
+                    ->money('EUR')
                     ->sortable(),
                 TextColumn::make('net')
-                    ->numeric()
+                    ->label('Netto')
+                    ->money('EUR')
                     ->sortable(),
-                TextColumn::make('practice_scope_id')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('practiceScope.name')
+                    ->label('Ambito')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Nessun ambito'),
                 TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('perfected_at')
-                    ->date()
+                    ->label('Stato')
+                    ->badge()
+                    ->color(fn($state) => \App\Models\PracticeStatus::where('name', $state)->value('color') ?? 'gray')
+                    ->searchable()
                     ->sortable(),
+                TextColumn::make('perfected_at')
+                    ->label('Data Perfezionamento')
+                    ->date()
+                    ->sortable()
+                    ->placeholder('Non definita'),
                 IconColumn::make('is_active')
+                    ->label('Attiva')
                     ->boolean(),
                 TextColumn::make('updated_at')
+                    ->label('Data Aggiornamento')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

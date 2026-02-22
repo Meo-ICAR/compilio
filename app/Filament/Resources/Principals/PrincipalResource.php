@@ -24,7 +24,7 @@ class PrincipalResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Rete';
+    protected static string|UnitEnum|null $navigationGroup = 'Organizzazione';
 
     public static function form(Schema $schema): Schema
     {

@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\Agent;
 use App\Models\Company;
 use App\Models\Principal;
 use App\Models\PrincipalContact;
-use App\Models\Agent;
-use App\Models\Mandate;
+use App\Models\PrincipalMandate;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -15,7 +15,8 @@ class CoreDataSeeder extends Seeder
     public function run(): void
     {
         $company = Company::first();
-        if (!$company) return;
+        if (!$company)
+            return;
 
         // Principals (Banche Mandanti)
         $principal = Principal::firstOrCreate(
@@ -42,7 +43,7 @@ class CoreDataSeeder extends Seeder
         );
 
         // Mandates (Contratti di mandato)
-        Mandate::firstOrCreate(
+        PrincipalMandate::firstOrCreate(
             ['mandate_number' => 'MAND-2024-001', 'company_id' => $company->id, 'principal_id' => $principal->id],
             [
                 'name' => 'Mandato Principale',

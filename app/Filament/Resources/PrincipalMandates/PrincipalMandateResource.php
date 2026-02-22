@@ -8,21 +8,19 @@ use App\Filament\Resources\PrincipalMandates\Pages\ListPrincipalMandates;
 use App\Filament\Resources\PrincipalMandates\Schemas\PrincipalMandateForm;
 use App\Filament\Resources\PrincipalMandates\Tables\PrincipalMandatesTable;
 use App\Models\PrincipalMandate;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class PrincipalMandateResource extends Resource
 {
+    protected static bool $isScopedToTenant = false;
     protected static ?string $model = PrincipalMandate::class;
-
     protected static bool $shouldRegisterNavigation = false;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
-
     protected static string|UnitEnum|null $navigationGroup = 'Nucleo Centrale';
 
     public static function form(Schema $schema): Schema

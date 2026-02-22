@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -27,5 +27,10 @@ class Client extends Model implements HasMedia
     public function addresses(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
         return $this->morphMany(Address::class, 'addressable');
+    }
+
+    public function clientType()
+    {
+        return $this->belongsTo(ClientType::class);
     }
 }

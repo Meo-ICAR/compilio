@@ -6,5 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Abi extends Model
 {
-    //
+    protected $fillable = [
+        'name',
+        'code',
+        'description',
+    ];
 }

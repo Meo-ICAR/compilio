@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\PracticeCommissions;
 
-use App\Filament\Resources\PracticeCommissions\Pages\ListPracticeCommissions;
 use App\Filament\Resources\PracticeCommissions\Pages\CreatePracticeCommission;
 use App\Filament\Resources\PracticeCommissions\Pages\EditPracticeCommission;
+use App\Filament\Resources\PracticeCommissions\Pages\ListPracticeCommissions;
 use App\Filament\Resources\PracticeCommissions\Schemas\PracticeCommissionForm;
 use App\Filament\Resources\PracticeCommissions\Tables\PracticeCommissionsTable;
 use App\Models\PracticeCommission;
@@ -21,7 +21,7 @@ class PracticeCommissionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Nucleo Centrale';
+    protected static string|UnitEnum|null $navigationGroup = 'Amministrazione';
 
     public static function form(Schema $schema): Schema
     {

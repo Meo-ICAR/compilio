@@ -8,11 +8,11 @@ use App\Filament\Resources\Agents\Pages\ListAgents;
 use App\Filament\Resources\Agents\Schemas\AgentForm;
 use App\Filament\Resources\Agents\Tables\AgentsTable;
 use App\Models\Agent;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class AgentResource extends Resource
@@ -21,8 +21,7 @@ class AgentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Rete';
-
+    protected static string|UnitEnum|null $navigationGroup = 'Organizzazione';
 
     public static function form(Schema $schema): Schema
     {
@@ -37,7 +36,7 @@ class AgentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            \App\Filament\Resources\Agents\RelationManagers\TrainingRecordsRelationManager::class,
         ];
     }
 

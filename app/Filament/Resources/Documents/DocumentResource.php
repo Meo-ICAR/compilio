@@ -8,21 +8,19 @@ use App\Filament\Resources\Documents\Pages\ListDocuments;
 use App\Filament\Resources\Documents\Schemas\DocumentForm;
 use App\Filament\Resources\Documents\Tables\DocumentsTable;
 use App\Models\Document;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class DocumentResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false;
     protected static ?string $model = Document::class;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
-
     protected static string|UnitEnum|null $navigationGroup = 'Nucleo Centrale';
-
 
     public static function form(Schema $schema): Schema
     {

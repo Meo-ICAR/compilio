@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Company;
-use App\Models\User;
-use App\Models\Client;
-use App\Models\ClientType;
 use App\Models\Address;
-use App\Models\Principal;
+use App\Models\Client;
+use App\Models\ClientPractice;
+use App\Models\ClientType;
+use App\Models\Company;
 use App\Models\Practice;
 use App\Models\PracticeScope;
-use App\Models\ClientPractice;
+use App\Models\Principal;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class OperationalSeeder extends Seeder
 {
@@ -55,14 +55,13 @@ class OperationalSeeder extends Seeder
         $practice = Practice::firstOrCreate(
             ['name' => 'Mutuo Acquisto Prima Casa Rossi', 'company_id' => $company->id],
             [
-                'client_id' => $client->id,
                 'principal_id' => $principal->id,
                 'bank_id' => $principal->id,
                 'agent_id' => $agentUser->id,
                 'CRM_code' => 'CRM-1001',
                 'principal_code' => 'PRIN-2002',
-                'amount' => 150000.00,
-                'net' => 150000.00,
+                'amount' => 150000.0,
+                'net' => 150000.0,
                 'practice_scope_id' => $practiceScope->id,
                 'status' => 'istruttoria',
                 'perfected_at' => now()->toDateString(),
