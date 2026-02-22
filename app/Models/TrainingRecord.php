@@ -8,12 +8,13 @@ class TrainingRecord extends Model
 {
     protected $fillable = [
         'training_session_id',
-        'user_id',
-        'name',
-        'email',
+        'employee_id',
+        'agent_id',
         'status',
+        'hours_attended',
+        'score',
         'completion_date',
-        'notes',
+        'certificate_path',
     ];
 
     public function trainingSession()
@@ -21,8 +22,13 @@ class TrainingRecord extends Model
         return $this->belongsTo(TrainingSession::class);
     }
 
-    public function user()
+    public function employee()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function agent()
+    {
+        return $this->belongsTo(Agent::class);
     }
 }

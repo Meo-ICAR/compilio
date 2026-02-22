@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Company;
-use App\Models\User;
-use App\Models\Practice;
 use App\Models\Audit;
 use App\Models\AuditItem;
-use App\Models\TrainingTemplate;
-use App\Models\TrainingSession;
+use App\Models\Company;
+use App\Models\Practice;
 use App\Models\Proforma;
 use App\Models\ProformaStatus;
+use App\Models\TrainingSession;
+use App\Models\TrainingTemplate;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class SupportSeeder extends Seeder
 {
@@ -32,7 +32,7 @@ class SupportSeeder extends Seeder
             ['company_id' => $company->id, 'agent_id' => $agentUser->id, 'month' => date('n'), 'year' => date('Y')],
             [
                 'name' => 'Proforma ' . date('n/Y') . ' - Agente',
-                'total_commissions' => 1250.50,
+                'total_commissions' => 1250.5,
                 'status' => $status ? $status->name : 'INSERITO',
             ]
         );
@@ -43,7 +43,7 @@ class SupportSeeder extends Seeder
             [
                 'proforma_id' => $proforma->id,
                 'agent_id' => $agentUser->id,
-                'amount' => 1250.50,
+                'amount' => 1250.5,
                 'description' => 'Provvigione Mese Corrente'
             ]
         );
@@ -72,7 +72,7 @@ class SupportSeeder extends Seeder
             ['name' => 'Aggiornamento OAM Base'],
             [
                 'category' => 'OAM',
-                'base_hours' => 30.00,
+                'base_hours' => 30.0,
                 'is_mandatory' => 1
             ]
         );
@@ -81,17 +81,17 @@ class SupportSeeder extends Seeder
             ['training_template_id' => $template->id, 'company_id' => $company->id],
             [
                 'name' => 'Sessione Autunnale OAM',
-                'total_hours' => 30.00,
+                'total_hours' => 30.0,
                 'start_date' => '2024-09-01',
                 'end_date' => '2024-09-30'
             ]
         );
 
         \App\Models\TrainingRecord::firstOrCreate(
-            ['training_session_id' => $session->id, 'user_id' => $agentUser->id],
+            ['training_session_id' => $session->id, 'agent_id' => 1],
             [
                 'status' => 'COMPLETATO',
-                'hours_attended' => 30.00,
+                'hours_attended' => 30.0,
                 'score' => 'Idoneo',
                 'completion_date' => '2024-10-01'
             ]

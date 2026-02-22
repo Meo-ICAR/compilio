@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,12 +15,12 @@ return new class extends Migration
             $table->increments('id')->comment('ID univoco filiale');
             $table->char('company_id', 36)->comment('Tenant proprietario della sede (UUID)');
             $table->string('name')->comment('Nome della sede (es. Sede Centrale, Filiale Milano Nord)');
-            $table->boolean('is_main_office')->default(false)->comment('Indica se questa è la sede legale/principale dell\'agenzia');
+            $table->boolean('is_main_office')->default(false)->comment("Indica se questa è la sede legale/principale dell'agenzia");
             $table->string('manager_first_name', 100)->nullable()->comment('Nome del referente/responsabile della sede');
             $table->string('manager_last_name', 100)->nullable()->comment('Cognome del referente/responsabile della sede');
             $table->string('manager_tax_code', 16)->nullable()->comment('Codice Fiscale del referente della sede');
-            $table->timestamp('created_at')->nullable()->useCurrent();
-            $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
+            $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data creazione sede');
+            $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Data ultimo aggiornamento sede');
 
             $table->index(['company_id', 'is_main_office'], 'idx_company_main');
         });

@@ -5,8 +5,8 @@ namespace Database\Seeders;
 use App\Models\Company;
 use App\Models\CompanyBranch;
 use App\Models\CompanyWebsite;
-use App\Models\User;
 use App\Models\Employee;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -86,7 +86,7 @@ class TenantSeeder extends Seeder
                 'name' => 'Tenant Manager',
                 'role_title' => 'Amministratore',
                 'email' => 'user@agency.com',
-                'company_branche_id' => $branch->id,
+                'company_branch_id' => $branch->id,
             ]
         );
     }

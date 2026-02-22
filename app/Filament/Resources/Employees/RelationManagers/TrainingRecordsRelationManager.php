@@ -8,6 +8,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -23,32 +24,32 @@ class TrainingRecordsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with('trainingSession'))
-            ->recordTitleAttribute('name')
+            ->modifyQueryUsing(fn($query) => $query->whereNotNull('employee_id')->with('trainingSession'))
+            ->recordTitleAttribute('id')
             ->columns([
                 TextColumn::make('trainingSession.name')
                     ->label('Sessione Formativa')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('completion_date')
-                    ->label('Data Completamento')
-                    ->date()
-                    ->sortable(),
                 TextColumn::make('status')
                     ->label('Stato')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'completed' => 'success',
-                        'in_progress' => 'warning',
-                        'cancelled' => 'danger',
+                    ->color(fn(string $state): string => match ($state) {
+                        'COMPLETATO' => 'success',
+                        'FREQUENTANTE' => 'warning',
+                        'ISCRITTO' => 'info',
+                        'NON_SUPERATO' => 'danger',
                         default => 'gray',
                     })
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('notes')
-                    ->label('Note')
-                    ->searchable()
-                    ->limit(50),
+                TextColumn::make('hours_attended')
+                    ->label('Ore Frequentate')
+                    ->sortable(),
+                TextColumn::make('completion_date')
+                    ->label('Data Completamento')
+                    ->date()
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -75,17 +76,35 @@ class TrainingRecordsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextInput::make('status')
-                    ->label('Stato')
-                    ->default('in_progress')
+                Select::make('training_session_id')
+                    ->label('Sessione Formativa')
+                    ->relationship('trainingSession', 'name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
+                Select::make('status')
+                    ->label('Stato')
+                    ->options([
+                        'ISCRITTO' => 'Iscritto',
+                        'FREQUENTANTE' => 'Frequentante',
+                        'COMPLETATO' => 'Completato',
+                        'NON_SUPERATO' => 'Non Superato',
+                    ])
+                    ->default('ISCRITTO')
+                    ->required(),
+                TextInput::make('hours_attended')
+                    ->label('Ore Frequentate')
+                    ->numeric()
+                    ->default(0),
+                TextInput::make('score')
+                    ->label('Punteggio/ Esito')
+                    ->maxLength(50),
                 TextInput::make('completion_date')
                     ->label('Data Completamento')
-                    ->date()
-                    ->required(),
-                TextInput::make('notes')
-                    ->label('Note')
-                    ->rows(3),
+                    ->type('date'),
+                TextInput::make('certificate_path')
+                    ->label('Percorso Certificato')
+                    ->maxLength(255),
             ]);
     }
 }

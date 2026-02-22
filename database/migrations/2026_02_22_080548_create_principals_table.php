@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,23 +13,23 @@ return new class extends Migration
         Schema::create('principals', function (Blueprint $table) {
             $table->comment('Tabella globale delle banche ed enti eroganti convenzionati.');
             $table->increments('id')->comment('ID intero autoincrementante');
-            $table->string('name')->comment('Nome dell\'istituto bancario o finanziaria (es. Intesa Sanpaolo, Compass)');
+            $table->string('name')->comment("Nome dell'istituto bancario o finanziaria (es. Intesa Sanpaolo, Compass)");
             $table->string('abi', 5)->nullable()->comment('Abi per banche o codice ISVASS');
-            $table->date('stipulated_at')->nullable();
-            $table->date('dismissed_at')->nullable();
-            $table->string('vat_number', 13)->nullable();
-            $table->string('vat_name', 13)->nullable();
-            $table->string('type', 30)->nullable()->comment('Banca / Assicurazione / Utility ');
-            $table->string('oam', 30)->nullable();
-            $table->string('ivass', 30)->nullable();
+            $table->date('stipulated_at')->nullable()->comment('Data stipula contratto convenzione');
+            $table->date('dismissed_at')->nullable()->comment('Data cessazione rapporto convenzione');
+            $table->string('vat_number', 13)->nullable()->comment("Partita IVA dell'istituto");
+            $table->string('vat_name', 13)->nullable()->comment('Ragione sociale fiscale');
+            $table->string('type', 30)->nullable()->comment('Banca / Assicurazione / Utility');
+            $table->string('oam', 30)->nullable()->comment('Codice di iscrizione OAM');
+            $table->string('ivass', 30)->nullable()->comment('Codice di iscrizione IVASS');
             $table->boolean('is_active')->default(true)->comment('Indica se la banca è attualmente convenzionata');
-            $table->char('company_id', 36)->index('company_id');
+            $table->char('company_id', 36)->index('company_id')->comment('Tenant di appartenenza');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
             $table->string('mandate_number', 100)->comment('Numero di protocollo o identificativo del contratto di mandato');
             $table->date('start_date')->comment('Data di decorrenza del mandato');
             $table->date('end_date')->nullable()->comment('Data di scadenza (NULL se a tempo indeterminato)');
-            $table->boolean('is_exclusive')->nullable()->default(false)->comment('Indica se il mandato prevede l\'esclusiva per quella categoria');
+            $table->boolean('is_exclusive')->nullable()->default(false)->comment("Indica se il mandato prevede l'esclusiva per quella categoria");
             $table->enum('status', ['ATTIVO', 'SCADUTO', 'RECEDUTO', 'SOPESO'])->nullable()->default('ATTIVO')->comment('Stato operativo del mandato');
             $table->text('notes')->nullable()->comment('Note su provvigioni particolari o patti specifici');
         });
