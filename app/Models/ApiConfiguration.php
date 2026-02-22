@@ -15,4 +15,8 @@ class ApiConfiguration extends Model
     ];
 
     //
+    public function softwareApplication()
+    {
+        return $this->belongsTo(SoftwareApplication::class);
+    }
 }

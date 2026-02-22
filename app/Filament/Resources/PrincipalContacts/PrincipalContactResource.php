@@ -19,7 +19,7 @@ class PrincipalContactResource extends Resource
 {
     protected static ?string $model = PrincipalContact::class;
 
-    protected static bool $isScopedToTenant = false;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

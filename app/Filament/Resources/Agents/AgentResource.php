@@ -21,7 +21,7 @@ class AgentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Rete Vendita';
+    protected static string|UnitEnum|null $navigationGroup = 'Rete';
 
 
     public static function form(Schema $schema): Schema

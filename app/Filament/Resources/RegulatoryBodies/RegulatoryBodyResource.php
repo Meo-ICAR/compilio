@@ -26,7 +26,7 @@ class RegulatoryBodyResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingLibrary;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
+    protected static string|UnitEnum|null $navigationGroup = 'Compilance';
 
 
     public static function form(Schema $schema): Schema

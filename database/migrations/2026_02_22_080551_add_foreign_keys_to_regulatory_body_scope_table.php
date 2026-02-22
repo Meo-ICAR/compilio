@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('regulatory_body_scope', function (Blueprint $table) {
+        Schema::table('regulatory_body_scopes', function (Blueprint $table) {
             $table->foreign(['regulatory_body_id'], 'regulatory_body_scope_ibfk_1')->references(['id'])->on('regulatory_bodies')->onUpdate('no action')->onDelete('cascade');
             $table->foreign(['document_scope_id'], 'regulatory_body_scope_ibfk_2')->references(['id'])->on('document_scopes')->onUpdate('no action')->onDelete('cascade');
         });

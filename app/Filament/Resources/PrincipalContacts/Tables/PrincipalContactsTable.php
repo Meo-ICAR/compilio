@@ -15,9 +15,6 @@ class PrincipalContactsTable
     {
         return $table
             ->columns([
-                TextColumn::make('principal_id')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('first_name')
                     ->searchable(),
                 TextColumn::make('last_name')

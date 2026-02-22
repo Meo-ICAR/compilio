@@ -1,24 +1,21 @@
 <?php
 
 namespace App\Filament\Resources\Companies;
-use AppFilamentResourcesCompaniesPagesCreateCompany;
-use AppFilamentResourcesCompaniesPagesEditCompany;
-use AppFilamentResourcesCompaniesPagesListCompany;
 
+use App\Filament\Resources\Companies\Pages\CreateCompany;
+use App\Filament\Resources\Companies\Pages\EditCompany;
+use App\Filament\Resources\Companies\Pages\ListCompanies;
+use App\Filament\Resources\Companies\RelationManagers\BranchesRelationManager;
+use App\Filament\Resources\Companies\RelationManagers\WebsitesRelationManager;
+use App\Filament\Resources\Companies\Schemas\CompanyForm;
+use App\Filament\Resources\Companies\Tables\CompaniesTable;
+use App\Models\Company;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 use BackedEnum;
-use App\Models\Company;
-use App\Filament\Resources\Companies\Schemas\CompanyForm;
-use App\Filament\Resources\Companies\Tables\CompaniesTable;
-use App\Filament\Resources\Companies\Pages\ListCompanies;
-use App\Filament\Resources\Companies\Pages\CreateCompany;
-use App\Filament\Resources\Companies\Pages\EditCompany;
-use App\Filament\Resources\Companies\RelationManagers\BranchesRelationManager;
-use App\Filament\Resources\Companies\RelationManagers\WebsitesRelationManager;
+use UnitEnum;
 
 class CompanyResource extends Resource
 {
@@ -28,7 +25,7 @@ class CompanyResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
+    protected static string|UnitEnum|null $navigationGroup = 'Nucleo Centrale';
 
     public static function form(Schema $schema): Schema
     {
@@ -45,6 +42,7 @@ class CompanyResource extends Resource
         return [
             BranchesRelationManager::class,
             WebsitesRelationManager::class,
+            \App\Filament\Resources\Companies\RelationManagers\SoftwareApplicationsRelationManager::class,
         ];
     }
 

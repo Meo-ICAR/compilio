@@ -2,17 +2,20 @@
 
 namespace App\Filament\Resources\Principals;
 
+use App\Filament\Resources\Principals\Imports\PrincipalsImport;
 use App\Filament\Resources\Principals\Pages\CreatePrincipal;
 use App\Filament\Resources\Principals\Pages\EditPrincipal;
 use App\Filament\Resources\Principals\Pages\ListPrincipals;
+use App\Filament\Resources\Principals\RelationManagers\PrincipalMandatesRelationManager;
+use App\Filament\Resources\Principals\RelationManagers\PrincipalScopesRelationManager;
 use App\Filament\Resources\Principals\Schemas\PrincipalForm;
 use App\Filament\Resources\Principals\Tables\PrincipalsTable;
 use App\Models\Principal;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class PrincipalResource extends Resource
@@ -21,8 +24,7 @@ class PrincipalResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Rete Vendita';
-
+    protected static string|UnitEnum|null $navigationGroup = 'Rete';
 
     public static function form(Schema $schema): Schema
     {
@@ -38,6 +40,8 @@ class PrincipalResource extends Resource
     {
         return [
             \App\Filament\Resources\Principals\RelationManagers\ContactsRelationManager::class,
+            PrincipalMandatesRelationManager::class,
+            PrincipalScopesRelationManager::class,
             //
         ];
     }

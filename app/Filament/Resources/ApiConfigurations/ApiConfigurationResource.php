@@ -21,7 +21,7 @@ class ApiConfigurationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedKey;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Software & API';
+    protected static bool $shouldRegisterNavigation = false;
 
 
     public static function form(Schema $schema): Schema

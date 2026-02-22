@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('company_software_application', function (Blueprint $table) {
+            $table->id();
+            $table->char('company_id', 36)->comment('UUID dell\'azienda');
+            $table->unsignedInteger('software_application_id')->comment('ID del software');
+            $table->string('status')->default('ATTIVO')->comment('Stato dell\'associazione (es. ATTIVO, SOSPESO)');
+            $table->text('notes')->nullable()->comment('Note specifiche per l\'azienda');
+            $table->timestamps();
+
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->foreign('software_application_id')->references('id')->on('software_applications')->onDelete('cascade');
+
+            $table->unique(['company_id', 'software_application_id'], 'uk_company_software');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('company_software_application');
+    }
+};

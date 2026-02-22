@@ -12,9 +12,6 @@ class SoftwareMappingForm
     {
         return $schema
             ->components([
-                TextInput::make('software_application_id')
-                    ->required()
-                    ->numeric(),
                 Select::make('mapping_type')
                     ->options([
             'PRACTICE_TYPE' => 'P r a c t i c e  t y p e',

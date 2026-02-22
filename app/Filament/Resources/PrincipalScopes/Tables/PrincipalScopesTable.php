@@ -14,11 +14,9 @@ class PrincipalScopesTable
     {
         return $table
             ->columns([
-                TextColumn::make('principal_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('practice_scope_id')
-                    ->numeric()
+                TextColumn::make('practiceScope.name')
+                    ->label('Ambito Operativo')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('name')
                     ->searchable(),

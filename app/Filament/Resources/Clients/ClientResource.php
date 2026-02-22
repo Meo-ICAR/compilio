@@ -8,11 +8,11 @@ use App\Filament\Resources\Clients\Pages\ListClients;
 use App\Filament\Resources\Clients\Schemas\ClientForm;
 use App\Filament\Resources\Clients\Tables\ClientsTable;
 use App\Models\Client;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class ClientResource extends Resource
@@ -23,6 +23,7 @@ class ClientResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Nucleo Centrale';
 
+    protected static ?string $navigationLabel = 'Clienti';
 
     public static function form(Schema $schema): Schema
     {

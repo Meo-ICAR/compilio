@@ -15,9 +15,6 @@ class ApiConfigurationsTable
     {
         return $table
             ->columns([
-                TextColumn::make('software_application_id')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('base_url')

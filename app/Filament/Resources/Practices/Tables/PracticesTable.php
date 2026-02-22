@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Maatwebsite\Excel\Excel;
 
 class PracticesTable
 {
@@ -64,6 +65,12 @@ class PracticesTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+                \Filament\Actions\ImportAction::make('import')
+                    ->label('Importa Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->importer(\App\Filament\Imports\PracticesImporter::class)
+                    ->maxRows(1000),
             ]);
     }
 }

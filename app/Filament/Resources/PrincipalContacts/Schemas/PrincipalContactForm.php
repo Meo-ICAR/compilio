@@ -13,9 +13,6 @@ class PrincipalContactForm
     {
         return $schema
             ->components([
-                TextInput::make('principal_id')
-                    ->required()
-                    ->numeric(),
                 TextInput::make('first_name')
                     ->required(),
                 TextInput::make('last_name')

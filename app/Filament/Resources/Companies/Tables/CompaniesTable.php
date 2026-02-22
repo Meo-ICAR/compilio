@@ -13,11 +13,15 @@ class CompaniesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with('companyType'))
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
                     ->searchable(),
                 TextColumn::make('name')
+                    ->searchable(),
+                TextColumn::make('company_type.name')
+                    ->label('Tipo Società')
                     ->searchable(),
                 TextColumn::make('vat_number')
                     ->searchable(),

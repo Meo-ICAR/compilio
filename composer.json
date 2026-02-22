@@ -15,6 +15,7 @@
         "jeffgreco13/filament-breezy": "^3.1",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "maatwebsite/excel": "^3.1",
         "opcodesio/log-viewer": "^3.21",
         "pboivin/filament-peek": "^4.0",
         "pragmarx/google2fa-laravel": "^2.3",

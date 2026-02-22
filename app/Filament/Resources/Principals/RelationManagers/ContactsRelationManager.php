@@ -2,19 +2,12 @@
 
 namespace App\Filament\Resources\Principals\RelationManagers;
 
-use Filament\Actions\AssociateAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\DissociateAction;
-use Filament\Actions\DissociateBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\TextInput;
+use App\Filament\Resources\PrincipalContacts\Schemas\PrincipalContactForm;
+use App\Filament\Resources\PrincipalContacts\Tables\PrincipalContactsTable;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Actions;
 
 class ContactsRelationManager extends RelationManager
 {
@@ -22,39 +15,14 @@ class ContactsRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('first_name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        return PrincipalContactForm::configure($schema);
     }
 
     public function table(Table $table): Table
     {
-        return $table
-            ->recordTitleAttribute('first_name')
-            ->columns([
-                TextColumn::make('first_name')
-                    ->searchable(),
-            ])
-            ->filters([
-                //
-            ])
+        return PrincipalContactsTable::configure($table)
             ->headerActions([
-                CreateAction::make(),
-                AssociateAction::make(),
-            ])
-            ->recordActions([
-                EditAction::make(),
-                DissociateAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DissociateBulkAction::make(),
-                    DeleteBulkAction::make(),
-                ]),
+                Actions\CreateAction::make(),
             ]);
     }
 }

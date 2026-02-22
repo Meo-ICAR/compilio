@@ -16,13 +16,16 @@ class LookupSeeder extends Seeder
         }
 
         // Client Types
-        $clientTypes = ['Privato Consumatore', 'Azienda', 'Ditta Individuale', 'Libero Professionista'];
+        $clientTypes = ['Dipendente Pubblico',
+            'Dipendente Privato',
+            'Pensionato',
+            'Privato Consumatore', 'Autonomo', 'Azienda', 'Ditta Individuale', 'Libero Professionista'];
         foreach ($clientTypes as $type) {
             \App\Models\ClientType::firstOrCreate(['name' => $type]);
         }
 
         // Company Types
-        $companyTypes = ['S.p.A.', 'S.r.l.', 'S.n.c.', 'S.a.s.', 'Ditta Individuale'];
+        $companyTypes = ['Mediatore', 'Call Center', 'Albergo', 'Software House'];
         foreach ($companyTypes as $type) {
             \App\Models\CompanyType::firstOrCreate(['name' => $type]);
         }
@@ -45,7 +48,7 @@ class LookupSeeder extends Seeder
         $istruttoriaScope = \App\Models\DocumentScope::where('name', 'Istruttoria')->first();
 
         $types = [
-            ['name' => 'Carta d\'Identità', 'scopes' => [$privacyScope->id, $amlScope->id]],
+            ['name' => "Carta d'Identità", 'scopes' => [$privacyScope->id, $amlScope->id]],
             ['name' => 'Codice Fiscale', 'scopes' => [$privacyScope->id]],
             ['name' => 'Modulo Privacy Firmato', 'scopes' => [$privacyScope->id]],
             ['name' => 'Questionario AML', 'scopes' => [$amlScope->id]],
@@ -73,9 +76,23 @@ class LookupSeeder extends Seeder
 
         // Practice Scopes
         $practiceScopes = [
-            ['name' => 'Mutuo Ipotecario', 'oam_code' => 'M01'],
-            ['name' => 'Cessione del Quinto', 'oam_code' => 'C05'],
-            ['name' => 'Prestito Personale', 'oam_code' => 'P01'],
+            ['name' => 'Mutui', 'oam_code' => 'A.1'],
+            ['name' => 'Cessioni del V dello stipendio/pensione e delegazioni di pagamento', 'oam_code' => 'A.2'],
+            ['name' => 'Factoring crediti', 'oam_code' => 'A.3'],
+            ['name' => 'Acquisto di crediti', 'oam_code' => 'A.4'],
+            ['name' => 'Leasing autoveicoli e aeronavali', 'oam_code' => 'A.5'],
+            ['name' => 'Leasing immobiliare', 'oam_code' => 'A.6'],
+            ['name' => 'Leasing strumentale', 'oam_code' => 'A.7'],
+            ['name' => 'Leasing su fonti rinnovabili ed altre tipologie di investimento', 'oam_code' => 'A.8'],
+            ['name' => 'Aperture di credito in conto corrente', 'oam_code' => 'A.9'],
+            ['name' => 'Credito personale', 'oam_code' => 'A.10'],
+            ['name' => 'Credito finalizzato', 'oam_code' => 'A.11'],
+            ['name' => 'Prestito su pegno', 'oam_code' => 'A.12'],
+            ['name' => 'Rilascio di fidejussioni e garanzie', 'oam_code' => 'A.13'],
+            ['name' => 'Garanzia collettiva dei fidi', 'oam_code' => 'A.13-bis'],
+            ['name' => 'Anticipi e sconti commerciali', 'oam_code' => 'A.14'],
+            ['name' => 'Credito revolving', 'oam_code' => 'A.15'],
+            ['name' => 'Ristrutturazione dei crediti (art. 128-quater decies, del TUB)', 'oam_code' => 'A.16'],
         ];
         foreach ($practiceScopes as $ps) {
             \App\Models\PracticeScope::firstOrCreate(['name' => $ps['name']], $ps);
@@ -104,7 +121,7 @@ class LookupSeeder extends Seeder
         // Regulatory Bodies
         $bodies = [
             ['name' => 'OAM', 'acronym' => 'OAM'],
-            ['name' => 'Banca d\'Italia', 'acronym' => 'BankIt'],
+            ['name' => "Banca d'Italia", 'acronym' => 'BankIt'],
             ['name' => 'Garante Privacy', 'acronym' => 'GPDP'],
         ];
         foreach ($bodies as $body) {

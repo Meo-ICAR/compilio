@@ -11,12 +11,11 @@ class PrincipalScopeForm
     {
         return $schema
             ->components([
-                TextInput::make('principal_id')
+                \Filament\Forms\Components\Select::make('practice_scope_id')
+                    ->relationship('practiceScope', 'name')
                     ->required()
-                    ->numeric(),
-                TextInput::make('practice_scope_id')
-                    ->required()
-                    ->numeric(),
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('name')
                     ->required(),
             ]);

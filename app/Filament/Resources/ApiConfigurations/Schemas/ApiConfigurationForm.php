@@ -15,9 +15,6 @@ class ApiConfigurationForm
     {
         return $schema
             ->components([
-                TextInput::make('software_application_id')
-                    ->required()
-                    ->numeric(),
                 TextInput::make('name'),
                 TextInput::make('base_url')
                     ->url(),

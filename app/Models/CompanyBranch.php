@@ -9,5 +9,8 @@ class CompanyBranch extends Model
 {
     use BelongsToCompany;
 
-    //
+    public function addresses()
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
 }

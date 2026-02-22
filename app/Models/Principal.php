@@ -12,4 +12,8 @@ class Principal extends Model
     //
 
     public function contacts() { return $this->hasMany(PrincipalContact::class); }
+
+    public function mandates() { return $this->hasMany(PrincipalMandate::class); }
+
+    public function principalScopes() { return $this->hasMany(PrincipalScope::class); }
 }

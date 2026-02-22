@@ -94,7 +94,7 @@ return [
     'permissions' => [
         'separator' => ':',
         'case' => 'pascal',
-        'generate' => true,
+        'generate' => false,
     ],
 
     /*
@@ -110,7 +110,7 @@ return [
     'policies' => [
         'path' => app_path('Policies'),
         'merge' => true,
-        'generate' => true,
+        'generate' => false,
         'methods' => [
             'viewAny',
             'view',
@@ -250,5 +250,5 @@ return [
      * | authorization system. Requires a RolePolicy class in your app.
      * |
      */
-    'register_role_policy' => true,
+    'register_role_policy' => false,
 ];

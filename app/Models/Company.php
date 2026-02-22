@@ -12,6 +12,16 @@ class Company extends Model implements HasCurrentTenantLabel
 
     protected $guarded = [];
 
+    protected $fillable = [
+        'name',
+        'vat_number',
+        'vat_name',
+        'oam',
+        'oam_at',
+        'oam_name',
+        'company_type_id',
+    ];
+
     public function getCurrentTenantLabel(): string
     {
         return 'Company';
@@ -25,5 +35,17 @@ class Company extends Model implements HasCurrentTenantLabel
     public function websites()
     {
         return $this->hasMany(CompanyWebsite::class);
+    }
+
+    public function companyType()
+    {
+        return $this->belongsTo(CompanyType::class);
+    }
+
+    public function softwareApplications()
+    {
+        return $this->belongsToMany(SoftwareApplication::class)
+            ->withPivot(['status', 'notes'])
+            ->withTimestamps();
     }
 }

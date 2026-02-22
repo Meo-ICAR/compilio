@@ -14,10 +14,6 @@ class AddressesTable
     {
         return $table
             ->columns([
-                TextColumn::make('addressable_type')
-                    ->searchable(),
-                TextColumn::make('addressable_id')
-                    ->searchable(),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('street')

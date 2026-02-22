@@ -5,14 +5,17 @@ namespace App\Filament\Resources\SoftwareApplications;
 use App\Filament\Resources\SoftwareApplications\Pages\CreateSoftwareApplication;
 use App\Filament\Resources\SoftwareApplications\Pages\EditSoftwareApplication;
 use App\Filament\Resources\SoftwareApplications\Pages\ListSoftwareApplications;
+use App\Filament\Resources\SoftwareApplications\RelationManagers\ApiConfigurationsRelationManager;
+use App\Filament\Resources\SoftwareApplications\RelationManagers\SoftwareCategoriesRelationManager;
+use App\Filament\Resources\SoftwareApplications\RelationManagers\SoftwareMappingsRelationManager;
 use App\Filament\Resources\SoftwareApplications\Schemas\SoftwareApplicationForm;
 use App\Filament\Resources\SoftwareApplications\Tables\SoftwareApplicationsTable;
 use App\Models\SoftwareApplication;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class SoftwareApplicationResource extends Resource
@@ -23,8 +26,7 @@ class SoftwareApplicationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
-
+    protected static string|UnitEnum|null $navigationGroup = 'Configurazione';
 
     public static function form(Schema $schema): Schema
     {
@@ -39,7 +41,8 @@ class SoftwareApplicationResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ApiConfigurationsRelationManager::class,
+            SoftwareMappingsRelationManager::class,
         ];
     }
 

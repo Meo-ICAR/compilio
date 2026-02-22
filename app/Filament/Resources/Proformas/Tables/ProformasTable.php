@@ -7,6 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Maatwebsite\Excel\Excel;
 
 class ProformasTable
 {
@@ -68,6 +69,12 @@ class ProformasTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+                \Filament\Actions\ImportAction::make('import')
+                    ->label('Importa Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->importer(\App\Filament\Imports\ProformasImporter::class)
+                    ->maxRows(1000),
             ]);
     }
 }

@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Maatwebsite\Excel\Excel;
 
 class PrincipalsTable
 {
@@ -64,6 +65,12 @@ class PrincipalsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+                \Filament\Actions\ImportAction::make('import')
+                    ->label('Importa Excel')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->importer(\App\Filament\Imports\PrincipalsImporter::class)
+                    ->maxRows(1000),
             ]);
     }
 }

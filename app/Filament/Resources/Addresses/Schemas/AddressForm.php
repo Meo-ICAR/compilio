@@ -11,10 +11,6 @@ class AddressForm
     {
         return $schema
             ->components([
-                TextInput::make('addressable_type')
-                    ->required(),
-                TextInput::make('addressable_id')
-                    ->required(),
                 TextInput::make('name'),
                 TextInput::make('street'),
                 TextInput::make('city'),

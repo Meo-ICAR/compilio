@@ -14,9 +14,6 @@ class SoftwareMappingsTable
     {
         return $table
             ->columns([
-                TextColumn::make('software_application_id')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('mapping_type')
                     ->badge(),
                 TextColumn::make('name')

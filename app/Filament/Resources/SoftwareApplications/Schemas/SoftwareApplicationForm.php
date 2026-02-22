@@ -13,9 +13,9 @@ class SoftwareApplicationForm
     {
         return $schema
             ->components([
-                TextInput::make('category_id')
-                    ->required()
-                    ->numeric(),
+                \Filament\Forms\Components\Select::make('category_id')
+                    ->relationship('softwareCategory', 'name')
+                    ->required(),
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('provider_name'),

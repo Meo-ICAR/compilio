@@ -8,5 +8,8 @@ class PrincipalScope extends Model
 {
     public $timestamps = false;
 
-    //
+    public function practiceScope()
+    {
+        return $this->belongsTo(PracticeScope::class);
+    }
 }
