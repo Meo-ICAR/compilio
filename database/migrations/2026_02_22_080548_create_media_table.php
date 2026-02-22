@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,18 +15,19 @@ return new class extends Migration
             $table->string('model_type');
             $table->unsignedBigInteger('model_id');
             $table->char('uuid', 36)->nullable()->unique();
-            $table->string('collection_name');
-            $table->string('name');
-            $table->string('file_name');
+            $table->string('collection_name')->nullable();
+            $table->string('name')->nullable();
+            $table->string('file_name')->nullable();
             $table->string('mime_type')->nullable();
-            $table->string('disk');
-            $table->string('conversions_disk')->nullable();
-            $table->unsignedBigInteger('size');
-            $table->json('manipulations');
-            $table->json('custom_properties');
-            $table->json('generated_conversions');
-            $table->json('responsive_images');
+            $table->string('disk')->nullable()->default('public');
+            $table->string('conversions_disk')->nullable()->default('public');
+            $table->unsignedBigInteger('size')->nullable();
+            $table->json('manipulations')->nullable();
+            $table->json('custom_properties')->nullable();
+            $table->json('generated_conversions')->nullable();
+            $table->json('responsive_images')->nullable();
             $table->unsignedInteger('order_column')->nullable()->index();
+
             $table->timestamps();
 
             $table->index(['model_type', 'model_id']);

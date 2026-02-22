@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Practice extends Model implements HasMedia
+class Practice extends Model
 {
-    use BelongsToCompany, InteractsWithMedia;
+    use BelongsToCompany;
 
     protected $fillable = [
         'company_id',
@@ -32,9 +31,9 @@ class Practice extends Model implements HasMedia
         'status' => \App\Enums\PracticeStatus::class,
     ];
 
-    public function documents(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function documents(): MorphMany
     {
-        return $this->hasMany(Document::class);
+        return $this->morphMany(Document::class, 'documentable');
     }
 
     public function clients()

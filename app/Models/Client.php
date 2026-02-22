@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -25,7 +26,7 @@ class Client extends Model implements HasMedia
         'privacy_consent',
     ];
 
-    public function addresses(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function addresses(): MorphMany
     {
         return $this->morphMany(Address::class, 'addressable');
     }
@@ -48,5 +49,10 @@ class Client extends Model implements HasMedia
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             ])
             ->useDisk('public');
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 }

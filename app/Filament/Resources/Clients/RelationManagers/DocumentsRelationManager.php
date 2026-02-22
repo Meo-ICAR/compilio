@@ -19,7 +19,7 @@ use Filament\Tables\Table;
 
 class DocumentsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'media';
+    protected static string $relationship = 'documents';
 
     protected static ?string $title = 'Documenti';
 
@@ -28,26 +28,30 @@ class DocumentsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                SpatieMediaLibraryImageColumn::make('document')
-                    ->label('Anteprima')
-                    ->collection('documents')
-                    ->conversion('thumb')
-                    ->defaultImageUrl(fn($record) => $this->getFileIcon($record->mime_type)),
-                TextColumn::make('name')
-                    ->label('Nome File')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('mime_type')
-                    ->label('Tipo')
-                    ->badge()
-                    ->formatStateUsing(fn(string $state): string => $this->getMimeTypeLabel($state)),
-                TextColumn::make('size')
-                    ->label('Dimensione')
-                    ->formatStateUsing(fn(int $state): string => $this->formatBytes($state)),
-                TextColumn::make('created_at')
-                    ->label('Caricato il')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable(),
+                /*
+                 * SpatieMediaLibraryImageColumn::make('document')
+                 *     ->label('Anteprima')
+                 *     ->collection('documents')
+                 *     ->conversion('thumb')
+                 *     ->defaultImageUrl(fn($record) => $this->getFileIcon($record->mime_type)),
+                 *
+                 *
+                 * TextColumn::make('name')
+                 *     ->label('Nome File')
+                 *     ->searchable()
+                 *     ->sortable(),
+                 * TextColumn::make('mime_type')
+                 *     ->label('Tipo')
+                 *     ->badge()
+                 *     ->formatStateUsing(fn(string $state): string => $this->getMimeTypeLabel($state)),
+                 * TextColumn::make('size')
+                 *     ->label('Dimensione')
+                 *     ->formatStateUsing(fn(int $state): string => $this->formatBytes($state)),
+                 * TextColumn::make('created_at')
+                 *     ->label('Caricato il')
+                 *     ->dateTime('d/m/Y H:i')
+                 *     ->sortable(),
+                 */
                 TextColumn::make('document_type_id')
                     ->label('Tipo Documento')
                     ->formatStateUsing(fn($state) => $state ? \App\Models\DocumentType::find($state)?->name : '-')
