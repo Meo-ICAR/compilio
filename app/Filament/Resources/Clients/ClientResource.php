@@ -6,6 +6,7 @@ use App\Filament\RelationManagers\AddressesRelationManager;
 use App\Filament\Resources\Clients\Pages\CreateClient;
 use App\Filament\Resources\Clients\Pages\EditClient;
 use App\Filament\Resources\Clients\Pages\ListClients;
+use App\Filament\Resources\Clients\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Clients\Schemas\ClientForm;
 use App\Filament\Resources\Clients\Tables\ClientsTable;
 use App\Models\Client;
@@ -40,6 +41,7 @@ class ClientResource extends Resource
     {
         return [
             AddressesRelationManager::class,
+            DocumentsRelationManager::class,
         ];
     }
 

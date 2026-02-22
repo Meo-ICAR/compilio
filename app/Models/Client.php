@@ -22,6 +22,7 @@ class Client extends Model implements HasMedia
         'is_pep',
         'client_type_id',
         'is_sanctioned',
+        'privacy_consent',
     ];
 
     public function addresses(): \Illuminate\Database\Eloquent\Relations\MorphMany
@@ -32,5 +33,20 @@ class Client extends Model implements HasMedia
     public function clientType()
     {
         return $this->belongsTo(ClientType::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('documents')
+            ->acceptsMimeTypes([
+                'application/pdf',
+                'image/jpeg',
+                'image/png',
+                'image/jpg',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ])
+            ->useDisk('public');
     }
 }

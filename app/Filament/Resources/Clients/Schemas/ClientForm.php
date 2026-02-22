@@ -28,6 +28,10 @@ class ClientForm
                     ->tel(),
                 Toggle::make('is_pep'),
                 Toggle::make('is_sanctioned'),
+                Toggle::make('privacy_consent')
+                    ->label('Consenso Privacy')
+                    ->helperText('Indica se il cliente ha dato il consenso al trattamento dei dati personali')
+                    ->default(false),
                 Select::make('client_type_id')
                     ->label('Tipo Cliente')
                     ->options(\App\Models\ClientType::pluck('name', 'id'))
