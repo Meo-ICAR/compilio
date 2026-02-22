@@ -90,7 +90,7 @@
                 <p class="text-center text-sm font-semibold text-slate-500 mb-6 uppercase tracking-wider">Conforme ai requisiti richiesti da</p>
                 <div class="flex justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
                     <div class="text-2xl font-black text-slate-800">OAM</div>
-                    <div class="text-2xl font-black text-slate-800">Banca d'Italia</div>
+                    <div class="text-2xl font-black text-slate-800">Antiriciclaggio</div>
                     <div class="text-2xl font-black text-slate-800">Garante Privacy</div>
                 </div>
             </div>

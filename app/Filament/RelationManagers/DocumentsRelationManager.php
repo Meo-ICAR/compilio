@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Clients\RelationManagers;
+namespace App\Filament\RelationManagers;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;  // Assicurati di importare questo
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -29,13 +31,6 @@ class DocumentsRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 /*
-                 * SpatieMediaLibraryImageColumn::make('document')
-                 *     ->label('Anteprima')
-                 *     ->collection('documents')
-                 *     ->conversion('thumb')
-                 *     ->defaultImageUrl(fn($record) => $this->getFileIcon($record->mime_type)),
-                 *
-                 *
                  * TextColumn::make('name')
                  *     ->label('Nome File')
                  *     ->searchable()
@@ -56,6 +51,11 @@ class DocumentsRelationManager extends RelationManager
                     ->label('Tipo Documento')
                     ->formatStateUsing(fn($state) => $state ? \App\Models\DocumentType::find($state)?->name : '-')
                     ->badge(),
+                TextColumn::make('expires_at')
+                    ->label('Scadenza')
+                    ->dateTime('d/m/Y')
+                    ->sortable(),
+                TextColumn::make('name'),
             ])
             ->filters([
                 //
@@ -67,6 +67,18 @@ class DocumentsRelationManager extends RelationManager
                     ->modalSubmitActionLabel('Carica')
             ])
             ->actions([
+                // AZIONE PER VEDERE IL DOCUMENTO
+                Action::make('view_document')
+                    ->label('Apri')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->url(fn($record) => $record->getFirstMediaUrl('documents'))
+                    ->openUrlInNewTab(),  // Apre il PDF o l'immagine in una nuova scheda
+                // Azione di Download
+                Action::make('download')
+                    ->label('Scarica')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(fn($record) => $record->getFirstMedia('documents')?->toResponse(request())),
                 EditAction::make()
                     ->label('Rinomina')
                     ->modalHeading('Rinomina Documento'),
@@ -91,6 +103,9 @@ class DocumentsRelationManager extends RelationManager
                     ->searchable()
                     ->preload()
                     ->required(),
+                DatePicker::make('expires_at')
+                    ->label('Scade il'),
+                TextInput::make('name'),
                 SpatieMediaLibraryFileUpload::make('document')
                     ->label('File')
                     ->collection('documents')

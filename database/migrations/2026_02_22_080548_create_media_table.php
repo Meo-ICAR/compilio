@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('media', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('model_type');
-            $table->unsignedBigInteger('model_id');
+            $table->string('model_id');
             $table->char('uuid', 36)->nullable()->unique();
             $table->string('collection_name')->nullable();
             $table->string('name')->nullable();

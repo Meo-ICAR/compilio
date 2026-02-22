@@ -11,10 +11,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('documents', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->char('company_id', 36);
             // Questo crea automaticamente 'documentable_id' e 'documentable_type'
-            $table->morphs('documentable');
+            $table->uuidMorphs('documentable');
             $table->unsignedInteger('document_type_id')->index()->comment('ID del tipo di documento associato')->nullable();
             $table->string('name')->nullable();
             $table->string('status')->default('uploaded');

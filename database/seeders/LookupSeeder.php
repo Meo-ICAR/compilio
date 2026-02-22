@@ -21,7 +21,7 @@ class LookupSeeder extends Seeder
             'Pensionato',
             'Privato Consumatore', 'Autonomo', 'Azienda', 'Ditta Individuale', 'Libero Professionista'];
         foreach ($clientTypes as $type) {
-            \App\Models\ClientType::firstOrCreate(['name' => $type]);
+            \App\Models\ClientType::firstOrCreate(['name' => $type, 'is_person' => true]);
         }
 
         // Company Types
