@@ -100,10 +100,17 @@ class LookupSeeder extends Seeder
                 $type->scopes()->syncWithoutDetaching($t['scopes']);
             }
         }
+        $staffRoles = [
+            'Operatore Front-Office',  // Gestione primo contatto e lead
+            'Consulente Commerciale',  // Rete vendita / Agenti interni
+            'Addetto Backoffice',  // Caricamento pratiche e check documentale
+            'Analista Istruttoria',  // Valutazione del merito creditizio (Pre-delibera)
+            'Amministrazione e CRM',  // Gestione provvigioni e fatturazione
+            'Compliance & AML',  // Controllo antiriciclaggio e normativa OAM
+            'Responsabile di Filiale',  // Manager della sede
+        ];
 
-        // Employment Types
-        $employmentTypes = ['Dipendente Tempo Indeterminato', 'Dipendente Tempo Determinato', 'Autonomo', 'Pensionato'];
-        foreach ($employmentTypes as $type) {
+        foreach ($staffRoles as $type) {
             \App\Models\EmploymentType::firstOrCreate(['name' => $type]);
         }
 

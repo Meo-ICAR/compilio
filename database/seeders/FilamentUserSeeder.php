@@ -20,8 +20,17 @@ class FilamentUserSeeder extends Seeder
             [
                 'name' => 'Hassisto Admin',
                 'email' => 'hassistosrl@gmail.com',
-                'password' => Hash::make('hassisto'),
-                'company_id' => null, // NULL per Super Admin globali
+                'password' => Hash::make('password'),
+                'company_id' => null,  // NULL per Super Admin globali
+            ]
+        );
+        User::updateOrCreate(
+            ['email' => 'mario@globaladvisor.com'],
+            [
+                'name' => 'Mario Gargiulo',
+                'email' => 'mario@globaladvisor.com',
+                'password' => Hash::make('password'),
+                'company_id' => null,  // NULL per Super Admin globali
             ]
         );
 
