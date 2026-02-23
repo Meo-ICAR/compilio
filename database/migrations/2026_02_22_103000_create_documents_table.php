@@ -12,17 +12,22 @@ return new class extends Migration {
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->char('company_id', 36);
+
             // Questo crea automaticamente 'documentable_id' e 'documentable_type'
             $table->uuidMorphs('documentable');
             $table->unsignedInteger('document_type_id')->index()->comment('ID del tipo di documento associato')->nullable();
             $table->string('name')->nullable();
             $table->string('status')->default('uploaded');
-            $table->date('expires_at')->nullable();
-            $table->timestamps();
 
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
-            $table->foreign('document_type_id')->references('id')->on('document_types')->onDelete('cascade');
+            $table->date('expires_at')->nullable()->comment('Scadenza documento');
+
+            $table->date('emitted_at')->nullable();
+            $table->string('docnumber')->nullable()->comment('Numero documento');
+
+            $table->string('emitted_by')->nullable()->comment('Ente rilascio');
+            $table->boolean('is_signed')->default(false)->comment('Indica se il documento deve essere firmato');
+
+            $table->timestamps();
         });
     }
 

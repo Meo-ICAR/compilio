@@ -24,9 +24,17 @@ class ClientResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Nucleo Centrale';
+    protected static string|UnitEnum|null $navigationGroup = 'Pratiche';
 
-    protected static ?string $navigationLabel = 'Clienti';
+    protected static ?string $navigationLabel = 'Contraenti';
+
+    protected static ?string $modelLabel = 'Contraente';
+
+    protected static ?string $pluralModelLabel = 'Contraenti';
+
+    // protected static UnitEnum|string|null $navigationGroup = 'Archivi';
+
+    protected static ?int $navigationSort = 8;
 
     public static function form(Schema $schema): Schema
     {

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Documents\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -26,7 +27,21 @@ class DocumentsTable
                     ->searchable(),
                 TextColumn::make('expires_at')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Scadenza'),
+                TextColumn::make('emitted_at')
+                    ->date()
+                    ->sortable()
+                    ->label('Emissione'),
+                TextColumn::make('docnumber')
+                    ->searchable()
+                    ->label('Numero documento'),
+                TextColumn::make('emitted_by')
+                    ->searchable()
+                    ->label('Ente rilascio'),
+                IconColumn::make('is_signed')
+                    ->boolean()
+                    ->label('Firmato'),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

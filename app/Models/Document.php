@@ -21,10 +21,16 @@ class Document extends Model implements HasMedia
         'name',
         'status',
         'expires_at',
+        'emitted_at',
+        'docnumber',
+        'emitted_by',
+        'is_signed',
     ];
 
     protected $casts = [
         'expires_at' => 'date',
+        'emitted_at' => 'date',
+        'is_signed' => 'boolean',
     ];
 
     public function documentType(): BelongsTo

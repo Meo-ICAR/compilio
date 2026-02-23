@@ -3,12 +3,20 @@
 namespace App\Filament\Resources\Clients\RelationManagers;
 
 use App\Models\ClientRelation;
+use App\Models\ClientType;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Model;
@@ -31,35 +39,35 @@ class ClientRelationsRelationManager extends RelationManager
             ->recordTitleAttribute('client.name')
             ->modifyQueryUsing(fn($query) => $query->with(['clientType' => fn($q) => $q->where('is_company', true)]))
             ->columns([
-                Tables\Columns\TextColumn::make('client.name')
+                TextColumn::make('client.name')
                     ->label('Persona')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('clientType.name')
+                TextColumn::make('clientType.name')
                     ->label('Ruolo')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('shares_percentage')
+                TextColumn::make('shares_percentage')
                     ->label('Quote %')
                     ->suffix('%')
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_titolare')
+                IconColumn::make('is_titolare')
                     ->label('Titolare')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('data_inizio_ruolo')
+                TextColumn::make('data_inizio_ruolo')
                     ->label('Inizio Ruolo')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('data_fine_ruolo')
+                TextColumn::make('data_fine_ruolo')
                     ->label('Fine Ruolo')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Data Creazione')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label('Data Aggiornamento')
                     ->dateTime()
                     ->sortable()
@@ -69,18 +77,18 @@ class ClientRelationsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->label('Nuova Relazione'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->label('Modifica'),
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->label('Elimina'),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->label('Elimina Selezionati'),
                 ]),
             ]);
@@ -99,21 +107,21 @@ class ClientRelationsRelationManager extends RelationManager
                 Select::make('client_type_id')
                     ->label('Ruolo')
                     ->options(function () {
-                        return \App\Models\ClientType::where('is_company', true)
+                        return ClientType::where('is_company', true)
                             ->pluck('name', 'id')
                             ->toArray();
                     })
                     ->searchable()
                     ->preload(),
+                Toggle::make('is_titolare')
+                    ->label('Titolare')
+                    ->default(false),
                 TextInput::make('shares_percentage')
                     ->label('Quote (%)')
                     ->numeric()
                     ->suffix('%')
                     ->max(100)
                     ->step(0.01),
-                Toggle::make('is_titolare')
-                    ->label('Titolare')
-                    ->default(false),
                 DatePicker::make('data_inizio_ruolo')
                     ->label('Inizio Ruolo'),
                 DatePicker::make('data_fine_ruolo')

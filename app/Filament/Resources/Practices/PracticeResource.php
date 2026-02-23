@@ -24,7 +24,11 @@ class PracticeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Nucleo Centrale';
+    protected static string|UnitEnum|null $navigationGroup = 'Pratiche';
+
+    protected static ?string $modelLabel = 'Pratica';
+
+    protected static ?string $pluralModelLabel = 'Pratiche';
 
     public static function form(Schema $schema): Schema
     {

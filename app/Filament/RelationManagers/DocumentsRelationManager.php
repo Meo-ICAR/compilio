@@ -2,18 +2,23 @@
 
 namespace App\Filament\RelationManagers;
 
+use App\Models\DocumentType;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\DatePicker;  // Assicurati di importare questo
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -57,15 +62,59 @@ class DocumentsRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('name'),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])  // headerFilters
             ->headerActions([
                 CreateAction::make()
-                    ->label('Carica Documento')
-                    ->modalHeading('Carica Nuovo Documento')
-                    ->modalSubmitActionLabel('Carica')
-            ])
+                    ->steps([
+                        Step::make('Name')
+                            ->description('Carica documento')
+                            ->schema([
+                                Select::make('document_type_id')
+                                    ->label('Tipo Documento')
+                                    ->options(\App\Models\DocumentType::pluck('name', 'id'))
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->reactive()
+                                    ->afterStateUpdated(fn($state, callable $set) => $set('document_type_preview', DocumentType::find($state)))
+                            ]),
+                        Step::make('Description')
+                            ->description('Compila informazioni documento')
+                            ->schema([
+                                TextInput::make('name')
+                                    //    ->default($documentType?->name)
+                                    ->label('Nome Documento'),
+                                DatePicker::make('emitted_at')
+                                    ->label('Data Emissione')
+                                    ->default(now()),
+                                DatePicker::make('expires_at')
+                                    ->label('Data Scadenza'),
+                                TextInput::make('emitted_by')
+                                    // ->default($documentType->emitted_by)
+                                    ->label('Ente Rilascio'),
+                                TextInput::make('docnumber')
+                                    ->label('Numero Documento'),
+                                SpatieMediaLibraryFileUpload::make('document')
+                                    ->label('File')
+                                    ->collection('documents')
+                                    ->disk('public')
+                                    ->preserveFilenames()
+                                    ->downloadable()
+                                    ->previewable(true)
+                                    ->imageEditor()
+                                    ->maxSize(10240)  // 10MB
+                                    ->acceptedFileTypes([
+                                        'application/pdf',
+                                        'image/jpeg',
+                                        'image/png',
+                                        'image/jpg',
+                                        'application/msword',
+                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                    ])
+                                    ->required(),
+                            ])
+                    ])
+            ])  // Action::make('create_document')
             ->actions([
                 // AZIONE PER VEDERE IL DOCUMENTO
                 Action::make('view_document')
@@ -80,8 +129,8 @@ class DocumentsRelationManager extends RelationManager
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn($record) => $record->getFirstMedia('documents')?->toResponse(request())),
                 EditAction::make()
-                    ->label('Rinomina')
-                    ->modalHeading('Rinomina Documento'),
+                    ->label('Modifica')
+                    ->modalHeading('Modifica Documento'),
                 DeleteAction::make()
                     ->label('Elimina'),
             ])
@@ -89,7 +138,7 @@ class DocumentsRelationManager extends RelationManager
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label('Elimina Selezionati'),
-                ]),
+                ])
             ]);
     }
 
