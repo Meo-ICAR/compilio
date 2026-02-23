@@ -88,7 +88,7 @@ class SupportSeeder extends Seeder
         );
 
         \App\Models\TrainingRecord::firstOrCreate(
-            ['training_session_id' => $session->id, 'agent_id' => 1],
+            ['training_session_id' => $session->id, 'trainable_type' => 'App\Models\Agent', 'trainable_id' => 1],
             [
                 'status' => 'COMPLETATO',
                 'hours_attended' => 30.0,

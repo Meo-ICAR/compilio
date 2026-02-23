@@ -11,8 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('audits', function (Blueprint $table) {
-            $table->unsignedInteger('regulatory_body_id')->nullable()->after('agent_id')->comment("Ente regolatore che richiede l'audit (se applicabile)");
-            $table->unsignedInteger('client_id')->nullable()->after('regulatory_body_id')->comment('Cliente specifico oggetto di audit (se applicabile)');
+            $table->unsignedInteger('regulatory_body_id')->nullable()->comment("Ente regolatore che richiede l'audit (se applicabile)");
+            $table->unsignedInteger('client_id')->nullable()->comment('Cliente specifico oggetto di audit (se applicabile)');
 
             // Aggiungo gli indici
             $table->index('regulatory_body_id', 'regulatory_body_id');

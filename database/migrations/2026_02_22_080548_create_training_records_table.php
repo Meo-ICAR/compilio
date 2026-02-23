@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->comment('Registro presenze e certificazioni: traccia la formazione di agenti e dipendenti per scopi normativi.');
             $table->increments('id')->comment('ID record partecipazione');
             $table->unsignedInteger('training_session_id')->nullable()->comment('La sessione seguita');
-            $table->foreign(['training_session_id'], 'training_records_ibfk_1')->references(['id'])->on('training_sessions')->onUpdate('no action')->onDelete('cascade');
             $table->string('name')->nullable()->comment('Descrizione');
 
             $table->enum('status', ['ISCRITTO', 'FREQUENTANTE', 'COMPLETATO', 'NON_SUPERATO'])->nullable()->default('ISCRITTO');
