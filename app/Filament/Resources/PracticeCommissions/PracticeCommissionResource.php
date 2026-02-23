@@ -29,6 +29,8 @@ class PracticeCommissionResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Pratiche';
 
+    protected static ?int $navigationSort = 8;
+
     public static function form(Schema $schema): Schema
     {
         return PracticeCommissionForm::configure($schema);

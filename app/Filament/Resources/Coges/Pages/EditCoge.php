@@ -3,17 +3,17 @@
 namespace App\Filament\Resources\Coges\Pages;
 
 use App\Filament\Resources\Coges\CogeResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\EditRecord;
 
-class ListCoges extends ListRecords
+class EditCoge extends EditRecord
 {
     protected static string $resource = CogeResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

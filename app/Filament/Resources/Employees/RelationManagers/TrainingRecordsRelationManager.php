@@ -24,7 +24,7 @@ class TrainingRecordsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->whereNotNull('employee_id')->with('trainingSession'))
+            ->modifyQueryUsing(fn($query) => $query->with('trainingSession'))
             ->recordTitleAttribute('id')
             ->columns([
                 TextColumn::make('trainingSession.name')

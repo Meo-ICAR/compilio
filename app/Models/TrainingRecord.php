@@ -11,8 +11,6 @@ class TrainingRecord extends Model
         'training_session_id',
         'trainable_type',
         'trainable_id',
-        'employee_id',
-        'agent_id',
         'status',
         'hours_attended',
         'score',
@@ -28,16 +26,6 @@ class TrainingRecord extends Model
     public function trainingSession()
     {
         return $this->belongsTo(TrainingSession::class);
-    }
-
-    public function employee()
-    {
-        return $this->belongsTo(Employee::class);
-    }
-
-    public function agent()
-    {
-        return $this->belongsTo(Agent::class);
     }
 
     public function documents(): MorphMany

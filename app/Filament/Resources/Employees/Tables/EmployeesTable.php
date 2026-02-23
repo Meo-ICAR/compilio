@@ -18,14 +18,14 @@ class EmployeesTable
     {
         return $table
             ->columns([
-                TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('name')
+                    ->label('Nominativo')
                     ->searchable(),
                 TextColumn::make('role_title')
+                    ->label('Ruolo')
                     ->searchable(),
-                TextColumn::make('cf')
+                TextColumn::make('company_branch.name')
+                    ->label('Sede')
                     ->searchable(),
                 TextColumn::make('email')
                     ->label('Email address')
@@ -34,18 +34,14 @@ class EmployeesTable
                     ->searchable(),
                 TextColumn::make('department')
                     ->searchable(),
-                TextColumn::make('oam')
-                    ->searchable(),
-                TextColumn::make('ivass')
+                TextColumn::make('employe_type.name')
+                    ->label('Tipo di impiego')
                     ->searchable(),
                 TextColumn::make('hiring_date')
                     ->date()
                     ->sortable(),
                 TextColumn::make('termination_date')
                     ->date()
-                    ->sortable(),
-                TextColumn::make('company_branche_id')
-                    ->numeric()
                     ->sortable(),
                 TextColumn::make('updated_at')
                     ->dateTime()

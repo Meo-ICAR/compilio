@@ -57,12 +57,15 @@ class LookupSeeder extends Seeder
         $types = [
             // --- IDENTITÀ E ANAGRAFICA ---
             ['name' => "Carta d'Identità (Fronte/Retro)", 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
-            ['name' => 'Patente)', 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
-            ['name' => 'Passaporto)', 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
+            ['name' => 'Patente', 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
+            ['name' => 'Passaporto', 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
             ['name' => 'Codice Fiscale / Tessera Sanitaria', 'scopes' => [$privacyScope->id, $istruttoriaScope->id]],
             // --- PRIVACY E ANTIRICICLAGGIO (Compliance) ---
             ['name' => 'Informativa Privacy e Consenso Trattamento Dati', 'scopes' => [$privacyScope->id]],
             ['name' => 'Consenso al Trattamento Dati Particolari (Sanitari)', 'scopes' => [$privacyScope->id]],
+            ['name' => 'Nomina incaricato del trattamento)', 'scopes' => [$privacyScope->id]],
+            ['name' => 'Nomina responsabile del trattamento)', 'scopes' => [$privacyScope->id]],
+            ['name' => 'Nomina amministratore di sistema', 'scopes' => [$privacyScope->id]],
             ['name' => 'Questionario Adeguata Verifica AML', 'scopes' => [$amlScope->id]],
             ['name' => 'Dichiarazione Titolare Effettivo', 'scopes' => [$amlScope->id]],
             ['name' => 'Dichiarazione PEP (Persona Esposta Politicamente)', 'scopes' => [$amlScope->id]],

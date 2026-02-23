@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,6 +13,7 @@ class Employee extends Model
 
     protected $fillable = [
         'company_id',
+        'company_branch_id',
         'name',
         'email',
         'phone',
@@ -23,7 +25,12 @@ class Employee extends Model
 
     public function trainingRecords()
     {
-        return $this->hasMany(TrainingRecord::class);
+        return $this->morphMany(TrainingRecord::class, 'trainable');
+    }
+
+    public function companyBranch(): BelongsTo
+    {
+        return $this->belongsTo(CompanyBranch::class);
     }
 
     public function audits(): MorphMany
@@ -31,9 +38,9 @@ class Employee extends Model
         return $this->morphMany(Audit::class, 'auditable');
     }
 
-    public function morphTrainingRecords(): MorphMany
+    public function documents(): MorphMany
     {
-        return $this->morphMany(TrainingRecord::class, 'trainable');
+        return $this->morphMany(Document::class, 'documentable');
     }
 
     public function employmentType()
