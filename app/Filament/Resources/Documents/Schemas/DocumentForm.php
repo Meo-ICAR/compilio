@@ -14,16 +14,19 @@ class DocumentForm
     {
         return $schema
             ->components([
-                Select::make('practice_id')
-                    ->relationship('practice', 'name')
-                    ->required(),
                 Select::make('document_type_id')
                     ->relationship('documentType', 'name')
+                    ->label('Tipo Documento')
                     ->required(),
                 TextInput::make('name')
+                    ->label('Nome Documento')
                     ->required(),
-                TextInput::make('file_path'),
+                Toggle::make('is_template')
+                    ->label('Template Fornito')
+                    ->default(false)
+                    ->helperText('Indica se forniamo noi il documento'),
                 TextInput::make('status')
+                    ->label('Stato')
                     ->required()
                     ->default('uploaded'),
                 DatePicker::make('expires_at')

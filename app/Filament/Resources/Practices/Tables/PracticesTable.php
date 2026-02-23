@@ -68,6 +68,11 @@ class PracticesTable
                     ->date()
                     ->sortable()
                     ->placeholder('Non definita'),
+                TextColumn::make('brokerage_fee')
+                    ->label('Provvigione')
+                    ->money('EUR')
+                    ->sortable()
+                    ->placeholder('Non definita'),
                 IconColumn::make('is_active')
                     ->label('Attiva')
                     ->boolean(),

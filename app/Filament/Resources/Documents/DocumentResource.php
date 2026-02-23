@@ -12,15 +12,18 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
 use UnitEnum;
 
 class DocumentResource extends Resource
 {
-    protected static bool $shouldRegisterNavigation = false;
     protected static ?string $model = Document::class;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
-    protected static string|UnitEnum|null $navigationGroup = 'Nucleo Centrale';
+    protected static string|UnitEnum|null $navigationGroup = 'Configurazione';
+    protected static ?string $modelLabel = 'Modulo';
+    protected static ?string $navigationLabel = 'Modulistica';
+    protected static ?string $pluralModelLabel = 'Moduli';
 
     public static function form(Schema $schema): Schema
     {
@@ -30,6 +33,11 @@ class DocumentResource extends Resource
     public static function table(Table $table): Table
     {
         return DocumentsTable::configure($table);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('is_template', true);
     }
 
     public static function getRelations(): array

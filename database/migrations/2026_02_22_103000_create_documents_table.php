@@ -12,13 +12,13 @@ return new class extends Migration {
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->uuid('id')->primary();
-
+            $table->char('company_id', 36)->index('company_id')->comment("Vincolo multi-tenant: l'agenzia che gestisce il documento");
             // Questo crea automaticamente 'documentable_id' e 'documentable_type'
             $table->uuidMorphs('documentable');
             $table->unsignedInteger('document_type_id')->index()->comment('ID del tipo di documento associato')->nullable();
             $table->string('name')->nullable();
             $table->string('status')->default('uploaded');
-
+            $table->boolean('is_template')->default(false)->comment('Indica se forniamo noi il documento');
             $table->date('expires_at')->nullable()->comment('Scadenza documento');
 
             $table->date('emitted_at')->nullable();

@@ -19,6 +19,7 @@ class Practice extends Model
         'principal_code',
         'amount',
         'net',
+        'brokerage_fee',
         'practice_scope_id',
         'status',
         'perfected_at',
@@ -29,6 +30,8 @@ class Practice extends Model
 
     protected $casts = [
         'status' => \App\Enums\PracticeStatus::class,
+        'perfected_at' => 'date',
+        'brokerage_fee' => 'decimal:2',
     ];
 
     public function documents(): MorphMany

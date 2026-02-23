@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -19,9 +18,21 @@ return new class extends Migration
             $table->enum('role', ['intestatario', 'cointestatario', 'garante', 'terzo_datore'])->default('intestatario')->comment('Ruolo legale del cliente nella pratica: Intestatario principale, Co-intestatario, Garante o Terzo Datore di ipoteca');
             $table->string('name')->nullable()->comment('Descrizione');
             $table->text('notes')->nullable()->comment('Note specifiche sul ruolo per questa pratica (es. "Garante solo per quota 50%")');
+            // --- CAMPI COMPLIANCE SPECIFICI PER QUESTA PERSONA IN QUESTA PRATICA ---
+            // Obblighi AML: Scopo e Natura
+            $table->text('purpose_of_relationship')->nullable()->comment('Es: Acquisto prima casa');
+
+            $table->text('funds_origin')->nullable()->comment('Es: Risparmi, donazione, stipendio');
+
+            // 1. Trasparenza OAM
+            $table->boolean('oam_delivered')->default(false)->comment('Foglio informativo consegnato a questo soggetto?');
+
+            // 3. Rischio specifico per il ruolo (Il garante potrebbe avere rischio basso, il richiedente alto)
+            $table->enum('role_risk_level', ['basso', 'medio', 'alto'])->nullable();
+
             $table->char('company_id', 36)->nullable()->index('company_id')->comment('Tenant di riferimento del legame');
-            $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data di associazione del cliente alla pratica');
-            $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
+
+            $table->timestamps();
 
             $table->unique(['practice_id', 'client_id'], 'unique_client_practice');
         });

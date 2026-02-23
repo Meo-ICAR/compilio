@@ -20,6 +20,7 @@ class Document extends Model implements HasMedia
         'document_type_id',
         'name',
         'status',
+        'is_template',
         'expires_at',
         'emitted_at',
         'docnumber',
@@ -31,6 +32,7 @@ class Document extends Model implements HasMedia
         'expires_at' => 'date',
         'emitted_at' => 'date',
         'is_signed' => 'boolean',
+        'is_template' => 'boolean',
     ];
 
     public function documentType(): BelongsTo

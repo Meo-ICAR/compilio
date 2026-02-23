@@ -15,16 +15,20 @@ class DocumentsTable
     {
         return $table
             ->columns([
-                TextColumn::make('practice.name')
-                    ->searchable(),
                 TextColumn::make('documentType.name')
+                    ->label('Tipo Documento')
                     ->searchable(),
                 TextColumn::make('name')
+                    ->label('Nome Documento')
                     ->searchable(),
-                TextColumn::make('file_path')
-                    ->searchable(),
+                IconColumn::make('is_template')
+                    ->label('Template')
+                    ->boolean(),
+                //  ->helperText('Fornito da noi'),
                 TextColumn::make('status')
-                    ->searchable(),
+                    ->label('Stato')
+                    ->searchable()
+                    ->badge(),
                 TextColumn::make('expires_at')
                     ->date()
                     ->sortable()

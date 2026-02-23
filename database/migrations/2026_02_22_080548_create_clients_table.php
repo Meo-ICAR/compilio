@@ -23,6 +23,12 @@ return new class extends Migration {
             $table->boolean('is_pep')->default(false)->comment('Persona Politicamente Esposta');
             $table->unsignedInteger('client_type_id')->nullable()->index('client_type_id')->comment('Classificazione cliente');
             $table->boolean('is_sanctioned')->default(false)->comment('Presente in liste antiterrorismo/blacklists');
+
+            $table->boolean('is_remote_interaction')->default(false)->comment('Operatività a distanza = Rischio più alto');
+
+            // Stati del Workflow (Spatie Model States o Enum)
+            $table->string('status')->default('raccolta_dati')->comment('raccolta_dati, valutazione_aml, approvata, sos_inviata, chiusa');
+
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data acquisizione cliente');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Ultima modifica anagrafica');
         });

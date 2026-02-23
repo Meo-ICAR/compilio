@@ -56,7 +56,6 @@ class OperationalSeeder extends Seeder
             ['name' => 'Mutuo Acquisto Prima Casa Rossi', 'company_id' => $company->id],
             [
                 'principal_id' => $principal->id,
-                'bank_id' => $principal->id,
                 'agent_id' => $agentUser->id,
                 'CRM_code' => 'CRM-1001',
                 'principal_code' => 'PRIN-2002',

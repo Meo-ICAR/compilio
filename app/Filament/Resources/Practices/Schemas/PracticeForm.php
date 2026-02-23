@@ -65,6 +65,12 @@ class PracticeForm
                 DatePicker::make('perfected_at')
                     ->label('Data Perfezionamento')
                     ->required(),
+                TextInput::make('brokerage_fee')
+                    ->label('Provvigione')
+                    ->numeric()
+                    ->prefix('€')
+                    ->step(0.01)
+                    ->helperText('Provvigione pattuita per questa pratica'),
                 Toggle::make('is_active')
                     ->label('Attiva')
                     ->default(true),

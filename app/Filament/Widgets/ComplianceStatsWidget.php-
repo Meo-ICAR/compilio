@@ -2,7 +2,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\AmlQuestionnaire;
-use App\Models\Dossier;
+use App\Models\Pratice;
 use App\States\Dossier\ValutazioneAml;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
