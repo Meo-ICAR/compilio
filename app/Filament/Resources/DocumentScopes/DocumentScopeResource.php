@@ -8,11 +8,11 @@ use App\Filament\Resources\DocumentScopes\Pages\ListDocumentScopes;
 use App\Filament\Resources\DocumentScopes\Schemas\DocumentScopeForm;
 use App\Filament\Resources\DocumentScopes\Tables\DocumentScopesTable;
 use App\Models\DocumentScope;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class DocumentScopeResource extends Resource
@@ -21,10 +21,9 @@ class DocumentScopeResource extends Resource
 
     protected static bool $isScopedToTenant = false;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEye;
-
     protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
 
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEye;
 
     public static function form(Schema $schema): Schema
     {

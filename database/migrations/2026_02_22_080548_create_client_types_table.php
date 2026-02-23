@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->boolean('is_person')->default(true)->comment('Persona fisica (true) o giuridica (false)');
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data di creazione');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Ultima modifica');
+            $table->boolean('is_company')->default(false)->comment('Indica se è una società/azienda');
         });
     }
 

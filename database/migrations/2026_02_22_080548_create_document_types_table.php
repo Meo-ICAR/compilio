@@ -17,6 +17,13 @@ return new class extends Migration {
             $table->boolean('is_person')->default(true)->comment('Persona fisica (true) o giuridica (false)');
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data di inserimento a sistema');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Ultima modifica');
+            $table->boolean('is_signed')->default(false)->comment('Indica se il documento deve essere firmato');
+
+            $table->integer('duration')->nullable()->comment('Validità dal rilascio in giorni');
+            $table->string('emitted_by')->nullable()->comment('Ente di rilascio');
+            $table->boolean('is_sensible')->default(false)->comment('Indica se contiene dati sensibili');
+            $table->boolean('is_template')->default(false)->comment('Indica se forniamo noi il documento');
+            $table->boolean('is_stored')->default(false)->comment('Indica se il documento deve avere conservazione sostitutiva');
         });
     }
 

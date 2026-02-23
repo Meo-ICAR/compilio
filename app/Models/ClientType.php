@@ -9,5 +9,7 @@ class ClientType extends Model
     protected $fillable = [
         'name',
         'description',
+        'is_person',
+        'is_company',
     ];
 }

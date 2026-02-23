@@ -55,4 +55,22 @@ class Client extends Model implements HasMedia
     {
         return $this->morphMany(Document::class, 'documentable');
     }
+
+    public function members()
+    {
+        return $this
+            ->belongsToMany(Client::class, 'client_relations', 'company_id', 'client_id')
+            ->withPivot('shares_percentage', 'is_titolare', 'client_type_id', 'data_inizio_ruolo', 'data_fine_ruolo')
+            ->withTimestamps();
+    }
+
+    public function companyRelations()
+    {
+        return $this->hasMany(ClientRelation::class, 'company_id');
+    }
+
+    public function personRelations()
+    {
+        return $this->hasMany(ClientRelation::class, 'client_id');
+    }
 }

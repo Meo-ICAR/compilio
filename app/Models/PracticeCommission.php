@@ -30,6 +30,21 @@ class PracticeCommission extends Model
         return $this->belongsTo(Practice::class);
     }
 
+    public function proforma()
+    {
+        return $this->belongsTo(Proforma::class);
+    }
+
+    public function agent()
+    {
+        return $this->belongsTo(Agent::class);
+    }
+
+    public function principal()
+    {
+        return $this->belongsTo(Principal::class);
+    }
+
     public function company()
     {
         return $this->belongsTo(Company::class);

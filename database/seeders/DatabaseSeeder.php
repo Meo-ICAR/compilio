@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             OperationalSeeder::class,
             SupportSeeder::class,
             OamScopeSeeder::class,
+            FirrSeeder::class,
             FilamentUserSeeder::class,
         ]);
     }

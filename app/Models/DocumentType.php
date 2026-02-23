@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DocumentType extends Model
 {
-    protected $fillable = ['name', 'is_person'];
+    protected $fillable = ['name', 'is_person', 'is_signed', 'is_stored', 'duration', 'emitted_by', 'is_sensible'];
 
     public function scopes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {

@@ -24,6 +24,10 @@ class PracticeCommissionsRelationManager extends RelationManager
             ->modifyQueryUsing(fn($query) => $query->where('practice_commissions.company_id', auth()->user()->company_id))
             ->recordTitleAttribute('amount')
             ->columns([
+                Tables\Columns\TextColumn::make('agent.name')
+                    ->label('Agent')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Importo')
                     ->money('EUR')
@@ -87,6 +91,11 @@ class PracticeCommissionsRelationManager extends RelationManager
     {
         return $schema
             ->components([
+                Select::make('agent_id')
+                    ->label('Agent')
+                    ->relationship('agent', 'name')
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('amount')
                     ->label('Importo')
                     ->numeric()

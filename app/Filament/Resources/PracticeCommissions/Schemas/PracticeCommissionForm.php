@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PracticeCommissions\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -13,15 +14,23 @@ class PracticeCommissionForm
     {
         return $schema
             ->components([
-                TextInput::make('practice_id')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('proforma_id')
-                    ->numeric(),
-                TextInput::make('agent_id')
-                    ->numeric(),
-                TextInput::make('principal_id')
-                    ->numeric(),
+                Select::make('practice_id')
+                    ->relationship('practice', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+                Select::make('proforma_id')
+                    ->relationship('proforma', 'name')
+                    ->searchable()
+                    ->preload(),
+                Select::make('agent_id')
+                    ->relationship('agent', 'name')
+                    ->searchable()
+                    ->preload(),
+                Select::make('principal_id')
+                    ->relationship('principal', 'name')
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('amount')
                     ->numeric(),
                 TextInput::make('description'),

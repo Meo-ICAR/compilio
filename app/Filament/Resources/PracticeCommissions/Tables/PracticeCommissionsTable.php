@@ -15,17 +15,21 @@ class PracticeCommissionsTable
     {
         return $table
             ->columns([
-                TextColumn::make('practice_id')
-                    ->numeric()
+                TextColumn::make('practice.name')
+                    ->label('Practice')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('proforma_id')
-                    ->numeric()
+                TextColumn::make('proforma.name')
+                    ->label('Proforma')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('agent_id')
-                    ->numeric()
+                TextColumn::make('agent.name')
+                    ->label('Agent')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('principal_id')
-                    ->numeric()
+                TextColumn::make('principal.name')
+                    ->label('Principal')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('amount')
                     ->numeric()

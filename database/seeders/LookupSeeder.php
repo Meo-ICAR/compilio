@@ -10,7 +10,7 @@ class LookupSeeder extends Seeder
     public function run(): void
     {
         // Address Types
-        $addressTypes = ['Residenza', 'Domicilio', 'Sede Legale', 'Sede Operativa'];
+        $addressTypes = ['Residenza', 'Domicilio', 'Domicilio Legale', 'Domicilio Operativo', 'Sede Legale', 'Sede Operativa'];
         foreach ($addressTypes as $type) {
             \App\Models\AddressType::firstOrCreate(['name' => $type]);
         }
@@ -19,9 +19,16 @@ class LookupSeeder extends Seeder
         $clientTypes = ['Dipendente Pubblico',
             'Dipendente Privato',
             'Pensionato',
-            'Privato Consumatore', 'Autonomo', 'Azienda', 'Ditta Individuale', 'Libero Professionista'];
+            'Privato Consumatore'];
+        $companyTypes = [
+            'Autonomo', 'Ditta Individuale', 'Libero Professionista', 'Amministratore',
+            'Titolare', 'Socio'
+        ];
         foreach ($clientTypes as $type) {
-            \App\Models\ClientType::firstOrCreate(['name' => $type, 'is_person' => true]);
+            \App\Models\ClientType::firstOrCreate(['name' => $type, 'is_person' => true, 'is_company' => false]);
+        }
+        foreach ($companyTypes as $type) {
+            \App\Models\ClientType::firstOrCreate(['name' => $type, 'is_person' => false, 'is_company' => true]);
         }
 
         // Company Types
@@ -48,14 +55,41 @@ class LookupSeeder extends Seeder
         $istruttoriaScope = \App\Models\DocumentScope::where('name', 'Istruttoria')->first();
 
         $types = [
-            ['name' => "Carta d'Identità", 'scopes' => [$privacyScope->id, $amlScope->id]],
-            ['name' => 'Codice Fiscale', 'scopes' => [$privacyScope->id]],
-            ['name' => 'Modulo Privacy Firmato', 'scopes' => [$privacyScope->id]],
-            ['name' => 'Questionario AML', 'scopes' => [$amlScope->id]],
+            // --- IDENTITÀ E ANAGRAFICA ---
+            ['name' => "Carta d'Identità (Fronte/Retro)", 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
+            ['name' => 'Patente)', 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
+            ['name' => 'Passaporto)', 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
+            ['name' => 'Codice Fiscale / Tessera Sanitaria', 'scopes' => [$privacyScope->id, $istruttoriaScope->id]],
+            // --- PRIVACY E ANTIRICICLAGGIO (Compliance) ---
+            ['name' => 'Informativa Privacy e Consenso Trattamento Dati', 'scopes' => [$privacyScope->id]],
+            ['name' => 'Consenso al Trattamento Dati Particolari (Sanitari)', 'scopes' => [$privacyScope->id]],
+            ['name' => 'Questionario Adeguata Verifica AML', 'scopes' => [$amlScope->id]],
+            ['name' => 'Dichiarazione Titolare Effettivo', 'scopes' => [$amlScope->id]],
+            ['name' => 'Dichiarazione PEP (Persona Esposta Politicamente)', 'scopes' => [$amlScope->id]],
+            // --- TRASPARENZA E OAM ---
+            ['name' => 'Lettera di Incarico di Mediazione', 'scopes' => [$oamScope->id]],
+            ['name' => 'Avviso sulla Trasparenza (Presa Visione)', 'scopes' => [$oamScope->id]],
+            ['name' => 'Modulo SECCI (Informazioni Europee di Base)', 'scopes' => [$oamScope->id, $istruttoriaScope->id]],
             ['name' => 'Modulo Segnalazione OAM', 'scopes' => [$oamScope->id]],
-            ['name' => 'Busta Paga', 'scopes' => [$istruttoriaScope->id]],
-            ['name' => 'Contratto di Lavoro', 'scopes' => [$istruttoriaScope->id]],
+            // --- ISTRUTTORIA REDDITUALE (Dipendenti) ---
+            ['name' => 'Ultime 3 Buste Paga', 'scopes' => [$istruttoriaScope->id]],
+            ['name' => 'Certificazione Unica (CU)', 'scopes' => [$istruttoriaScope->id]],
+            ['name' => 'Certificato di Stipendio / Attestato di Servizio', 'scopes' => [$istruttoriaScope->id]],
+            ['name' => 'Estratto Conto Contributivo INPS', 'scopes' => [$istruttoriaScope->id]],
+            // --- ISTRUTTORIA REDDITUALE (Pensionati) ---
+            ['name' => 'Cedolino Pensione', 'scopes' => [$istruttoriaScope->id]],
+            ['name' => 'Comunicazione di Quota Cedibile', 'scopes' => [$istruttoriaScope->id]],
+            ['name' => 'Modello Obis/M', 'scopes' => [$istruttoriaScope->id]],
+            // --- DOCUMENTAZIONE AGGIUNTIVA ---
+            ['name' => 'Conteggio Estintivo (per Rinnovi)', 'scopes' => [$istruttoriaScope->id]],
+            ['name' => 'Rapporto di Visita Medica', 'scopes' => [$istruttoriaScope->id]],
         ];
+
+        // Logica per l'inserimento nel database (esempio)
+        foreach ($types as $type) {
+            $documentType = \App\Models\DocumentType::updateOrCreate(['name' => $type['name']]);
+            $documentType->scopes()->sync($type['scopes']);
+        }
 
         foreach ($types as $t) {
             $type = \App\Models\DocumentType::firstOrCreate(['name' => $t['name']]);
@@ -73,6 +107,7 @@ class LookupSeeder extends Seeder
         // Enasarco Limits
         \App\Models\EnasarcoLimit::firstOrCreate(['year' => 2024], ['name' => 'Massimali 2024', 'minimal_amount' => 1000, 'maximal_amount' => 45000]);
         \App\Models\EnasarcoLimit::firstOrCreate(['year' => 2025], ['name' => 'Massimali 2025', 'minimal_amount' => 1050, 'maximal_amount' => 46500]);
+        \App\Models\EnasarcoLimit::firstOrCreate(['year' => 2026], ['name' => 'Massimali 2025', 'minimal_amount' => 1050, 'maximal_amount' => 46500]);
 
         // Practice Scopes
         $practiceScopes = [
@@ -103,6 +138,7 @@ class LookupSeeder extends Seeder
             ['name' => 'CRM', 'code' => 'CRM', 'description' => 'Customer Relationship Management'],
             ['name' => 'Contabilità', 'code' => 'ACC', 'description' => 'Sistemi Contabili'],
             ['name' => 'Firma Elettronica', 'code' => 'SIGN', 'description' => 'Servizi di Firma Digitale'],
+            ['name' => 'Documentale', 'code' => 'DOC', 'description' => 'Conservazione Documentale'],
         ];
         foreach ($softwareCats as $cat) {
             \App\Models\SoftwareCategory::firstOrCreate(['code' => $cat['code']], $cat);
