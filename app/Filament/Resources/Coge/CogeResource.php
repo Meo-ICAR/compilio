@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\Coges;
+namespace App\Filament\Resources\Coge;
 
-use App\Filament\Resources\Coges\Pages\CreateCoge;
-use App\Filament\Resources\Coges\Pages\EditCoge;
-use App\Filament\Resources\Coges\Pages\ListCoges;
-use App\Filament\Resources\Coges\Schemas\CogeForm;
-use App\Filament\Resources\Coges\Tables\CogesTable;
+use App\Filament\Resources\Coge\Pages\CreateCoge;
+use App\Filament\Resources\Coge\Pages\EditCoge;
+use App\Filament\Resources\Coge\Pages\ListCoges;
+use App\Filament\Resources\Coge\Schemas\CogeForm;
+use App\Filament\Resources\Coge\Tables\CogesTable;
 use App\Models\Coge;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

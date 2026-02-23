@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Coges\Pages;
+namespace App\Filament\Resources\Coge\Pages;
 
-use App\Filament\Resources\Coges\CogeResource;
+use App\Filament\Resources\Coge\CogeResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateCoge extends CreateRecord

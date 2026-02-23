@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Coges\Schemas;
+namespace App\Filament\Resources\Coge\Schemas;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -32,14 +32,14 @@ class CogeForm
                     ->default('Quadratura'),
                 Select::make('value_period')
                     ->options([
-            'Adesso' => 'Adesso',
-            'Oggi' => 'Oggi',
-            'Ieri' => 'Ieri',
-            'Settimana' => 'Settimana',
-            'Quindicinale' => 'Quindicinale',
-            'Mese' => 'Mese',
-            'Trimestre' => 'Trimestre',
-        ])
+                        'Adesso' => 'Adesso',
+                        'Oggi' => 'Oggi',
+                        'Ieri' => 'Ieri',
+                        'Settimana' => 'Settimana',
+                        'Quindicinale' => 'Quindicinale',
+                        'Mese' => 'Mese',
+                        'Trimestre' => 'Trimestre',
+                    ])
                     ->default('Oggi')
                     ->required(),
             ]);

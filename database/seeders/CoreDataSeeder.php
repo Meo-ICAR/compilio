@@ -57,6 +57,7 @@ class CoreDataSeeder extends Seeder
                     'status' => 'ATTIVO'
                 ]
             );
+            $principal = Principal::where('name', $bank['name'])->first();
 
             // Principal Contacts
             PrincipalContact::firstOrCreate(

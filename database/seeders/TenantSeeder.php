@@ -52,7 +52,7 @@ class TenantSeeder extends Seeder
         // Recuperiamo le istanze delle Company create
         $races = Company::where('vat_number', '05822361007')->first();
         $credifacile = Company::where('vat_number', '02450210419')->first();
-
+        $company = $races;
         // --- Sedi per Races Finance ---
         if ($races) {
             CompanyBranch::firstOrCreate(
@@ -64,6 +64,7 @@ class TenantSeeder extends Seeder
                 ]
             );
         }
+        $branch = CompanyBranch::where('company_id', $races->id)->first();
 
         // --- Sedi per Credifacile ---
         if ($credifacile) {

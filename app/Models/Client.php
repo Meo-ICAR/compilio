@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Client extends Model implements HasMedia
 {
-    use BelongsToCompany, InteractsWithMedia;
+    use BelongsToCompany, InteractsWithMedia, LogsActivity;
 
     protected $fillable = [
         'company_id',
@@ -72,5 +74,11 @@ class Client extends Model implements HasMedia
     public function personRelations()
     {
         return $this->hasMany(ClientRelation::class, 'client_id');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
     }
 }

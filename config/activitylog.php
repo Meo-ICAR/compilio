@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
      * If set to false, no activities will be saved to the database.
      */
@@ -35,7 +34,7 @@ return [
      * It should implement the Spatie\Activitylog\Contracts\Activity interface
      * and extend Illuminate\Database\Eloquent\Model.
      */
-    'activity_model' => \Spatie\Activitylog\Models\Activity::class,
+    'activity_model' => App\Models\ActivityLog::class,  // \Spatie\Activitylog\Models\Activity::class,
 
     /*
      * This is the name of the table that will be created by the migration and
@@ -49,4 +48,7 @@ return [
      * Laravel's database.default will be used instead.
      */
     'database_connection' => env('ACTIVITY_LOGGER_DB_CONNECTION'),
+    'activity_logger_taps' => [
+        \AlizHarb\ActivityLog\Taps\SetActivityContextTap::class,
+    ],
 ];
