@@ -15,9 +15,6 @@ class CompaniesTable
         return $table
             ->modifyQueryUsing(fn($query) => $query->with('companyType'))
             ->columns([
-                TextColumn::make('id')
-                    ->label('ID')
-                    ->searchable(),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('company_type.name')

@@ -18,7 +18,7 @@ class PracticesTable
             ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'practiceScope']))
             ->columns([
                 TextColumn::make('clients_names')
-                    ->label('Clienti')
+                    ->label('Contraenti')
                     ->searchable()
                     ->sortable()
                     ->placeholder('Nessun cliente'),

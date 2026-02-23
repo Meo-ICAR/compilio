@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Coges\Schemas;
+namespace App\Filament\Resources\Coge\Schemas;
 
 use Filament\Schemas\Schema;
 

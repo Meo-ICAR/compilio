@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Clients\Tables;
 
+use App\Filament\Imports\ClientsImporter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ImportAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -52,11 +54,11 @@ class ClientsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-                \Filament\Actions\ImportAction::make('import')
+                ImportAction::make('import')
                     ->label('Importa Excel')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('success')
-                    ->importer(\App\Filament\Imports\ClientsImporter::class)
+                    ->importer(ClientsImporter::class)
                     ->maxRows(1000),
             ]);
     }

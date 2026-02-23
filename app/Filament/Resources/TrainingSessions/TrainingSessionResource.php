@@ -23,7 +23,7 @@ class TrainingSessionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static ?string $navigationLabel = 'Corso';
+    protected static ?string $navigationLabel = 'Corsi';
 
     protected static ?string $modelLabel = 'Corso';
 

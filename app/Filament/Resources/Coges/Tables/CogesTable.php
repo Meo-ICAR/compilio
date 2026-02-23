@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Coges\Tables;
+namespace App\Filament\Resources\Coge\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

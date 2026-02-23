@@ -139,6 +139,7 @@ class LookupSeeder extends Seeder
             ['name' => 'Contabilità', 'code' => 'ACC', 'description' => 'Sistemi Contabili'],
             ['name' => 'Firma Elettronica', 'code' => 'SIGN', 'description' => 'Servizi di Firma Digitale'],
             ['name' => 'Documentale', 'code' => 'DOC', 'description' => 'Conservazione Documentale'],
+            ['name' => 'Call Center', 'code' => 'CAL', 'description' => 'Call Center'],
         ];
         foreach ($softwareCats as $cat) {
             \App\Models\SoftwareCategory::firstOrCreate(['code' => $cat['code']], $cat);

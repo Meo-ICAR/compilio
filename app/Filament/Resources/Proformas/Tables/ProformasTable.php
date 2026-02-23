@@ -15,46 +15,62 @@ class ProformasTable
     {
         return $table
             ->columns([
-                TextColumn::make('agent_id')
-                    ->numeric()
+                TextColumn::make('agent.name')
+                    ->label('Agente')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('commission_label')
+                    ->label('Proforma')
                     ->searchable(),
                 TextColumn::make('total_commissions')
+                    ->label('Provvigioni')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('net_amount')
+                    ->label('Netto')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('enasarco_retained')
+                    ->label('Enasarco Trattenuto')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('commission_label')
+                    ->label('Provvigione')
+                    ->searchable(),
                 TextColumn::make('remburse')
+                    ->label('Rimborso')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('remburse_label')
+                    ->label('Etichetta Rimborso')
                     ->searchable(),
                 TextColumn::make('contribute')
+                    ->label('Contributo')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('contribute_label')
+                    ->label('Etichetta Contributo')
                     ->searchable(),
                 TextColumn::make('refuse')
+                    ->label('Storno')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('refuse_label')
+                    ->label('Etichetta Storno')
                     ->searchable(),
-                TextColumn::make('net_amount')
-                    ->numeric()
-                    ->sortable(),
                 TextColumn::make('month')
+                    ->label('Mese')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('year')
+                    ->label('Anno')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('status')
+                    ->label('Stato')
                     ->badge(),
                 TextColumn::make('updated_at')
+                    ->label('Data Aggiornamento')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

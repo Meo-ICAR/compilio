@@ -29,7 +29,7 @@ class CompilanceViolationResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Registro Violazioni';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Segnalazioni';
+    protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
     public static function form(Schema $schema): Schema
     {

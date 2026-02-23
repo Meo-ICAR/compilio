@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\Company;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -39,8 +40,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->favicon(asset('favicon.ico'))
+            ->brandName('Compilio')
+            ->brandLogo(asset('logo_compilio.png'))
             ->login()
-            ->tenant(\App\Models\Company::class)
+            ->tenant(Company::class)
             ->colors([
                 'primary' => Color::Amber,
             ])

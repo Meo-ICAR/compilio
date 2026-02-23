@@ -15,38 +15,17 @@ class DocumentsTable
     {
         return $table
             ->columns([
-                TextColumn::make('documentType.name')
-                    ->label('Tipo Documento')
-                    ->searchable(),
                 TextColumn::make('name')
                     ->label('Nome Documento')
                     ->searchable(),
-                IconColumn::make('is_template')
-                    ->label('Template')
-                    ->boolean(),
-                //  ->helperText('Fornito da noi'),
-                TextColumn::make('status')
-                    ->label('Stato')
-                    ->searchable()
-                    ->badge(),
-                TextColumn::make('expires_at')
-                    ->date()
-                    ->sortable()
-                    ->label('Scadenza'),
-                TextColumn::make('emitted_at')
-                    ->date()
-                    ->sortable()
-                    ->label('Emissione'),
-                TextColumn::make('docnumber')
-                    ->searchable()
-                    ->label('Numero documento'),
-                TextColumn::make('emitted_by')
-                    ->searchable()
-                    ->label('Ente rilascio'),
+                TextColumn::make('documentType.name')
+                    ->label('Tipo Documento')
+                    ->searchable(),
                 IconColumn::make('is_signed')
-                    ->boolean()
-                    ->label('Firmato'),
+                    ->label('Deve essere firmato')
+                    ->boolean(),
                 TextColumn::make('updated_at')
+                    ->label('Ultimo aggiornamento')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

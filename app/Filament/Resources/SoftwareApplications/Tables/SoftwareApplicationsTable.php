@@ -32,7 +32,8 @@ class SoftwareApplicationsTable
                     ->label('Sito Web')
                     ->url()
                     ->limit(30)
-                    ->toggleable(),
+                    ->toggleable()
+                    ->openUrlInNewTab(),
                 IconColumn::make('is_cloud')
                     ->label('Cloud')
                     ->boolean()

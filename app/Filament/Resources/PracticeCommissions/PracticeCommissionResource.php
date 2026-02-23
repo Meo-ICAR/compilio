@@ -27,7 +27,7 @@ class PracticeCommissionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Provvigioni';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Amministrazione';
+    protected static string|UnitEnum|null $navigationGroup = 'Pratiche';
 
     public static function form(Schema $schema): Schema
     {

@@ -18,49 +18,107 @@ class CoreDataSeeder extends Seeder
         if (!$company)
             return;
 
-        // Principals (Banche Mandanti)
-        $principal = Principal::firstOrCreate(
-            ['name' => 'Test Bank Spa', 'company_id' => $company->id],
+        $principals = [
             [
-                'abi' => '01234',
-                'mandate_number' => 'MAND-2024-001',
-                'start_date' => '2024-01-01',
-                'type' => 'Banca',
-                'status' => 'ATTIVO'
-            ]
-        );
+                'name' => 'Findomestic Banca Spa',
+                'abi' => '03110',
+                'mandate_number' => 'MAND-2024-002',
+            ],
+            [
+                'name' => 'IBL Banca Spa',
+                'abi' => '03263',
+                'mandate_number' => 'MAND-2024-003',
+            ],
+            [
+                'name' => 'Santander Consumer Bank Spa',
+                'abi' => '03191',
+                'mandate_number' => 'MAND-2024-004',
+            ],
+            [
+                'name' => 'Banca Progetto Spa',
+                'abi' => '05015',
+                'mandate_number' => 'MAND-2024-005',
+            ],
+            [
+                'name' => 'Compass Banca Spa',
+                'abi' => '03069',
+                'mandate_number' => 'MAND-2024-006',
+            ],
+        ];
 
-        // Principal Contacts
-        PrincipalContact::firstOrCreate(
-            ['email' => 'contact@testbank.it'],
-            [
-                'principal_id' => $principal->id,
-                'first_name' => 'Giulia',
-                'last_name' => 'Bianchi',
-                'role_title' => 'Area Manager',
-                'department' => 'Ufficio Crediti'
-            ]
-        );
+        foreach ($principals as $bank) {
+            Principal::firstOrCreate(
+                ['name' => $bank['name'], 'company_id' => $company->id],
+                [
+                    'abi' => $bank['abi'],
+                    'mandate_number' => $bank['mandate_number'],
+                    'start_date' => '2024-01-01',
+                    'type' => 'Banca',
+                    'status' => 'ATTIVO'
+                ]
+            );
 
-        // Mandates (Contratti di mandato)
-        PrincipalMandate::firstOrCreate(
-            ['mandate_number' => 'MAND-2024-001', 'company_id' => $company->id, 'principal_id' => $principal->id],
-            [
-                'name' => 'Mandato Principale',
-                'start_date' => '2024-01-01',
-                'status' => 'ATTIVO'
-            ]
-        );
+            // Principal Contacts
+            PrincipalContact::firstOrCreate(
+                ['email' => 'contact@testbank.it'],
+                [
+                    'principal_id' => $principal->id,
+                    'first_name' => 'Giulia',
+                    'last_name' => 'Bianchi',
+                    'role_title' => 'Area Manager',
+                    'department' => 'Ufficio Crediti'
+                ]
+            );
 
-        // Agents (Rete Commerciale Esterna)
-        Agent::firstOrCreate(
-            ['name' => 'Mega Consulenze SRL', 'company_id' => $company->id],
-            [
-                'description' => 'Agenzia OAM Partner',
-                'oam' => 'OAM99999',
-                'type' => 'Mediatore',
-                'is_active' => 1
-            ]
-        );
+            // Mandates (Contratti di mandato)
+            PrincipalMandate::firstOrCreate(
+                ['mandate_number' => 'MAND-2024-001', 'company_id' => $company->id, 'principal_id' => $principal->id],
+                [
+                    'name' => 'Mandato Principale',
+                    'start_date' => '2024-01-01',
+                    'status' => 'ATTIVO'
+                ]
+            );
+
+            // Agents (Rete Commerciale Esterna)
+            $agents = [
+                [
+                    'name' => 'Eurofinanza Mediazioni SRL',
+                    'description' => 'Mediatore Creditizio Nazionale',
+                    'oam' => 'M456',  // Formato tipico mediatori (M + numero)
+                    'type' => 'Mediatore',
+                ],
+                [
+                    'name' => 'Mario Rossi Consulenze',
+                    'description' => 'Agente in Attività Finanziaria',
+                    'oam' => 'A1234',  // Formato tipico agenti (A + numero)
+                    'type' => 'Agente',
+                ],
+                [
+                    'name' => 'Rete Prestiti Direct SPA',
+                    'description' => 'Partner Territoriale CQS',
+                    'oam' => 'M987',
+                    'type' => 'Mediatore',
+                ],
+                [
+                    'name' => 'Studio Finanziario Bianchi SAS',
+                    'description' => 'Agenzia Specializzata Pensionati',
+                    'oam' => 'A5566',
+                    'type' => 'Agente',
+                ],
+            ];
+
+            foreach ($agents as $agentData) {
+                Agent::firstOrCreate(
+                    ['name' => $agentData['name'], 'company_id' => $company->id],
+                    [
+                        'description' => $agentData['description'],
+                        'oam' => $agentData['oam'],
+                        'type' => $agentData['type'],
+                        'is_active' => 1
+                    ]
+                );
+            }
+        }
     }
 }

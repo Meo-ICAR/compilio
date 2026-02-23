@@ -60,4 +60,9 @@ class Company extends Model implements HasCurrentTenantLabel
     {
         return $this->morphMany(TrainingRecord::class, 'trainable');
     }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
 }
