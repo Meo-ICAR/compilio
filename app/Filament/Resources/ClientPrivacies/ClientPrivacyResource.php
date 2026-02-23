@@ -4,7 +4,6 @@ namespace App\Filament\Resources\ClientPrivacies;
 
 use App\Filament\Resources\ClientPrivacies\Pages\ManageClientPrivacies;
 use App\Models\ClientPrivacy;
-use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -16,6 +15,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class ClientPrivacyResource extends Resource
@@ -24,7 +24,13 @@ class ClientPrivacyResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Privacy';
+    protected static string|UnitEnum|null $navigationGroup = 'Compliance';
+
+    protected static ?string $navigationLabel = 'Privacy Clienti';
+
+    protected static ?string $modelLabel = 'Privacy Cliente';
+
+    protected static ?string $pluralModelLabel = 'Privacy Clienti';
 
     protected static ?string $recordTitleAttribute = 'request_type';
 
@@ -75,7 +81,7 @@ class ClientPrivacyResource extends Resource
                 TextColumn::make('status')
                     ->label('Stato')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Ricevuta' => 'info',
                         'In lavorazione' => 'warning',
                         'Evasa' => 'success',

@@ -19,11 +19,12 @@ use UnitEnum;
 class AuditItemResource extends Resource
 {
     protected static ?string $model = AuditItem::class;
-
+    protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $navigationLabel = 'Dettaglio';
+    protected static ?string $modelLabel = 'Dettaglio';
+    protected static ?string $pluralModelLabel = 'Dettagli';
     protected static bool $isScopedToTenant = false;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
     protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
 
     public static function form(Schema $schema): Schema

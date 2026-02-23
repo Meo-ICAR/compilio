@@ -28,6 +28,12 @@ class PrincipalResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Organizzazione';
 
+    protected static ?string $navigationLabel = 'Mandanti';
+
+    protected static ?string $modelLabel = 'Mandante';
+
+    protected static ?string $pluralModelLabel = 'Mandanti';
+
     public static function form(Schema $schema): Schema
     {
         return PrincipalForm::configure($schema);

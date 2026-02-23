@@ -23,6 +23,12 @@ class AbiResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
+    protected static ?string $navigationLabel = 'Banche';
+
+    protected static ?string $modelLabel = 'Banca';
+
+    protected static ?string $pluralModelLabel = 'Banche';
+
     protected static string|UnitEnum|null $navigationGroup = 'Elenchi';
 
     public static function form(Schema $schema): Schema
@@ -46,8 +52,6 @@ class AbiResource extends Resource
     {
         return [
             'index' => ListAbis::route('/'),
-            'create' => CreateAbi::route('/create'),
-            'edit' => EditAbi::route('/{record}/edit'),
         ];
     }
 }

@@ -23,6 +23,12 @@ class VcogesResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Primanota';
+
+    protected static ?string $modelLabel = 'Primanota';
+
+    protected static ?string $pluralModelLabel = 'Primenote';
+
     public static function form(Schema $schema): Schema
     {
         return VcogesForm::configure($schema);

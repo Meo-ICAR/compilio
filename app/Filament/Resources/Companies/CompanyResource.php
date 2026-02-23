@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Companies;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Companies\Pages\CreateCompany;
 use App\Filament\Resources\Companies\Pages\EditCompany;
 use App\Filament\Resources\Companies\Pages\ListCompanies;
 use App\Filament\Resources\Companies\RelationManagers\BranchesRelationManager;
+use App\Filament\Resources\Companies\RelationManagers\SoftwareApplicationsRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\WebsitesRelationManager;
 use App\Filament\Resources\Companies\Schemas\CompanyForm;
 use App\Filament\Resources\Companies\Tables\CompaniesTable;
@@ -25,6 +27,14 @@ class CompanyResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Azienda';
+
+    protected static ?int $navigationSort = 8;
+
+    protected static ?string $modelLabel = 'Azienda';
+
+    protected static ?string $pluralModelLabel = 'Aziende';
+
     protected static string|UnitEnum|null $navigationGroup = 'Organizzazione';
 
     public static function form(Schema $schema): Schema
@@ -40,9 +50,10 @@ class CompanyResource extends Resource
     public static function getRelations(): array
     {
         return [
+            DocumentsRelationManager::class,
             BranchesRelationManager::class,
             WebsitesRelationManager::class,
-            \App\Filament\Resources\Companies\RelationManagers\SoftwareApplicationsRelationManager::class,
+            SoftwareApplicationsRelationManager::class,
         ];
     }
 

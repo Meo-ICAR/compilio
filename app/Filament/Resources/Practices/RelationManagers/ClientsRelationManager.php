@@ -20,6 +20,7 @@ use Filament\Tables\Table;
 class ClientsRelationManager extends RelationManager
 {
     protected static string $relationship = 'clients';
+    protected static ?string $title = 'Contraenti';
 
     public function form(Schema $schema): Schema
     {
@@ -34,6 +35,7 @@ class ClientsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Contraenti')
             ->modifyQueryUsing(fn($query) => $query->with('clientType'))
             ->recordTitleAttribute('name')
             ->columns([

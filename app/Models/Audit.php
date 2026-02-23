@@ -11,6 +11,8 @@ class Audit extends Model
 
     protected $fillable = [
         'company_id',
+        'auditable_type',
+        'auditable_id',
         'requester_type',
         'principal_id',
         'agent_id',
@@ -32,6 +34,11 @@ class Audit extends Model
         'updated_at' => 'datetime',
     ];
 
+    public function auditable()
+    {
+        return $this->morphTo();
+    }
+
     public function principal()
     {
         return $this->belongsTo(Principal::class);
@@ -50,5 +57,10 @@ class Audit extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function auditItems()
+    {
+        return $this->hasMany(AuditItem::class);
     }
 }

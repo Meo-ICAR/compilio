@@ -23,6 +23,12 @@ class OamResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
+    protected static ?string $navigationLabel = 'Albo OAM';
+
+    protected static ?string $modelLabel = 'Iscritto';
+
+    protected static ?string $pluralModelLabel = 'Iscritti';
+
     protected static string|UnitEnum|null $navigationGroup = 'Elenchi';
 
     public static function form(Schema $schema): Schema
@@ -46,8 +52,6 @@ class OamResource extends Resource
     {
         return [
             'index' => ListOams::route('/'),
-            'create' => CreateOam::route('/create'),
-            'edit' => EditOam::route('/{record}/edit'),
         ];
     }
 }

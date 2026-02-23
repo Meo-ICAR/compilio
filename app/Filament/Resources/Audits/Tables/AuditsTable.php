@@ -13,36 +13,66 @@ class AuditsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'regulatoryBody', 'client']))
+            ->modifyQueryUsing(fn($query) => $query->with(['auditable', 'principal', 'agent', 'regulatoryBody', 'client']))
             ->columns([
+                TextColumn::make('title')
+                    ->label('Titolo')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('auditable_type')
+                    ->label('Tipo Oggetto')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'App\Models\Company' => 'Azienda',
+                        'App\Models\Agent' => 'Agente',
+                        'App\Models\Employee' => 'Dipendente',
+                        'App\Models\Client' => 'Cliente',
+                        'App\Models\Principal' => 'Mandante',
+                        default => $state,
+                    })
+                    ->badge()
+                    ->sortable(),
+                TextColumn::make('auditable.name')
+                    ->label('Oggetto Audit')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('requester_type')
                     ->label('Tipo Richiedente')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'OAM' => 'OAM',
+                        'PRINCIPAL' => 'Mandante',
+                        'INTERNAL' => 'Interno',
+                        'EXTERNAL' => 'Esterno',
+                        default => $state,
+                    })
                     ->badge(),
                 TextColumn::make('principal.name')
-                    ->label('Mandante')
+                    ->label('Mandante (Legacy)')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('agent.name')
-                    ->label('Agente')
+                    ->label('Agente (Legacy)')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('regulatoryBody.name')
                     ->label('Ente Regolatore')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('client.name')
                     ->label('Cliente')
                     ->searchable()
-                    ->sortable(),
-                TextColumn::make('title')
-                    ->label('Titolo')
-                    ->searchable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('emails')
                     ->label('Email Notifiche')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('reference_period')
                     ->label('Periodo Riferimento')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('start_date')
                     ->label('Data Inizio')
                     ->date()
@@ -50,13 +80,29 @@ class AuditsTable
                 TextColumn::make('end_date')
                     ->label('Data Fine')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->label('Stato')
-                    ->badge(),
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'PROGRAMMATO' => 'Programmato',
+                        'IN_CORSO' => 'In Corso',
+                        'COMPLETATO' => 'Completato',
+                        'ARCHIVIATO' => 'Archiviato',
+                        default => $state,
+                    })
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'PROGRAMMATO' => 'info',
+                        'IN_CORSO' => 'warning',
+                        'COMPLETATO' => 'success',
+                        'ARCHIVIATO' => 'gray',
+                        default => 'gray',
+                    }),
                 TextColumn::make('overall_score')
                     ->label('Valutazione')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

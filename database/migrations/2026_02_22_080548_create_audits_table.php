@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,10 +14,10 @@ return new class extends Migration
             $table->comment('Sessioni di Audit richieste da OAM, Mandanti o effettuate internamente.');
             $table->increments('id')->comment('ID univoco audit');
             $table->char('company_id', 36)->index('company_id')->comment('Tenant oggetto del controllo');
-            $table->enum('requester_type', ['OAM', 'PRINCIPAL', 'INTERNAL', 'EXTERNAL'])->comment('Chi richiede l\'audit: Ente Regolatore, Mandante o Auto-controllo interno');
-            $table->unsignedInteger('principal_id')->nullable()->index('principal_id')->comment('Se requester è PRINCIPAL, indicare quale');
-            $table->unsignedInteger('agent_id')->nullable()->index('agent_id')->comment('Agente specifico oggetto di audit (se applicabile)');
-            $table->string('title')->comment('Titolo dell\'ispezione (es. Audit Semestrale Trasparenza 2026)');
+
+            $table->enum('requester_type', ['OAM', 'PRINCIPAL', 'INTERNAL', 'EXTERNAL'])->comment("Chi richiede l'audit: Ente Regolatore, Mandante o Auto-controllo interno");
+
+            $table->string('title')->comment("Titolo dell'ispezione (es. Audit Semestrale Trasparenza 2026)");
             $table->string('emails')->default('')->comment('Lista email per notifiche esiti audit');
             $table->string('reference_period', 100)->nullable()->comment('Periodo oggetto di analisi (es. Q1-Q2 2025)');
             $table->date('start_date')->comment('Data inizio ispezione');

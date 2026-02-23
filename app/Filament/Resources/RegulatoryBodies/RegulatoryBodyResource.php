@@ -1,9 +1,6 @@
 <?php
 
 namespace App\Filament\Resources\RegulatoryBodies;
-use AppFilamentResourcesRegulatoryBodiesPagesCreateRegulatoryBody;
-use AppFilamentResourcesRegulatoryBodiesPagesEditRegulatoryBody;
-use AppFilamentResourcesRegulatoryBodiesPagesListRegulatoryBody;
 
 use App\Filament\Resources\RegulatoryBodies\Pages\CreateRegulatoryBody;
 use App\Filament\Resources\RegulatoryBodies\Pages\EditRegulatoryBody;
@@ -11,11 +8,14 @@ use App\Filament\Resources\RegulatoryBodies\Pages\ListRegulatoryBodies;
 use App\Filament\Resources\RegulatoryBodies\Schemas\RegulatoryBodyForm;
 use App\Filament\Resources\RegulatoryBodies\Tables\RegulatoryBodiesTable;
 use App\Models\RegulatoryBody;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use AppFilamentResourcesRegulatoryBodiesPagesCreateRegulatoryBody;
+use AppFilamentResourcesRegulatoryBodiesPagesEditRegulatoryBody;
+use AppFilamentResourcesRegulatoryBodiesPagesListRegulatoryBody;
+use BackedEnum;
 use UnitEnum;
 
 class RegulatoryBodyResource extends Resource
@@ -26,8 +26,13 @@ class RegulatoryBodyResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingLibrary;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Compilance';
+    protected static ?string $modelLabel = 'Ente';
 
+    protected static ?string $navigationLabel = 'Enti';
+
+    protected static ?string $pluralModelLabel = 'Enti';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Elenchi';
 
     public static function form(Schema $schema): Schema
     {
@@ -50,8 +55,6 @@ class RegulatoryBodyResource extends Resource
     {
         return [
             'index' => ListRegulatoryBodies::route('/'),
-            'create' => CreateRegulatoryBody::route('/create'),
-            'edit' => EditRegulatoryBody::route('/{record}/edit'),
         ];
     }
 }

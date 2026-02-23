@@ -25,6 +25,12 @@ class AgentResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Organizzazione';
 
+    protected static ?string $navigationLabel = 'Agenti';
+
+    protected static ?string $modelLabel = 'Agente';
+
+    protected static ?string $pluralModelLabel = 'Agenti';
+
     public static function form(Schema $schema): Schema
     {
         return AgentForm::configure($schema);

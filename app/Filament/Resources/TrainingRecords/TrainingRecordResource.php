@@ -2,17 +2,18 @@
 
 namespace App\Filament\Resources\TrainingRecords;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\TrainingRecords\Pages\CreateTrainingRecord;
 use App\Filament\Resources\TrainingRecords\Pages\EditTrainingRecord;
 use App\Filament\Resources\TrainingRecords\Pages\ListTrainingRecords;
 use App\Filament\Resources\TrainingRecords\Schemas\TrainingRecordForm;
 use App\Filament\Resources\TrainingRecords\Tables\TrainingRecordsTable;
 use App\Models\TrainingRecord;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class TrainingRecordResource extends Resource
@@ -23,8 +24,13 @@ class TrainingRecordResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
+    protected static ?string $navigationLabel = 'Formazione';
 
+    protected static ?string $modelLabel = 'Formazione';
+
+    protected static ?string $pluralModelLabel = 'Formazione';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
     public static function form(Schema $schema): Schema
     {
@@ -39,7 +45,7 @@ class TrainingRecordResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            DocumentsRelationManager::class,
         ];
     }
 

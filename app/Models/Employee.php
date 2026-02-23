@@ -26,6 +26,16 @@ class Employee extends Model
         return $this->hasMany(TrainingRecord::class);
     }
 
+    public function audits(): MorphMany
+    {
+        return $this->morphMany(Audit::class, 'auditable');
+    }
+
+    public function morphTrainingRecords(): MorphMany
+    {
+        return $this->morphMany(TrainingRecord::class, 'trainable');
+    }
+
     public function employmentType()
     {
         return $this->belongsTo(EmploymentType::class);

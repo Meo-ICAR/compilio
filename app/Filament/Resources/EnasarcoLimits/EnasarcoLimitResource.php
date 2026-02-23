@@ -23,6 +23,12 @@ class EnasarcoLimitResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyEuro;
 
+    protected static ?string $modelLabel = 'Massimali';
+
+    protected static ?string $navigationLabel = 'Enasarco Massimali';
+
+    // protected static ?string $pluralModelLabel = 'Enasarco';
+
     protected static string|UnitEnum|null $navigationGroup = 'Elenchi';
 
     public static function form(Schema $schema): Schema
@@ -46,8 +52,6 @@ class EnasarcoLimitResource extends Resource
     {
         return [
             'index' => ListEnasarcoLimits::route('/'),
-            'create' => CreateEnasarcoLimit::route('/create'),
-            'edit' => EditEnasarcoLimit::route('/{record}/edit'),
         ];
     }
 }

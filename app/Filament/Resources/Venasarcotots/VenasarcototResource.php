@@ -20,6 +20,9 @@ class VenasarcototResource extends Resource
     protected static ?string $model = Venasarcotot::class;
     protected static string|UnitEnum|null $navigationGroup = 'Amministrazione';
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $navigationLabel = 'Enasarco';
+    protected static ?string $modelLabel = 'Enasarco';
+    protected static ?string $pluralModelLabel = 'Enasarco';
 
     public static function form(Schema $schema): Schema
     {

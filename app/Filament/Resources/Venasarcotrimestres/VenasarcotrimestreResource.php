@@ -18,9 +18,8 @@ use UnitEnum;
 class VenasarcotrimestreResource extends Resource
 {
     protected static ?string $model = Venasarcotrimestre::class;
-
+    protected static bool $shouldRegisterNavigation = false;
     protected static string|UnitEnum|null $navigationGroup = 'Amministrazione';
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema

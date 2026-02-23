@@ -13,27 +13,76 @@ class TrainingRecordsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with(['trainable', 'trainingSession', 'employee', 'agent']))
             ->columns([
-                TextColumn::make('training_session_id')
-                    ->numeric()
+                TextColumn::make('trainingSession.title')
+                    ->label('Sessione Formativa')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(30),
+                TextColumn::make('trainable_type')
+                    ->label('Tipo Partecipante')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'App\Models\Employee' => 'Dipendente',
+                        'App\Models\Agent' => 'Agente',
+                        'App\Models\Company' => 'Azienda',
+                        'App\Models\Client' => 'Cliente',
+                        default => $state,
+                    })
+                    ->badge()
                     ->sortable(),
-                TextColumn::make('user_id')
-                    ->numeric()
+                TextColumn::make('trainable.name')
+                    ->label('Partecipante')
+                    ->searchable()
                     ->sortable(),
+                TextColumn::make('employee.name')
+                    ->label('Dipendente (Legacy)')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('agent.name')
+                    ->label('Agente (Legacy)')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
-                    ->badge(),
+                    ->label('Stato')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'ISCRITTO' => 'Iscritto',
+                        'FREQUENTANTE' => 'Frequentante',
+                        'COMPLETATO' => 'Completato',
+                        'NON_SUPERATO' => 'Non Superato',
+                        default => $state,
+                    })
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'ISCRITTO' => 'info',
+                        'FREQUENTANTE' => 'warning',
+                        'COMPLETATO' => 'success',
+                        'NON_SUPERATO' => 'danger',
+                        default => 'gray',
+                    }),
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->label('Descrizione')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('hours_attended')
+                    ->label('Ore')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('score')
-                    ->searchable(),
+                    ->label('Esito')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('completion_date')
+                    ->label('Completamento')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('certificate_path')
-                    ->searchable(),
+                    ->label('Certificato')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

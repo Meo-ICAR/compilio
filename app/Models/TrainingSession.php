@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 
 class TrainingSession extends Model
@@ -28,5 +29,10 @@ class TrainingSession extends Model
     public function trainingRecords()
     {
         return $this->hasMany(TrainingRecord::class);
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 }

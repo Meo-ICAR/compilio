@@ -6,6 +6,7 @@ use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Audits\Pages\CreateAudit;
 use App\Filament\Resources\Audits\Pages\EditAudit;
 use App\Filament\Resources\Audits\Pages\ListAudits;
+use App\Filament\Resources\Audits\RelationManagers\AuditItemsRelationManager;
 use App\Filament\Resources\Audits\Schemas\AuditForm;
 use App\Filament\Resources\Audits\Tables\AuditsTable;
 use App\Models\Audit;
@@ -38,6 +39,7 @@ class AuditResource extends Resource
     {
         return [
             DocumentsRelationManager::class,
+            AuditItemsRelationManager::class,
         ];
     }
 

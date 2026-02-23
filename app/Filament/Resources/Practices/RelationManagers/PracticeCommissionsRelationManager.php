@@ -3,13 +3,24 @@
 namespace App\Filament\Resources\Practices\RelationManagers;
 
 use App\Models\PracticeCommission;
+use Filament\Actions\AttachAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 
 class PracticeCommissionsRelationManager extends RelationManager
@@ -18,25 +29,25 @@ class PracticeCommissionsRelationManager extends RelationManager
 
     protected static ?string $title = 'Commissioni Pratica';
 
-    public function table(Tables\Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
             ->modifyQueryUsing(fn($query) => $query->where('practice_commissions.company_id', auth()->user()->company_id))
             ->recordTitleAttribute('amount')
             ->columns([
-                Tables\Columns\TextColumn::make('agent.name')
+                TextColumn::make('agent.name')
                     ->label('Agent')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label('Importo')
                     ->money('EUR')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('percentage')
+                TextColumn::make('percentage')
                     ->label('Percentuale')
                     ->suffix('%')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->label('Stato')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -45,23 +56,23 @@ class PracticeCommissionsRelationManager extends RelationManager
                         'REJECTED' => 'danger',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('notes')
+                TextColumn::make('notes')
                     ->label('Note')
                     ->searchable()
                     ->limit(50),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->label('Data Creazione')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label('Data Aggiornamento')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->label('Stato')
                     ->options([
                         'PENDING' => 'In Attesa',
@@ -70,18 +81,18 @@ class PracticeCommissionsRelationManager extends RelationManager
                     ]),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->label('Nuova Commissione'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->label('Modifica'),
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->label('Elimina'),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
                         ->label('Elimina Selezionati'),
                 ]),
             ]);
@@ -105,9 +116,7 @@ class PracticeCommissionsRelationManager extends RelationManager
                 TextInput::make('percentage')
                     ->label('Percentuale')
                     ->numeric()
-                    ->suffix('%')
-                    ->max(100)
-                    ->step(0.01),
+                    ->suffix('%'),
                 Select::make('status')
                     ->label('Stato')
                     ->options([

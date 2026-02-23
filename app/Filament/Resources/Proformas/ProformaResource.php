@@ -22,6 +22,12 @@ class ProformaResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
+    protected static ?string $navigationLabel = 'Proforma';
+
+    protected static ?string $modelLabel = 'Proforma';
+
+    protected static ?string $pluralModelLabel = 'Proforma';
+
     protected static string|UnitEnum|null $navigationGroup = 'Amministrazione';
 
     public static function form(Schema $schema): Schema

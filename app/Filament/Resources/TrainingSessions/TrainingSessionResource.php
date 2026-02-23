@@ -23,7 +23,13 @@ class TrainingSessionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Formazione';
+    protected static ?string $navigationLabel = 'Corso';
+
+    protected static ?string $modelLabel = 'Corso';
+
+    protected static ?string $pluralModelLabel = 'Corsi';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Configurazione';
 
     public static function form(Schema $schema): Schema
     {

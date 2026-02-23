@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Filament\Models\Contracts\HasCurrentTenantLabel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 
 class Company extends Model implements HasCurrentTenantLabel
@@ -44,8 +45,19 @@ class Company extends Model implements HasCurrentTenantLabel
 
     public function softwareApplications()
     {
-        return $this->belongsToMany(SoftwareApplication::class)
+        return $this
+            ->belongsToMany(SoftwareApplication::class)
             ->withPivot(['status', 'notes'])
             ->withTimestamps();
+    }
+
+    public function audits(): MorphMany
+    {
+        return $this->morphMany(Audit::class, 'auditable');
+    }
+
+    public function trainingRecords(): MorphMany
+    {
+        return $this->morphMany(TrainingRecord::class, 'trainable');
     }
 }

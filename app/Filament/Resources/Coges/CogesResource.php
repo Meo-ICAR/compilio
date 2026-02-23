@@ -23,6 +23,12 @@ class CogesResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Contabilità';
+
+    protected static ?string $modelLabel = 'Contabilità';
+
+    protected static ?string $pluralModelLabel = 'Contabilità';
+
     public static function form(Schema $schema): Schema
     {
         return CogesForm::configure($schema);

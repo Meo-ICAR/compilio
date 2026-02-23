@@ -23,6 +23,12 @@ class SoftwareApplicationResource extends Resource
 {
     protected static ?string $model = SoftwareApplication::class;
 
+    protected static ?string $navigationLabel = 'Software';
+
+    protected static ?string $modelLabel = 'Software';
+
+    protected static ?string $pluralModelLabel = 'Software';
+
     protected static bool $isScopedToTenant = false;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedComputerDesktop;

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Audits\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -13,59 +14,108 @@ class AuditForm
     {
         return $schema
             ->components([
-                Select::make('requester_type')
-                    ->options([
-                        'OAM' => 'O a m',
-                        'PRINCIPAL' => 'P r i n c i p a l',
-                        'INTERNAL' => 'I n t e r n a l',
-                        'EXTERNAL' => 'E x t e r n a l',
+                Section::make('Informazioni Generali')
+                    ->schema([
+                        TextInput::make('title')
+                            ->label('Titolo Audit')
+                            ->required(),
+                        Select::make('requester_type')
+                            ->label('Tipo Richiedente')
+                            ->options([
+                                'OAM' => 'OAM',
+                                'PRINCIPAL' => 'Mandante',
+                                'INTERNAL' => 'Interno',
+                                'EXTERNAL' => 'Esterno',
+                            ])
+                            ->required(),
+                        TextInput::make('emails')
+                            ->label('Email Notifiche')
+                            ->email()
+                            ->required(),
+                        TextInput::make('reference_period')
+                            ->label('Periodo di Riferimento'),
+                    ]),
+                Section::make('Oggetto Audit (Polimorfico)')
+                    ->schema([
+                        Select::make('auditable_type')
+                            ->label('Tipo Oggetto')
+                            ->options([
+                                'App\Models\Company' => 'Azienda',
+                                'App\Models\Agent' => 'Agente',
+                                'App\Models\Employee' => 'Dipendente',
+                                'App\Models\Client' => 'Cliente',
+                                'App\Models\Principal' => 'Mandante',
+                            ])
+                            ->reactive()
+                            ->afterStateUpdated(fn($state, callable $set) => $set('auditable_id', null))
+                            ->required(),
+                        Select::make('auditable_id')
+                            ->label('Oggetto Selezionato')
+                            ->searchable()
+                            ->getSearchResultsUsing(function (string $search, callable $get) {
+                                $type = $get('auditable_type');
+                                if (!$type)
+                                    return [];
+
+                                $model = new $type;
+                                return $model::where('name', 'like', "%{$search}%")
+                                    ->limit(50)
+                                    ->pluck('name', 'id');
+                            })
+                            ->getOptionLabelUsing(function ($value, callable $get) {
+                                $type = $get('auditable_type');
+                                if (!$type || !$value)
+                                    return '';
+
+                                $model = new $type;
+                                $record = $model::find($value);
+                                return $record?->name ?? '';
+                            })
+                            ->required(),
+                    ]),
+                Section::make('Riferimenti Specifici (Legacy)')
+                    ->schema([
+                        Select::make('principal_id')
+                            ->label('Mandante (Legacy)')
+                            ->relationship('principal', 'name')
+                            ->searchable()
+                            ->nullable(),
+                        Select::make('agent_id')
+                            ->label('Agente (Legacy)')
+                            ->relationship('agent', 'name')
+                            ->searchable()
+                            ->nullable(),
+                        Select::make('regulatory_body_id')
+                            ->label('Ente Regolatore')
+                            ->relationship('regulatoryBody', 'name')
+                            ->searchable()
+                            ->nullable(),
+                        Select::make('client_id')
+                            ->label('Cliente')
+                            ->relationship('client', 'name')
+                            ->searchable()
+                            ->nullable(),
                     ])
-                    ->required(),
-                Select::make('principal_id')
-                    ->label('Mandante')
-                    ->relationship('principal', 'name')
-                    ->searchable()
-                    ->nullable(),
-                Select::make('agent_id')
-                    ->label('Agente')
-                    ->relationship('agent', 'name')
-                    ->searchable()
-                    ->nullable(),
-                Select::make('regulatory_body_id')
-                    ->label('Ente Regolatore')
-                    ->relationship('regulatoryBody', 'name')
-                    ->searchable()
-                    ->nullable(),
-                Select::make('client_id')
-                    ->label('Cliente')
-                    ->relationship('client', 'name')
-                    ->searchable()
-                    ->nullable(),
-                TextInput::make('title')
-                    ->label('Titolo Audit')
-                    ->required(),
-                TextInput::make('emails')
-                    ->label('Email Notifiche')
-                    ->email()
-                    ->required(),
-                TextInput::make('reference_period')
-                    ->label('Periodo di Riferimento'),
-                DatePicker::make('start_date')
-                    ->label('Data Inizio')
-                    ->required(),
-                DatePicker::make('end_date')
-                    ->label('Data Fine'),
-                Select::make('status')
-                    ->label('Stato')
-                    ->options([
-                        'PROGRAMMATO' => 'P r o g r a m m a t o',
-                        'IN_CORSO' => 'I n  c o r s o',
-                        'COMPLETATO' => 'C o m p l e t a t o',
-                        'ARCHIVIATO' => 'A r c h i v i a t o',
-                    ])
-                    ->default('PROGRAMMATO'),
-                TextInput::make('overall_score')
-                    ->label('Valutazione Finale'),
+                    ->collapsed(),
+                Section::make('Date e Stato')
+                    ->schema([
+                        DatePicker::make('start_date')
+                            ->label('Data Inizio')
+                            ->required(),
+                        DatePicker::make('end_date')
+                            ->label('Data Fine'),
+                        Select::make('status')
+                            ->label('Stato')
+                            ->options([
+                                'PROGRAMMATO' => 'Programmato',
+                                'IN_CORSO' => 'In Corso',
+                                'COMPLETATO' => 'Completato',
+                                'ARCHIVIATO' => 'Archiviato',
+                            ])
+                            ->default('PROGRAMMATO'),
+                        TextInput::make('overall_score')
+                            ->label('Valutazione Finale'),
+                    ]),
             ]);
     }
 }

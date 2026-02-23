@@ -15,24 +15,45 @@ class SoftwareApplicationsTable
     {
         return $table
             ->columns([
-                TextColumn::make('category_id')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('softwareCategory.name')
+                    ->label('Categoria')
+                    ->searchable()
+                    ->sortable()
+                    ->badge(),
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->label('Software')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('provider_name')
-                    ->searchable(),
+                    ->label('Provider')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('website_url')
-                    ->searchable(),
-                TextColumn::make('api_url')
-                    ->searchable(),
-                TextColumn::make('sandbox_url')
-                    ->searchable(),
-                TextColumn::make('api_key_url')
-                    ->searchable(),
+                    ->label('Sito Web')
+                    ->url()
+                    ->limit(30)
+                    ->toggleable(),
                 IconColumn::make('is_cloud')
-                    ->boolean(),
+                    ->label('Cloud')
+                    ->boolean()
+                    ->sortable(),
+                TextColumn::make('api_url')
+                    ->label('URL API')
+                    ->url()
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('sandbox_url')
+                    ->label('Sandbox')
+                    ->url()
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('api_key_url')
+                    ->label('API Key')
+                    ->url()
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Aggiornato il')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Model;
 
 class ApiConfiguration extends Model
 {
@@ -18,5 +18,10 @@ class ApiConfiguration extends Model
     public function softwareApplication()
     {
         return $this->belongsTo(SoftwareApplication::class);
+    }
+
+    public function apiLogs()
+    {
+        return $this->morphMany(ApiLog::class, 'apiLoggable');
     }
 }

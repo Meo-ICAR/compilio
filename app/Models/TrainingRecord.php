@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 
 class TrainingRecord extends Model
 {
     protected $fillable = [
         'training_session_id',
+        'trainable_type',
+        'trainable_id',
         'employee_id',
         'agent_id',
         'status',
@@ -16,6 +19,11 @@ class TrainingRecord extends Model
         'completion_date',
         'certificate_path',
     ];
+
+    public function trainable()
+    {
+        return $this->morphTo();
+    }
 
     public function trainingSession()
     {
@@ -30,5 +38,10 @@ class TrainingRecord extends Model
     public function agent()
     {
         return $this->belongsTo(Agent::class);
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 }

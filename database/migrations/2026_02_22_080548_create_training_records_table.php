@@ -13,20 +13,18 @@ return new class extends Migration {
         Schema::create('training_records', function (Blueprint $table) {
             $table->comment('Registro presenze e certificazioni: traccia la formazione di agenti e dipendenti per scopi normativi.');
             $table->increments('id')->comment('ID record partecipazione');
-            $table->unsignedInteger('training_session_id')->comment('La sessione seguita');
-            $table->unsignedInteger('employee_id')->nullable()->index('employee_id')->comment('Dipendente che ha partecipato alla formazione');
-            $table->unsignedInteger('agent_id')->nullable()->index('agent_id')->comment('Agente che ha partecipato alla formazione');
-            $table->enum('status', ['ISCRITTO', 'FREQUENTANTE', 'COMPLETATO', 'NON_SUPERATO'])->nullable()->default('ISCRITTO');
+            $table->unsignedInteger('training_session_id')->nullable()->comment('La sessione seguita');
+            $table->foreign(['training_session_id'], 'training_records_ibfk_1')->references(['id'])->on('training_sessions')->onUpdate('no action')->onDelete('cascade');
             $table->string('name')->nullable()->comment('Descrizione');
+
+            $table->enum('status', ['ISCRITTO', 'FREQUENTANTE', 'COMPLETATO', 'NON_SUPERATO'])->nullable()->default('ISCRITTO');
+
             $table->decimal('hours_attended', 5)->nullable()->default(0)->comment('Ore effettivamente frequentate dal singolo utente');
             $table->string('score', 50)->nullable()->comment('Esito test finale (es. 28/30 o Idoneo)');
             $table->date('completion_date')->nullable()->comment('Data esatta di conseguimento titolo');
             $table->string('certificate_path')->nullable()->comment("Link al PDF dell'attestato (se salvato fuori da Media Library)");
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data creazione record');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Data ultimo aggiornamento record');
-
-            $table->unique(['training_session_id', 'employee_id'], 'unique_employee_session');
-            $table->unique(['training_session_id', 'agent_id'], 'unique_agent_session');
         });
     }
 

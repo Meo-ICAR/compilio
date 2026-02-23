@@ -23,7 +23,13 @@ class FirrResource extends Resource
 
     protected static bool $isScopedToTenant = false;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
+    protected static ?string $modelLabel = 'FIRR';
+
+    protected static ?string $navigationLabel = 'FIRR';
+
+    protected static ?string $pluralModelLabel = 'FIRR';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Elenchi';
 
     public static function form(Schema $schema): Schema
     {
@@ -46,8 +52,6 @@ class FirrResource extends Resource
     {
         return [
             'index' => ListFirrs::route('/'),
-            'create' => CreateFirr::route('/create'),
-            'edit' => EditFirr::route('/{record}/edit'),
         ];
     }
 }
