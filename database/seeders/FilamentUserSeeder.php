@@ -25,10 +25,10 @@ class FilamentUserSeeder extends Seeder
             ]
         );
         User::updateOrCreate(
-            ['email' => 'mario@globaladvisor.com'],
+            ['email' => 'mario@globadvisor.it'],
             [
                 'name' => 'Mario Gargiulo',
-                'email' => 'mario@globaladvisor.com',
+                'email' => 'mario@globadvisor.it',
                 'password' => Hash::make('password'),
                 'company_id' => null,  // NULL per Super Admin globali
             ]
