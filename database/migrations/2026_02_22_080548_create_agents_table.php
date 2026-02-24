@@ -30,7 +30,7 @@ return new class extends Migration {
             $table->boolean('is_active')->default(true)->comment('Indica se la banca è attualmente convenzionata');
 
             $table->foreignId('company_id')->constrained();
-            //             $table->char('company_id', 36)->index('company_id')->comment('Tenant di appartenenza');
+            //             $table->char('company_id', 36)->comment('Tenant di appartenenza');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });

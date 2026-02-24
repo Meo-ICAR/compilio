@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('regulatory_body_scopes', function (Blueprint $table) {
             $table->comment('Tabella pivot per definire quali ambiti normativi sono di competenza di ciascun ente.');
             $table->unsignedInteger('regulatory_body_id')->comment("Riferimento all'ente");
-            $table->unsignedInteger('document_scope_id')->index('document_scope_id')->comment("Riferimento all'ambito (es. Privacy, AML, OAM)");
+            $table->unsignedInteger('document_scope_id')->comment("Riferimento all'ambito (es. Privacy, AML, OAM)");
             $table->string('name')->nullable()->comment('Descrizione');
 
             $table->primary(['regulatory_body_id', 'document_scope_id']);

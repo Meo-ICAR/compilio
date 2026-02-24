@@ -13,13 +13,12 @@ return new class extends Migration
     {
         Schema::create('company_software_application', function (Blueprint $table) {
             $table->id();
-            $table->char('company_id', 36)->comment('UUID dell\'azienda');
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->unsignedInteger('software_application_id')->comment('ID del software');
             $table->string('status')->default('ATTIVO')->comment('Stato dell\'associazione (es. ATTIVO, SOSPESO)');
             $table->text('notes')->nullable()->comment('Note specifiche per l\'azienda');
             $table->timestamps();
 
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->foreign('software_application_id')->references('id')->on('software_applications')->onDelete('cascade');
 
             $table->unique(['company_id', 'software_application_id'], 'uk_company_software');

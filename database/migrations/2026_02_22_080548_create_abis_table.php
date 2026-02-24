@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('abis', function (Blueprint $table) {
             $table->bigIncrements('id')->comment('ID univoco interno');
-            $table->string('abi', 5)->unique('financials_abi_code_unique')->comment('Codice ABI a 5 cifre');
+            $table->string('abi', 5)->unique()->comment('Codice ABI a 5 cifre');
             $table->string('name')->comment('Nome ufficiale (es. AGOS DUCATO S.P.A.)');
             $table->enum('type', ['BANCA', 'INTERMEDIARIO_106', 'IP_IMEL'])->comment('Banca o Finanziaria ex Art. 106 TUB');
             $table->string('capogruppo')->nullable()->comment('Gruppo bancario di appartenenza');

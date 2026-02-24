@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('street')->nullable()->comment('Via e numero civico');
             $table->string('city')->nullable()->comment('Città o Comune');
             $table->string('zip_code', 20)->nullable()->comment('CAP (Codice di Avviamento Postale)');
-            $table->integer('address_type_id')->nullable()->index('address_type_id')->comment('Relazione con tipologia indirizzo');
+            $table->integer('address_type_id')->nullable()->comment('Relazione con tipologia indirizzo');
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data inserimento indirizzo');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Data ultimo aggiornamento');
         });

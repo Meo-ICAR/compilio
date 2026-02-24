@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->comment("Configurazioni tecniche per l'interfacciamento API con software terzi.");
             $table->increments('id')->comment('ID univoco configurazione');
             $table->foreignId('company_id')->constrained();
-            $table->unsignedInteger('software_application_id')->index('software_application_id')->comment('Software con cui interfacciarsi');
+            $table->unsignedInteger('software_application_id')->comment('Software con cui interfacciarsi');
             $table->string('name')->nullable()->comment('Nome mnemonico della connessione');
             $table->string('base_url')->nullable()->comment("URL base dell'API (es. https://api.crmesterno.it/v1)");
             $table->enum('auth_type', ['BASIC', 'BEARER_TOKEN', 'API_KEY', 'OAUTH2'])->nullable()->default('API_KEY')->comment('Metodo di autenticazione');

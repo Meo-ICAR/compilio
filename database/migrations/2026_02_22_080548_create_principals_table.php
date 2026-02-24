@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
@@ -23,7 +24,7 @@ return new class extends Migration {
             $table->string('oam', 30)->nullable()->comment('Codice di iscrizione OAM');
             $table->string('ivass', 30)->nullable()->comment('Codice di iscrizione IVASS');
             $table->boolean('is_active')->default(true)->comment('Indica se la banca è attualmente convenzionata');
-            $table->char('company_id', 36)->index('company_id')->comment('Tenant di appartenenza');
+            $table->foreignId('company_id')->constrained();
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
             $table->string('mandate_number', 100)->comment('Numero di protocollo o identificativo del contratto di mandato');

@@ -4,13 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::table('vcoge', function (Blueprint $table) {
-            $table->char('company_id', 36)->nullable()->after('id')->comment('ID della company (tenant)');
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
-            $table->index('company_id');
+            $table->foreignId('company_id')->nullable()->after('id')->constrained()->onDelete('cascade');
         });
     }
 

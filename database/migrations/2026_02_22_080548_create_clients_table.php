@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->string('email')->nullable()->comment('Email di contatto principale');
             $table->string('phone', 50)->nullable()->comment('Recapito telefonico');
             $table->boolean('is_pep')->default(false)->comment('Persona Politicamente Esposta');
-            $table->unsignedInteger('client_type_id')->nullable()->index('client_type_id')->comment('Classificazione cliente');
+            $table->unsignedInteger('client_type_id')->nullable()->comment('Classificazione cliente');
             $table->boolean('is_sanctioned')->default(false)->comment('Presente in liste antiterrorismo/blacklists');
 
             $table->boolean('is_remote_interaction')->default(false)->comment('Operatività a distanza = Rischio più alto');

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('api_logs', function (Blueprint $table) {
             $table->comment('Registro storico di tutte le chiamate API effettuate per monitoraggio e risoluzione problemi.');
             $table->bigIncrements('id');
-            $table->unsignedInteger('api_configuration_id')->index('api_configuration_id')->comment('Riferimento alla configurazione usata');
+            $table->unsignedInteger('api_configuration_id')->comment('Riferimento alla configurazione usata');
             $table->string('api_loggable_type')->nullable()->comment('Classe del Modello collegato');
             $table->string('api_loggable_id', 36)->nullable()->comment('ID del Modello (VARCHAR 36)');
             $table->string('endpoint')->comment('L\'endpoint specifico chiamato');

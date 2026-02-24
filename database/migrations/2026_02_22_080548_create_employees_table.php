@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->comment('Anagrafica dipendenti interni delle società di mediazione.');
             $table->increments('id')->comment('ID univoco dipendente');
             $table->foreignId('company_id')->constrained()->index()->comment('Agenzia di appartenenza');
-            $table->unsignedInteger('user_id')->nullable()->unique('user_id')->comment("Legame con l'utente di sistema");
+            $table->unsignedInteger('user_id')->nullable()->unique()->comment("Legame con l'utente di sistema");
             $table->string('name')->nullable()->comment('Nome completo dipendente');
             $table->string('role_title', 100)->nullable()->comment('Qualifica aziendale (es. Responsabile Backoffice)');
             $table->string('cf', 16)->nullable()->comment('Codice Fiscale');
@@ -25,7 +25,7 @@ return new class extends Migration {
             $table->string('ivass', 100)->nullable()->comment('Codice IVASS individuale dipendente');
             $table->date('hiring_date')->nullable()->comment('Data di assunzione');
             $table->date('termination_date')->nullable()->comment('Data di fine rapporto');
-            $table->unsignedInteger('company_branch_id')->nullable()->index('company_branch_id')->comment('Sede fisica di assegnazione');
+            $table->unsignedInteger('company_branch_id')->nullable()->comment('Sede fisica di assegnazione');
 
             $table->string('privacy_role')->nullable()->comment('Ruolo Privacy (es. Titolare Autonomo, Responsabile Esterno)');
             $table->text('purpose')->nullable()->comment('Finalità del trattamento');

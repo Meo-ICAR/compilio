@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('proforma_status_history', function (Blueprint $table) {
             $table->comment('Registro storico dei passaggi di stato del proforma per controllo amministrativo.');
             $table->increments('id')->comment('ID univoco log stato');
-            $table->unsignedInteger('proforma_id')->index('proforma_id')->comment('Riferimento al proforma');
+            $table->unsignedInteger('proforma_id')->comment('Riferimento al proforma');
             $table->string('status', 50)->comment('Lo stato assunto dal proforma');
             $table->string('name')->nullable()->comment('Descrizione');
-            $table->unsignedInteger('changed_by')->index('changed_by')->comment('L\'utente (amministratore) che ha effettuato l\'azione');
+            $table->unsignedInteger('changed_by')->comment('L\'utente (amministratore) che ha effettuato l\'azione');
             $table->text('notes')->nullable()->comment('Eventuali note sul cambio stato (es. motivo dell\'annullamento)');
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data e ora esatta del passaggio di stato');
         });

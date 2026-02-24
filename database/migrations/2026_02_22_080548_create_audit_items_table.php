@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('audit_items', function (Blueprint $table) {
             $table->comment('Singole verifiche effettuate durante un audit su specifiche pratiche o fascicoli agenti.');
             $table->increments('id')->comment('ID singola riga di controllo');
-            $table->unsignedInteger('audit_id')->index('audit_id')->comment('Riferimento alla sessione di audit');
+            $table->unsignedInteger('audit_id')->comment('Riferimento alla sessione di audit');
             $table->string('auditable_type')->comment('Classe dell\'oggetto controllato (es. App\\Models\\Practice)');
             $table->string('auditable_id', 36)->comment('ID dell\'oggetto controllato');
             $table->string('name')->nullable()->comment('Descrizione');

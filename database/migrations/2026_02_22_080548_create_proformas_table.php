@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->comment('Proforma mensili generati dal sistema per calcolare compensi e ritenute Enasarco degli agenti.');
             $table->increments('id')->comment('ID intero autoincrementante');
             $table->foreignId('company_id')->constrained()->index()->comment("L'agenzia che deve liquidare l'agente");
-            $table->unsignedInteger('agent_id')->index('agent_id')->comment("L'agente beneficiario delle provvigioni");
+            $table->unsignedInteger('agent_id')->comment("L'agente beneficiario delle provvigioni");
             $table->string('name')->nullable()->comment('Riferimento documento (es. Proforma 01/2026 - Rossi Mario)');
             $table->string('commission_label')->nullable();
             $table->decimal('total_commissions', 10)->nullable()->comment('Totale provvigioni lorde maturate nel periodo');

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('principal_contacts', function (Blueprint $table) {
             $table->comment('Rubrica dei referenti presso le banche mandanti per comunicazioni operative e istruttoria.');
             $table->increments('id')->comment('ID univoco contatto mandante');
-            $table->unsignedInteger('principal_id')->index('principal_id')->comment('Riferimento alla banca mandante');
+            $table->unsignedInteger('principal_id')->comment('Riferimento alla banca mandante');
             $table->string('first_name', 100)->comment('Nome del referente bancario');
             $table->string('last_name', 100)->comment('Cognome del referente bancario');
             $table->string('role_title', 150)->nullable()->comment('Ruolo (es. Responsabile Istruttoria, Area Manager, Deliberante)');

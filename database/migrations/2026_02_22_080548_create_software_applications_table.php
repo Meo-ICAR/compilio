@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('software_applications', function (Blueprint $table) {
             $table->comment('Tabella di lookup globale: Elenco dei software più comuni nel settore finanziario.');
             $table->increments('id')->comment('ID univoco software');
-            $table->unsignedInteger('category_id')->index('category_id')->comment('Riferimento alla categoria');
+            $table->unsignedInteger('category_id')->comment('Riferimento alla categoria');
             $table->string('name')->comment('Nome commerciale (es. Salesforce, XCrm, Teamsystem, Namirial)');
             $table->string('provider_name')->nullable()->comment('Nome della software house produttrice');
             $table->string('website_url')->nullable()->comment('Sito web ufficiale del produttore');

@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->comment('Tabella di legame tra Clienti e Pratiche. Gestisce chi sono gli intestatari e chi i garanti per ogni pratica.');
             $table->increments('id')->comment('ID univoco del legame');
             $table->unsignedInteger('practice_id')->comment('Riferimento alla pratica');
-            $table->unsignedInteger('client_id')->index('client_id')->comment('Riferimento al cliente coinvolto');
+            $table->unsignedInteger('client_id')->comment('Riferimento al cliente coinvolto');
             $table->enum('role', ['intestatario', 'cointestatario', 'garante', 'terzo_datore'])->default('intestatario')->comment('Ruolo legale del cliente nella pratica: Intestatario principale, Co-intestatario, Garante o Terzo Datore di ipoteca');
             $table->string('name')->nullable()->comment('Descrizione');
             $table->text('notes')->nullable()->comment('Note specifiche sul ruolo per questa pratica (es. "Garante solo per quota 50%")');

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('principal_scopes', function (Blueprint $table) {
             $table->comment('Tabella pivot: definisce quali comparti operativi sono autorizzati per ogni singolo mandato.');
-            $table->unsignedInteger('principal_id')->index('principal_id')->comment('Riferimento al mandato');
-            $table->unsignedInteger('practice_scope_id')->index('practice_scope_id')->comment('Riferimento all\'ambito (es. Cessione del Quinto, Mutui)');
+            $table->unsignedInteger('principal_id')->comment('Riferimento al mandato');
+            $table->unsignedInteger('practice_scope_id')->comment('Riferimento all\'ambito (es. Cessione del Quinto, Mutui)');
             $table->string('name');
         });
     }

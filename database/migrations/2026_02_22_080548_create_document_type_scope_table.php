@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('document_type_scope', function (Blueprint $table) {
             $table->comment('Tabella pivot per associare uno o più ambiti (tag) a ogni tipologia di documento.');
             $table->unsignedInteger('document_type_id')->comment('ID tipo documento');
-            $table->unsignedInteger('document_scope_id')->index('document_scope_id')->comment('ID ambito normativo');
+            $table->unsignedInteger('document_scope_id')->comment('ID ambito normativo');
             $table->string('name')->nullable()->comment('Descrizione');
 
             $table->primary(['document_type_id', 'document_scope_id']);

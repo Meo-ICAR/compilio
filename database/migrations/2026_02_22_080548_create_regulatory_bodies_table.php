@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('regulatory_bodies', function (Blueprint $table) {
             $table->comment('Anagrafica delle Autorità di Vigilanza e degli Enti preposti ai controlli normativi.');
             $table->increments('id')->comment('ID univoco dell\'ente');
-            $table->string('name')->unique('name')->comment('Nome dell\'ente (es. OAM - Organismo Agenti e Mediatori, Garante per la Protezione dei Dati Personali)');
+            $table->string('name')->unique()->comment('Nome dell\'ente (es. OAM - Organismo Agenti e Mediatori, Garante per la Protezione dei Dati Personali)');
             $table->string('acronym', 20)->nullable()->comment('Sigla (es. OAM, GPDP, IVASS)');
             $table->string('official_website')->nullable()->comment('Sito web istituzionale');
             $table->string('pec_address')->nullable()->comment('Indirizzo PEC per comunicazioni legali');
