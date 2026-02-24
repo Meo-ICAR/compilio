@@ -10,8 +10,20 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        // La tabella documents esiste già
-        // Questa migration è stata resa obsoleta da altre modifiche
+        Schema::create('documents', function (Blueprint $table) {
+            $table->id();
+            $table->char('company_id', 36);
+            // Questo crea automaticamente 'documentable_id' e 'documentable_type'
+            $table->morphs('documentable');
+            $table->unsignedInteger('document_type_id')->index()->comment('ID del tipo di documento associato')->nullable();
+            $table->string('name')->nullable();
+            $table->string('status')->default('uploaded');
+            $table->date('expires_at')->nullable();
+            $table->timestamps();
+
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->foreign('document_type_id')->references('id')->on('document_types')->onDelete('cascade');
+        });
     }
 
     /**
@@ -19,6 +31,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        // Non faccio nulla per non rompere le funzionalità esistenti
+        Schema::dropIfExists('documents');
     }
 };
