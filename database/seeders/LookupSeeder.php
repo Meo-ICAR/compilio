@@ -328,14 +328,10 @@ class LookupSeeder extends Seeder
         foreach ($ruoliPrivacy as $nomeRuolo => $datiPrivacy) {
             // updateOrCreate cerca per il primo array (chiave di ricerca)
             // e aggiorna/crea con il secondo array (i dati da inserire)
-            EmploymentType::updateOrCreate(
+            \App\Models\EmploymentType::updateOrCreate(
                 ['name' => $nomeRuolo],
                 $datiPrivacy
             );
-        }
-
-        foreach ($staffRoles as $type) {
-            \App\Models\EmploymentType::firstOrCreate(['name' => $type]);
         }
 
         // Enasarco Limits
