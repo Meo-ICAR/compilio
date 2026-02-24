@@ -25,6 +25,17 @@ return new class extends Migration {
             $table->boolean('is_sanctioned')->default(false)->comment('Presente in liste antiterrorismo/blacklists');
 
             $table->boolean('is_remote_interaction')->default(false)->comment('Operatività a distanza = Rischio più alto');
+            // Consensi Obbligatori
+            $table->timestamp('general_consent_at')->nullable()->comment('Consenso generale al trattamento base');
+            $table->timestamp('privacy_policy_read_at')->nullable()->comment('Data presa visione informativa Art.13');
+            $table->timestamp('consent_special_categories_at')->nullable()->comment('Consenso dati sanitari/giudiziari per polizze/CQS');
+            $table->timestamp('consent_sic_at')->nullable()->comment('Consenso interrogazione CRIF/CTC/Experian');
+
+            // Consensi Facoltativi
+            $table->timestamp('consent_marketing_at')->nullable()->comment('Consenso comunicazioni commerciali e newsletter');
+
+            // (Opzionale ma consigliato per il futuro) Consenso per la profilazione
+            $table->timestamp('consent_profiling_at')->nullable()->comment('Consenso profilazione abitudini di consumo/spesa');
 
             // Stati del Workflow (Spatie Model States o Enum)
             $table->string('status')->default('raccolta_dati')->comment('raccolta_dati, valutazione_aml, approvata, sos_inviata, chiusa');

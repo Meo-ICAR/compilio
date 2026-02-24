@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Filament\Models\Contracts\HasCurrentTenantLabel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
@@ -100,5 +101,10 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
+    }
+
+    public function companyClients(): HasMany
+    {
+        return $this->hasMany(CompanyClient::class);
     }
 }
