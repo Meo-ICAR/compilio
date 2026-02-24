@@ -8,6 +8,7 @@ class PracticeScope extends Model
 {
     protected $fillable = [
         'name',
+        'code',
         'description',
     ];
 }

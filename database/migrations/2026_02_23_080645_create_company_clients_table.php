@@ -15,6 +15,15 @@ return new class extends Migration {
             $table->char('company_id', 36)->comment('ID della company (consulenti esterni)');
             $table->unsignedInteger('client_id')->comment('ID del cliente');
             $table->string('role')->default('privacy')->comment('Ruolo privacy per consulenti esterni');
+            $table->string('privacy_role')->nullable()->comment('Ruolo Privacy (es. Titolare Autonomo, Responsabile Esterno)');
+            $table->text('purpose')->nullable()->comment('Finalità del trattamento');
+            $table->text('data_subjects')->nullable()->comment('Categorie di Interessati');
+            $table->text('data_categories')->nullable()->comment('Categorie di Dati Trattati');
+            $table->string('retention_period')->nullable()->comment('Tempi di Conservazione (Data Retention)');
+            $table->string('extra_eu_transfer')->nullable()->comment('Trasferimento Extra-UE');
+            $table->text('security_measures')->nullable()->comment('Misure di Sicurezza');
+            $table->string('privacy_data')->nullable()->comment('Altri Dati Privacy');
+
             $table->timestamps();
 
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');

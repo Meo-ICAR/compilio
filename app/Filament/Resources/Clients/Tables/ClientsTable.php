@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Excel;
@@ -18,6 +19,12 @@ class ClientsTable
     {
         return $table
             ->columns([
+                ImageColumn::make('photo_url')
+                    ->label('Foto')
+                    ->size(40)
+                    ->circular()
+                    ->defaultImageUrl(url('images/default-avatar.png'))
+                    ->toggleable(),
                 IconColumn::make('is_person')
                     ->boolean(),
                 TextColumn::make('name')

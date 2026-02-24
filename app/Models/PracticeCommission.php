@@ -15,12 +15,14 @@ class PracticeCommission extends Model
         'percentage',
         'status',
         'notes',
+        'storned_at',
         'company_id',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'percentage' => 'decimal:2',
+        'storned_at' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

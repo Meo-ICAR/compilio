@@ -11,8 +11,11 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('activity_log', function (Blueprint $table) {
-            // Usa il tipo di dato corretto per il tuo ID (bigInteger o uuid)
-            $table->foreignUuid('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
+            // Aggiungo prima la colonna company_id
+            $table->char('company_id', 36)->nullable()->after('batch_uuid')->comment('ID company per multi-tenant');
+
+            // Poi aggiungo la foreign key
+            $table->foreign(['company_id'], 'fk_activity_log_company')->references(['id'])->on('companies')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
@@ -22,7 +25,8 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('activity_log', function (Blueprint $table) {
-            //
+            $table->dropForeign('fk_activity_log_company');
+            $table->dropColumn('company_id');
         });
     }
 };

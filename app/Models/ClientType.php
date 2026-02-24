@@ -11,5 +11,13 @@ class ClientType extends Model
         'description',
         'is_person',
         'is_company',
+        'privacy_data',
+        'privacy_role',
+        'purpose',
+        'data_subjects',
+        'data_categories',
+        'retention_period',
+        'extra_eu_transfer',
+        'security_measures',
     ];
 }

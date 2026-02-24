@@ -33,9 +33,18 @@ class EmployeeForm
                     ->label('Sede')
                     ->relationship('companyBranch', 'name')
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->required(),
+                Select::make('coordinated_by_id')
+                    ->label('Coordinato da')
+                    ->relationship('coordinatedBy', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Seleziona un coordinatore della stessa sede'),
                 TextInput::make('department')
-                    ->label('Dipartimento'),
+                    ->label('Dipartimento')
+                    ->required(),
                 Select::make('employment_type_id')
                     ->label('Tipo di Impiego')
                     ->relationship('employmentType', 'name')

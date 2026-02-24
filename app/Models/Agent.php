@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,6 +13,8 @@ class Agent extends Model
 
     protected $fillable = [
         'company_id',
+        'coordinated_by_id',
+        'coordinated_by_agent_id',
         'name',
         'abi',
         'mandate_number',
@@ -26,6 +29,21 @@ class Agent extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
+    }
+
+    public function coordinatedBy(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'coordinated_by_id');
+    }
+
+    public function coordinatedByAgent(): BelongsTo
+    {
+        return $this->belongsTo(Agent::class, 'coordinated_by_agent_id');
+    }
+
+    public function coordinatedAgents()
+    {
+        return $this->hasMany(Agent::class, 'coordinated_by_agent_id');
     }
 
     public function audits(): MorphMany

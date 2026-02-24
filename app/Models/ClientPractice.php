@@ -12,6 +12,7 @@ class ClientPractice extends Model
         'practice_id',
         'client_id',
         'role',
+        'is_richiedente',
         'name',
         'notes',
         'purpose_of_relationship',
@@ -23,6 +24,7 @@ class ClientPractice extends Model
 
     protected $casts = [
         'oam_delivered' => 'boolean',
+        'is_richiedente' => 'boolean',
     ];
 
     public function practice()
@@ -33,5 +35,15 @@ class ClientPractice extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function scopeRichiedente($query)
+    {
+        return $query->where('is_richiedente', true);
+    }
+
+    public function scopeNonRichiedente($query)
+    {
+        return $query->where('is_richiedente', false);
     }
 }

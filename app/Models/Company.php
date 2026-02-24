@@ -6,10 +6,12 @@ use Filament\Models\Contracts\HasCurrentTenantLabel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Company extends Model implements HasCurrentTenantLabel
+class Company extends Model implements HasCurrentTenantLabel, HasMedia
 {
-    use HasUuids;
+    use HasUuids, InteractsWithMedia;
 
     protected $guarded = [];
 
@@ -21,11 +23,45 @@ class Company extends Model implements HasCurrentTenantLabel
         'oam_at',
         'oam_name',
         'company_type_id',
+        'page_header',
+        'page_footer',
     ];
 
     public function getCurrentTenantLabel(): string
     {
         return 'Company';
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('logo')
+            ->acceptsMimeTypes([
+                'image/jpeg',
+                'image/png',
+                'image/jpg',
+                'image/svg+xml',
+                'image/webp',
+            ])
+            ->useDisk('public')
+            ->singleFile()
+            ->registerMediaConversions(function ($media) {
+                $this
+                    ->addMediaConversion('thumb')
+                    ->width(200)
+                    ->height(200)
+                    ->sharpen(10);
+            });
+    }
+
+    public function getLogoUrlAttribute(): string
+    {
+        return $this->getFirstMediaUrl('logo') ?? asset('images/default-logo.png');
+    }
+
+    public function getLogoThumbUrlAttribute(): string
+    {
+        return $this->getFirstMediaUrl('logo', 'thumb') ?? asset('images/default-logo.png');
     }
 
     public function branches()

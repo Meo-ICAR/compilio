@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Agents\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -14,25 +15,54 @@ class AgentForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nome Agente')
                     ->required(),
-                TextInput::make('description'),
-                TextInput::make('oam'),
-                DatePicker::make('oam_at'),
-                TextInput::make('oam_name'),
-                DatePicker::make('stipulated_at'),
-                DatePicker::make('dismissed_at'),
-                TextInput::make('type'),
+                Select::make('coordinated_by_id')
+                    ->label('Coordinato da (Dipendente)')
+                    ->relationship('coordinatedBy', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Seleziona un dipendente coordinatore'),
+                Select::make('coordinated_by_agent_id')
+                    ->label('Coordinato da (Agente)')
+                    ->relationship('coordinatedByAgent', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Seleziona un agente coordinatore'),
+                TextInput::make('description')
+                    ->label('Descrizione'),
+                TextInput::make('oam')
+                    ->label('Numero OAM'),
+                DatePicker::make('oam_at')
+                    ->label('Data Iscrizione OAM'),
+                TextInput::make('oam_name')
+                    ->label('Nome OAM'),
+                DatePicker::make('stipulated_at')
+                    ->label('Data Stipula'),
+                DatePicker::make('dismissed_at')
+                    ->label('Data Cessazione'),
+                TextInput::make('type')
+                    ->label('Tipo'),
                 TextInput::make('contribute')
+                    ->label('Contributo')
                     ->numeric(),
                 TextInput::make('contributeFrequency')
+                    ->label('Frequenza Contributo')
                     ->numeric()
                     ->default(1),
-                DatePicker::make('contributeFrom'),
+                DatePicker::make('contributeFrom')
+                    ->label('Valido dal'),
                 TextInput::make('remburse')
+                    ->label('Rimborso')
                     ->numeric(),
-                TextInput::make('vat_number'),
-                TextInput::make('vat_name'),
+                TextInput::make('vat_number')
+                    ->label('Partita IVA'),
+                TextInput::make('vat_name')
+                    ->label('Ragione Sociale'),
                 Toggle::make('is_active')
+                    ->label('Attivo')
                     ->required(),
             ]);
     }

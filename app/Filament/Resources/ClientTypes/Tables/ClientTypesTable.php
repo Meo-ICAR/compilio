@@ -16,13 +16,24 @@ class ClientTypesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->label('Nome Tipo Cliente'),
                 IconColumn::make('is_person')
                     ->label('Persona Fisica')
                     ->boolean(),
                 IconColumn::make('is_company')
                     ->label('Società')
                     ->boolean(),
+                TextColumn::make('privacy_role')
+                    ->label('Ruolo Privacy')
+                    ->searchable()
+                    ->placeholder('Non configurato')
+                    ->toggleable(),
+                TextColumn::make('retention_period')
+                    ->label('Conservazione')
+                    ->searchable()
+                    ->placeholder('Non specificato')
+                    ->toggleable(),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
