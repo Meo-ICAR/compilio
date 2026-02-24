@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\ChecklistDocument;
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
@@ -73,5 +74,37 @@ class Practice extends Model
             ->pluck('clients.name');
 
         return $clients->join(', ');
+    }
+
+    /**
+     * Calcola lo stato della checklist
+     */
+    public function getChecklist(): Collection
+    {
+        // 1. Recupera i requisiti per questo scope e questa banca (o requisiti generali)
+        $requirements = ChecklistDocuments::where('practice_scope_id', $this->practice_scope_id)
+            ->where(function ($query) {
+                $query
+                    ->where('principal_id', $this->principal_id)
+                    ->orWhereNull('principal_id');
+            })
+            ->with('documentType')
+            ->get();
+
+        // 2. Recupera i tipi di documenti già caricati
+        $uploadedDocumentTypeIds = $this
+            ->getMedia('documents')
+            ->map(fn($media) => (int) $media->getCustomProperty('document_type_id'))
+            ->unique();
+
+        // 3. Costruisce la lista
+        return $requirements->map(function ($req) use ($uploadedDocumentTypeIds) {
+            return (object) [
+                'name' => $req->documentType->name,
+                'is_required' => $req->is_required,
+                'description' => $req->description,
+                'is_uploaded' => $uploadedDocumentTypeIds->contains($req->document_type_id),
+            ];
+        });
     }
 }
