@@ -8,8 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('venasarcotot', function (Blueprint $table) {
-            $table->char('company_id', 36)->nullable()->after('id')->comment('ID della company (tenant)');
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->foreignId('company_id')->nullable()->after('id')->comment('ID della company (tenant)');
             $table->index('company_id');
         });
     }

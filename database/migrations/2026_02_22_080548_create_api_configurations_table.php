@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('api_configurations', function (Blueprint $table) {
             $table->comment("Configurazioni tecniche per l'interfacciamento API con software terzi.");
             $table->increments('id')->comment('ID univoco configurazione');
-            $table->char('company_id', 36)->index('company_id')->comment('Tenant proprietario della connessione');
+            $table->foreignId('company_id')->constrained();
             $table->unsignedInteger('software_application_id')->index('software_application_id')->comment('Software con cui interfacciarsi');
             $table->string('name')->nullable()->comment('Nome mnemonico della connessione');
             $table->string('base_url')->nullable()->comment("URL base dell'API (es. https://api.crmesterno.it/v1)");

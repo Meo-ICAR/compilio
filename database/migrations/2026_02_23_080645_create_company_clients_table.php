@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('company_clients', function (Blueprint $table) {
             $table->id();
-            $table->char('company_id', 36)->comment('ID della company (consulenti esterni)');
+            $table->foreignId('company_id')->constrained()->comment('ID della company (consulenti esterni)');
             $table->unsignedInteger('client_id')->comment('ID del cliente');
             $table->string('role')->default('privacy')->comment('Ruolo privacy per consulenti esterni');
             $table->string('privacy_role')->nullable()->comment('Ruolo Privacy (es. Titolare Autonomo, Responsabile Esterno)');

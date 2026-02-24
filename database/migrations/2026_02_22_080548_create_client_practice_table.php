@@ -30,7 +30,7 @@ return new class extends Migration {
             // 3. Rischio specifico per il ruolo (Il garante potrebbe avere rischio basso, il richiedente alto)
             $table->enum('role_risk_level', ['basso', 'medio', 'alto'])->nullable();
 
-            $table->char('company_id', 36)->nullable()->index('company_id')->comment('Tenant di riferimento del legame');
+            $table->foreignId('company_id')->constrained();
 
             $table->timestamps();
 

@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('training_sessions', function (Blueprint $table) {
             $table->comment('Sessioni reali di formazione erogate o pianificate dalle agenzie.');
             $table->increments('id')->comment('ID univoco sessione');
-            $table->char('company_id', 36)->index('company_id')->comment('Tenant che organizza o acquista la formazione');
+            $table->foreignId('company_id')->constrained()->index()->comment('Tenant che organizza o acquista la formazione');
             $table->unsignedInteger('training_template_id')->index('training_template_id')->comment('Riferimento al template del corso')->nullable();
             $table->string('name')->comment('Nome specifico (es. Sessione Autunnale OAM Roma)')->nullable()->default('');
             $table->decimal('total_hours', 5)->comment('Numero ore effettive erogate in questa sessione')->nullable()->default(1);

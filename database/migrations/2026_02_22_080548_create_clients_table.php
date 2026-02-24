@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('clients', function (Blueprint $table) {
             $table->comment('Clienti (Richiedenti credito) associati in modo esclusivo a una specifica agenzia (Tenant).');
             $table->increments('id')->comment('ID intero autoincrementante');
-            $table->char('company_id', 36)->index('company_id')->comment("Vincolo multi-tenant: l'agenzia proprietaria del dato");
+            $table->foreignId('company_id')->constrained();
             $table->boolean('is_person')->default(true)->comment('Persona fisica (true) o giuridica (false)');
             $table->string('name')->comment('Cognome (se persona fisica) o Ragione Sociale (se giuridica)');
             $table->string('first_name')->nullable()->comment('Nome persona fisica');

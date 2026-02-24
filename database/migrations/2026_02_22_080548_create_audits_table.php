@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('audits', function (Blueprint $table) {
             $table->comment('Sessioni di Audit richieste da OAM, Mandanti o effettuate internamente.');
             $table->increments('id')->comment('ID univoco audit');
-            $table->char('company_id', 36)->index('company_id')->comment('Tenant oggetto del controllo');
+            $table->foreignId('company_id')->constrained();
 
             $table->enum('requester_type', ['OAM', 'PRINCIPAL', 'INTERNAL', 'EXTERNAL'])->comment("Chi richiede l'audit: Ente Regolatore, Mandante o Auto-controllo interno");
 

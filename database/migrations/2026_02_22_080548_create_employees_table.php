@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('employees', function (Blueprint $table) {
             $table->comment('Anagrafica dipendenti interni delle società di mediazione.');
             $table->increments('id')->comment('ID univoco dipendente');
-            $table->char('company_id', 36)->index('company_id')->comment('Agenzia di appartenenza');
+            $table->foreignId('company_id')->constrained()->index()->comment('Agenzia di appartenenza');
             $table->unsignedInteger('user_id')->nullable()->unique('user_id')->comment("Legame con l'utente di sistema");
             $table->string('name')->nullable()->comment('Nome completo dipendente');
             $table->string('role_title', 100)->nullable()->comment('Qualifica aziendale (es. Responsabile Backoffice)');
