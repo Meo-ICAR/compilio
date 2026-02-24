@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -24,15 +23,24 @@ return new class extends Migration
             $table->string('oam', 30)->nullable()->comment('Codice di iscrizione OAM');
             $table->string('ivass', 30)->nullable()->comment('Codice di iscrizione IVASS');
             $table->boolean('is_active')->default(true)->comment('Indica se la banca è attualmente convenzionata');
-            $table->foreignId('company_id')->constrained();
-            $table->timestamp('created_at')->nullable()->useCurrent();
-            $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
+
             $table->string('mandate_number', 100)->comment('Numero di protocollo o identificativo del contratto di mandato');
             $table->date('start_date')->comment('Data di decorrenza del mandato');
             $table->date('end_date')->nullable()->comment('Data di scadenza (NULL se a tempo indeterminato)');
             $table->boolean('is_exclusive')->nullable()->default(false)->comment("Indica se il mandato prevede l'esclusiva per quella categoria");
             $table->enum('status', ['ATTIVO', 'SCADUTO', 'RECEDUTO', 'SOPESO'])->nullable()->default('ATTIVO')->comment('Stato operativo del mandato');
             $table->text('notes')->nullable()->comment('Note su provvigioni particolari o patti specifici');
+            $table->timestamp('created_at')->nullable()->useCurrent();
+            $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });
     }
 

@@ -12,7 +12,16 @@ return new class extends Migration {
     {
         Schema::create('client_privacies', function (Blueprint $table) {
             $table->increments('id');
-            $table->foreignId('company_id')->constrained()->index()->comment('Tentant ID');
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
+
             $table->unsignedInteger('client_id')->index()->comment('Riferimento al cliente');
             $table->string('request_type')->comment('Accesso, Rettifica, Cancellazione, Portabilità');
             $table->string('status')->comment('Ricevuta, In lavorazione, Evasa');

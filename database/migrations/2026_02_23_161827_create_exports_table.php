@@ -19,8 +19,13 @@ return new class extends Migration {
             $table->unsignedInteger('processed_rows')->default(0);
             $table->unsignedInteger('total_rows');
             $table->unsignedInteger('successful_rows')->default(0);
-            $table->unsignedInteger('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // Chi ha causato l'anomalia? (Può essere null se è un attacco esterno)
+            $table
+                ->foreignId('user_id')
+                ->nullable()
+                ->comment("ID dell'utente collegato")
+                ->constrained('users')  // Indica esplicitamente la tabella users
+                ->onDelete('set null');
             $table->timestamps();
         });
     }

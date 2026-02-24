@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,7 +13,15 @@ return new class extends Migration
         Schema::create('company_branches', function (Blueprint $table) {
             $table->comment('Anagrafica delle sedi operative e legali delle società di mediazione con relativi referenti.');
             $table->increments('id')->comment('ID univoco filiale');
-            $table->foreignId('company_id')->constrained();
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
             $table->string('name')->comment('Nome della sede (es. Sede Centrale, Filiale Milano Nord)');
             $table->boolean('is_main_office')->default(false)->comment("Indica se questa è la sede legale/principale dell'agenzia");
             $table->string('manager_first_name', 100)->nullable()->comment('Nome del referente/responsabile della sede');

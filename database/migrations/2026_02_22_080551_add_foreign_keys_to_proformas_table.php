@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,7 +12,6 @@ return new class extends Migration
     {
         Schema::table('proformas', function (Blueprint $table) {
             $table->foreign(['company_id'], 'proformas_ibfk_1')->references(['id'])->on('companies')->onUpdate('no action')->onDelete('cascade');
-            $table->foreign(['agent_id'], 'proformas_ibfk_2')->references(['id'])->on('users')->onUpdate('no action')->onDelete('cascade');
         });
     }
 

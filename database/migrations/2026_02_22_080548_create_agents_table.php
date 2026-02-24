@@ -29,8 +29,22 @@ return new class extends Migration {
             $table->string('vat_name')->nullable()->comment('Ragione Sociale Fiscale');
             $table->boolean('is_active')->default(true)->comment('Indica se la banca è attualmente convenzionata');
 
-            $table->foreignId('company_id')->constrained();
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
             //             $table->char('company_id', 36)->comment('Tenant di appartenenza');
+            $table
+                ->foreignId('user_id')
+                ->nullable()
+                ->comment("ID dell'utente collegato")
+                ->constrained('users')  // Indica esplicitamente la tabella users
+                ->onDelete('set null');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });

@@ -10,6 +10,15 @@ return new class extends Migration {
         Schema::create('coges', function (Blueprint $table) {
             $table->comment('Piano dei conti e configurazioni per la contabilità generale');
             $table->id();
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
             $table->string('fonte')->comment('Fonte del movimento contabile');
             $table->string('entrata_uscita')->comment('Entrata o Uscita');
             $table->string('conto_avere')->comment('Conto Avere');

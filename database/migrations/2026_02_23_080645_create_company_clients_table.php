@@ -12,7 +12,15 @@ return new class extends Migration {
     {
         Schema::create('company_clients', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained()->comment('ID della company (consulenti esterni)');
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
             $table->unsignedInteger('client_id')->comment('ID del cliente');
             $table->string('role')->default('privacy')->comment('Ruolo privacy per consulenti esterni');
             $table->string('privacy_role')->nullable()->comment('Ruolo Privacy (es. Titolare Autonomo, Responsabile Esterno)');
@@ -26,7 +34,6 @@ return new class extends Migration {
 
             $table->timestamps();
 
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->unique(['company_id', 'client_id']);
         });

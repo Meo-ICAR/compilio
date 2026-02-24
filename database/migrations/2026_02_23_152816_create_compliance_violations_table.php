@@ -16,8 +16,12 @@ return new class extends Migration {
             $table->unique(['company_id', 'violation_type']);
 
             // Chi ha causato l'anomalia? (Può essere null se è un attacco esterno)
-            $table->unsignedInteger('user_id')->nullable()->comment('Utente che ha causato la violazione');
-            $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
+            $table
+                ->foreignId('user_id')
+                ->nullable()
+                ->comment("ID dell'utente collegato")
+                ->constrained('users')  // Indica esplicitamente la tabella users
+                ->onDelete('set null');
 
             // A quale entità è legata? (Polimorfica: può essere un Dossier, un Client, ecc.)
             $table->nullableMorphs('violatable');
@@ -44,8 +48,12 @@ return new class extends Migration {
 
             // Gestione e Risoluzione (L'Admin deve chiudere l'incidente)
             $table->timestamp('resolved_at')->nullable();
-            $table->unsignedInteger('resolved_by')->nullable()->comment('Utente che ha risolto la violazione');
-            $table->foreign('resolved_by')->references('id')->on('users')->nullOnDelete();
+            $table
+                ->foreignId('resolved_by')
+                ->nullable()
+                ->comment("ID dell'utente collegato")
+                ->constrained('users')  // Indica esplicitamente la tabella users
+                ->onDelete('set null');
             $table->text('resolution_notes')->nullable()->comment('Come è stata sanata la violazione?');
 
             $table->timestamps();

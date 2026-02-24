@@ -13,7 +13,15 @@ return new class extends Migration {
         Schema::create('audits', function (Blueprint $table) {
             $table->comment('Sessioni di Audit richieste da OAM, Mandanti o effettuate internamente.');
             $table->increments('id')->comment('ID univoco audit');
-            $table->foreignId('company_id')->constrained();
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
 
             $table->enum('requester_type', ['OAM', 'PRINCIPAL', 'INTERNAL', 'EXTERNAL'])->comment("Chi richiede l'audit: Ente Regolatore, Mandante o Auto-controllo interno");
 

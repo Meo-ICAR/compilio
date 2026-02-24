@@ -13,7 +13,15 @@ return new class extends Migration {
         Schema::create('mandates', function (Blueprint $table) {
             $table->comment("Contratti di mandato che legano l'agenzia agli Istituti Bancari.");
             $table->increments('id')->comment('ID univoco del mandato');
-            $table->foreignId('company_id')->constrained();
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
             $table->unsignedInteger('principal_id')->comment('Banca o Istituto mandante');
             $table->string('mandate_number', 100)->comment('Numero di protocollo o identificativo del contratto di mandato');
             $table->string('name')->nullable()->comment('Descrizione');

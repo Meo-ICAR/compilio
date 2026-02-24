@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,9 +12,19 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->comment('Utenti del sistema: SuperAdmin, Titolari, Agenti e Backoffice.');
-            $table->increments('id')->comment('ID intero autoincrementante');
-            $table->foreignId('company_id')->nullable()->constrained();
-            $table->string('name')->comment('Nome e Cognome dell\'utente');
+            $table->id();  // Crea un BIGINT UNSIGNED automaticamente
+            // Modo corretto e moderno (Laravel 10/11/12)
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
+
+            $table->string('name')->comment("Nome e Cognome dell'utente");
             $table->string('email')->unique()->comment('Email usata per il login');
             $table->timestamp('email_verified_at')->nullable()->comment('Data verifica email');
             $table->string('password')->comment('Password hashata tramite bcrypt/argon2');

@@ -12,7 +12,15 @@ return new class extends Migration {
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->char('id', 36)->primary()->comment('UUID del documento');
-            $table->foreignId('company_id')->constrained();
+            // Questa DEVE essere char(36) per combaciare con companies.id
+            $table->char('company_id', 36)->nullable();
+
+            // Ora il vincolo funzionerà
+            $table
+                ->foreign('company_id')
+                ->references('id')
+                ->on('companies')
+                ->onDelete('set null');  // o cascade
 
             // Campi polymorphic per documentable
             $table->string('documentable_type', 255)->comment('Tipo di modello associato (es. Client, Employee, Practice)');
@@ -29,16 +37,25 @@ return new class extends Migration {
             // Campi audit aggiunti
             $table->text('rejection_note')->nullable()->comment('Motivazione in caso di documento rifiutato');
             $table->timestamp('verified_at')->nullable()->comment('Data e ora della verifica');
-            $table->char('verified_by', 36)->nullable()->comment("ID dell'utente/admin che ha effettuato la verifica");
-            $table->char('uploaded_by', 36)->nullable()->comment("ID dell'utente/admin che ha caricato il documento");
+            $table
+                ->foreignId('verified_by')
+                ->nullable()
+                ->comment("ID dell'utente/admin che ha verificato il documento")
+                ->constrained('users')  // Indica esplicitamente la tabella users
+                ->onDelete('set null');
 
+            $table
+                ->foreignId('uploaded_by')
+                ->nullable()
+                ->comment("ID dell'utente/admin che ha caricato il documento")
+                ->constrained('users')  // Indica esplicitamente la tabella users
+                ->onDelete('set null');
             $table->timestamps();
 
             // Indici
             $table->index(['documentable_type', 'documentable_id']);
 
             $table->foreign('document_type_id')->references('id')->on('document_types')->onDelete('cascade');
-            $table->foreign('verified_by')->references('id')->on('users')->nullOnDelete();
         });
     }
 
