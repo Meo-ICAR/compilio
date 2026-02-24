@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Filament\Models\Contracts\HasCurrentTenantLabel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;  // <--- Deve esserci
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Company extends Model implements HasCurrentTenantLabel, HasMedia
 {
-    use HasUuids, InteractsWithMedia;
+    use HasUuids, InteractsWithMedia, HasFactory;
 
     protected $guarded = [];
 
