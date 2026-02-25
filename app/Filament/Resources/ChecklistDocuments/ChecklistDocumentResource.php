@@ -8,17 +8,21 @@ use App\Filament\Resources\ChecklistDocuments\Pages\ListChecklistDocuments;
 use App\Filament\Resources\ChecklistDocuments\Schemas\ChecklistDocumentForm;
 use App\Filament\Resources\ChecklistDocuments\Tables\ChecklistDocumentsTable;
 use App\Models\ChecklistDocument;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class ChecklistDocumentResource extends Resource
 {
     protected static ?string $model = ChecklistDocument::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static bool $shouldRegisterNavigation = false;
+
+    protected static bool $isScopedToTenant = false;
 
     protected static ?string $recordTitleAttribute = 'name';
 

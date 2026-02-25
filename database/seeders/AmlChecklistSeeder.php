@@ -17,13 +17,14 @@ class AmlChecklistSeeder extends Seeder
 
         // 1. Creazione della Checklist (Template) - solo se non esiste
         $checklist = DB::table('checklists')
-            ->where('name', 'Adeguata Verifica Antiriciclaggio (KYC / AML)')
+            ->where('code', 'AML')
             ->first();
 
         if (!$checklist) {
             $checklistId = DB::table('checklists')->insertGetId([
                 'company_id' => null,
                 'name' => 'Adeguata Verifica Antiriciclaggio (KYC / AML)',
+                'code' => 'AML',
                 'type' => 'loan_management',  // Legata all'apertura di una pratica o anagrafica
                 'description' => "Questionario per l'assolvimento degli obblighi di adeguata verifica della clientela ai sensi del D.Lgs. 231/2007.",
                 'principal_id' => null,

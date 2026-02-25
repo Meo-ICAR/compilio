@@ -17,13 +17,14 @@ class AuditChecklistSeeder extends Seeder
 
         // 1. Creazione della Checklist (Template) - solo se non esiste
         $checklist = DB::table('checklists')
-            ->where('name', 'Verifica Ispettiva Ordinaria - Rete Agenti')
+            ->where('code', 'AUDIT_RETE_AGENTI')
             ->first();
 
         if (!$checklist) {
             $checklistId = DB::table('checklists')->insertGetId([
                 'company_id' => null,  // Lasciato null per essere disponibile a tutti i tenant/globale
                 'name' => 'Verifica Ispettiva Ordinaria - Rete Agenti',
+                'code' => 'AUDIT_RETE_AGENTI',
                 'type' => 'audit',
                 'description' => "Checklist standard per l'audit periodico (OAM/Antiriciclaggio) dei collaboratori e delle agenzie della rete commerciale.",
                 'principal_id' => null,

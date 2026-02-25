@@ -30,7 +30,7 @@ class SoftwareApplicationsTable
                     ->sortable(),
                 TextColumn::make('website_url')
                     ->label('Sito Web')
-                    ->url()
+                    //  ->url()
                     ->limit(30)
                     ->toggleable()
                     ->openUrlInNewTab(),
@@ -40,17 +40,17 @@ class SoftwareApplicationsTable
                     ->sortable(),
                 TextColumn::make('api_url')
                     ->label('URL API')
-                    ->url()
+                    //  ->url()
                     ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sandbox_url')
                     ->label('Sandbox')
-                    ->url()
+                    //    ->url()
                     ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('api_key_url')
                     ->label('API Key')
-                    ->url()
+                    //   ->url()
                     ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')

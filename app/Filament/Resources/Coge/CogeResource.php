@@ -29,7 +29,7 @@ class CogeResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Primenote';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Configurazioni';
+    protected static string|UnitEnum|null $navigationGroup = 'Configurazione';
 
     protected static ?int $navigationSort = 8;
 

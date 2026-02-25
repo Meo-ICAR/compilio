@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             AuditChecklistSeeder::class,
             CessioneQuintoChecklistSeeder::class,
             AmlChecklistSeeder::class,
+            MutuoImmobiliareChecklistSeeder::class,
         ]);
     }
 }

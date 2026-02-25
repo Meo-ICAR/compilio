@@ -1,73 +1,13 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('compliance_violations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignUuid('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
-            $table->unique(['company_id', 'violation_type']);
-
-            // Chi ha causato l'anomalia? (Può essere null se è un attacco esterno)
-            $table
-                ->foreignId('user_id')
-                ->nullable()
-                ->comment("ID dell'utente collegato")
-                ->constrained('users')  // Indica esplicitamente la tabella users
-                ->onDelete('set null');
-
-            // A quale entità è legata? (Polimorfica: può essere un Dossier, un Client, ecc.)
-            $table->nullableMorphs('violatable');
-
-            // Dettagli della violazione
-            $table->string('violation_type')->comment('Es: accesso_non_autorizzato, kyc_scaduto, forzatura_stato, data_breach');
-            $table->enum('severity', ['basso', 'medio', 'alto', 'critico'])->default('medio');
-            $table->text('description')->comment("Descrizione dettagliata dell'evento");
-
-            // Campi specifici per GDPR / Data Breach
-            $table->integer('affected_subjects_count')->nullable()->comment('Numero approssimativo di clienti/utenti coinvolti');
-            $table->text('likely_consequences')->nullable()->comment("Possibili conseguenze per gli interessati (es. furto d'identità, frode finanziaria)");
-            $table->dateTime('discovery_date')->nullable()->comment("Data e ora in cui l'azienda ha scoperto la violazione (inizio delle 72h)");
-
-            // Dati tecnici e legali (Fondamentali per il Garante Privacy)
-            $table->ipAddress('ip_address')->nullable();
-            $table->text('user_agent')->nullable()->comment('Browser e dispositivo utilizzato');
-
-            // Checkbox e date legali
-            $table->boolean('is_dpa_notified')->default(false)->comment('Il Garante Privacy è stato notificato?');
-            $table->dateTime('dpa_notified_at')->nullable();
-            $table->text('dpa_not_notified_reason')->nullable()->comment('Se non notificato, motivazione legale (es. rischio improbabile per i diritti)');
-            $table->boolean('are_subjects_notified')->default(false)->comment('I clienti coinvolti sono stati avvisati?');
-
-            // Gestione e Risoluzione (L'Admin deve chiudere l'incidente)
-            $table->timestamp('resolved_at')->nullable();
-            $table
-                ->foreignId('resolved_by')
-                ->nullable()
-                ->comment("ID dell'utente collegato")
-                ->constrained('users')  // Indica esplicitamente la tabella users
-                ->onDelete('set null');
-            $table->text('resolution_notes')->nullable()->comment('Come è stata sanata la violazione?');
-
-            $table->timestamps();
-        });
-
-        // Popolamento dati di esempio per compliance violations
-        $this->seedComplianceViolations();
-    }
-
-    /**
-     * Popola la tabella con dati di esempio
-     */
-    private function seedComplianceViolations(): void
     {
         $now = now();
 
@@ -87,7 +27,7 @@ return new class extends Migration {
                 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'is_dpa_notified' => false,
                 'dpa_notified_at' => null,
-                'dpa_not_notified_reason' => 'Rischico valutato come improbabile per i diritti degli interessati',
+                'dpa_not_notified_reason' => 'Rischio valutato come improbabile per i diritti degli interessati',
                 'are_subjects_notified' => false,
                 'resolved_at' => null,
                 'resolved_by' => null,
@@ -174,6 +114,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('compliance_violations');
+        DB::table('compliance_violations')->truncate();
     }
 };

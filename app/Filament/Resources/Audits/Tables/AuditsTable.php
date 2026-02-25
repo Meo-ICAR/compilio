@@ -132,8 +132,9 @@ class AuditsTable
 
                         // 1. Troviamo il template di checklist corretto (es. Cessione del Quinto)
                         $template = Checklist::where('type', 'loan_management')->first();
-                        if (!$template)
+                        if (!$template) {
                             return [];
+                        }
 
                         // 2. Cerchiamo se c'è già una sottomissione in corso per questa pratica
                         $submission = ChecklistSubmission::firstOrCreate([
@@ -160,19 +161,26 @@ class AuditsTable
                     })
                     ->form(function () {
                         $template = Checklist::where('type', 'loan_management')->first();
+                        if (!$template) {
+                            return [];
+                        }
                         return ChecklistService::getFormSchema($template);
                     })
                     ->action(function (array $data, Model $record) {
                         // QUESTO VIENE ESEGUITO QUANDO L'UTENTE CLICCA "SALVA"
 
                         $template = Checklist::where('type', 'loan_management')->first();
+                        if (!$template) {
+                            return;
+                        }
+
                         $submission = ChecklistSubmission::where('submittable_type', get_class($record))
                             ->where('submittable_id', $record->id)
                             ->where('checklist_id', $template->id)
                             ->first();
 
                         // Estraiamo tutti gli item del template
-                        $items = $template->items()->get();
+                        $items = $template->checklistItems()->get();
 
                         foreach ($items as $item) {
                             $code = $item->item_code;

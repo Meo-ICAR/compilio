@@ -16,7 +16,7 @@ class MutuoImmobiliareChecklistSeeder extends Seeder
         $now = Carbon::now();
 
         $checklist = DB::table('checklists')
-            ->where('name', 'Lavorazione Pratica - Mutuo Immobiliare')
+            ->where('code', 'MUT')
             ->first();
 
         if (!$checklist) {
@@ -24,6 +24,7 @@ class MutuoImmobiliareChecklistSeeder extends Seeder
             $checklistId = DB::table('checklists')->insertGetId([
                 'company_id' => null,
                 'name' => 'Lavorazione Pratica - Mutuo Immobiliare',
+                'code' => 'MUT',
                 'type' => 'loan_management',
                 'description' => "Iter di raccolta documentale e verifica per l'istruttoria di un Mutuo Ipotecario (Acquisto, Surroga o Ristrutturazione).",
                 'principal_id' => null,

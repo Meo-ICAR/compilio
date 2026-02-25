@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Checklists\Tables;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -19,11 +20,11 @@ class ChecklistsTable
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->label('Tipo')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -37,26 +38,26 @@ class ChecklistsTable
                         default => $state,
                     })
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_practice')
+                IconColumn::make('is_practice')
                     ->label('Pratica')
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_audit')
+                IconColumn::make('is_audit')
                     ->label('Audit')
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('items_count')
+                TextColumn::make('items_count')
                     ->label('N. Domande')
                     ->counts('items')  // Conta le righe relazionate
                     ->badge(),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->label('Ultima Modifica')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('type')
+                SelectFilter::make('type')
                     ->label('Filtra per Tipo')
                     ->options([
                         'loan_management' => 'Gestione Pratica',
@@ -64,17 +65,17 @@ class ChecklistsTable
                     ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
                 // L'azione Replicate è comodissima per creare variazioni di un template esistente
-                Tables\Actions\ReplicateAction::make()
+                ReplicateAction::make()
                     ->excludeAttributes(['name'])
                     ->beforeReplicaSaved(function (Model $replica): void {
                         $replica->name = $replica->name . ' (Copia)';
                     }),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

@@ -13,7 +13,7 @@ class TrainingRecordsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with(['trainable', 'trainingSession', 'employee', 'agent']))
+            ->modifyQueryUsing(fn($query) => $query->with(['trainable', 'trainingSession']))
             ->columns([
                 TextColumn::make('trainingSession.title')
                     ->label('Sessione Formativa')
@@ -34,17 +34,8 @@ class TrainingRecordsTable
                 TextColumn::make('trainable.name')
                     ->label('Partecipante')
                     ->searchable()
-                    ->sortable(),
-                TextColumn::make('employee.name')
-                    ->label('Dipendente (Legacy)')
-                    ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('agent.name')
-                    ->label('Agente (Legacy)')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->getStateUsing(fn($record) => $record->trainable ? $record->trainable->name : null),
                 TextColumn::make('status')
                     ->label('Stato')
                     ->formatStateUsing(fn($state) => match ($state) {
