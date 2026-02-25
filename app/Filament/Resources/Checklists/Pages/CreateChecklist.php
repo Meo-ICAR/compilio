@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\Checklists\ChecklistResource\Pages;
+namespace App\Filament\Resources\Checklists\Pages;
 
 use App\Filament\Resources\Checklists\ChecklistResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateChecklist extends CreateRecord

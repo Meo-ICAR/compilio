@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources\Checklists\Tables;
 
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
 
 class ChecklistsTable
 {
@@ -16,60 +19,58 @@ class ChecklistsTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                Tables\Columns\TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
                     ->sortable(),
-                BadgeColumn::make('type')
+                Tables\Columns\TextColumn::make('type')
                     ->label('Tipo')
-                    ->colors([
-                        'primary' => 'loan_management',
-                        'warning' => 'audit',
-                    ])
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'loan_management' => 'success',
+                        'audit' => 'warning',
+                        default => 'gray',
+                    })
                     ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'loan_management' => 'Gestione Prestiti',
-                        'audit' => 'Audit/Compliance',
+                        'loan_management' => 'Gestione Pratica',
+                        'audit' => 'Audit',
                         default => $state,
-                    }),
-                TextColumn::make('principal.name')
-                    ->label('Principal')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('Nessuno'),
-                IconColumn::make('is_practice')
-                    ->label('Pratiche')
+                    })
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('is_practice')
+                    ->label('Pratica')
                     ->boolean()
                     ->sortable(),
-                IconColumn::make('is_audit')
+                Tables\Columns\IconColumn::make('is_audit')
                     ->label('Audit')
                     ->boolean()
                     ->sortable(),
-                TextColumn::make('checklist_items_count')
-                    ->label('Elementi')
-                    ->counts('checklistItems')
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->label('Creato')
+                Tables\Columns\TextColumn::make('items_count')
+                    ->label('N. Domande')
+                    ->counts('items')  // Conta le righe relazionate
+                    ->badge(),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Ultima Modifica')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('type')
-                    ->label('Tipo')
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('Filtra per Tipo')
                     ->options([
-                        'loan_management' => 'Gestione Prestiti',
-                        'audit' => 'Audit/Compliance',
+                        'loan_management' => 'Gestione Pratica',
+                        'audit' => 'Audit',
                     ]),
-                TernaryFilter::make('is_practice')
-                    ->label('Riferito a Pratiche'),
-                TernaryFilter::make('is_audit')
-                    ->label('Per Audit'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                // L'azione Replicate è comodissima per creare variazioni di un template esistente
+                Tables\Actions\ReplicateAction::make()
+                    ->excludeAttributes(['name'])
+                    ->beforeReplicaSaved(function (Model $replica): void {
+                        $replica->name = $replica->name . ' (Copia)';
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

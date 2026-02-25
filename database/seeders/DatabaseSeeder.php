@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
             OamScopeSeeder::class,
             FirrSeeder::class,
             FilamentUserSeeder::class,
+            AuditChecklistSeeder::class,
+            CessioneQuintoChecklistSeeder::class,
+            AmlChecklistSeeder::class,
         ]);
     }
 }

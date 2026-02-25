@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\Checklists\ChecklistResource\Pages;
+namespace App\Filament\Resources\Checklists\Pages;
 
 use App\Filament\Resources\Checklists\ChecklistResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\EditRecord;
 
-class ListChecklists extends ListRecords
+class EditChecklist extends EditRecord
 {
     protected static string $resource = ChecklistResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

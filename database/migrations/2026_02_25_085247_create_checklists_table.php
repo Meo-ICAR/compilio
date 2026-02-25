@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->comment('Checklist per workflow con domande e allegati');
             $table->id();
             $table->char('company_id', 36)->nullable()->comment('Agenzia proprietaria (multi-tenant)');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->string('name')->comment('Nome della checklist');
             $table->enum('type', ['loan_management', 'audit'])->comment('Tipo di checklist');
             $table->text('description')->nullable()->comment('Descrizione della checklist');
@@ -27,7 +28,7 @@ return new class extends Migration {
             $table->index('principal_id');
 
             // Foreign keys
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+
             $table->foreign('principal_id')->references('id')->on('principals')->onDelete('cascade');
         });
     }
