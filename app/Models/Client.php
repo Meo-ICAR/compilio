@@ -31,6 +31,13 @@ class Client extends Model implements HasMedia
         'client_type_id',
         'is_sanctioned',
         'privacy_consent',
+        'subfornitori',
+        'is_requiredApprovation',
+        'is_anonymous',
+        'blacklist_at',
+        'blacklisted_by',
+        'salary',
+        'salary_quote',
     ];
 
     public function addresses(): MorphMany
