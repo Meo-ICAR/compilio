@@ -100,6 +100,10 @@ return new class extends Migration {
                 ->comment('ID del modello a cui i file sono stati allegati');
 
             $table->char('company_id', 36)->nullable()->comment('Agenzia proprietaria (multi-tenant)');
+
+            $table->integer('ordine')->default(0)->comment('Ordine di visualizzazione');
+            $table->tinyInteger('n_documents')->default(0)->comment('Numero di documenti richiesti (0=nessuno, 1=esatto, 99=multipli)');
+            $table->index('ordine');
             $table->timestamps();
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
 

@@ -32,6 +32,14 @@ return new class extends Migration {
             $table->string('depends_on_code')->nullable()->comment('Il codice della domanda da cui dipende');
             $table->string('depends_on_value')->nullable()->comment('Il valore che deve avere per attivarsi');
             $table->enum('dependency_type', ['show_if', 'hide_if'])->nullable()->comment('Attiva / Disattiva condizionale');
+            $table
+                ->string('url_step')
+                ->nullable()
+                ->comment('Link esterno per step procedure');
+            $table
+                ->string('url_callback')
+                ->nullable()
+                ->comment('Link esterno per callback');
 
             $table->timestamps();
 

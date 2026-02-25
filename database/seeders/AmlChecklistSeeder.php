@@ -17,7 +17,7 @@ class AmlChecklistSeeder extends Seeder
 
         // 1. Creazione della Checklist (Template) - solo se non esiste
         $checklist = DB::table('checklists')
-            ->where('name', 'Verifica Ispettiva Ordinaria - Rete Agenti')
+            ->where('name', 'Adeguata Verifica Antiriciclaggio (KYC / AML)')
             ->first();
 
         if (!$checklist) {

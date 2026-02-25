@@ -14,6 +14,7 @@ class Checklist extends Model
     protected $fillable = [
         'company_id',
         'name',
+        'code',
         'type',
         'description',
         'principal_id',

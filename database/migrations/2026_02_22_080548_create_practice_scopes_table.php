@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,6 +15,10 @@ return new class extends Migration
             $table->increments('id')->comment('ID intero autoincrementante');
             $table->string('name')->comment('Es. Mutui Ipotecari, Cessioni del Quinto, Prestiti Personali');
             $table->string('oam_code');
+            $table
+                ->boolean('is_oneclient')
+                ->default(true)
+                ->comment('Finanziamento mono cliente');
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data di creazione');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Ultima modifica');
         });

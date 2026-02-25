@@ -26,6 +26,8 @@ class ChecklistItem extends Model
         'depends_on_code',
         'depends_on_value',
         'dependency_type',
+        'url_step',
+        'url_callback',
     ];
 
     protected $casts = [

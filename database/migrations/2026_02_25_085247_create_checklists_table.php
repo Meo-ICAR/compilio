@@ -15,8 +15,9 @@ return new class extends Migration {
             $table->id();
             $table->char('company_id', 36)->nullable()->comment('Agenzia proprietaria (multi-tenant)');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
-            $table->string('name')->comment('Nome della checklist');
-            $table->enum('type', ['loan_management', 'audit'])->comment('Tipo di checklist');
+            $table->string('name')->comment('Nome della checklist')->nullable();
+            $table->string('code')->comment('Codice della checklist')->nullable();
+            $table->enum('type', ['loan_management', 'audit'])->comment('Tipo di checklist')->nullable();
             $table->text('description')->nullable()->comment('Descrizione della checklist');
             $table->unsignedInteger('principal_id')->nullable()->comment('Principal specifico (se applicabile)');
             $table->boolean('is_practice')->default(false)->comment('Se riferisce a pratiche');
