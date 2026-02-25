@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Checklists\ChecklistResource\RelationManagers;
+namespace App\Filament\Resources\Checklists\RelationManagers;
 
 use App\Models\ChecklistItem;
 use Filament\Resources\RelationManagers\RelationManager;
