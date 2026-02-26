@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
@@ -163,5 +164,12 @@ class Client extends Model implements HasMedia
     public function hasPhoto(): bool
     {
         return $this->hasMedia('photos');
+    }
+
+    protected function fullName(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->is_person ? "{$this->name} {$this->first_name}" : $this->name,
+        );
     }
 }

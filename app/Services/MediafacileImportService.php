@@ -157,6 +157,26 @@ class MediafacileImportService
      */
     protected function processRecord(array $praticaData): void
     {
+        $practiceType = SoftwareMapping::firstOrCreate(
+            ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $praticaData['tipo_prodotto']],
+            [
+                'name' => $praticaData['tipo_prodotto'],
+                'internal_id' => 1,  // Default ID, da mappare correttamente in base alla logica di business
+                'description' => 'Mapping automatico da Mediafacile',
+            ]
+        );
+        $praticaData['practice_scope_id'] = $practiceType->internal_id;
+
+        $status = SoftwareMapping::firstOrCreate(
+            ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_STATUS', 'external_value' => $praticaData['stato_pratica']],
+            [
+                'name' => $praticaData['stato_pratica'],
+                'internal_id' => 1,  // Default ID, da mappare correttamente in base alla logica di business
+                'description' => 'Mapping automatico da Mediafacile',
+            ]
+        );
+        $praticaData['status_id'] = $status->internal_id;
+
         $existing = Practice::where('CRM_code', $praticaData['CRM_code'])->first();
 
         if ($existing) {
@@ -164,25 +184,6 @@ class MediafacileImportService
         } else {
             $praticaData['company_id'] = $this->companyId;
             // Software Mapping
-            $practiceType = SoftwareMapping::firstOrCreate(
-                ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $praticaData['tipo_prodotto']],
-                [
-                    'name' => $praticaData['tipo_prodotto'],
-                    'internal_id' => 1,  // Default ID, da mappare correttamente in base alla logica di business
-                    'description' => 'Mapping automatico da Mediafacile',
-                ]
-            );
-            $praticaData['practice_scope_id'] = $practiceType->internal_id;
-
-            $status = SoftwareMapping::firstOrCreate(
-                ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_STATUS', 'external_value' => $praticaData['stato_pratica']],
-                [
-                    'name' => $praticaData['stato_pratica'],
-                    'internal_id' => 1,  // Default ID, da mappare correttamente in base alla logica di business
-                    'description' => 'Mapping automatico da Mediafacile',
-                ]
-            );
-            $praticaData['status_id'] = $status->internal_id;
 
             // Gestione cliente
             $client = Client::firstOrCreate(
@@ -201,6 +202,7 @@ class MediafacileImportService
                 [
                     'name' => $praticaData['denominazione_agente'],
                     'company_id' => $this->companyId,
+                    'vat_number' => $praticaData['partita_iva_agente'],
                 ]
             );
             $praticaData['agent_id'] = $agent->id;
@@ -255,9 +257,7 @@ class MediafacileImportService
             'cognome_cliente' => $apiData['Nome Cliente'] ?? null,
             'codice_fiscale' => $apiData['Codice Fiscale'] ?? null,
             'denominazione_agente' => $apiData['Denominazione Agente'] ?? null,
-            'partita_iva_agente' => (blank($apiData['Partita IVA Agente'] ?? null) || $apiData['Partita IVA Agente'] < '0')
-                ? '---'
-                : $apiData['Partita IVA Agente'],
+            'partita_iva_agente' => $apiData['Partita IVA Agente'],
             'denominazione_banca' => $apiData['Denominazione Banca'] ?? null,
             'tipo_prodotto' => $apiData['Tipo Prodotto'] ?? null,
             'denominazione_prodotto' => $apiData['Descrizione Prodotto'] ?? null,

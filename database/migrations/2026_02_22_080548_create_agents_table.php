@@ -27,6 +27,7 @@ return new class extends Migration {
             $table->decimal('remburse', 10)->nullable()->comment('Importo rimborsi spese concordati');
             $table->string('vat_number', 16)->nullable()->comment('Partita IVA Agente');
             $table->string('vat_name')->nullable()->comment('Ragione Sociale Fiscale');
+            $table->string('enasarco')->nullable()->comment('Enasarco no / monomandatario / plurimandatario / societa');
             $table->boolean('is_active')->default(true)->comment('Indica se la banca è attualmente convenzionata');
 
             // Questa DEVE essere char(36) per combaciare con companies.id

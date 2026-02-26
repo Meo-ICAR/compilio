@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PracticeStatus extends Model
 {
-    protected $table = 'practice_status_lookup';
+    protected $table = 'practice_statuses';
 
     protected $fillable = [
         'name',

@@ -157,6 +157,14 @@ class MediafacileProvvigioniService
      */
     protected function processRecord(array $provvigioneData): void
     {
+        $commissionStatus = SoftwareMapping::firstOrCreate(
+            ['software_application_id' => $this->softwareId, 'mapping_type' => 'COMMISSION_STATUS', 'external_value' => $provvigioneData['status_payment']],
+            [
+                'name' => $provvigioneData['status_payment'],
+                'description' => 'Mapping automatico da Mediafacile',
+            ]
+        );
+
         $existing = PracticeCommission::where('CRM_code', $provvigioneData['CRM_code'])->first();
 
         if ($existing) {
@@ -178,17 +186,7 @@ class MediafacileProvvigioniService
 
                 $provvigioneData['practice_id'] = $practiceId;
 
-                /*
-                 * $commissioneType = SoftwareMapping::firstOrCreate(
-                 *     ['software_application_id' => $this->softwareId, 'mapping_type' => 'COMMISSION_TYPE', 'external_value' => $provvigioneData['tipo_prodotto']],
-                 *     [
-                 *         'name' => $provvigioneData['tipo_prodotto'],
-                 *         'internal_id' => 1,  // Default ID, da mappare correttamente in base alla logica di business
-                 *         'description' => 'Mapping automatico da Mediafacile',
-                 *     ]
-                 * );
-                 * $provvigioneData['practice_scope_id'] = $practiceType->internal_id;
-                 */
+                //   $provvigioneData['practice_scope_id'] = $practiceType->internal_id;
 
                 /*
                  * $status = SoftwareMapping::firstOrCreate(

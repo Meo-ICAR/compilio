@@ -13,7 +13,6 @@ return new class extends Migration {
         Schema::table('practices', function (Blueprint $table) {
             $table->foreign(['company_id'], 'practices_ibfk_1')->references(['id'])->on('companies')->onUpdate('no action')->onDelete('cascade');
 
-            $table->foreign(['principal_id'], 'practices_ibfk_4')->references(['id'])->on('principals')->onUpdate('no action')->onDelete('no action');
             $table->foreign(['practice_scope_id'], 'practices_ibfk_5')->references(['id'])->on('practice_scopes')->onUpdate('no action')->onDelete('no action');
         });
     }

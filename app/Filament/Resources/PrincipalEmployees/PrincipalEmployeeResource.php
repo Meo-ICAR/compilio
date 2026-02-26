@@ -16,6 +16,8 @@ use Filament\Tables\Table;
 class PrincipalEmployeeResource extends Resource
 {
     protected static ?string $model = PrincipalEmployee::class;
+    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

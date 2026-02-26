@@ -2,11 +2,18 @@
 
 namespace App\Filament\Resources\Clients\Schemas;
 
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,90 +23,122 @@ class ClientForm
     {
         return $schema
             ->components([
-                Toggle::make('is_person')
-                    ->required(),
-                TextInput::make('name')
-                    ->required(),
-                TextInput::make('first_name')
-                    ->required(),
-                TextInput::make('tax_code'),
-                TextInput::make('email')
-                    ->label('Email address')
-                    ->email(),
-                TextInput::make('phone')
-                    ->tel(),
-                Toggle::make('is_pep'),
-                Toggle::make('is_sanctioned'),
-                // All'interno del tuo $form->schema([ ... ])
-                Section::make('Consensi Privacy e GDPR (Art. 13 e 14)')
-                    ->description("Gestione delle autorizzazioni legali del cliente. L'attivazione registra automaticamente data e ora del consenso.")
-                    ->icon('heroicon-o-shield-check')
-                    ->collapsible()
-                    ->columns(2)
-                    ->schema([
-                        TextInput::make('privacy_policy_version')
-                            ->label('Versione Informativa')
-                            ->default('v1.0-' . date('Y'))
-                            ->readOnly()
-                            ->helperText('Traccia quale versione del documento è stata firmata.')
-                            ->columnSpanFull(),
-                        Toggle::make('privacy_policy_read_at')
-                            ->label('Presa Visione Informativa')
-                            ->onColor('success')
-                            ->formatStateUsing(fn($state) => $state !== null)
-                            ->dehydrateStateUsing(fn($state, ?Model $record) => $state ? ($record?->privacy_policy_read_at ?? now()) : null),
-                        Toggle::make('general_consent_at')
-                            ->label('Consenso Privacy Generale')
-                            ->helperText("Obbligatorio per l'inserimento anagrafica e gestione base.")
-                            ->onColor('success')
-                            ->formatStateUsing(fn($state) => $state !== null)
-                            ->dehydrateStateUsing(fn($state, ?Model $record) => $state ? ($record?->general_consent_at ?? now()) : null),
-                        Toggle::make('consent_sic_at')
-                            ->label('Consenso Interrogazione SIC (CRIF/CTC)')
-                            ->helperText("Obbligatorio per l'istruttoria del merito creditizio.")
-                            ->onColor('success')
-                            ->formatStateUsing(fn($state) => $state !== null)
-                            ->dehydrateStateUsing(fn($state, ?Model $record) => $state ? ($record?->consent_sic_at ?? now()) : null),
-                        Toggle::make('consent_special_categories_at')
-                            ->label('Consenso Dati Particolari (Sanitari)')
-                            ->helperText('Necessario solo per Polizze CPI e Cessioni del Quinto.')
-                            ->onColor('warning')
-                            ->formatStateUsing(fn($state) => $state !== null)
-                            ->dehydrateStateUsing(fn($state, ?Model $record) => $state ? ($record?->consent_special_categories_at ?? now()) : null),
-                        Toggle::make('consent_marketing_at')
-                            ->label('Consenso Marketing Diretto')
-                            ->helperText('Opzionale. Per invio email, SMS e contatti commerciali.')
-                            ->onColor('info')
-                            ->formatStateUsing(fn($state) => $state !== null)
-                            ->dehydrateStateUsing(fn($state, ?Model $record) => $state ? ($record?->consent_marketing_at ?? now()) : null),
-                        Toggle::make('consent_profiling_at')
-                            ->label('Consenso Profilazione')
-                            ->helperText('Opzionale. Per analisi abitudini di consumo.')
-                            ->onColor('info')
-                            ->formatStateUsing(fn($state) => $state !== null)
-                            ->dehydrateStateUsing(fn($state, ?Model $record) => $state ? ($record?->consent_profiling_at ?? now()) : null),
-                    ]),
-                FileUpload::make('photo')
-                    ->label('Foto Cliente')
-                    ->image()
-                    ->imageEditor()
-                    ->directory('clients/photos')
-                    ->visibility('public')
-                    ->collection('photos')
-                    ->maxSize(5120)  // 5MB
-                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])
-                    ->helperText('Carica una foto del cliente (max 5MB, formati: JPG, PNG, WebP)')
+                Tabs::make('Client Details')
+                    ->tabs([
+                        // --- TAB 1: ANAGRAFICA ---
+                        Tab::make('Anagrafica')
+                            ->icon('heroicon-o-user')
+                            ->schema([
+                                Grid::make(3)->schema([
+                                    Toggle::make('is_person')
+                                        ->label('Persona Fisica')
+                                        ->default(true)
+                                        ->live()  // Ricarica la form al cambio
+                                        ->columnSpan(1),
+                                    Select::make('status')
+                                        ->options([
+                                            'raccolta_dati' => 'Raccolta Dati',
+                                            'valutazione_aml' => 'Valutazione AML',
+                                            'approvata' => 'Approvata',
+                                            'sos_inviata' => 'SOS Inviata',
+                                            'chiusa' => 'Chiusa',
+                                        ])
+                                        ->required()
+                                        ->columnSpan(2),
+                                ]),
+                                Section::make('Dati Identificativi')
+                                    ->schema([
+                                        TextInput::make('name')
+                                            ->label(fn(Get $get) => $get('is_person') ? 'Cognome' : 'Ragione Sociale')
+                                            ->required()
+                                            ->maxLength(255),
+                                        TextInput::make('first_name')
+                                            ->label('Nome')
+                                            ->visible(fn(Get $get) => $get('is_person'))  // Scompare se azienda
+                                            ->maxLength(255),
+                                        TextInput::make('tax_code')
+                                            ->label('Codice Fiscale / P.IVA')
+                                            ->unique(ignoreRecord: true)
+                                            ->maxLength(16),
+                                    ])
+                                    ->columns(2),
+                                Section::make('Contatti & Origine')
+                                    ->schema([
+                                        TextInput::make('email')->email(),
+                                        TextInput::make('phone')->tel(),
+                                        Select::make('client_type_id')
+                                            ->relationship('clientType', 'name')
+                                            ->searchable(),
+                                        Select::make('leadsource_id')
+                                            ->relationship('leadSource', 'name')
+                                            ->label('Sorgente Lead')
+                                            ->searchable(),
+                                    ])
+                                    ->columns(2),
+                            ]),
+                        // --- TAB 2: COMPLIANCE & PRIVACY ---
+                        Tab::make('Compliance & Privacy')
+                            ->icon('heroicon-o-shield-check')
+                            ->schema([
+                                Section::make('Valutazione Rischio (AML)')
+                                    ->description('Indicatori di rischio e posizioni critiche')
+                                    ->schema([
+                                        Toggle::make('is_pep')->label('PEP (Esposto Politicamente)'),
+                                        Toggle::make('is_sanctioned')->label('Sanzionato / Blacklist'),
+                                        Toggle::make('is_remote_interaction')->label('Interazione a Distanza'),
+                                    ])
+                                    ->columns(3),
+                                Section::make('Consensi Privacy')
+                                    ->schema([
+                                        DateTimePicker::make('general_consent_at')->label('Consenso Base'),
+                                        DateTimePicker::make('consent_marketing_at')->label('Marketing'),
+                                        DateTimePicker::make('consent_profiling_at')->label('Profilazione'),
+                                        DateTimePicker::make('consent_sic_at')->label('Consenso SIC (CRIF)'),
+                                    ])
+                                    ->columns(2),
+                            ]),
+                        // --- TAB 3: DATI ECONOMICI E DOCUMENTI ---
+                        Tab::make('Dati Finanziari & Doc')
+                            ->icon('heroicon-o-banknotes')
+                            ->schema([
+                                Grid::make(2)->schema([
+                                    TextInput::make('salary')
+                                        ->numeric()
+                                        ->prefix('€')
+                                        ->label('Retribuzione Annuale (RAL)'),
+                                    TextInput::make('salary_quote')
+                                        ->numeric()
+                                        ->step(0.01)
+                                        ->label('Quota Cedibile/Calcolata'),
+                                ]),
+                                Section::make('Documentazione')
+                                    ->schema([
+                                        SpatieMediaLibraryFileUpload::make('documents')
+                                            ->collection('client_documents')
+                                            ->multiple()
+                                            ->reorderable()
+                                            ->label('Documenti Identità / Reddito')
+                                            ->columnSpanFull(),
+                                    ]),
+                            ]),
+                        // --- TAB 4: AMMINISTRAZIONE ---
+                        Tab::make('Admin / Stato')
+                            ->icon('heroicon-o-cog')
+                            ->schema([
+                                Textarea::make('subfornitori')
+                                    ->rows(3)
+                                    ->columnSpanFull(),
+                                Grid::make(3)->schema([
+                                    Toggle::make('is_approved')->label('Approvato'),
+                                    Toggle::make('is_anonymous')->label('Anonimizza'),
+                                    Toggle::make('is_lead')->label('È un Lead'),
+                                ]),
+                                DateTimePicker::make('blacklist_at')
+                                    ->label('Data Blacklist')
+                                    ->readOnly(),
+                            ]),
+                    ])
                     ->columnSpanFull(),
-                Select::make('client_type_id')
-                    ->label('Tipo Cliente')
-                    ->options(function () {
-                        $client = $this->getRecord();
-                        $isCompany = $client?->is_company ?? false;
-                        return \App\Models\ClientType::where('is_company', $isCompany)
-                            ->pluck('name', 'id');
-                    })
-                    ->searchable()
-                    ->required(),
             ]);
     }
 }

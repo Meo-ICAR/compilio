@@ -341,26 +341,43 @@ class LookupSeeder extends Seeder
 
         // Practice Scopes
         $practiceScopes = [
-            ['name' => 'Mutui', 'code' => 'MUT', 'oam_code' => 'A.1'],
-            ['name' => 'Cessioni del V dello stipendio', 'code' => 'CessioneCQS', 'oam_code' => 'A.2'],
-            ['name' => 'Cessioni del V pensione', 'code' => 'CessioneCQP', 'oam_code' => 'A.2'],
-            ['name' => 'Delegazioni di pagamento', 'code' => 'Delega', 'oam_code' => 'A.2'],
-            ['name' => 'Factoring crediti', 'code' => 'FACT', 'oam_code' => 'A.3'],
-            ['name' => 'Acquisto di crediti', 'code' => 'ACQ_CRED', 'oam_code' => 'A.4'],
-            ['name' => 'Leasing autoveicoli e aeronavali', 'code' => 'LEASE_AUTO', 'oam_code' => 'A.5'],
-            ['name' => 'Leasing immobiliare', 'code' => 'LEASE_IMMO', 'oam_code' => 'A.6'],
-            ['name' => 'Leasing strumentale', 'code' => 'LEASE_STRUM', 'oam_code' => 'A.7'],
-            ['name' => 'Leasing su fonti rinnovabili ed altre tipologie di investimento', 'code' => 'LEASE_RINN', 'oam_code' => 'A.8'],
-            ['name' => 'Aperture di credito in conto corrente', 'code' => 'APERT_CCC', 'oam_code' => 'A.9'],
-            ['name' => 'Credito personale', 'code' => 'CRED_PERS', 'oam_code' => 'A.10'],
-            ['name' => 'Credito finalizzato', 'code' => 'CRED_FIN', 'oam_code' => 'A.11'],
-            ['name' => 'Prestito su pegno', 'code' => 'PREST_PEGNO', 'oam_code' => 'A.12'],
-            ['name' => 'Rilascio di fidejussioni e garanzie', 'code' => 'FIDEJUSSIONI', 'oam_code' => 'A.13'],
-            ['name' => 'Garanzia collettiva dei fidi', 'code' => 'GAR_COLLETTIVA', 'oam_code' => 'A.13-bis'],
-            ['name' => 'Anticipi e sconti commerciali', 'code' => 'ANT_SCONTI', 'oam_code' => 'A.14'],
-            ['name' => 'Credito revolving', 'code' => 'CRED_REV', 'oam_code' => 'A.15'],
-            ['name' => 'Ristrutturazione dei crediti (art. 128-quater decies, del TUB)', 'code' => 'RISTRUTT_CRED', 'oam_code' => 'A.16'],
+            ['name' => 'Mutui', 'code' => 'MUT', 'oam_code' => 'A.1', 'is_oneclient' => 0],
+            ['name' => 'Cessioni del V dello stipendio', 'code' => 'CessioneCQS', 'oam_code' => 'A.2', 'is_oneclient' => 1],
+            ['name' => 'Cessioni del V pensione', 'code' => 'CessioneCQP', 'oam_code' => 'A.2', 'is_oneclient' => 1],
+            ['name' => 'Delegazioni di pagamento', 'code' => 'Delega', 'oam_code' => 'A.2', 'is_oneclient' => 1],
+            ['name' => 'Factoring crediti', 'code' => 'FACT', 'oam_code' => 'A.3', 'is_oneclient' => 1],
+            ['name' => 'Acquisto di crediti', 'code' => 'ACQ_CRED', 'oam_code' => 'A.4', 'is_oneclient' => 1],
+            ['name' => 'Leasing autoveicoli e aeronavali', 'code' => 'LEASE_AUTO', 'oam_code' => 'A.5', 'is_oneclient' => 1],
+            ['name' => 'Leasing immobiliare', 'code' => 'LEASE_IMMO', 'oam_code' => 'A.6', 'is_oneclient' => 1],
+            ['name' => 'Leasing strumentale', 'code' => 'LEASE_STRUM', 'oam_code' => 'A.7', 'is_oneclient' => 1],
+            ['name' => 'Leasing su fonti rinnovabili ed altre tipologie di investimento', 'code' => 'LEASE_RINN', 'oam_code' => 'A.8', 'is_oneclient' => 1],
+            ['name' => 'Aperture di credito in conto corrente', 'code' => 'APERT_CCC', 'oam_code' => 'A.9', 'is_oneclient' => 1],
+            ['name' => 'Credito personale', 'code' => 'CRED_PERS', 'oam_code' => 'A.10', 'is_oneclient' => 1],
+            ['name' => 'Credito finalizzato', 'code' => 'CRED_FIN', 'oam_code' => 'A.11', 'is_oneclient' => 1],
+            ['name' => 'Prestito su pegno', 'code' => 'PREST_PEGNO', 'oam_code' => 'A.12', 'is_oneclient' => 1],
+            ['name' => 'Rilascio di fidejussioni e garanzie', 'code' => 'FIDEJUSSIONI', 'oam_code' => 'A.13', 'is_oneclient' => 1],
+            ['name' => 'Garanzia collettiva dei fidi', 'code' => 'GAR_COLLETTIVA', 'oam_code' => 'A.13-bis', 'is_oneclient' => 0],
+            ['name' => 'Anticipi e sconti commerciali', 'code' => 'ANT_SCONTI', 'oam_code' => 'A.14', 'is_oneclient' => 1],
+            ['name' => 'Credito revolving', 'code' => 'CRED_REV', 'oam_code' => 'A.15', 'is_oneclient' => 1],
+            ['name' => 'Ristrutturazione dei crediti (art. 128-quater decies, del TUB)', 'code' => 'RISTRUTT_CRED', 'oam_code' => 'A.16', 'is_oneclient' => 1],
+            ['name' => 'Utenze', 'code' => 'UTENZE', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'Utenza Luce', 'code' => 'LUCE', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'Utenza Telefono', 'code' => 'TELEFONIA', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'Utenza GAS', 'code' => 'GAS', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'TFS', 'code' => 'TFS', 'oam_code' => 'A.2', 'is_oneclient' => 1],
+            ['name' => 'Altro', 'code' => 'Altro', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'ASSICURAZIONE', 'code' => 'ASSICURAZIONE', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'Aziendale', 'code' => 'Aziendale', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'CASSA MUTUA', 'code' => 'CASSA MUTUA', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'Chirografario', 'code' => 'Chirografario', 'oam_code' => 'A.10', 'is_oneclient' => 1],
+            ['name' => 'Microcredito', 'code' => 'Microcredito', 'oam_code' => 'A.10', 'is_oneclient' => 1],
+            ['name' => 'Pignoramento', 'code' => 'Pignoramento', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'Polizza', 'code' => 'Polizza', 'oam_code' => '', 'is_oneclient' => 1],
+            ['name' => 'PRESTITO AZIENDALE', 'code' => 'PRESTITO AZIENDALE', 'oam_code' => 'A.15', 'is_oneclient' => 1],
+            ['name' => 'IPOTECARIO', 'code' => 'MUT_IPOTECARIO', 'oam_code' => 'A.1', 'is_oneclient' => 0],
+            ['name' => 'Prestito', 'code' => 'PREST', 'oam_code' => 'A.10', 'is_oneclient' => 1],
         ];
+
         foreach ($practiceScopes as $ps) {
             \App\Models\PracticeScope::firstOrCreate(['name' => $ps['name']], $ps);
         }
@@ -592,6 +609,96 @@ class LookupSeeder extends Seeder
             ];
             foreach ($abis as $abi) {
                 \App\Models\Abi::firstOrCreate(['abi' => $abi['abi']], $abi);
+            }
+
+            $softwareMappings = [
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Cessioni del V dello stipendio', 'external_value' => 'Cessione', 'internal_id' => 2, 'description' => 'CessioneCQS', 'code' => 'CessioneCQS'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'PERFEZIONATA', 'external_value' => 'PERFEZIONATA', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'RINUNCIA CLIENTE', 'external_value' => 'RINUNCIA CLIENTE', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Microcredito', 'external_value' => 'Microcredito', 'internal_id' => 30, 'description' => 'Microcredito', 'code' => 'Microcredito'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'DECLINATA', 'external_value' => 'DECLINATA', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'PRATICA RESPINTA', 'external_value' => 'PRATICA RESPINTA', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Prestito', 'external_value' => 'Prestito', 'internal_id' => 35, 'description' => 'Mapping automatico da Mediafacile', 'code' => 'PREST'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Chirografario', 'external_value' => 'Chirografario', 'internal_id' => 29, 'description' => 'Chirografario', 'code' => 'Chirografario'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'RIENTRO POLIZZA', 'external_value' => 'RIENTRO POLIZZA', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Aziendale', 'external_value' => 'Aziendale', 'internal_id' => 27, 'description' => 'Aziendale', 'code' => 'Aziendale'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'ESTINTO', 'external_value' => 'ESTINTO', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'CARICATA BANCA', 'external_value' => 'CARICATA BANCA', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Delegazioni di pagamento', 'external_value' => 'Delega', 'internal_id' => 4, 'description' => 'Delega', 'code' => 'Delega'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'RIENTRO BENESTARE', 'external_value' => 'RIENTRO BENESTARE', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'IN AMMORTAMENTO', 'external_value' => 'IN AMMORTAMENTO', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Utenza', 'external_value' => 'Utenza', 'internal_id' => 0, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'Inserita', 'external_value' => 'Inserita', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'RINNOVABILE', 'external_value' => 'RINNOVABILE', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Mutuo', 'external_value' => 'Mutuo', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_STATUS', 'name' => 'LIQUIDATA', 'external_value' => 'LIQUIDATA', 'internal_id' => 1, 'description' => 'Mapping automatico da Mediafacile', 'code' => null],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Pignoramento', 'external_value' => 'Pignoramento', 'internal_id' => 31, 'description' => 'Pignoramento', 'code' => 'Pignoramento'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Polizza', 'external_value' => 'Polizza', 'internal_id' => 32, 'description' => 'Polizza', 'code' => 'Polizza'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'Altro', 'external_value' => 'Altro', 'internal_id' => 25, 'description' => 'Altro', 'code' => 'Altro'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'TFS', 'external_value' => 'TFS', 'internal_id' => 24, 'description' => 'TFS', 'code' => 'TFS'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'PRESTITO AZIENDALE', 'external_value' => 'PRESTITO AZIENDALE', 'internal_id' => 33, 'description' => 'PRESTITO AZIENDALE', 'code' => 'PRESTITO AZIENDALE'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'CASSA MUTUA', 'external_value' => 'CASSA MUTUA', 'internal_id' => 28, 'description' => 'CASSA MUTUA', 'code' => 'CASSA MUTUA'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'ASSICURAZIONE', 'external_value' => 'ASSICURAZIONE', 'internal_id' => 26, 'description' => 'ASSICURAZIONE', 'code' => 'ASSICURAZIONE'],
+                ['software_application_id' => 1, 'mapping_type' => 'PRACTICE_TYPE', 'name' => 'IPOTECARIO', 'external_value' => 'IPOTECARIO', 'internal_id' => 34, 'description' => 'MUT_IPOTECARIO', 'code' => 'MUT_IPOTECARIO'],
+            ];
+
+            foreach ($softwareMappings as $data) {
+                \App\Models\SoftwareMapping::firstOrCreate(
+                    [
+                        'software_application_id' => $data['software_application_id'],
+                        'mapping_type' => $data['mapping_type'],
+                        'external_value' => $data['external_value'],
+                    ],
+                    [
+                        'name' => $data['name'],
+                        'internal_id' => $data['internal_id'],
+                        'description' => $data['description'],
+                        'code' => $data['code'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+            }
+
+            $pratcticeStatuses = [
+                ['code' => 'ACCETTATO PREVENTIVO', 'name' => 'accettato preventivo', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'Approvata', 'name' => 'approvata', 'color' => 'success', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'CARICATA BANCA', 'name' => 'caricata banca', 'color' => 'warning', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'Chiusa', 'name' => 'chiusa', 'color' => 'gray', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => 1, 'is_completed' => null],
+                ['code' => 'DECLINATA', 'name' => 'declinata', 'color' => 'danger', 'is_working' => null, 'is_rejected' => 1, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'DELIBERATA', 'name' => 'deliberata', 'color' => 'success', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'ESTINTO', 'name' => 'estinto', 'color' => 'gray', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'FASCICOLO COMPLETO', 'name' => 'fascicolo completo', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'IN AMMORTAMENTO', 'name' => 'in ammortamento', 'color' => 'success', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => 1],
+                ['code' => 'In attesa documenti originali', 'name' => 'in attesa documenti originali', 'color' => 'warning', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'Inserita', 'name' => 'inserita', 'color' => 'gray', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'Invio in istruttoria', 'name' => 'invio in istruttoria', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'LIQUIDATA', 'name' => 'liquidata', 'color' => 'success', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => 1],
+                ['code' => 'NOTIFICA', 'name' => 'notifica', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'PERFEZIONATA', 'name' => 'perfezionata', 'color' => 'success', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => 1, 'is_completed' => null],
+                ['code' => 'PRATICA RESPINTA', 'name' => 'pratica respinta', 'color' => 'danger', 'is_working' => null, 'is_rejected' => 1, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'Richiesta Polizza', 'name' => 'richiesta polizza', 'color' => 'warning', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'RIENTRO BENESTARE', 'name' => 'rientro benestare', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'RIENTRO POLIZZA', 'name' => 'rientro polizza', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'RINNOVABILE', 'name' => 'rinnovabile', 'color' => 'info', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => 1],
+                ['code' => 'RINUNCIA CLIENTE', 'name' => 'rinuncia cliente', 'color' => 'danger', 'is_working' => null, 'is_rejected' => 1, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'SOSPESA', 'name' => 'sospesa', 'color' => 'warning', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'Sospesa Istruttoria Interna', 'name' => 'sospesa istruttoria interna', 'color' => 'warning', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+            ];
+            foreach ($pratcticeStatuses as $data) {
+                \App\Model\PracticeStatus::firstOrCreate(
+                    [
+                        'code' => $data['code'],
+                    ],
+                    [
+                        'name' => $status['name'],
+                        'color' => $status['color'],
+                        'is_working' => $status['is_working'],
+                        'is_rejected' => $status['is_rejected'],
+                        'is_perfectioned' => $status['is_perfectioned'],
+                        'is_completed' => $status['is_completed'],
+                    ]
+                );
             }
         }
     }

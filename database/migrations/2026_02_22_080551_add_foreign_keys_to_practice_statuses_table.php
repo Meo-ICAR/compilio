@@ -10,9 +10,9 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('practice_statuses', function (Blueprint $table) {
-            $table->foreign(['practice_id'], 'practice_statuses_ibfk_1')->references(['id'])->on('practices')->onUpdate('no action')->onDelete('cascade');
-        });
+        // La tabella practice_statuses non ha practice_id
+        // È una tabella di lookup per gli stati, non ha bisogno di foreign key
+        // La foreign key verrà aggiunta in practice_status_history se necessario
     }
 
     /**
@@ -20,9 +20,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('practice_statuses', function (Blueprint $table) {
-            $table->dropForeign('practice_statuses_ibfk_1');
-            $table->dropForeign('practice_statuses_ibfk_2');
-        });
+        // La tabella practice_statuses non ha foreign keys da rimuovere
+        // È una tabella di lookup per gli stati
     }
 };

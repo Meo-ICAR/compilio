@@ -12,6 +12,7 @@ class SoftwareMapping extends Model
         'name',
         'external_value',
         'internal_id',
+        'code',
         'description',
     ];
 

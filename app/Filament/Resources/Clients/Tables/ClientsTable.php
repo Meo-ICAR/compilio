@@ -9,10 +9,14 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Excel;
@@ -29,95 +33,82 @@ class ClientsTable
                     ->circular()
                     ->defaultImageUrl(url('images/default-avatar.png'))
                     ->toggleable(),
-                IconColumn::make('is_person')
-                    ->boolean(),
-                TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('first_name')
-                    ->searchable(),
-                TextColumn::make('tax_code')
-                    ->searchable(),
-                TextColumn::make('email')
-                    ->label('Email address')
-                    ->searchable(),
-                TextColumn::make('phone')
-                    ->searchable(),
+                // Identificazione Rapida
+                TextColumn::make('full_name')  // Presuppone un accessor nel modello o usa formatStateUsing
+                    ->label('Cliente')
+                    ->description(fn($record) => $record->tax_code)
+                    ->searchable(['name', 'first_name', 'tax_code'])
+                    ->state(fn($record) => $record->is_person
+                        ? "{$record->name} {$record->first_name}"
+                        : $record->name),
+                // Stato Avanzamento (Badge colorati)
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'raccolta_dati' => 'gray',
+                        'valutazione_aml' => 'warning',
+                        'approvata' => 'success',
+                        'sos_inviata' => 'danger',
+                        'chiusa' => 'info',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn(string $state): string => str($state)->replace('_', ' ')->title()),
+                // Indicatori di Rischio (Icone silenziose ma visibili)
                 IconColumn::make('is_pep')
-                    ->boolean(),
-                TextColumn::make('client_type_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('is_sanctioned')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('PEP')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-flag')
+                    ->falseIcon('')  // Nasconde l'icona se falso per pulizia visiva
+                    ->color('danger'),
+                IconColumn::make('is_sanctioned')
+                    ->label('Blacklist')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-exclamation-triangle')
+                    ->falseIcon('')
+                    ->color('danger'),
+                // Dati Finanziari
+                TextColumn::make('salary')
+                    ->label('RAL')
+                    ->money('EUR')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                // Date
+                TextColumn::make('created_at')
+                    ->label('Acquisito il')
+                    ->dateTime('d/m/Y')
+                    ->sortable(),
             ])
             ->filters([
-                //
+                // Filtro per tipologia
+                TernaryFilter::make('is_person')
+                    ->label('Tipo Soggetto')
+                    ->placeholder('Tutti')
+                    ->trueLabel('Persone Fisiche')
+                    ->falseLabel('Persone Giuridiche'),
+                // Filtro per Stato
+                SelectFilter::make('status')
+                    ->multiple()  // Permette di vedere più stati contemporaneamente
+                    ->options([
+                        'raccolta_dati' => 'Raccolta Dati',
+                        'valutazione_aml' => 'In Valutazione',
+                        'approvata' => 'Approvati',
+                    ]),
+                // Filtro Rischio
+                Filter::make('high_risk')
+                    ->label('Alto Rischio (AML)')
+                    ->query(fn(Builder $query) => $query
+                        ->where('is_pep', true)
+                        ->orWhere('is_sanctioned', true)
+                        ->orWhere('is_remote_interaction', true)),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
-                Action::make('scarica_nomina_responsabile')
-                    ->label('Nomina Privacy')
-                    ->icon('heroicon-o-briefcase')
-                    ->color('warning')
-                    ->action(function ($record) {
-                        // $record rappresenta il Partner/Fornitore
-                        $company = $record->company;  // L'agenzia mandante
-                        $tipoPartner = $record->clientType;  // La categoria dal tuo seeder
-
-                        if (!$tipoPartner) {
-                            Notification::make()->title('Errore')->body('Assegna prima una tipologia al partner.')->danger()->send();
-                            return;
-                        }
-
-                        // Se è un Titolare Autonomo puro, avvisiamo l'utente (opzionale ma consigliato)
-                        if (str_contains(strtolower($tipoPartner->privacy_role), 'titolare autonomo') && !str_contains(strtolower($tipoPartner->privacy_role), 'responsabile')) {
-                            Notification::make()
-                                ->title('Attenzione')
-                                ->body('Questo profilo è un Titolare Autonomo (es. Notaio). Di norma non necessita di nomina ex Art. 28, ma di un accordo di contitolarità o condivisione dati.')
-                                ->warning()
-                                ->send();
-                            // Puoi scegliere se bloccare con un "return;" o far scaricare comunque il PDF
-                        }
-
-                        // Gestione Logo in Base64
-                        $logoBase64 = null;
-                        if ($company->hasMedia('logo')) {
-                            $media = $company->getFirstMedia('logo');
-                            $path = $media->getPath();
-                            if (file_exists($path)) {
-                                $type = pathinfo($path, PATHINFO_EXTENSION);
-                                $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode(file_get_contents($path));
-                            }
-                        }
-
-                        // Generazione PDF
-                        $pdf = Pdf::loadView('pdf.nomina-responsabile-esterno', [
-                            'partner' => $record,
-                            'company' => $company,
-                            'profilo' => $tipoPartner,
-                            'logoBase64' => $logoBase64,
-                        ]);
-
-                        $nomeFile = 'Nomina-Art28-' . Str::slug($record->name ?? $record->ragione_sociale) . '.pdf';
-
-                        return response()->streamDownload(fn() => print ($pdf->stream()), $nomeFile);
-                    }),
+                ViewAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-                ImportAction::make('import')
-                    ->label('Importa Excel')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('success')
-                    ->importer(ClientsImporter::class)
-                    ->maxRows(1000),
             ]);
     }
 }

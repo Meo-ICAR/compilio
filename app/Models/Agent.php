@@ -24,6 +24,22 @@ class Agent extends Model
         'oam_number',
         'oam_at',
         'oam_name',
+        'vat_number',
+        'vat_name',
+        'is_active',
+        'user_id',
+        'description',
+        'enasarco',
+    ];
+
+    protected $casts = [
+        'oam_at' => 'date',
+        'stipulated_at' => 'date',
+        'dismissed_at' => 'date',
+        'contribute' => 'decimal:2',
+        'remburse' => 'decimal:2',
+        'contributeFrom' => 'date',
+        'contributeFrequency' => 'integer',
     ];
 
     public function documents(): MorphMany

@@ -28,10 +28,10 @@ return new class extends Migration {
             $table->unsignedInteger('principal_id')->nullable()->comment('Mandante');
             $table->string('CRM_code')->nullable()->comment('Codice CRM');
             $table->date('inserted_at')->nullable();
-            $table->boolean('is_enasarco')->nullable();
+            $table->boolean('is_enasarco')->nullable()->default(true);
             $table->boolean('is_payment')->nullable();
             $table->boolean('is_client')->nullable();
-            $table->boolean('is_coordination')->nullable()->comment('Compenso coordinamento');
+            $table->boolean('is_coordination')->nullable()->comment('Compenso coordinamento')->default(false);
             $table->string('tipo')->nullable()->comment('Tipo di provvigione');
             $table->string('name')->nullable()->comment('Provvigione');
             $table->decimal('amount', 10)->nullable()->comment('Importo provvigionale lordo per questa singola pratica');

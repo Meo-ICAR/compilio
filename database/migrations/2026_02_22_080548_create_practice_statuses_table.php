@@ -4,22 +4,24 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         Schema::create('practice_statuses', function (Blueprint $table) {
-            $table->comment('Storico cronologico dei cambi di stato della pratica per monitorare i tempi di lavorazione (KPI).');
+            $table->comment('Stati della  pratica');
+
             $table->increments('id');
-            $table->unsignedInteger('practice_id')->comment('La pratica a cui si riferisce il cambio di stato');
-            $table->string('status', 50)->comment('Valore dello stato (es. istruttoria, delibera, erogata, annullata)');
+            $table->string('code', 50)->comment('Codice dello stato (es. istruttoria, delibera, erogata, annullata)')->nullable();
             $table->string('name')->nullable()->comment('Descrizione');
-            $table->text('notes')->nullable()->comment('Eventuali motivazioni o note interne (es. motivo del respinto)');
-            $table->unsignedInteger('changed_by')->comment('L\'utente (backoffice/admin) che ha aggiornato lo stato');
-            $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data e ora esatta del cambio stato (Audit Log)');
+            $table->string('ordine', 5)->comment('Ordine stato (es. istruttoria, delibera, erogata, annullata)')->nullable();
+            $table->string('color', 20)->comment('Colore dello stato')->nullable();
+            $table->boolean('is_rejected')->default(false)->comment('Stato respinto');
+            $table->boolean('is_working')->default(false)->comment('Stato in lavorazione');
+            $table->boolean('is_completed')->default(false)->comment('Stato completato');
+            $table->boolean('is_perfectioned')->default(false)->comment('Stato perfezionato');
         });
     }
 
