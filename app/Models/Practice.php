@@ -23,6 +23,10 @@ class Practice extends Model
         'brokerage_fee',
         'practice_scope_id',
         'status',
+        'inserted_at',
+        'status_at',
+        'description',
+        'annotation',
         'perfected_at',
         'is_active',
     ];

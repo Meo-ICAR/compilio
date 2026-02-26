@@ -33,8 +33,8 @@ return new class extends Migration {
                 ->on('companies')
                 ->onDelete('set null');  // o cascade
 
-            $table->string('mandate_number', 100)->comment('Numero di protocollo o identificativo del contratto di mandato');
-            $table->date('start_date')->comment('Data di decorrenza del mandato');
+            $table->string('mandate_number', 100)->nullable()->comment('Numero di protocollo o identificativo del contratto di mandato');
+            $table->date('start_date')->nullable()->comment('Data di decorrenza del mandato');
             $table->date('end_date')->nullable()->comment('Data di scadenza (NULL se a tempo indeterminato)');
             $table->boolean('is_exclusive')->nullable()->default(false)->comment("Indica se il mandato prevede l'esclusiva per quella categoria");
             $table->enum('status', ['ATTIVO', 'SCADUTO', 'RECEDUTO', 'SOPESO'])->nullable()->default('ATTIVO')->comment('Stato operativo del mandato');

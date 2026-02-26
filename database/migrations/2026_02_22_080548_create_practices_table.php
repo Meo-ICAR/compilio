@@ -34,7 +34,12 @@ return new class extends Migration {
             $table->decimal('brokerage_fee', 10, 2)->nullable()->comment('Provvigione pattuita');
             $table->unsignedInteger('practice_scope_id')->nullable()->comment('Ambito della pratica');
             // Lo stato governato da Spatie Model States
-            $table->string('status', 50)->default('istruttoria')->comment('Stato: istruttoria, deliberata, erogata, respinta');
+            $table->string('status', 50)->nullable()->default('istruttoria')->comment('Stato: istruttoria, deliberata, erogata, respinta');
+            $table->date('inserted_at')->nullable()->comment('Data inserimento pratica');
+            $table->date('status_at')->nullable()->comment('Data stato');
+            $table->text('description')->nullable()->comment('Descrizione pratica');
+            $table->text('annotation')->nullable()->comment('Annotazioni pratica');
+
             $table->date('perfected_at')->nullable()->comment('Data perfezionamento pratica');
 
             $table->boolean('is_active')->default(true)->comment('Pratica attiva/inattiva');

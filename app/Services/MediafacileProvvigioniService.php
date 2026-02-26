@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Agent;
 use App\Models\Client;
-use App\Models\ClientPractice;
 use App\Models\Company;
 use App\Models\Practice;
 use App\Models\PracticeCommission;
@@ -30,6 +29,7 @@ class MediafacileImportService
     {
         // Meglio usare config() invece di env() direttamente nel codice
         $this->apiUrl = config('services.mediafacile.url', env('MEDIAFACILE_BASE_URL', 'https://races.mediafacile.it/ws/hassisto.php'));
+
         $this->apiKey = config('services.mediafacile.key', env('MEDIAFACILE_HEADER_KEY'));
         $this->companyId = Company::where('oam_name', 'RACES FINANCE SRL')->first()->id;
 
@@ -59,19 +59,19 @@ class MediafacileImportService
 
             foreach ($data as $item) {
                 try {
-                    $praticaData = $this->mapApiToModel($item);
+                    $provvigioneData = $this->mapApiToModel($item);
 
-                    if (empty($praticaData['id'])) {
+                    if (empty($provvigioneData['id'])) {
                         Log::warning('Skipping item without id: ' . json_encode($item));
                         $result['errors']++;
                         continue;
                     }
 
-                    $this->processRecord($praticaData);
+                    $this->processRecord($provvigioneData);
 
                     // Se non ha lanciato eccezioni, consideriamo il record processato
                     // Un modo semplice per sapere se è stato aggiornato o creato:
-                    if (Practice::where('CRM_code', $praticaData['CRM_code'])->exists()) {
+                    if (Pratica::where('id', $provvigioneData['id'])->exists()) {
                         $result['updated']++;  // Nota: questo conteggio è approssimativo se fai updateOrCreate
                     } else {
                         $result['imported']++;
@@ -96,14 +96,14 @@ class MediafacileImportService
     protected function fetchData(Carbon $startDate, Carbon $endDate): array
     {
         $queryParams = [
-            'table' => 'pratiche',
+            'table' => 'compensi',
             'data_inizio' => $startDate->format('Y-m-d'),
             'data_fine' => $endDate->format('Y-m-d'),
         ];
 
         $response = Http::withHeaders([
             'Accept' => 'application/json, */*',
-            'User-Agent' => 'Compilio Import-Pratiche/1.0',
+            'User-Agent' => 'Compilio Import-Provvigioni/1.0',
             'X-Api-Key' => $this->apiKey,
         ])
             ->timeout(60)
@@ -155,78 +155,60 @@ class MediafacileImportService
     /**
      * Salva o aggiorna il record a DB
      */
-    protected function processRecord(array $praticaData): void
+    protected function processRecord(array $provvigioneData): void
     {
-        $existing = Practice::where('CRM_code', $praticaData['CRM_code'])->first();
+        $existing = PracticeCommission::where('CRM_code', $provvigioneData['CRM_code'])->first();
 
         if ($existing) {
-            $existing->update($praticaData);
+            $existing->update($provvigioneData);
         } else {
-            $praticaData['company_id'] = $this->companyId;
+            $provvigioneData['company_id'] = $this->companyId;
             // Software Mapping
-            $practiceType = SoftwareMapping::firstOrCreate(
-                ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $praticaData['tipo_prodotto']],
+            SoftwareMapping::firstOrCreate(
+                ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $provvigioneData['tipo_prodotto']],
                 [
-                    'name' => $praticaData['tipo_prodotto'],
+                    'name' => $provvigioneData['tipo_prodotto'],
                     'internal_id' => 1,  // Default ID, da mappare correttamente in base alla logica di business
                     'description' => 'Mapping automatico da Mediafacile',
                 ]
             );
-            $praticaData['practice_scope_id'] = $practiceType->internal_id;
-
-            $status = SoftwareMapping::firstOrCreate(
-                ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_STATUS', 'external_value' => $praticaData['stato_pratica']],
+            SoftwareMapping::firstOrCreate(
+                ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_STATUS', 'external_value' => $provvigioneData['stato_pratica']],
                 [
-                    'name' => $praticaData['stato_pratica'],
+                    'name' => $provvigioneData['stato_pratica'],
                     'internal_id' => 1,  // Default ID, da mappare correttamente in base alla logica di business
                     'description' => 'Mapping automatico da Mediafacile',
                 ]
             );
-            $praticaData['status_id'] = $status->internal_id;
-
             // Gestione cliente
-            $client = Client::firstOrCreate(
-                ['tax_code' => $praticaData['codice_fiscale'], 'company_id' => $this->companyId],
+            Client::firstOrCreate(
+                ['tax_code' => $provvigioneData['codice_fiscale'], 'company_id' => $this->companyId],
                 [
-                    'first_name' => $praticaData['nome_cliente'],
-                    'name' => $praticaData['cognome_cliente'],
+                    'first_name' => $provvigioneData['nome_cliente'],
+                    'name' => $provvigioneData['cognome_cliente'],
                     'company_id' => $this->companyId,
                 ]
             );
-            $praticaData['client_id'] = $client->id;
 
             // Gestione agente
-            $agent = Agent::firstOrCreate(
-                ['vat_number' => $praticaData['partita_iva_agente'], 'company_id' => $this->companyId],
+            Agent::firstOrCreate(
+                ['vat_number' => $provvigioneData['partita_iva_agente'], 'company_id' => $this->companyId],
                 [
-                    'name' => $praticaData['denominazione_agente'],
+                    'name' => $provvigioneData['denominazione_agente'],
                     'company_id' => $this->companyId,
                 ]
             );
-            $praticaData['agent_id'] = $agent->id;
-
             // Gestione della banca
-            $principal = Principal::firstOrCreate(
-                ['name' => $praticaData['denominazione_banca'], 'company_id' => $this->companyId],
+            Principal::firstOrCreate(
+                ['name' => $provvigioneData['denominazione_banca'], 'company_id' => $this->companyId],
                 [
-                    // altri campi se necessari
+                    //  'company_id' => $this->companyId,
                 ]
             );
-            $praticaData['principal_id'] = $principal->id;
-
-            $rateData = $this->parseDescription($praticaData['denominazione_prodotto']);
-            $praticaData['amount'] = $rateData['rata'] * $rateData['nrate'];
-            //  $praticaData['na'] = $rateData['nrate'];
-            $praticaData['name'] = $praticaData['denominazione_prodotto'];
-
-            $practice = Practice::create($praticaData);
-
-            // Associa la pratica al cliente
-            ClientPractice::create([
-                'company_id' => $this->companyId,
-                'client_id' => $client->id,
-                'practice_id' => $practice->id,
-            ]);
+            $rateData = $this->parseDescription($provvigioneData['denominazione_prodotto']);
+            $provvigioneData['amount'] = $rateData['rata'] * $rateData['nrate'];
+            //  $provvigioneData['nrate'] = $rateData['nrate'];
+            Practice::create($provvigioneData);
         }
     }
 
@@ -248,21 +230,39 @@ class MediafacileImportService
             }
         }
 
+        // Parse all date fields
+        $dataInserimento = $parseDate($apiData['Data Inserimento'] ?? null);
+        $dataPagamento = $parseDate($apiData['Data Pagamento'] ?? null);
+        $dataFattura = $parseDate($apiData['Data Fattura'] ?? null);
+        $dataStatus = $parseDate($apiData['Data Status'] ?? null);
+
         return [
-            'id' => $apiData['ID Pratica'] ?? (string) Str::uuid(),
-            'CRM_code' => $apiData['ID Pratica'] ?? null,
-            'nome_cliente' => $apiData['Cognome Cliente'] ?? null,
-            'cognome_cliente' => $apiData['Nome Cliente'] ?? null,
-            'codice_fiscale' => $apiData['Codice Fiscale'] ?? null,
-            'denominazione_agente' => $apiData['Denominazione Agente'] ?? null,
-            'partita_iva_agente' => (blank($apiData['Partita IVA Agente'] ?? null) || $apiData['Partita IVA Agente'] < '0')
-                ? '---'
-                : $apiData['Partita IVA Agente'],
-            'denominazione_banca' => $apiData['Denominazione Banca'] ?? null,
-            'tipo_prodotto' => $apiData['Tipo Prodotto'] ?? null,
-            'denominazione_prodotto' => $apiData['Descrizione Prodotto'] ?? null,
-            'inserted_at' => $dataInserimento ?? now(),
-            'stato_pratica' => $apiData['Stato Pratica'] ?? null,
+            'id' => $apiData['ID Compenso'] ?? null,
+            'data_inserimento_compenso' => $dataInserimento ? $dataInserimento->toDateTimeString() : null,
+            'descrizione' => $apiData['Descrizione'] ?? null,
+            'tipo' => $apiData['Tipo'] ?? 'provvigione',
+            'importo' => is_numeric($apiData['Importo']) ? $apiData['Importo'] : (is_string($apiData['Importo']) ? (float) str_replace(',', '.', $apiData['Importo']) : 0),
+            'importo_effettivo' => is_numeric($apiData['Importo Effettivo'] ?? null) ? $apiData['Importo Effettivo'] : (is_string($apiData['Importo Effettivo'] ?? null) ? (float) str_replace(',', '.', $apiData['Importo Effettivo']) : null),
+            'status_pagamento' => $apiData['Stato'] ?? '',
+            'data_pagamento' => $dataPagamento ? $dataPagamento->toDateTimeString() : null,
+            'n_fattura' => $apiData['N. Fattura'] ?? null,
+            'data_fattura' => $dataFattura ? $dataFattura->toDateTimeString() : null,
+            'data_status' => $dataStatus ? $dataStatus->toDateTimeString() : null,
+            'status_compenso' => $apiData['Status Compenso'] ?? null,
+            'denominazione_riferimento' => $apiData['Denominazione Riferimento'] ?? null,
+            'entrata_uscita' => $apiData['Entrata Uscita'] ?? null,
+            'id_pratica' => $apiData['ID Pratica'] ?? null,
+            'segnalatore' => $apiData['Agente'] ?? null,
+            'istituto_finanziario' => $apiData['Istituto finanziario'] ?? null,
+            'piva' => !empty($apiData['Partita IVA Agente'])
+                ? $apiData['Partita IVA Agente']
+                : (!empty($apiData['Codice Fiscale Agente']) ? $apiData['Codice Fiscale Agente'] : null),
+            'cf' => $apiData['Codice Fiscale Agente'] ?? null,
+            // 'annullato' => !empty($apiData['ANNULLATA']) && $apiData['ANNULLATA'] === 'SI',
+            //  'invoice_number' => $apiData['ANNULLATA'] ?? null,
+            'fonte' => 'mediafacile',
+            'coordinamento' => $apiData['Agente'] <> $apiData['Denominazione Riferimento'],
+            'iscliente' => (isset($apiData['Descrizione']) && str_contains($apiData['Descrizione'], 'liente')),
         ];
     }
 

@@ -11,8 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->boolean('is_company')->default(false)->after('company_id')->comment("True se il cliente è un'azienda fornitore");
-            $table->boolean('is_lead')->default(true)->after('is_company')->comment('True se è un lead non ancora convertito');
+            $table->boolean('is_company')->default(false)->after('status')->comment("True se il cliente è un'azienda fornitore");
+            $table->boolean('is_lead')->default(false)->after('is_company')->comment('True se è un lead non ancora convertito');
             $table->unsignedInteger('leadsource_id')->nullable()->after('is_lead')->comment('ID del client che ha fornito il lead');
             $table->timestamp('acquired_at')->nullable()->after('leadsource_id')->comment('Data di acquisizione del contatto');
             $table->foreign(['leadsource_id'], 'clients_ibfk_4')->references(['id'])->on('clients')->onUpdate('no action')->onDelete('set null');
