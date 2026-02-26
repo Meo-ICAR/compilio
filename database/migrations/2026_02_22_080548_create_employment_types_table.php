@@ -14,7 +14,13 @@ return new class extends Migration {
             $table->comment('Catalogo globale: Classificazione lavorativa del cliente (fondamentale per le logiche di delibera del credito).');
             $table->increments('id')->comment('ID intero autoincrementante');
             $table->string('name')->comment('Descrizione');
+            $table->unsignedInteger('company_type_id')->nullable()->comment('Ruolo specifico per quella determinata categoria di company');
+            $table->foreign('company_type_id')->references('id')->on('company_types')->onDelete('set null');
+            $table->unsignedInteger('client_type_id')->nullable()->comment('Ruolo specifico per quella determinata categoria di clienti');
+            $table->foreign('client_type_id')->references('id')->on('client_types')->onDelete('set null');
+
             $table->string('privacy_role')->nullable()->comment('Ruolo Privacy (es. Titolare Autonomo, Responsabile Esterno)');
+
             $table->text('purpose')->nullable()->comment('Finalità del trattamento');
             $table->text('data_subjects')->nullable()->comment('Categorie di Interessati');
             $table->text('data_categories')->nullable()->comment('Categorie di Dati Trattati');

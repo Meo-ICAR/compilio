@@ -24,6 +24,7 @@ return new class extends Migration {
             $table->string('extra_eu_transfer')->nullable()->comment('Trasferimento Extra-UE');
             $table->text('security_measures')->nullable()->comment('Misure di Sicurezza');
             $table->string('privacy_data')->nullable()->comment('Altri Dati Privacy');
+
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data di creazione');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Ultima modifica');
         });
