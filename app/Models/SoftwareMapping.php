@@ -35,10 +35,12 @@ class SoftwareMapping extends Model
                 return $this->belongsTo(PracticeType::class, 'internal_id');
             case 'PRACTICE_STATUS':
                 return $this->belongsTo(PracticeStatus::class, 'internal_id');
+            case 'COMMISSION_STATUS':
+                return $this->belongsTo(PracticeCommissionStatus::class, 'internal_id');
             case 'CLIENT_TYPE':
                 return $this->belongsTo(ClientType::class, 'internal_id');
             case 'BANK_NAME':
-                return $this->belongsTo(Bank::class, 'internal_id');
+                return $this->belongsTo(Principal::class, 'internal_id');
             default:
                 return null;
         }

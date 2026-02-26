@@ -23,16 +23,22 @@ class PracticeCommission extends Model
         'CRM_code',
         'tipo',
         'description',
-        'is_coordination',
         'invoice_number',
+        'status_payment',
+        'status_commission',
+        'is_coordination',
         'is_storno',
         'is_enasarco',
+        'is_client',
+        'is_payment',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'storno_amount' => 'decimal:2',
         'percentage' => 'decimal:2',
+        'inserted_at' => 'date',
+        'status_at' => 'date',
         'storned_at' => 'date',
         'created_at' => 'datetime',
         'perfected_at' => 'date',

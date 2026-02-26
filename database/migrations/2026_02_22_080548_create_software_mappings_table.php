@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,7 +14,7 @@ return new class extends Migration
             $table->comment('Tabelle di conversione (Cross-Reference) per tradurre i dati da software esterni al formato interno.');
             $table->increments('id')->comment('ID univoco mappatura');
             $table->unsignedInteger('software_application_id')->comment('Il software sorgente (es. CRM esterno)');
-            $table->enum('mapping_type', ['PRACTICE_TYPE', 'PRACTICE_STATUS', 'CLIENT_TYPE', 'BANK_NAME'])->comment('Cosa stiamo mappando (es. Tipo Pratica o Stato Pratica)');
+            $table->enum('mapping_type', ['PRACTICE_TYPE', 'PRACTICE_STATUS', 'CLIENT_TYPE', 'BANK_NAME', 'COMMISSION_STATUS'])->comment('Cosa stiamo mappando (es. Tipo Pratica o Stato Pratica)');
             $table->string('name')->nullable()->comment('Descrizione');
             $table->string('external_value')->comment('Il valore testuale nel CRM sorgente (es. "MUT_ACQ")');
             $table->unsignedInteger('internal_id')->comment('L\'ID corrispondente nel nostro database (es. ID di "Mutuo Acquisto")');
