@@ -13,7 +13,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        /*
+         * // Qui facciamo il bind!
+         * $this->app->bind(
+         *     SignatureServiceInterface::class,
+         *     YousignSignatureService::class
+         * );
+         */
+
+        /*
+         * * BONUS MULTI-TENANT:
+         * Se ogni tenant avesse il proprio provider preferito configurato a DB,
+         * potresti fare una logica dinamica qui dentro!
+         */
     }
 
     /**

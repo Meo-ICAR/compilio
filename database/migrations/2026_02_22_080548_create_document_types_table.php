@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->comment("Tabella di lookup globale (Senza Tenant): Tipologie di documenti riconosciuti per l'Adeguata Verifica.");
             $table->increments('id')->comment('ID intero autoincrementante');
             $table->string('name')->nullable()->comment('Descrizione');
+            $table->string('code')->nullable()->comment('Codice documento');
             $table->boolean('is_person')->default(true)->comment('Documento inerente Persona o azienda');
 
             $table->boolean('is_signed')->default(false)->comment('Indica se il documento deve essere firmato');

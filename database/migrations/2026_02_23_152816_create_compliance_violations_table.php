@@ -71,6 +71,17 @@ return new class extends Migration {
     {
         $now = now();
 
+        // Verifica se ci sono utenti nel sistema
+        $userIds = DB::table('users')->pluck('id')->toArray();
+        if (empty($userIds)) {
+            // Se non ci sono utenti, non inseriamo dati di test
+            return;
+        }
+
+        $firstUserId = $userIds[0];
+        $secondUserId = $userIds[1] ?? $firstUserId;  // Usa il primo se non esiste il secondo
+        $thirdUserId = $userIds[2] ?? $firstUserId;  // Usa il primo se non esiste il terzo
+
         $violations = [
             [
                 'company_id' => null,  // Violazione globale
@@ -82,7 +93,7 @@ return new class extends Migration {
                 'description' => 'Tentativo di accesso a dati clienti da parte di utente non autorizzato. IP rilevato da rete esterna.',
                 'affected_subjects_count' => 15,
                 'likely_consequences' => 'Possibile esposizione dati personali e finanziari dei clienti coinvolti.',
-                'discovery_date' => $now->subDays(2),
+                'discovery_date' => $now->subHours(3),
                 'ip_address' => '192.168.1.100',
                 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'is_dpa_notified' => false,
@@ -92,12 +103,12 @@ return new class extends Migration {
                 'resolved_at' => null,
                 'resolved_by' => null,
                 'resolution_notes' => null,
-                'created_at' => $now->subDays(2),
-                'updated_at' => $now->subDays(2),
+                'created_at' => $now->subHours(3),
+                'updated_at' => $now->subHours(3),
             ],
             [
                 'company_id' => null,
-                'user_id' => 1,
+                'user_id' => $firstUserId,
                 'violatable_type' => 'App\Models\Client',
                 'violatable_id' => 123,
                 'violation_type' => 'kyc_scaduto',
@@ -113,7 +124,7 @@ return new class extends Migration {
                 'dpa_not_notified_reason' => null,
                 'are_subjects_notified' => true,
                 'resolved_at' => $now->subHours(2),
-                'resolved_by' => 1,
+                'resolved_by' => $firstUserId,
                 'resolution_notes' => 'Cliente contattato e documentazione in via di aggiornamento.',
                 'created_at' => $now->subHours(6),
                 'updated_at' => $now->subHours(2),
@@ -143,7 +154,7 @@ return new class extends Migration {
             ],
             [
                 'company_id' => null,
-                'user_id' => 3,
+                'user_id' => $thirdUserId,
                 'violatable_type' => 'App\Models\Practice',
                 'violatable_id' => 456,
                 'violation_type' => 'forzatura_stato',
@@ -159,7 +170,7 @@ return new class extends Migration {
                 'dpa_not_notified_reason' => null,
                 'are_subjects_notified' => false,
                 'resolved_at' => $now->subHours(12),
-                'resolved_by' => 2,
+                'resolved_by' => $secondUserId,
                 'resolution_notes' => "Accesso revocato all'utente. Pratica ripristinata stato corretto.",
                 'created_at' => $now->subDay(),
                 'updated_at' => $now->subHours(12),

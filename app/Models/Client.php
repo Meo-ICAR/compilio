@@ -65,6 +65,11 @@ class Client extends Model implements HasMedia
         return $this->morphMany(Document::class, 'documentable');
     }
 
+    public function contacts(): MorphMany
+    {
+        return $this->morphMany(Contact::class, 'contactable');
+    }
+
     public function registerMediaCollections(): void
     {
         $this

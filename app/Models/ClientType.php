@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 
 class ClientType extends Model
@@ -20,4 +21,9 @@ class ClientType extends Model
         'extra_eu_transfer',
         'security_measures',
     ];
+
+    public function employmentTypes(): HasMany
+    {
+        return $this->hasMany(EmploymentType::class);
+    }
 }

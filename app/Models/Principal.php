@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 
 class Principal extends Model
@@ -19,11 +21,6 @@ class Principal extends Model
         'status',
     ];
 
-    public function contacts()
-    {
-        return $this->hasMany(PrincipalContact::class);
-    }
-
     public function mandates()
     {
         return $this->hasMany(PrincipalMandate::class);
@@ -32,5 +29,20 @@ class Principal extends Model
     public function principalScopes()
     {
         return $this->hasMany(PrincipalScope::class);
+    }
+
+    public function employees(): HasMany
+    {
+        return $this->hasMany(PrincipalEmployee::class);
+    }
+
+    public function contacts(): MorphMany
+    {
+        return $this->morphMany(Contact::class, 'contactable');
+    }
+
+    public function principalContacts(): HasMany
+    {
+        return $this->hasMany(PrincipalContact::class);
     }
 }

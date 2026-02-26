@@ -55,4 +55,9 @@ class Agent extends Model
     {
         return $this->morphMany(TrainingRecord::class, 'trainable');
     }
+
+    public function contacts(): MorphMany
+    {
+        return $this->morphMany(Contact::class, 'contactable');
+    }
 }

@@ -51,7 +51,7 @@ class PrincipalResource extends Resource
             PrincipalMandatesRelationManager::class,
             PrincipalScopesRelationManager::class,
             DocumentsRelationManager::class,
-            //
+            \App\Filament\Resources\Principals\RelationManagers\EmployeesRelationManager::class,
         ];
     }
 

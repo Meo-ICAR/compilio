@@ -6,6 +6,7 @@ namespace App\Models;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -89,6 +90,11 @@ class User extends Authenticatable implements HasTenants
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id');
+    }
+
+    public function apiUsageLogs(): HasMany
+    {
+        return $this->hasMany(CompanyApiUsageLog::class);
     }
 
     public function getActivitylogOptions(): LogOptions
