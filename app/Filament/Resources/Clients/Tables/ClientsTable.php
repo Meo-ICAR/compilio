@@ -27,12 +27,6 @@ class ClientsTable
     {
         return $table
             ->columns([
-                ImageColumn::make('photo_url')
-                    ->label('Foto')
-                    ->size(40)
-                    ->circular()
-                    ->defaultImageUrl(url('images/default-avatar.png'))
-                    ->toggleable(),
                 // Identificazione Rapida
                 TextColumn::make('full_name')  // Presuppone un accessor nel modello o usa formatStateUsing
                     ->label('Cliente')
@@ -54,6 +48,15 @@ class ClientsTable
                     })
                     ->formatStateUsing(fn(string $state): string => str($state)->replace('_', ' ')->title()),
                 // Indicatori di Rischio (Icone silenziose ma visibili)
+                IconColumn::make('privacy_policy_read_at')
+                    ->label('Privacy OK')
+                    ->boolean()  // Trasforma il valore in boolean (null = false, date = true)
+                    ->trueIcon('heroicon-s-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->color(fn($state) => $state ? 'success' : 'gray')
+                    ->tooltip(fn($record) => $record->privacy_policy_read_at
+                        ? 'Letta il: ' . $record->privacy_policy_read_at->format('d/m/Y H:i')
+                        : 'Non ancora letta'),
                 IconColumn::make('is_pep')
                     ->label('PEP')
                     ->boolean()

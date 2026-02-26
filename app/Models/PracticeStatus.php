@@ -12,14 +12,12 @@ class PracticeStatus extends Model
         'name',
         'color',
         'description',
-        'is_active',
-        'sort_order',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'sort_order' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'is_active' => 'boolean',
+        'sort_order' => 'integer',
     ];
 }

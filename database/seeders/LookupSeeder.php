@@ -685,10 +685,10 @@ class LookupSeeder extends Seeder
                 ['code' => 'SOSPESA', 'name' => 'sospesa', 'color' => 'warning', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
                 ['code' => 'Sospesa Istruttoria Interna', 'name' => 'sospesa istruttoria interna', 'color' => 'warning', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
             ];
-            foreach ($pratcticeStatuses as $data) {
-                \App\Model\PracticeStatus::firstOrCreate(
+            foreach ($pratcticeStatuses as $status) {
+                \App\Models\PracticeStatus::firstOrCreate(
                     [
-                        'code' => $data['code'],
+                        'code' => $status['code'],
                     ],
                     [
                         'name' => $status['name'],
