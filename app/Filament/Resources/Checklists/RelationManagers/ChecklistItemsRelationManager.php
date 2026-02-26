@@ -3,9 +3,20 @@
 namespace App\Filament\Resources\Checklists\RelationManagers;
 
 use App\Models\ChecklistItem;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Filter;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SelectFilter;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Repeater;
+use Filament\Schemas\Grid;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Filament\Utilities\Get;
 use Filament\Forms;
 use Filament\Tables;
 
@@ -19,31 +30,31 @@ class ChecklistItemsRelationManager extends RelationManager
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make('Informazioni Elemento')
+                Section::make('Informazioni Elemento')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        TextInput::make('name')
                             ->label('Nome Elemento')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Textarea::make('question')
+                        Textarea::make('question')
                             ->label('Domanda')
                             ->required()
                             ->rows(3),
-                        Forms\Components\Textarea::make('description')
+                        Textarea::make('description')
                             ->label('Descrizione')
                             ->rows(2)
                             ->nullable(),
                     ])
                     ->columns(1),
-                Forms\Components\Section::make('Configurazione')
+                Section::make('Configurazione')
                     ->schema([
-                        Forms\Components\Checkbox::make('is_required')
+                        Checkbox::make('is_required')
                             ->label('Obbligatorio')
                             ->default(false),
-                        Forms\Components\Checkbox::make('is_document_required')
+                        Checkbox::make('is_document_required')
                             ->label('Richiede Documento')
                             ->default(false),
-                        Forms\Components\Select::make('attach_model')
+                        Select::make('attach_model')
                             ->label('Modello Allegato')
                             ->options([
                                 'principal' => 'Principal',
@@ -51,30 +62,30 @@ class ChecklistItemsRelationManager extends RelationManager
                                 'company' => 'Company',
                             ])
                             ->nullable(),
-                        Forms\Components\TextInput::make('attach_model_id')
+                        TextInput::make('attach_model_id')
                             ->label('ID Modello')
                             ->nullable(),
-                        Forms\Components\TextInput::make('repeatable_code')
+                        TextInput::make('repeatable_code')
                             ->label('Codice Ripetibile')
                             ->helperText('Es: doc_annuale per documenti annuali')
                             ->nullable(),
                     ])
                     ->columns(2),
-                Forms\Components\Section::make('Logica Condizionale')
+                Section::make('Logica Condizionale')
                     ->schema([
-                        Forms\Components\TextInput::make('item_code')
+                        TextInput::make('item_code')
                             ->label('Codice Univoco')
                             ->helperText('Codice univoco della domanda per dipendenze')
                             ->nullable(),
-                        Forms\Components\TextInput::make('depends_on_code')
+                        TextInput::make('depends_on_code')
                             ->label('Dipende da Codice')
                             ->helperText('Il codice della domanda da cui dipende')
                             ->nullable(),
-                        Forms\Components\TextInput::make('depends_on_value')
+                        TextInput::make('depends_on_value')
                             ->label('Valore Dipendenza')
                             ->helperText('Il valore che deve avere per attivarsi')
                             ->nullable(),
-                        Forms\Components\Select::make('dependency_type')
+                        Select::make('dependency_type')
                             ->label('Tipo Dipendenza')
                             ->options([
                                 'show_if' => 'Mostra se',
@@ -83,13 +94,13 @@ class ChecklistItemsRelationManager extends RelationManager
                             ->nullable(),
                     ])
                     ->columns(2),
-                Forms\Components\Section::make('Risposta e Note')
+                Section::make('Risposta e Note')
                     ->schema([
-                        Forms\Components\Textarea::make('answer')
+                        Textarea::make('answer')
                             ->label('Risposta')
                             ->rows(3)
                             ->nullable(),
-                        Forms\Components\Textarea::make('annotation')
+                        Textarea::make('annotation')
                             ->label('Annotazioni Interne')
                             ->rows(2)
                             ->nullable(),
@@ -103,23 +114,23 @@ class ChecklistItemsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label('Nome')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('question')
+                TextColumn::make('question')
                     ->label('Domanda')
                     ->limit(50)
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_required')
+                IconColumn::make('is_required')
                     ->label('Obbligatorio')
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_document_required')
+                IconColumn::make('is_document_required')
                     ->label('Richiede Doc')
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\BadgeColumn::make('attach_model')
+                BadgeColumn::make('attach_model')
                     ->label('Allegato a')
                     ->colors([
                         'primary' => 'principal',
@@ -132,11 +143,11 @@ class ChecklistItemsRelationManager extends RelationManager
                         'company' => 'Company',
                         default => 'Nessuno',
                     }),
-                Tables\Columns\TextColumn::make('repeatable_code')
+                TextColumn::make('repeatable_code')
                     ->label('Codice Ripetibile')
                     ->searchable()
                     ->placeholder('No'),
-                Tables\Columns\TextColumn::make('item_code')
+                TextColumn::make('item_code')
                     ->label('Codice Univoco')
                     ->searchable()
                     ->placeholder('No'),
@@ -151,44 +162,44 @@ class ChecklistItemsRelationManager extends RelationManager
                         'hide_if' => 'Nascondi se',
                         default => 'Nessuna',
                     }),
-                Tables\Columns\TextColumn::make('depends_on_code')
+                TextColumn::make('depends_on_code')
                     ->label('Dipende da')
                     ->searchable()
                     ->placeholder('Nessuna'),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('is_required')
+                Filter::make('is_required')
                     ->label('Obbligatorio'),
-                Tables\Filters\TernaryFilter::make('is_document_required')
+                Filter::make('is_document_required')
                     ->label('Richiede Documento'),
-                Tables\Filters\SelectFilter::make('attach_model')
+                SelectFilter::make('attach_model')
                     ->label('Modello Allegato')
                     ->options([
                         'principal' => 'Principal',
                         'agent' => 'Agent',
                         'company' => 'Company',
                     ]),
-                Tables\Filters\SelectFilter::make('dependency_type')
+                SelectFilter::make('dependency_type')
                     ->label('Tipo Dipendenza')
                     ->options([
                         'show_if' => 'Mostra se',
                         'hide_if' => 'Nascondi se',
                     ]),
-                Tables\Filters\TernaryFilter::make('has_dependency')
+                TernaryFilter::make('has_dependency')
                     ->label('Ha Dipendenze')
                     ->query(fn($query) => $query->whereNotNull('depends_on_code')),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

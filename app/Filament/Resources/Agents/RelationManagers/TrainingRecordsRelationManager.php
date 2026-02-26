@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Agents\RelationManagers;
 
+use App\Models\Agent;
 use App\Models\TrainingRecord;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -24,7 +25,7 @@ class TrainingRecordsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->whereNotNull('agent_id')->with('trainingSession'))
+            ->modifyQueryUsing(fn($query) => $query->where('trainable_type', Agent::class)->with('trainingSession'))
             ->recordTitleAttribute('id')
             ->columns([
                 TextColumn::make('trainingSession.name')

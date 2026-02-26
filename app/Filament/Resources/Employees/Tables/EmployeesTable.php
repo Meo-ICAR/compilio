@@ -25,18 +25,19 @@ class EmployeesTable
             ->columns([
                 TextColumn::make('name')
                     ->label('Nominativo')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('role_title')
                     ->label('Ruolo')
+                    ->sortable()
                     ->searchable(),
-                SelectColumn::make('company_branch_id')
+                TextColumn::make('employe_type.name')
+                    ->label('Tipo di impiego')
+                    ->searchable(),
+                TextColumn::make('company_branch.name')
                     ->label('Sede')
-                    ->relationship('company_branch', 'name')
+                    ->sortable()
                     ->searchable(),
-                TextColumn::make('coordinatedBy.name')
-                    ->label('Coordinato da')
-                    ->searchable()
-                    ->placeholder('Nessun coordinatore'),
                 TextColumn::make('email')
                     ->label('Email address')
                     ->searchable(),
@@ -44,12 +45,13 @@ class EmployeesTable
                     ->searchable(),
                 TextColumn::make('department')
                     ->searchable(),
-                TextColumn::make('employe_type.name')
-                    ->label('Tipo di impiego')
-                    ->searchable(),
                 TextColumn::make('hiring_date')
                     ->date()
                     ->sortable(),
+                TextColumn::make('coordinatedBy.name')
+                    ->label('Coordinato da')
+                    ->searchable()
+                    ->placeholder('Nessun coordinatore'),
                 TextColumn::make('termination_date')
                     ->date()
                     ->sortable(),
