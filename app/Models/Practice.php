@@ -15,6 +15,8 @@ class Practice extends Model
         'company_id',
         'principal_id',
         'agent_id',
+        'practice_status_id',
+        'stato_pratica',
         'name',
         'CRM_code',
         'principal_code',
@@ -69,6 +71,11 @@ class Practice extends Model
         return $this->belongsTo(PracticeScope::class);
     }
 
+    public function practiceStatus()
+    {
+        return $this->belongsTo(PracticeStatus::class);
+    }
+
     public function getClientsNamesAttribute()
     {
         $clients = \DB::table('clients')
@@ -110,5 +117,20 @@ class Practice extends Model
                 'is_uploaded' => $uploadedDocumentTypeIds->contains($req->document_type_id),
             ];
         });
+    }
+
+    public function isPerfected()
+    {
+        return !empty($this->perfected_at);
+    }
+
+    public function isWorking()
+    {
+        return $this->practiceStatus?->is_working ?? false;
+    }
+
+    public function isRejected()
+    {
+        return $this->practiceStatus?->is_rejected ?? false;
     }
 }

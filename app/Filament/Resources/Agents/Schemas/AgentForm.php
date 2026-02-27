@@ -64,6 +64,10 @@ class AgentForm
                 Toggle::make('is_active')
                     ->label('Attivo')
                     ->required(),
+                Toggle::make('is_art108')
+                    ->label('Esente art. 108 - ex art. 128-novies TUB')
+                    ->helperText("Seleziona se l'agente è esente ai sensi dell'art. 108 del Testo Unico Bancario")
+                    ->default(false),
             ]);
     }
 }

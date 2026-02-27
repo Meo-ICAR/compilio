@@ -10,8 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('practice_scopes', function (Blueprint $table) {
-            $table->string('code', 10)->after('name')->comment('Codice identificativo dello scope');
+        Schema::table('clients', function (Blueprint $table) {
+            $table
+                ->boolean('is_art108')
+                ->default(false)
+                ->after('salary_quote')
+                ->comment('Esente art. 108 - ex art. 128-novies TUB');
         });
     }
 
@@ -20,8 +24,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('practice_scopes', function (Blueprint $table) {
-            $table->dropColumn('code');
+        Schema::table('clients', function (Blueprint $table) {
+            $table->dropColumn('is_art108');
         });
     }
 };

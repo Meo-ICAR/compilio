@@ -23,6 +23,13 @@ class PracticeCommissionForm
                     ->relationship('proforma', 'name')
                     ->searchable()
                     ->preload(),
+                Select::make('practice_commission_status_id')
+                    ->label('Stato Commissione')
+                    ->relationship('practiceCommissionStatus', 'status_payment')
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Seleziona lo stato della commissione'),
                 Select::make('agent_id')
                     ->relationship('agent', 'name')
                     ->searchable()

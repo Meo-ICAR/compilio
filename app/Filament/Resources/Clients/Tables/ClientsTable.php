@@ -69,6 +69,12 @@ class ClientsTable
                     ->trueIcon('heroicon-o-exclamation-triangle')
                     ->falseIcon('')
                     ->color('danger'),
+                IconColumn::make('is_art108')
+                    ->label('Esente art. 108')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-shield-check')
+                    ->falseIcon('heroicon-o-shield-x')
+                    ->color(fn($state) => $state ? 'success' : 'gray'),
                 // Dati Finanziari
                 TextColumn::make('salary')
                     ->label('RAL')

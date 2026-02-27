@@ -39,6 +39,7 @@ class Client extends Model implements HasMedia
         'blacklisted_by',
         'salary',
         'salary_quote',
+        'is_art108',
     ];
 
     public function addresses(): MorphMany

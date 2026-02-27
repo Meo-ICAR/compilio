@@ -15,6 +15,7 @@ class PracticeCommission extends Model
         'agent_id',
         'principal_id',
         'proforma_id',
+        'practice_commission_status_id',
         'amount',
         'percentage',
         'status',
@@ -66,6 +67,16 @@ class PracticeCommission extends Model
     public function principal()
     {
         return $this->belongsTo(Principal::class);
+    }
+
+    public function practiceCommissionStatus()
+    {
+        return $this->belongsTo(PracticeCommissionStatus::class);
+    }
+
+    public function isPerfected()
+    {
+        return $this->practiceCommissionStatus?->is_perfectioned ?? false;
     }
 
     public function company()

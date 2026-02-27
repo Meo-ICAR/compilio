@@ -157,25 +157,43 @@ class MediafacileImportService
      */
     protected function processRecord(array $praticaData): void
     {
-        $practiceType = SoftwareMapping::firstOrCreate(
+        $practiceSwType = SoftwareMapping::firstOrCreate(
             ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $praticaData['tipo_prodotto']],
             [
                 'name' => $praticaData['tipo_prodotto'],
-                'internal_id' => 1,  // Default ID, da mappare correttamente in base alla logica di business
+                'internal_id' => 0,  // ID, da mappare correttamente in base alla logica di business
                 'description' => 'Mapping automatico da Mediafacile',
             ]
         );
-        $praticaData['practice_scope_id'] = $practiceType->internal_id;
+        if ($practiceSwType->internal_id === 0) {
+            $practiceScope = PracticeScope::insert([
+                'name' => $praticaData['tipo_prodotto'],
+                'code' => 'Mediafacile',
+                //  'description' => 'Mapping automatico da Mediafacile',
+            ]);
+            $practiceSwType->internal_id = $practiceScope->id;
+            $practiceSwType->save();
+        }
+        $praticaData['practice_scope_id'] = $practiceSwType->internal_id;
 
+        $statoPratica = $praticaData['stato_pratica'];
         $status = SoftwareMapping::firstOrCreate(
-            ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_STATUS', 'external_value' => $praticaData['stato_pratica']],
+            ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_STATUS', 'external_value' => $statoPratica],
             [
-                'name' => $praticaData['stato_pratica'],
-                'internal_id' => 1,  // Default ID, da mappare correttamente in base alla logica di business
+                'name' => $statoPratica,
+                'internal_id' => 0,  // Default ID, da mappare correttamente in base alla logica di business
                 'description' => 'Mapping automatico da Mediafacile',
             ]
         );
-        $praticaData['status_id'] = $status->internal_id;
+        if ($status->internal_id === 0) {
+            $practiceScope = PracticeStatus::insert([
+                'name' => $statoPratica,
+                'code' => 'Mediafacile',
+            ]);
+            $status->internal_id = $practiceScope->id;
+            $status->save();
+        }
+        $praticaData['practice_status_id'] = $status->internal_id;
 
         $existing = Practice::where('CRM_code', $praticaData['CRM_code'])->first();
 

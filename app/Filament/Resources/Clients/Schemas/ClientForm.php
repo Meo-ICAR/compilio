@@ -85,6 +85,9 @@ class ClientForm
                                     ->schema([
                                         Toggle::make('is_pep')->label('PEP (Esposto Politicamente)'),
                                         Toggle::make('is_sanctioned')->label('Sanzionato / Blacklist'),
+                                        Toggle::make('is_art108')
+                                            ->label('Esente art. 108 - ex art. 128-novies TUB')
+                                            ->helperText("Seleziona se il cliente è esente ai sensi dell'art. 108 del Testo Unico Bancario"),
                                         Toggle::make('is_remote_interaction')->label('Interazione a Distanza'),
                                     ])
                                     ->columns(3),

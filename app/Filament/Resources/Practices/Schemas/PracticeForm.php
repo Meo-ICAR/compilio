@@ -26,6 +26,13 @@ class PracticeForm
                     ->searchable()
                     ->preload()
                     ->required(),
+                Select::make('practice_status_id')
+                    ->label('Stato Pratica')
+                    ->relationship('practiceStatus', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Seleziona lo stato attuale della pratica'),
                 TextInput::make('name')
                     ->label('Nome Pratica')
                     ->required(),

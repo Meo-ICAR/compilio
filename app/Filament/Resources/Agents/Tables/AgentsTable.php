@@ -78,6 +78,12 @@ class AgentsTable
                 IconColumn::make('is_active')
                     ->label('Attivo')
                     ->boolean(),
+                IconColumn::make('is_art108')
+                    ->label('Esente art. 108')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-shield-check')
+                    ->falseIcon('heroicon-o-shield-x')
+                    ->color(fn($state) => $state ? 'success' : 'gray'),
                 TextColumn::make('updated_at')
                     ->label('Aggiornato')
                     ->dateTime()

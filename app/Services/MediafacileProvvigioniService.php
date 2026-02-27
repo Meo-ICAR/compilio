@@ -7,8 +7,7 @@ use App\Models\Client;
 use App\Models\Company;
 use App\Models\Practice;
 use App\Models\PracticeCommission;
-use App\Models\PracticeScope;
-use App\Models\PracticeStatus;
+use App\Models\PracticeCommissionStatus;
 use App\Models\Principal;
 use App\Models\SoftwareApplication;
 use App\Models\SoftwareMapping;
@@ -157,11 +156,25 @@ class MediafacileProvvigioniService
      */
     protected function processRecord(array $provvigioneData): void
     {
+        \Log::info('Processing provvigione record', $provvigioneData);
+
         $commissionStatus = SoftwareMapping::firstOrCreate(
             ['software_application_id' => $this->softwareId, 'mapping_type' => 'COMMISSION_STATUS', 'external_value' => $provvigioneData['status_payment']],
             [
                 'name' => $provvigioneData['status_payment'],
                 'description' => 'Mapping automatico da Mediafacile',
+            ]
+        );
+        $statusid = $commissionStatus->internal_id;
+        $practiceStatus = PracticeCommissionStatus::find($statusid);
+        if ($practiceStatus) {
+            $praticaData['practice_commission_status_id'] = $practiceStatus->id;
+        }
+
+        $practice = Practice::firstOrCreate(
+            ['company_id' => $this->companyId, 'CRM_code' => $provvigioneData['id_pratica']],
+            [
+                'name' => 'Mapping automatico da Mediafacile',
             ]
         );
 
@@ -177,14 +190,8 @@ class MediafacileProvvigioniService
             } else {
                 $provvigioneData['company_id'] = $this->companyId;
                 // Software Mapping
-                $practiceId = Practice::firstOrCreate(
-                    ['company_id' => $this->companyId, 'CRM_code' => $provvigioneData['id_pratica']],
-                    [
-                        'name' => 'Mapping automatico da Mediafacile',
-                    ]
-                )->id;
 
-                $provvigioneData['practice_id'] = $practiceId;
+                $provvigioneData['practice_id'] = $practice->id;
 
                 //   $provvigioneData['practice_scope_id'] = $practiceType->internal_id;
 
@@ -233,7 +240,11 @@ class MediafacileProvvigioniService
 
                 $provvigioneData['name'] = $provvigioneData['descrizione'];
 
-                $practice = PracticeCommission::create($provvigioneData);
+                $practiceCommission = PracticeCommission::create($provvigioneData);
+            }
+            if ($practiceCommission && $practiceCommission->isPerfected() && !$practice->isPerfected()) {
+                // TODO: inviare email al cliente
+                $practice->update(['perfected_at' => $practiceCommission->status_at]);
             }
         }
     }

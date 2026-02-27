@@ -27,6 +27,7 @@ class Agent extends Model
         'vat_number',
         'vat_name',
         'is_active',
+        'is_art108',
         'user_id',
         'description',
         'enasarco',
@@ -40,6 +41,7 @@ class Agent extends Model
         'remburse' => 'decimal:2',
         'contributeFrom' => 'date',
         'contributeFrequency' => 'integer',
+        'is_art108' => 'boolean',
     ];
 
     public function documents(): MorphMany

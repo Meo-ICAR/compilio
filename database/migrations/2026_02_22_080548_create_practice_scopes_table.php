@@ -13,12 +13,14 @@ return new class extends Migration {
         Schema::create('practice_scopes', function (Blueprint $table) {
             $table->comment('Tabella tipologia finanziamento');
             $table->increments('id')->comment('ID intero autoincrementante');
-            $table->string('name')->comment('Es. Mutui Ipotecari, Cessioni del Quinto, Prestiti Personali');
-            $table->string('oam_code');
+            $table->string('name')->comment('Es. Mutui Ipotecari, Cessioni del Quinto, Prestiti Personali')->nullable();
+            $table->string('code')->nullable();
+            $table->string('oam_code')->nullable();
             $table
                 ->boolean('is_oneclient')
                 ->default(true)
-                ->comment('Finanziamento mono cliente');
+                ->comment('Finanziamento mono cliente')
+                ->nullable();
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data di creazione');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Ultima modifica');
         });

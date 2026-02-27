@@ -26,6 +26,15 @@ class PracticeCommissionsTable
                     ->label('Proforma')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('practiceCommissionStatus.status_payment')
+                    ->label('Stato Commissione')
+                    ->badge()
+                    ->color(fn($record) => $record->practiceCommissionStatus?->is_perfectioned
+                        ? 'success'
+                        : ($record->practiceCommissionStatus?->is_working ? 'warning' : 'gray'))
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Nessuno stato'),
                 TextColumn::make('agent.name')
                     ->label('Agente')
                     ->searchable()
