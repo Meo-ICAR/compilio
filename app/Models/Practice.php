@@ -119,18 +119,73 @@ class Practice extends Model
         });
     }
 
-    public function isPerfected()
-    {
-        return !empty($this->perfected_at);
-    }
-
     public function isWorking()
     {
         return $this->practiceStatus?->is_working ?? false;
     }
 
+    public function isWorkingLastYear()
+    {
+        $lastYear = now()->subYear()->endOfYear();
+        return $this->practiceStatus?->is_working && $this->inserted_at < $lastYear && !isPerfectedLastYear() && !isRejectedLastYear() ?? false;
+    }
+
     public function isRejected()
     {
         return $this->practiceStatus?->is_rejected ?? false;
+    }
+
+    public function isRejectedLastYear()
+    {
+        $lastYear = now()->subYear()->endOfYear();
+        return $this->practiceStatus?->is_rejected &&
+            $this->inserted_at < $lastYear &&
+            $this->rejected_at < $lastYear ?? false;
+    }
+
+    public function isPerfectedLastYear()
+    {
+        $lastYear = now()->subYear()->endOfYear();
+        return !empty($this->perfected_at) &&
+            $this->perfected_at < $lastYear &&
+            $this->inserted_at < $lastYear
+                ?? false;
+    }
+
+    public function OAMisLastYear()
+    {
+        return $this->isOAMname() && (
+            $this->isWorkingLastYear() ||
+            $this->isPerfectedLastYear() ||
+            $this->isRejectedLastYear()
+        );
+    }
+
+    public function practiceScopeOAM()
+    {
+        return $this->practiceScope->oamname();
+    }
+
+    public function scopeWithOamScopeAndConditions($query)
+    {
+        return $query
+            ->whereHas('practiceScope', function ($query) {
+                $query->whereNotNull('oam_code');
+            })
+            ->where(function ($query) {
+                // Condizione 1: isWorking() true e inserted_at < fine anno precedente
+                $query
+                    ->whereHas('practiceStatus', function ($statusQuery) {
+                        $statusQuery->where('is_working', true);
+                    })
+                    ->where('inserted_at', '<', now()->subYear()->endOfYear())
+                    // OR
+                    // Condizione 2: perfected_at null OR perfected_at > fine anno precedente
+                    ->orWhere(function ($perfectedQuery) {
+                        $perfectedQuery
+                            ->whereNull('perfected_at')
+                            ->orWhere('perfected_at', '>', now()->subYear()->endOfYear());
+                    });
+            });
     }
 }

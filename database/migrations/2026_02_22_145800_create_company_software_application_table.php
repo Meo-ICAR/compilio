@@ -23,6 +23,8 @@ return new class extends Migration {
                 ->onDelete('set null');  // o cascade
             $table->unsignedInteger('software_application_id')->comment('ID del software');
             $table->string('status')->default('ATTIVO')->comment("Stato dell'associazione (es. ATTIVO, SOSPESO)");
+            $table->string('apikey')->nullable()->comment('API Key per il software');
+            $table->decimal('wallet_balance', 10, 2)->nullable()->comment('Saldo del wallet');
             $table->text('notes')->nullable()->comment("Note specifiche per l'azienda");
             $table->timestamps();
 

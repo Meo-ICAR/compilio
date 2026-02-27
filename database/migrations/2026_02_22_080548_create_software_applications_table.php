@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -23,6 +22,8 @@ return new class extends Migration
             $table->string('api_key_url')->nullable();
             $table->text('api_parameters')->nullable();
             $table->boolean('is_cloud')->nullable()->default(true)->comment('Indica se il software è SaaS/Cloud o On-Premise');
+            $table->string('apikey')->nullable()->comment('API Key per il software');
+            $table->decimal('wallet_balance', 10, 2)->nullable()->comment('Saldo del wallet');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });

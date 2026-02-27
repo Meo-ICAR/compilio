@@ -5,10 +5,12 @@ namespace App\Filament\Resources\Practices;
 use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Practices\Pages\CreatePractice;
 use App\Filament\Resources\Practices\Pages\EditPractice;
+use App\Filament\Resources\Practices\Pages\ListPracticeOAMs;
 use App\Filament\Resources\Practices\Pages\ListPractices;
 use App\Filament\Resources\Practices\RelationManagers\ClientsRelationManager;
 use App\Filament\Resources\Practices\RelationManagers\PracticeCommissionsRelationManager;
 use App\Filament\Resources\Practices\Schemas\PracticeForm;
+use App\Filament\Resources\Practices\Tables\PracticeOAMsTable;
 use App\Filament\Resources\Practices\Tables\PracticesTable;
 use App\Models\Practice;
 use Filament\Resources\Resource;
@@ -55,6 +57,18 @@ class PracticeResource extends Resource
             'index' => ListPractices::route('/'),
             'create' => CreatePractice::route('/create'),
             'edit' => EditPractice::route('/{record}/edit'),
+            'oam' => ListPracticeOAMs::route('/oam'),
+        ];
+    }
+
+    public static function getNavigationItems(): array
+    {
+        return [
+            ...parent::getNavigationItems(),
+            NavigationItem::make('OAM Vigilanza')
+                ->icon('heroicon-o-check-circle')
+                ->url(static::getUrl('oam'))
+                ->sort(2),
         ];
     }
 }

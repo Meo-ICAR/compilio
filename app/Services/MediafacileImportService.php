@@ -157,10 +157,11 @@ class MediafacileImportService
      */
     protected function processRecord(array $praticaData): void
     {
+        $tipoProdotto = strtolower($praticaData['tipo_prodotto']);
         $practiceSwType = SoftwareMapping::firstOrCreate(
-            ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $praticaData['tipo_prodotto']],
+            ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $tipoProdotto],
             [
-                'name' => $praticaData['tipo_prodotto'],
+                'name' => $tipoProdotto,
                 'internal_id' => 0,  // ID, da mappare correttamente in base alla logica di business
                 'description' => 'Mapping automatico da Mediafacile',
             ]
@@ -176,7 +177,7 @@ class MediafacileImportService
         }
         $praticaData['practice_scope_id'] = $practiceSwType->internal_id;
 
-        $statoPratica = $praticaData['stato_pratica'];
+        $statoPratica = strtolower($praticaData['stato_pratica']);
         $status = SoftwareMapping::firstOrCreate(
             ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_STATUS', 'external_value' => $statoPratica],
             [
@@ -197,63 +198,65 @@ class MediafacileImportService
 
         $existing = Practice::where('CRM_code', $praticaData['CRM_code'])->first();
 
-        if ($existing) {
-            $existing->update($praticaData);
-        } else {
-            $praticaData['company_id'] = $this->companyId;
-            // Software Mapping
+        // Gestione cliente
+        $client = null;
+        if (!empty($praticaData['codice_fiscale'])) {
+            $client = Client::firstOrCreate(
+                ['tax_code' => $praticaData['codice_fiscale'], 'company_id' => $this->companyId],
+                [
+                    'first_name' => $praticaData['nome_cliente'],
+                    'name' => $praticaData['cognome_cliente'],
+                    'company_id' => $this->companyId,
+                ]
+            );
+            $praticaData['client_id'] = $client->id;
+        }
+        if (!empty($client)) {
+            if ($existing) {
+                $existing->update($praticaData);
+            } else {
+                $praticaData['company_id'] = $this->companyId;
+                // Software Mapping
 
-            // Gestione cliente
-            if (!empty($praticaData['codice_fiscale'])) {
-                $client = Client::firstOrCreate(
-                    ['tax_code' => $praticaData['codice_fiscale'], 'company_id' => $this->companyId],
-                    [
-                        'first_name' => $praticaData['nome_cliente'],
-                        'name' => $praticaData['cognome_cliente'],
-                        'company_id' => $this->companyId,
-                    ]
-                );
-                $praticaData['client_id'] = $client->id;
-            }
+                // Gestione agente
+                if (!empty($praticaData['partita_iva_agente'])) {
+                    $agent = Agent::firstOrCreate(
+                        ['vat_number' => $praticaData['partita_iva_agente'], 'company_id' => $this->companyId],
+                        [
+                            'name' => $praticaData['denominazione_agente'],
+                            'company_id' => $this->companyId,
+                            'vat_number' => $praticaData['partita_iva_agente'],
+                        ]
+                    );
+                    $praticaData['agent_id'] = $agent->id;
+                }
 
-            // Gestione agente
-            if (!empty($praticaData['partita_iva_agente'])) {
-                $agent = Agent::firstOrCreate(
-                    ['vat_number' => $praticaData['partita_iva_agente'], 'company_id' => $this->companyId],
-                    [
-                        'name' => $praticaData['denominazione_agente'],
-                        'company_id' => $this->companyId,
-                        'vat_number' => $praticaData['partita_iva_agente'],
-                    ]
-                );
-                $praticaData['agent_id'] = $agent->id;
-            }
+                // Gestione della banca
+                if (!empty($praticaData['denominazione_banca'])) {
+                    $principal = Principal::firstOrCreate(
+                        ['name' => $praticaData['denominazione_banca'], 'company_id' => $this->companyId],
+                        [
+                            // altri campi se necessari
+                        ]
+                    );
+                    $praticaData['principal_id'] = $principal->id;
+                }
 
-            // Gestione della banca
-            if (!empty($praticaData['denominazione_banca'])) {
-                $principal = Principal::firstOrCreate(
-                    ['name' => $praticaData['denominazione_banca'], 'company_id' => $this->companyId],
-                    [
-                        // altri campi se necessari
-                    ]
-                );
-                $praticaData['principal_id'] = $principal->id;
-            }
+                $rateData = $this->parseDescription($praticaData['denominazione_prodotto']);
+                $praticaData['amount'] = $rateData['rata'] * $rateData['nrate'];
+                //  $praticaData['na'] = $rateData['nrate'];
+                $praticaData['name'] = $praticaData['denominazione_prodotto'];
 
-            $rateData = $this->parseDescription($praticaData['denominazione_prodotto']);
-            $praticaData['amount'] = $rateData['rata'] * $rateData['nrate'];
-            //  $praticaData['na'] = $rateData['nrate'];
-            $praticaData['name'] = $praticaData['denominazione_prodotto'];
-
-            $practice = Practice::create($praticaData);
-
-            // Associa la pratica al cliente
-            if ($client) {
+                $practice = Practice::create($praticaData);
                 ClientPractice::create([
                     'company_id' => $this->companyId,
                     'client_id' => $client->id,
                     'practice_id' => $practice->id,
                 ]);
+            }
+            if ($practice->isRejected() && !$practice->isPerfected() && empty($practice->rejected_at)) {
+                // TODO: inviare email al cliente
+                $practice->update(['rejected_at' => $practice->inserted_at->addMonth()]);
             }
         }
     }

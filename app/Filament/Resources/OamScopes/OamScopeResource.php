@@ -22,6 +22,9 @@ class OamScopeResource extends Resource
     protected static bool $isScopedToTenant = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
     protected static string|UnitEnum|null $navigationGroup = 'Elenchi';
+    protected static ?string $modelLabel = 'OAM Prodotto';
+    protected static ?string $pluralModelLabel = 'OAM Prodotti';
+    protected static ?int $navigationSort = 15;
 
     public static function form(Schema $schema): Schema
     {

@@ -22,6 +22,13 @@ class SoftwareApplication extends Model
         'api_key_url',
         'api_parameters',
         'is_cloud',
+        'apikey',
+        'wallet_balance',
+    ];
+
+    protected $casts = [
+        'is_cloud' => 'boolean',
+        'wallet_balance' => 'decimal:2',
     ];
 
     public function apiConfigurations(): HasMany
@@ -43,7 +50,7 @@ class SoftwareApplication extends Model
     {
         return $this
             ->belongsToMany(Company::class)
-            ->withPivot(['status', 'notes'])
+            ->withPivot(['status', 'notes', 'apikey', 'wallet_balance'])
             ->withTimestamps();
     }
 

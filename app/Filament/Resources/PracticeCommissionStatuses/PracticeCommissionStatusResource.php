@@ -8,17 +8,28 @@ use App\Filament\Resources\PracticeCommissionStatuses\Pages\ListPracticeCommissi
 use App\Filament\Resources\PracticeCommissionStatuses\Schemas\PracticeCommissionStatusForm;
 use App\Filament\Resources\PracticeCommissionStatuses\Tables\PracticeCommissionStatusesTable;
 use App\Models\PracticeCommissionStatus;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
+use UnitEnum;
 
 class PracticeCommissionStatusResource extends Resource
 {
     protected static ?string $model = PracticeCommissionStatus::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static bool $isScopedToTenant = false;
+
+    protected static ?string $navigationLabel = 'Pratiche status';
+
+    protected static ?string $modelLabel = 'Status';
+
+    protected static ?string $pluralModelLabel = 'Status';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
 
     public static function form(Schema $schema): Schema
     {

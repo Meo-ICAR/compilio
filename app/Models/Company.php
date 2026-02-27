@@ -85,7 +85,7 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
     {
         return $this
             ->belongsToMany(SoftwareApplication::class)
-            ->withPivot(['status', 'notes'])
+            ->withPivot(['status', 'notes', 'apikey', 'wallet_balance'])
             ->withTimestamps();
     }
 

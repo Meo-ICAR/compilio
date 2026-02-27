@@ -60,12 +60,16 @@ class MediafacileProvvigioniService
                 try {
                     $provvigioneData = $this->mapApiToModel($item);
 
+                    if (empty($provvigioneData['amount']) || $provvigioneData['amount'] == 0) {
+                        Log::warning('Skipping item without Importo: ' . json_encode($item));
+                        $result['errors']++;
+                        continue;
+                    }
                     if (empty($provvigioneData['ID Compenso'])) {
                         Log::warning('Skipping item without id: ' . json_encode($item));
                         $result['errors']++;
                         continue;
                     }
-
                     $this->processRecord($provvigioneData);
 
                     // Se non ha lanciato eccezioni, consideriamo il record processato
@@ -156,19 +160,19 @@ class MediafacileProvvigioniService
      */
     protected function processRecord(array $provvigioneData): void
     {
-        \Log::info('Processing provvigione record', $provvigioneData);
-
+        //    \Log::info('Processing provvigione record', $provvigioneData);
+        $statusPayment = strtolower($provvigioneData['status_payment']);
         $commissionStatus = SoftwareMapping::firstOrCreate(
-            ['software_application_id' => $this->softwareId, 'mapping_type' => 'COMMISSION_STATUS', 'external_value' => $provvigioneData['status_payment']],
+            ['software_application_id' => $this->softwareId, 'mapping_type' => 'COMMISSION_STATUS', 'external_value' => $statusPayment],
             [
-                'name' => $provvigioneData['status_payment'],
+                'name' => $statusPayment,
                 'description' => 'Mapping automatico da Mediafacile',
                 'internal_id' => 0,  // Default ID, da mappare correttamente in base al valore
             ]
         );
         if ($commissionStatus->internal_id === 0) {
             $practiceCommissionStatus = PracticeCommissionStatus::create([
-                'name' => $provvigioneData['status_payment'],
+                'name' => $statusPayment,
                 'code' => 'Mediafacile',
                 //  'description' => 'Mapping automatico da Mediafacile',
             ]);

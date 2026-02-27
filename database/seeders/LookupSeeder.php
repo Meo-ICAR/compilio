@@ -337,7 +337,7 @@ class LookupSeeder extends Seeder
         // Enasarco Limits
         \App\Models\EnasarcoLimit::firstOrCreate(['year' => 2024], ['name' => 'Massimali 2024', 'minimal_amount' => 1000, 'maximal_amount' => 45000]);
         \App\Models\EnasarcoLimit::firstOrCreate(['year' => 2025], ['name' => 'Massimali 2025', 'minimal_amount' => 1050, 'maximal_amount' => 46500]);
-        \App\Models\EnasarcoLimit::firstOrCreate(['year' => 2026], ['name' => 'Massimali 2025', 'minimal_amount' => 1050, 'maximal_amount' => 46500]);
+        \App\Models\EnasarcoLimit::firstOrCreate(['year' => 2026], ['name' => 'Massimali 2026', 'minimal_amount' => 1050, 'maximal_amount' => 46500]);
 
         // Practice Scopes
         $practiceScopes = [
@@ -650,7 +650,7 @@ class LookupSeeder extends Seeder
                         'external_value' => $data['external_value'],
                     ],
                     [
-                        'name' => $data['name'],
+                        'name' => strtolower($data['name']),
                         'internal_id' => $data['internal_id'],
                         'description' => $data['description'],
                         'code' => $data['code'],
@@ -661,42 +661,44 @@ class LookupSeeder extends Seeder
             }
 
             $pratcticeStatuses = [
-                ['code' => 'ACCETTATO PREVENTIVO', 'name' => 'accettato preventivo', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'Approvata', 'name' => 'approvata', 'color' => 'success', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'CARICATA BANCA', 'name' => 'caricata banca', 'color' => 'warning', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'Chiusa', 'name' => 'chiusa', 'color' => 'gray', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => 1, 'is_completed' => null],
-                ['code' => 'DECLINATA', 'name' => 'declinata', 'color' => 'danger', 'is_working' => null, 'is_rejected' => 1, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'DELIBERATA', 'name' => 'deliberata', 'color' => 'success', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'ESTINTO', 'name' => 'estinto', 'color' => 'gray', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'FASCICOLO COMPLETO', 'name' => 'fascicolo completo', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'IN AMMORTAMENTO', 'name' => 'in ammortamento', 'color' => 'success', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => 1],
-                ['code' => 'In attesa documenti originali', 'name' => 'in attesa documenti originali', 'color' => 'warning', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'Inserita', 'name' => 'inserita', 'color' => 'gray', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'Invio in istruttoria', 'name' => 'invio in istruttoria', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'LIQUIDATA', 'name' => 'liquidata', 'color' => 'success', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => 1],
-                ['code' => 'NOTIFICA', 'name' => 'notifica', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'PERFEZIONATA', 'name' => 'perfezionata', 'color' => 'success', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => 1, 'is_completed' => null],
-                ['code' => 'PRATICA RESPINTA', 'name' => 'pratica respinta', 'color' => 'danger', 'is_working' => null, 'is_rejected' => 1, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'Richiesta Polizza', 'name' => 'richiesta polizza', 'color' => 'warning', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'RIENTRO BENESTARE', 'name' => 'rientro benestare', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'RIENTRO POLIZZA', 'name' => 'rientro polizza', 'color' => 'info', 'is_working' => 1, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'RINNOVABILE', 'name' => 'rinnovabile', 'color' => 'info', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => 1],
-                ['code' => 'RINUNCIA CLIENTE', 'name' => 'rinuncia cliente', 'color' => 'danger', 'is_working' => null, 'is_rejected' => 1, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'SOSPESA', 'name' => 'sospesa', 'color' => 'warning', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
-                ['code' => 'Sospesa Istruttoria Interna', 'name' => 'sospesa istruttoria interna', 'color' => 'warning', 'is_working' => null, 'is_rejected' => null, 'is_perfectioned' => null, 'is_completed' => null],
+                ['code' => 'ACCETTATO PREVENTIVO', 'name' => 'accettato preventivo', 'ordine' => null, 'color' => 'info', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'Approvata', 'name' => 'approvata', 'ordine' => null, 'color' => 'success', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'CARICATA BANCA', 'name' => 'caricata banca', 'ordine' => null, 'color' => 'warning', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'Chiusa', 'name' => 'chiusa', 'ordine' => null, 'color' => 'gray', 'is_rejected' => null, 'is_working' => null, 'is_completed' => null, 'is_perfectioned' => 1, 'rejected_month' => 0],
+                ['code' => 'DECLINATA', 'name' => 'declinata', 'ordine' => null, 'color' => 'danger', 'is_rejected' => 1, 'is_working' => null, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 1],
+                ['code' => 'DELIBERATA', 'name' => 'deliberata', 'ordine' => null, 'color' => 'success', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'ESTINTO', 'name' => 'estinto', 'ordine' => null, 'color' => 'gray', 'is_rejected' => null, 'is_working' => null, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'FASCICOLO COMPLETO', 'name' => 'fascicolo completo', 'ordine' => null, 'color' => 'info', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'IN AMMORTAMENTO', 'name' => 'in ammortamento', 'ordine' => null, 'color' => 'success', 'is_rejected' => null, 'is_working' => null, 'is_completed' => 1, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'In attesa documenti originali', 'name' => 'in attesa documenti originali', 'ordine' => null, 'color' => 'warning', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'Inserita', 'name' => 'inserita', 'ordine' => null, 'color' => 'gray', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'Invio in istruttoria', 'name' => 'invio in istruttoria', 'ordine' => null, 'color' => 'info', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'LIQUIDATA', 'name' => 'liquidata', 'ordine' => null, 'color' => 'success', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => 1, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'NOTIFICA', 'name' => 'notifica', 'ordine' => null, 'color' => 'info', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'PERFEZIONATA', 'name' => 'perfezionata', 'ordine' => null, 'color' => 'success', 'is_rejected' => null, 'is_working' => null, 'is_completed' => null, 'is_perfectioned' => 1, 'rejected_month' => 0],
+                ['code' => 'PRATICA RESPINTA', 'name' => 'pratica respinta', 'ordine' => null, 'color' => 'danger', 'is_rejected' => 1, 'is_working' => null, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 1],
+                ['code' => 'Richiesta Polizza', 'name' => 'richiesta polizza', 'ordine' => null, 'color' => 'warning', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'RIENTRO BENESTARE', 'name' => 'rientro benestare', 'ordine' => null, 'color' => 'info', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'RIENTRO POLIZZA', 'name' => 'rientro polizza', 'ordine' => null, 'color' => 'info', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'RINNOVABILE', 'name' => 'rinnovabile', 'ordine' => null, 'color' => 'info', 'is_rejected' => null, 'is_working' => null, 'is_completed' => 1, 'is_perfectioned' => 1, 'rejected_month' => 0],
+                ['code' => 'RINUNCIA CLIENTE', 'name' => 'rinuncia cliente', 'ordine' => null, 'color' => 'danger', 'is_rejected' => 1, 'is_working' => null, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 1],
+                ['code' => 'SOSPESA', 'name' => 'sospesa', 'ordine' => null, 'color' => 'warning', 'is_rejected' => null, 'is_working' => 1, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
+                ['code' => 'Sospesa Istruttoria Interna', 'name' => 'sospesa istruttoria interna', 'ordine' => null, 'color' => 'warning', 'is_rejected' => null, 'is_working' => null, 'is_completed' => null, 'is_perfectioned' => null, 'rejected_month' => 0],
             ];
+
             foreach ($pratcticeStatuses as $status) {
                 \App\Models\PracticeStatus::firstOrCreate(
                     [
                         'code' => $status['code'],
                     ],
                     [
-                        'name' => $status['name'],
+                        'name' => strtolower($status['name']),
                         'color' => $status['color'],
                         'is_working' => $status['is_working'],
                         'is_rejected' => $status['is_rejected'],
                         'is_perfectioned' => $status['is_perfectioned'],
                         'is_completed' => $status['is_completed'],
+                        'rejected_month' => $status['rejected_month'],
                     ]
                 );
             }

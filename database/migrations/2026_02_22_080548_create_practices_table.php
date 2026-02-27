@@ -36,6 +36,7 @@ return new class extends Migration {
             // Lo stato governato da Spatie Model States
             $table->string('status', 50)->nullable()->default('istruttoria')->comment('Stato: istruttoria, deliberata, erogata, respinta');
             $table->date('inserted_at')->nullable()->comment('Data inserimento pratica');
+            $table->date('rejected_at')->nullable()->comment('Data rifiuto pratica');
             $table->date('status_at')->nullable()->comment('Data stato');
             $table->text('description')->nullable()->comment('Descrizione pratica');
             $table->text('annotation')->nullable()->comment('Annotazioni pratica');
