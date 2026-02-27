@@ -168,7 +168,7 @@ class MediafacileImportService
         );
         if ($practiceSwType->internal_id === 0) {
             $practiceScope = PracticeScope::create([
-                'name' => $praticaData['tipo_prodotto'],
+                'name' => $tipoProdotto,
                 'code' => 'Mediafacile',
                 //  'description' => 'Mapping automatico da Mediafacile',
             ]);
@@ -247,16 +247,26 @@ class MediafacileImportService
                 //  $praticaData['na'] = $rateData['nrate'];
                 $praticaData['name'] = $praticaData['denominazione_prodotto'];
 
-                $practice = Practice::create($praticaData);
+                $existing = Practice::create($praticaData);
                 ClientPractice::create([
                     'company_id' => $this->companyId,
                     'client_id' => $client->id,
-                    'practice_id' => $practice->id,
+                    'practice_id' => $existing->id,
                 ]);
             }
-            if ($practice->isRejected() && !$practice->isPerfected() && empty($practice->rejected_at)) {
-                // TODO: inviare email al cliente
-                $practice->update(['rejected_at' => $practice->inserted_at->addMonth()]);
+        }
+
+        // Check if existing practice exists before calling methods
+        if ($existing) {
+            $practiceStatus = PracticeStatus::where('code', $existing->stato_pratica)->first();
+            if ($practiceStatus) {
+                $existing->update(['status' => $practiceStatus->status,
+                    'practice_status_id' => $practiceStatus->id]);
+                if ($practiceStatus->is_rejected && !$existing->isPerfectedStatus() && empty($existing->rejected_at)) {
+                    // TODO: inviare email al cliente
+                    $existing->update(['rejected_at' => $existing->inserted_at->addMonth(), 'status' => 'rejected']);
+                }
+                $existing->save();
             }
         }
     }

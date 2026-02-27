@@ -12,6 +12,7 @@ class PracticeStatus extends Model
         'code',
         'name',
         'ordine',
+        'status',
         'color',
         'is_rejected',
         'is_working',

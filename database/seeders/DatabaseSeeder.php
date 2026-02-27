@@ -21,11 +21,14 @@ class DatabaseSeeder extends Seeder
             SupportSeeder::class,
             OamScopeSeeder::class,
             FirrSeeder::class,
+            PracticeCommissionStatusSeeder::class,
             FilamentUserSeeder::class,
-            AuditChecklistSeeder::class,
-            CessioneQuintoChecklistSeeder::class,
             AmlChecklistSeeder::class,
+            AuditChecklistSeeder::class,
+            BankAuditCompanyChecklistSeeder::class,
+            CessioneQuintoChecklistSeeder::class,
             MutuoImmobiliareChecklistSeeder::class,
+            ComplianceSeeder::class,
         ]);
     }
 }

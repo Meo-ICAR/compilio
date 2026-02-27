@@ -7,26 +7,26 @@ use Filament\Support\Contracts\HasLabel;
 
 enum PracticeStatus: string implements HasLabel, HasColor
 {
-    case ISTRUTTORIA = 'istruttoria';
-    case DELIBERATA = 'deliberata';
-    case EROGATA = 'erogata';
-    case RESPINTA = 'respinta';
+    case ISTRUTTORIA = 'working';
+    case RESPINTA = 'rejected';
+    case EROGATA = 'perfected';
+    case RINNOVABILE = 'renewable';
 
     public function getLabel(): ?string
     {
         return match ($this) {
             self::ISTRUTTORIA => 'In Istruttoria',
-            self::DELIBERATA => 'Deliberata',
+            self::RESPINTA => 'Deliberata',
             self::EROGATA => 'Erogata',
-            self::RESPINTA => 'Respinta',
+            self::RINNOVABILE => 'Respinta',
         };
     }
 
-    public function getColor(): string | array | null
+    public function getColor(): string|array|null
     {
         return match ($this) {
             self::ISTRUTTORIA => 'warning',
-            self::DELIBERATA => 'info',
+            self::RINNOVABILE => 'info',
             self::EROGATA => 'success',
             self::RESPINTA => 'danger',
         };

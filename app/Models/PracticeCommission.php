@@ -82,7 +82,7 @@ class PracticeCommission extends Model
         return $this->belongsTo(PracticeCommissionStatus::class);
     }
 
-    public function isPerfected()
+    public function isPerfectedStatus()
     {
         return $this->practiceCommissionStatus?->is_perfectioned ?? false;
     }

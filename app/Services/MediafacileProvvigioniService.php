@@ -179,7 +179,7 @@ class MediafacileProvvigioniService
             $commissionStatus->internal_id = $practiceCommissionStatus->id;
             $commissionStatus->save();
         }
-        $praticaData['practice_commission_status_id'] = $commissionStatus->internal_id;
+        $provvigioneData['practice_commission_status_id'] = $commissionStatus->internal_id;
 
         $practice = Practice::firstOrCreate(
             ['company_id' => $this->companyId, 'CRM_code' => $provvigioneData['id_pratica']],
@@ -250,11 +250,26 @@ class MediafacileProvvigioniService
 
                 $provvigioneData['name'] = $provvigioneData['descrizione'];
 
-                $practiceCommission = PracticeCommission::create($provvigioneData);
+                $existing = PracticeCommission::create($provvigioneData);
             }
-            if ($practiceCommission && $practiceCommission->isPerfected() && !$practice->isPerfected()) {
-                // TODO: inviare email al cliente
-                $practice->update(['perfected_at' => $practiceCommission->status_at]);
+        }
+
+        /*
+         * \Log::info('Update pratica status', [
+         *     'practice_id' => $practice->id,
+         *     'practice_commission_id' => $practiceCommission->id,
+         *     'is_perfected' => $practiceCommission->isPerfected(),
+         *     'is_practice_perfected' => $practice->isPerfectedStatus(),
+         * ]);
+         */
+        if ($existing) {
+            if ($existing->isPerfectedStatus()) {
+                if (!$practice->isPerfectedStatus()) {
+                    $practice->update(['perfected_at' => $existing->status_at, 'status' => 'perfected']);
+                }
+                if (empty($existing->perfected_at)) {
+                    $existing->update(['perfected_at' => $existing->status_at]);
+                }
             }
         }
     }

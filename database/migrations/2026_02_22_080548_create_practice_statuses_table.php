@@ -16,7 +16,8 @@ return new class extends Migration {
             $table->increments('id');
             $table->string('code', 50)->comment('Codice dello stato (es. istruttoria, delibera, erogata, annullata)')->nullable();
             $table->string('name')->nullable()->comment('Descrizione');
-            $table->string('ordine', 5)->comment('Ordine stato (es. istruttoria, delibera, erogata, annullata)')->nullable();
+            $table->string('ordine', 5)->comment('Ordine stato per workflow operatore')->nullable();
+            $table->string('status', 20)->comment('Stato pratica working / rejected / perfected / renewable')->nullable();
             $table->string('color', 20)->comment('Colore dello stato')->nullable();
             $table->boolean('is_rejected')->nullable()->default(false)->comment('Stato respinto');
             $table->boolean('is_working')->nullable()->default(false)->comment('Stato in lavorazione');
