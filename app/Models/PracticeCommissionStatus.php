@@ -10,6 +10,7 @@ class PracticeCommissionStatus extends Model
 
     protected $fillable = [
         'status_payment',
+        'name',
         'code',
         'is_perfectioned',
         'is_working',

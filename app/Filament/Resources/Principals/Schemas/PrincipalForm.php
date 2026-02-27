@@ -4,8 +4,8 @@ namespace App\Filament\Resources\Principals\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
@@ -35,12 +35,16 @@ class PrincipalForm
                 Toggle::make('is_exclusive'),
                 Select::make('status')
                     ->options([
-            'ATTIVO' => 'A t t i v o',
-            'SCADUTO' => 'S c a d u t o',
-            'RECEDUTO' => 'R e c e d u t o',
-            'SOPESO' => 'S o p e s o',
-        ])
+                        'ATTIVO' => 'A t t i v o',
+                        'SCADUTO' => 'S c a d u t o',
+                        'RECEDUTO' => 'R e c e d u t o',
+                        'SOPESO' => 'S o p e s o',
+                    ])
                     ->default('ATTIVO'),
+                Toggle::make('is_dummy')
+                    ->label('Mandante Fittizio')
+                    ->helperText('Seleziona se il mandante è fittizio o non convenzionato')
+                    ->default(false),
                 Textarea::make('notes')
                     ->columnSpanFull(),
             ]);

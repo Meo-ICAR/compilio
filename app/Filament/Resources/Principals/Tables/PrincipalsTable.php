@@ -54,6 +54,13 @@ class PrincipalsTable
                     ->boolean(),
                 TextColumn::make('status')
                     ->badge(),
+                IconColumn::make('is_dummy')
+                    ->label('Fittizio')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-exclamation-triangle')
+                    ->falseIcon('heroicon-o-building-office')
+                    ->color(fn($state) => $state ? 'warning' : 'success')
+                    ->tooltip(fn($record) => $record->is_dummy ? 'Mandante fittizio / non convenzionato' : 'Mandante convenzionato'),
             ])
             ->filters([
                 //

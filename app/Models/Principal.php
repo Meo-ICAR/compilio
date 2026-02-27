@@ -19,6 +19,7 @@ class Principal extends Model
         'start_date',
         'type',
         'status',
+        'is_dummy',
     ];
 
     public function mandates()

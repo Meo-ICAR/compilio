@@ -166,7 +166,7 @@ class MediafacileImportService
             ]
         );
         if ($practiceSwType->internal_id === 0) {
-            $practiceScope = PracticeScope::insert([
+            $practiceScope = PracticeScope::create([
                 'name' => $praticaData['tipo_prodotto'],
                 'code' => 'Mediafacile',
                 //  'description' => 'Mapping automatico da Mediafacile',
@@ -186,11 +186,11 @@ class MediafacileImportService
             ]
         );
         if ($status->internal_id === 0) {
-            $practiceScope = PracticeStatus::insert([
+            $practiceStatus = PracticeStatus::create([
                 'name' => $statoPratica,
                 'code' => 'Mediafacile',
             ]);
-            $status->internal_id = $practiceScope->id;
+            $status->internal_id = $practiceStatus->id;
             $status->save();
         }
         $praticaData['practice_status_id'] = $status->internal_id;
@@ -204,35 +204,41 @@ class MediafacileImportService
             // Software Mapping
 
             // Gestione cliente
-            $client = Client::firstOrCreate(
-                ['tax_code' => $praticaData['codice_fiscale'], 'company_id' => $this->companyId],
-                [
-                    'first_name' => $praticaData['nome_cliente'],
-                    'name' => $praticaData['cognome_cliente'],
-                    'company_id' => $this->companyId,
-                ]
-            );
-            $praticaData['client_id'] = $client->id;
+            if (!empty($praticaData['codice_fiscale'])) {
+                $client = Client::firstOrCreate(
+                    ['tax_code' => $praticaData['codice_fiscale'], 'company_id' => $this->companyId],
+                    [
+                        'first_name' => $praticaData['nome_cliente'],
+                        'name' => $praticaData['cognome_cliente'],
+                        'company_id' => $this->companyId,
+                    ]
+                );
+                $praticaData['client_id'] = $client->id;
+            }
 
             // Gestione agente
-            $agent = Agent::firstOrCreate(
-                ['vat_number' => $praticaData['partita_iva_agente'], 'company_id' => $this->companyId],
-                [
-                    'name' => $praticaData['denominazione_agente'],
-                    'company_id' => $this->companyId,
-                    'vat_number' => $praticaData['partita_iva_agente'],
-                ]
-            );
-            $praticaData['agent_id'] = $agent->id;
+            if (!empty($praticaData['partita_iva_agente'])) {
+                $agent = Agent::firstOrCreate(
+                    ['vat_number' => $praticaData['partita_iva_agente'], 'company_id' => $this->companyId],
+                    [
+                        'name' => $praticaData['denominazione_agente'],
+                        'company_id' => $this->companyId,
+                        'vat_number' => $praticaData['partita_iva_agente'],
+                    ]
+                );
+                $praticaData['agent_id'] = $agent->id;
+            }
 
             // Gestione della banca
-            $principal = Principal::firstOrCreate(
-                ['name' => $praticaData['denominazione_banca'], 'company_id' => $this->companyId],
-                [
-                    // altri campi se necessari
-                ]
-            );
-            $praticaData['principal_id'] = $principal->id;
+            if (!empty($praticaData['denominazione_banca'])) {
+                $principal = Principal::firstOrCreate(
+                    ['name' => $praticaData['denominazione_banca'], 'company_id' => $this->companyId],
+                    [
+                        // altri campi se necessari
+                    ]
+                );
+                $praticaData['principal_id'] = $principal->id;
+            }
 
             $rateData = $this->parseDescription($praticaData['denominazione_prodotto']);
             $praticaData['amount'] = $rateData['rata'] * $rateData['nrate'];
@@ -242,11 +248,13 @@ class MediafacileImportService
             $practice = Practice::create($praticaData);
 
             // Associa la pratica al cliente
-            ClientPractice::create([
-                'company_id' => $this->companyId,
-                'client_id' => $client->id,
-                'practice_id' => $practice->id,
-            ]);
+            if ($client) {
+                ClientPractice::create([
+                    'company_id' => $this->companyId,
+                    'client_id' => $client->id,
+                    'practice_id' => $practice->id,
+                ]);
+            }
         }
     }
 

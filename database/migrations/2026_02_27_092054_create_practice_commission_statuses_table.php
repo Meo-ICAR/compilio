@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('practice_commission_statuses', function (Blueprint $table) {
             $table->tinyIncrements('id');
-            $table->string('status_payment', 255)->nullable()->comment('Stato pagamento');
+            $table->string('name', 255)->nullable()->comment('Stato pagamento');
             $table->string('code', 20)->nullable();
             $table->boolean('is_perfectioned')->nullable();
             $table->boolean('is_working')->nullable();

@@ -163,13 +163,19 @@ class MediafacileProvvigioniService
             [
                 'name' => $provvigioneData['status_payment'],
                 'description' => 'Mapping automatico da Mediafacile',
+                'internal_id' => 0,  // Default ID, da mappare correttamente in base al valore
             ]
         );
-        $statusid = $commissionStatus->internal_id;
-        $practiceStatus = PracticeCommissionStatus::find($statusid);
-        if ($practiceStatus) {
-            $praticaData['practice_commission_status_id'] = $practiceStatus->id;
+        if ($commissionStatus->internal_id === 0) {
+            $practiceCommissionStatus = PracticeCommissionStatus::create([
+                'name' => $provvigioneData['status_payment'],
+                'code' => 'Mediafacile',
+                //  'description' => 'Mapping automatico da Mediafacile',
+            ]);
+            $commissionStatus->internal_id = $practiceCommissionStatus->id;
+            $commissionStatus->save();
         }
+        $praticaData['practice_commission_status_id'] = $commissionStatus->internal_id;
 
         $practice = Practice::firstOrCreate(
             ['company_id' => $this->companyId, 'CRM_code' => $provvigioneData['id_pratica']],
