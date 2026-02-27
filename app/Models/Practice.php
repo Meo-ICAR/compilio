@@ -134,23 +134,28 @@ class Practice extends Model
         return !empty($this->perfected_at);
     }
 
-    public function isWorkingLastYearStatus()
+    public function checkWorkingLastYear()
     {
         $lastYear = now()->subYear()->endOfYear();
-        return $this->practiceStatus?->is_working && $this->inserted_at < $lastYear && !$this->isPerfectedLastYearStatus() && !$this->isRejectedLastYearStatus() ?? false;
+        if (!$this->checkRejectedLastYear() || !$this->checkPerfectedLastYear()) {
+            return false;
+        }
+        return $this->practiceStatus?->is_working && $this->inserted_at < $lastYear;
     }
 
-    public function isRejectedLastYearStatus()
+    public function checkRejectedLastYear()
     {
         $lastYear = now()->subYear()->endOfYear();
         $startYear = now()->subYear()->startOfYear();
-        return $this->practiceStatus?->is_rejectedStatus() &&
-            $this->inserted_at < $lastYear &&
+        if (!$this->practiceStatus?->is_rejectedStatus()) {
+            return false;
+        }
+        return $this->inserted_at < $lastYear &&
             $this->rejected_at < $lastYear &&
             $this->rejected_at > $startYear ?? false;
     }
 
-    public function isPerfectedLastYearStatus()
+    public function checkPerfectedLastYear()
     {
         $lastYear = now()->subYear()->endOfYear();
         $startYear = now()->subYear()->startOfYear();
@@ -163,9 +168,9 @@ class Practice extends Model
     public function OAMisLastYearStatus()
     {
         return $this->isOAMname() && (
-            $this->isWorkingLastYearStatus() ||
-            $this->isPerfectedLastYearStatus() ||
-            $this->isRejectedLastYearStatus()
+            $this->checkWorkingLastYear() ||
+            $this->checkPerfectedLastYear() ||
+            $this->checkRejectedLastYear()
         );
     }
 

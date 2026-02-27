@@ -25,6 +25,7 @@ use Filament\Forms;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;  // ← Import corretto
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder as Builderq;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Excel;
 
@@ -32,47 +33,98 @@ class PracticeOAMsTable
 {
     public static function configure(Table $table): Table
     {
+        $lastYear = now()->subYear()->endOfYear();
+        $startYear = now()->subYear()->startOfYear();
         return $table
-            ->groups([
-                Group::make('practiceScopeOAM')
-                    ->label('Tipo Pratica')
-                    ->collapsible(),  // SOSTITUISCE le vecchie impostazioni di groupingSettings
-            ])
+            ->query(function () use ($lastYear, $startYear) {
+                return Practice::query()
+                    ->with(['practiceScope', 'practiceScope.oamScope', 'practiceStatus'])
+                    ->where('inserted_at', '<', $lastYear)
+                    ->where(function ($query) use ($lastYear, $startYear) {
+                        // Condizione 1: Non rifiutata E inserita dopo inizio anno
+                        $query
+                            ->whereNull('rejected_at')
+                            ->where('inserted_at', '>', $startYear);
+
+                        // OR Condizione 2: Rifiutata nell'anno precedente
+                        $query->orWhere(function ($query) use ($lastYear, $startYear) {
+                            $query
+                                ->whereNotNull('rejected_at')
+                                ->where('rejected_at', '<', $lastYear)
+                                ->where('rejected_at', '>', $startYear);
+                        });
+
+                        // OR Condizione 3: Non perfezionata E inserita dopo inizio anno
+                        $query->orWhere(function ($query) use ($startYear) {
+                            $query
+                                ->whereNull('perfected_at')
+                                ->where('inserted_at', '>', $startYear);
+                        });
+
+                        // OR Condizione 4: Perfezionata nell'anno precedente
+                        $query->orWhere(function ($query) use ($lastYear, $startYear) {
+                            $query
+                                ->whereNotNull('perfected_at')
+                                ->where('perfected_at', '<', $lastYear)
+                                ->where('perfected_at', '>', $startYear);
+                        });
+                    })
+                    ->whereHas('practiceScope', function ($query) {
+                        $query
+                            ->whereNotNull('oam_code')
+                            ->where('oam_code', '!=', '');
+                    })
+                    ->whereHas('practiceStatus', function ($query) {
+                        $query
+                            ->where('is_working', true)
+                            ->orWhere('is_perfectioned', true);
+                    })
+                    ->limit(15);
+            })
+            /*
+             * ->groups([
+             *     Group::make('practiceScope.name')
+             *         ->label('OAM Scope')
+             *         ->titlePrefixedWithLabel(false)
+             *         ->collapsible()
+             *         ->getTitleFromRecordUsing(function (Practice $record): string {
+             *             $scopeName = $record->practiceScope?->name ?? 'N/A';
+             *             $count = Practice::whereHas('practiceScope', function ($query) use ($record) {
+             *                 $query->where('name', $record->practiceScope?->name);
+             *             })->count();
+             *             return "{$scopeName} ({$count})";
+             *         }),
+             * ])
+             * //  ->collapsedGroupsByDefault()
+             * ->groupsOnly()
+             */
             ->columns([
-                TextColumn::make('practiceScopeOAM')
+                TextColumn::make('practiceScope.name')
                     ->label('OAM Scope')
-                    ->getStateUsing(fn(Practice $record): string => $record->practiceScopeOAM() ?? 'N/A')
+                    //  ->getStateUsing(fn(Practice $record): string => $record->practiceScope?->oamScope?->name ?? 'N/A')
                     ->searchable()
                     ->sortable(),
-                IconColumn::make('isPerfectedLastYearStatus')
-                    ->label('Perfected Last Year')
-                    //     ->getStateUsing(fn(Practice $record): bool => $record->isPerfectedLastYear())
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle')
-                    ->trueColor('success')
-                    ->falseColor('danger'),
+                TextColumn::make('amount')
+                    ->label('In Lavorazione')
+                    ->searchable()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label('')->query(fn(Builderq $query) => $query->whereNull('perfected_at')))
+                    ->sortable(),
+                TextColumn::make('inserted_at')
+                    ->label('Inserted At')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('amount')
                     ->label('Perfezionato')
                     ->searchable()
                     ->money('EUR')  // Forza Euro e formato italiano
                     ->alignEnd()
-                    ->summarize(Sum::make()->money('EUR')->label(''))
+                    ->summarize(Sum::make()->money('EUR')->label('')->query(fn(Builderq $query) => $query->whereNotNull('perfected_at')))
                     ->sortable(),
-                IconColumn::make('isWorkingLastYearStatus')
-                    ->label('Working Last Year')
-                    // ->getStateUsing(fn(Practice $record): bool => $record->isWorkingLastYear())
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle')
-                    ->trueColor('success')
-                    ->falseColor('danger'),
-                TextColumn::make('amount')
-                    ->label('Lavorazione')
+                TextColumn::make('perfected_at')
+                    ->label('Perfezionato Il')
                     ->searchable()
-                    ->money('EUR')  // Forza Euro e formato italiano
-                    ->alignEnd()
-                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('CRM_code')
                     ->label('Code')
@@ -82,28 +134,6 @@ class PracticeOAMsTable
                     ->label('Practice Name')
                     ->searchable()
                     ->sortable(),
-                IconColumn::make('isRejectedLastYearStatus')
-                    ->label('Rejected Last Year')
-                    //            ->getStateUsing(fn(Practice $record): bool => $record->isRejectedLastYearStatus())
-                    ->boolean()
-                    ->trueIcon('heroicon-o-x-circle')
-                    ->falseIcon('heroicon-o-check-circle')
-                    ->trueColor('danger')
-                    ->falseColor('success'),
-                TextColumn::make('inserted_at')
-                    ->label('Inserted At')
-                    ->dateTime('d/m/Y')
-                    ->sortable(),
-                TextColumn::make('perfected_at')
-                    ->label('Perfected At')
-                    ->dateTime('d/m/Y')
-                    ->sortable()
-                    ->default('N/A'),
-                TextColumn::make('rejected_at')
-                    ->label('Rejected At')
-                    ->dateTime('d/m/Y')
-                    ->sortable()
-                    ->default('N/A'),
             ])
             ->filters([])
             ->actions([
