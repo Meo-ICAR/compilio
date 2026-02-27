@@ -119,45 +119,53 @@ class Practice extends Model
         });
     }
 
-    public function isWorking()
+    public function isWorkingStatus()
     {
         return $this->practiceStatus?->is_working ?? false;
     }
 
-    public function isWorkingLastYear()
-    {
-        $lastYear = now()->subYear()->endOfYear();
-        return $this->practiceStatus?->is_working && $this->inserted_at < $lastYear && !isPerfectedLastYear() && !isRejectedLastYear() ?? false;
-    }
-
-    public function isRejected()
+    public function isRejectedStatus()
     {
         return $this->practiceStatus?->is_rejected ?? false;
     }
 
-    public function isRejectedLastYear()
+    public function isPerfectedStatus()
+    {
+        return !empty($this->perfected_at);
+    }
+
+    public function isWorkingLastYearStatus()
     {
         $lastYear = now()->subYear()->endOfYear();
-        return $this->practiceStatus?->is_rejected &&
+        return $this->practiceStatus?->is_working && $this->inserted_at < $lastYear && !$this->isPerfectedLastYearStatus() && !$this->isRejectedLastYearStatus() ?? false;
+    }
+
+    public function isRejectedLastYearStatus()
+    {
+        $lastYear = now()->subYear()->endOfYear();
+        $startYear = now()->subYear()->startOfYear();
+        return $this->practiceStatus?->is_rejectedStatus() &&
             $this->inserted_at < $lastYear &&
-            $this->rejected_at < $lastYear ?? false;
+            $this->rejected_at < $lastYear &&
+            $this->rejected_at > $startYear ?? false;
     }
 
-    public function isPerfectedLastYear()
+    public function isPerfectedLastYearStatus()
     {
         $lastYear = now()->subYear()->endOfYear();
-        return !empty($this->perfected_at) &&
-            $this->perfected_at < $lastYear &&
-            $this->inserted_at < $lastYear
-                ?? false;
+        $startYear = now()->subYear()->startOfYear();
+        return $this->practiceStatus?->is_perfectedStatus() &&
+            $this->inserted_at < $lastYear &&
+            $this->perfected_at > $startYear &&
+            $this->perfected_at < $lastYear ?? false;
     }
 
-    public function OAMisLastYear()
+    public function OAMisLastYearStatus()
     {
         return $this->isOAMname() && (
-            $this->isWorkingLastYear() ||
-            $this->isPerfectedLastYear() ||
-            $this->isRejectedLastYear()
+            $this->isWorkingLastYearStatus() ||
+            $this->isPerfectedLastYearStatus() ||
+            $this->isRejectedLastYearStatus()
         );
     }
 

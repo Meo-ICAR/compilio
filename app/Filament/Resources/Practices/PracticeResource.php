@@ -13,6 +13,7 @@ use App\Filament\Resources\Practices\Schemas\PracticeForm;
 use App\Filament\Resources\Practices\Tables\PracticeOAMsTable;
 use App\Filament\Resources\Practices\Tables\PracticesTable;
 use App\Models\Practice;
+use Filament\Navigation\NavigationItem;  // Add this import at the top
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;

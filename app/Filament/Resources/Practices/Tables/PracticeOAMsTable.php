@@ -33,10 +33,6 @@ class PracticeOAMsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(Provvigione::query()
-                ->where('is_OAM_last_year', true)
-            //  ->whereNot('annullato', 1))
-            )
             ->groups([
                 Group::make('practiceScopeOAM')
                     ->label('Tipo Pratica')
@@ -48,9 +44,9 @@ class PracticeOAMsTable
                     ->getStateUsing(fn(Practice $record): string => $record->practiceScopeOAM() ?? 'N/A')
                     ->searchable()
                     ->sortable(),
-                IconColumn::make('isPerfectedLastYear')
+                IconColumn::make('isPerfectedLastYearStatus')
                     ->label('Perfected Last Year')
-                    ->getStateUsing(fn(Practice $record): bool => $record->isPerfectedLastYear())
+                    //     ->getStateUsing(fn(Practice $record): bool => $record->isPerfectedLastYear())
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
@@ -63,9 +59,9 @@ class PracticeOAMsTable
                     ->alignEnd()
                     ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
-                IconColumn::make('isWorkingLastYear')
+                IconColumn::make('isWorkingLastYearStatus')
                     ->label('Working Last Year')
-                    ->getStateUsing(fn(Practice $record): bool => $record->isWorkingLastYear())
+                    // ->getStateUsing(fn(Practice $record): bool => $record->isWorkingLastYear())
                     ->boolean()
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
@@ -86,9 +82,9 @@ class PracticeOAMsTable
                     ->label('Practice Name')
                     ->searchable()
                     ->sortable(),
-                IconColumn::make('isRejectedLastYear')
+                IconColumn::make('isRejectedLastYearStatus')
                     ->label('Rejected Last Year')
-                    ->getStateUsing(fn(Practice $record): bool => $record->isRejectedLastYear())
+                    //            ->getStateUsing(fn(Practice $record): bool => $record->isRejectedLastYearStatus())
                     ->boolean()
                     ->trueIcon('heroicon-o-x-circle')
                     ->falseIcon('heroicon-o-check-circle')
@@ -109,21 +105,13 @@ class PracticeOAMsTable
                     ->sortable()
                     ->default('N/A'),
             ])
-            ->filters([
-                SelectFilter::make('oam_status')
-                    ->label('OAM Status')
-                    ->options([
-                        'working' => 'Working Last Year',
-                        'rejected' => 'Rejected Last Year',
-                        'perfected' => 'Perfected Last Year',
-                    ])
-            ])
+            ->filters([])
             ->actions([
                 ViewAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    //    DeleteBulkAction::make(),
                 ]),
             ]);
     }
