@@ -3,11 +3,24 @@
 namespace App\Filament\Resources\Companies\RelationManagers;
 
 use App\Models\SoftwareApplication;
-use Filament\Forms;
+use Filament\Actions\Action;
+use Filament\Actions\AttachAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Filament\Forms;
+use Filament\Tables;
 
 class SoftwareApplicationsRelationManager extends RelationManager
 {
@@ -20,17 +33,17 @@ class SoftwareApplicationsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->label('Nome Software')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('provider_name')
+                TextColumn::make('provider_name')
                     ->label('Produttore')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('status')
                     ->label('Stato')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'ATTIVO' => 'success',
                         'SOSPESO' => 'warning',
                         default => 'gray',
@@ -40,40 +53,40 @@ class SoftwareApplicationsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                \Filament\Actions\AttachAction::make()
+                AttachAction::make()
                     ->label('Associa Software')
-                    ->form(fn (\Filament\Actions\AttachAction $action): array => [
+                    ->form(fn(AttachAction $action): array => [
                         $action->getRecordSelect(),
-                        Forms\Components\Select::make('status')
+                        Select::make('status')
                             ->options([
                                 'ATTIVO' => 'Attivo',
                                 'SOSPESO' => 'Sospeso',
                             ])
                             ->default('ATTIVO')
                             ->required(),
-                        Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->label('Note Aziendali'),
                     ]),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->label('Modifica Associazione')
                     ->form([
-                        Forms\Components\Select::make('status')
+                        Select::make('status')
                             ->options([
                                 'ATTIVO' => 'Attivo',
                                 'SOSPESO' => 'Sospeso',
                             ])
                             ->required(),
-                        Forms\Components\Textarea::make('notes')
+                        Textarea::make('notes')
                             ->label('Note Aziendali'),
                     ]),
                 \Filament\Actions\DetachAction::make()
                     ->label('Rimuovi'),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    \Filament\Actions\DetachBulkAction::make(),
+                BulkActionGroup::make([
+                    DetachBulkAction::make(),
                 ]),
             ]);
     }

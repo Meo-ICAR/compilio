@@ -35,12 +35,12 @@ class CompanyWebsiteForm
                     ->default(true),
                 TextInput::make('url_privacy')
                     ->label('URL Privacy Policy')
-                    ->url()
+                    //  ->url()
                     ->nullable()
                     ->helperText('Link alla pagina privacy policy'),
                 TextInput::make('url_cookies')
                     ->label('URL Cookie Policy')
-                    ->url()
+                    //  ->url()
                     ->nullable()
                     ->helperText('Link alla pagina cookie policy'),
                 Toggle::make('is_footercompilant')

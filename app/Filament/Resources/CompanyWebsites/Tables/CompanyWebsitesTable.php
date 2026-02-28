@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CompanyWebsites\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -34,12 +35,12 @@ class CompanyWebsitesTable
                     ->boolean(),
                 TextColumn::make('url_privacy')
                     ->label('Privacy URL')
-                    ->url()
+                    //  ->url()
                     ->placeholder('Non impostato')
                     ->toggleable(),
                 TextColumn::make('url_cookies')
                     ->label('Cookies URL')
-                    ->url()
+                    //  ->url()
                     ->placeholder('Non impostato')
                     ->toggleable(),
                 IconColumn::make('is_footercompilant')

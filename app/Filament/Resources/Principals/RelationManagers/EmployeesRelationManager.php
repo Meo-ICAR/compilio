@@ -2,11 +2,37 @@
 
 namespace App\Filament\Resources\Principals\RelationManagers;
 
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ImportAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Tables;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class EmployeesRelationManager extends RelationManager
 {
@@ -22,24 +48,24 @@ class EmployeesRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Forms\Components\TextInput::make('usercode')
+                \TextInput::make('usercode')
                     ->required()
                     ->unique()
                     ->label('Codice Utente')
                     ->helperText('Codice identificativo univoco del dipendente'),
-                Forms\Components\TextInput::make('description')
+                TextInput::make('description')
                     ->label('Descrizione')
                     ->helperText('Ruolo o note sul dipendente')
                     ->nullable(),
-                Forms\Components\DatePicker::make('start_date')
+                DatePicker::make('start_date')
                     ->required()
                     ->label('Data Inizio')
                     ->helperText('Data di inizio autorizzazione'),
-                Forms\Components\DatePicker::make('end_date')
+                DatePicker::make('end_date')
                     ->label('Data Fine')
                     ->helperText('Data di fine autorizzazione (lasciare vuoto per indeterminato)')
                     ->nullable(),
-                Forms\Components\Toggle::make('is_active')
+                Toggle::make('is_active')
                     ->label('Attivo')
                     ->default(true)
                     ->helperText('Stato attuale del dipendente'),
@@ -51,37 +77,37 @@ class EmployeesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('usercode')
             ->columns([
-                Tables\Columns\TextColumn::make('usercode')
+                TextColumn::make('usercode')
                     ->label('Codice Utente')
                     ->searchable()
                     ->sortable()
                     ->copyable()
                     ->copyMessage('Codice copiato!'),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label('Descrizione')
                     ->searchable()
                     ->limit(50),
-                Tables\Columns\TextColumn::make('start_date')
+                TextColumn::make('start_date')
                     ->label('Inizio')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('end_date')
+                TextColumn::make('end_date')
                     ->label('Fine')
                     ->date()
                     ->sortable()
                     ->placeholder('Indeterminato'),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->label('Attivo')
                     ->boolean()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('is_currently_active')
+                TextColumn::make('is_currently_active')
                     ->label('Stato Corrente')
                     ->getStateUsing(fn($record) => $record->is_currently_active ? 'Attivo' : 'Non Attivo')
                     ->badge()
                     ->color(fn($record) => $record->is_currently_active ? 'success' : 'danger'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('is_active')
+                SelectFilter::make('is_active')
                     ->label('Stato')
                     ->options([
                         '1' => 'Attivo',
@@ -89,15 +115,15 @@ class EmployeesRelationManager extends RelationManager
                     ]),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
