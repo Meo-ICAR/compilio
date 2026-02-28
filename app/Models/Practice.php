@@ -12,6 +12,7 @@ class Practice extends Model
     use BelongsToCompany;
 
     protected $fillable = [
+        'client_mandate_id',
         'company_id',
         'principal_id',
         'agent_id',
@@ -25,7 +26,11 @@ class Practice extends Model
         'brokerage_fee',
         'practice_scope_id',
         'status',
+        'statoproforma',
         'inserted_at',
+        'erogated_at',
+        'rejected_at',
+        'rejected_reason',
         'status_at',
         'description',
         'annotation',
@@ -38,7 +43,14 @@ class Practice extends Model
     protected $casts = [
         'status' => \App\Enums\PracticeStatus::class,
         'perfected_at' => 'date',
+        'inserted_at' => 'date',
+        'erogated_at' => 'date',
+        'rejected_at' => 'date',
+        'status_at' => 'date',
+        'amount' => 'decimal:2',
+        'net' => 'decimal:2',
         'brokerage_fee' => 'decimal:2',
+        'is_active' => 'boolean',
     ];
 
     public function documents(): MorphMany
@@ -69,6 +81,11 @@ class Practice extends Model
     public function practiceScope()
     {
         return $this->belongsTo(PracticeScope::class);
+    }
+
+    public function clientMandate()
+    {
+        return $this->belongsTo(ClientMandate::class);
     }
 
     public function practiceStatus()

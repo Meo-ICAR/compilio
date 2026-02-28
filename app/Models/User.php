@@ -13,11 +13,12 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements HasTenants
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, LogsActivity, Notifiable;
+    use HasFactory, LogsActivity, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.

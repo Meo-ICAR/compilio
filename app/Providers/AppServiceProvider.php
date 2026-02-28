@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use App\Models\ActivityLog;
+// use App\Models\ClientMandate;
+use App\Models\Practice;
+use App\Observers\ClientMandateObserver;
+use App\Observers\PracticeObserver;
 use Filament\Facades\Filament;
 use Illuminate\Support\ServiceProvider;
 
@@ -38,5 +42,7 @@ class AppServiceProvider extends ServiceProvider
                 $activityLog->company_id = Filament::getTenant()->id;
             }
         });
+        //    ClientMandate::observe(ClientMandateObserver::class);
+        // Practice::observe(PraticaObserver::class);
     }
 }

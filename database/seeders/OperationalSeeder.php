@@ -62,7 +62,7 @@ class OperationalSeeder extends Seeder
                 'amount' => 150000.0,
                 'net' => 150000.0,
                 'practice_scope_id' => $practiceScope->id,
-                'status' => 'istruttoria',
+                'status' => 'working',
                 'perfected_at' => now()->toDateString(),
                 'is_active' => 1
             ]

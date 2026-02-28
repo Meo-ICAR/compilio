@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -19,6 +20,7 @@ class Client extends Model implements HasMedia
     protected $fillable = [
         'company_id',
         'is_company',
+        'is_client',
         'is_lead',
         'leadsource_id',
         'acquired_at',
@@ -31,9 +33,18 @@ class Client extends Model implements HasMedia
         'is_pep',
         'client_type_id',
         'is_sanctioned',
+        'is_remote_interaction',
+        'general_consent_at',
+        'privacy_policy_read_at',
+        'consent_special_categories_at',
+        'consent_sic_at',
+        'consent_marketing_at',
+        'consent_profiling_at',
+        'status',
         'privacy_consent',
         'subfornitori',
         'is_requiredApprovation',
+        'is_approved',
         'is_anonymous',
         'blacklist_at',
         'blacklisted_by',
@@ -136,10 +147,57 @@ class Client extends Model implements HasMedia
         return $this->hasMany(ClientRelation::class, 'client_id');
     }
 
+    public function clientMandates(): HasMany
+    {
+        return $this->hasMany(ClientMandate::class);
+    }
+
+    public function practices(): HasMany
+    {
+        return $this->hasMany(Practice::class);
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logAll();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'is_person' => 'boolean',
+            'is_pep' => 'boolean',
+            'is_sanctioned' => 'boolean',
+            'is_remote_interaction' => 'boolean',
+            'is_company' => 'boolean',
+            'is_client' => 'boolean',
+            'is_lead' => 'boolean',
+            'privacy_consent' => 'boolean',
+            'is_requiredApprovation' => 'boolean',
+            'is_approved' => 'boolean',
+            'is_anonymous' => 'boolean',
+            'is_art108' => 'boolean',
+            'general_consent_at' => 'datetime',
+            'privacy_policy_read_at' => 'datetime',
+            'consent_special_categories_at' => 'datetime',
+            'consent_sic_at' => 'datetime',
+            'consent_marketing_at' => 'datetime',
+            'consent_profiling_at' => 'datetime',
+            'acquired_at' => 'datetime',
+            'blacklist_at' => 'datetime',
+            'salary' => 'decimal:2',
+            'salary_quote' => 'decimal:2',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
+
+    protected function fullName(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->is_person ? "{$this->name} {$this->first_name}" : $this->name,
+        );
     }
 
     public function getPhotoUrlAttribute(): string
@@ -165,12 +223,5 @@ class Client extends Model implements HasMedia
     public function hasPhoto(): bool
     {
         return $this->hasMedia('photos');
-    }
-
-    protected function fullName(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->is_person ? "{$this->name} {$this->first_name}" : $this->name,
-        );
     }
 }
