@@ -27,26 +27,28 @@ return new class extends Migration {
             $table->unsignedInteger('agent_id')->nullable()->comment('Agente beneficiario');
             $table->unsignedInteger('principal_id')->nullable()->comment('Mandante');
             $table->string('CRM_code')->nullable()->comment('Codice CRM');
-            $table->date('inserted_at')->nullable();
-            $table->boolean('is_enasarco')->nullable()->default(true);
-            $table->boolean('is_payment')->nullable();
-            $table->boolean('is_client')->nullable();
+            $table->date('inserted_at')->nullable()->comment('Data inserimento');
+            $table->boolean('is_enasarco')->nullable()->default(true)->comment('Provvigione da conteggiare per ENASARCO');
+            $table->boolean('is_insurance')->nullable()->default(true)->comment('Provvigione assicurativa');
+            $table->boolean('is_payment')->nullable()->comment('Provvigione passiva verso rete');
+            $table->boolean('is_recurrent')->nullable()->comment('Compenso ricorrente');
+            $table->boolean('is_prize')->nullable()->comment('Premio da mandante');
+            $table->boolean('is_client')->nullable()->comment('Compenso da cliente');
             $table->boolean('is_coordination')->nullable()->comment('Compenso coordinamento')->default(false);
             $table->string('tipo')->nullable()->comment('Tipo di provvigione');
             $table->string('name')->nullable()->comment('Provvigione');
             $table->decimal('amount', 10)->nullable()->comment('Importo provvigionale lordo per questa singola pratica');
             $table->string('description')->nullable()->comment('Dettaglio (es. Bonus extra o Provvigione base)');
-            $table->string('status_payment')->nullable()->comment('Stato pagamento');
-            $table->date('status_at')->nullable();
-            $table->date('perfected_at')->nullable();
+            $table->string('status_payment')->nullable()->comment('Stato pagamento perfezionata');
+            $table->date('status_at')->nullable()->comment('Data stato pagamento');
+            $table->date('perfected_at')->nullable()->comment('Data perfezionamento provvigione');
+            $table->date('cancellation_at')->nullable()->comment('Data annullamento provvigione');
+            $table->string('invoice_number', 30)->nullable()->comment('Numero fattura');
+            $table->date('invoice_at')->nullable()->comment('Data fattura');
+            $table->date('paided_at')->nullable()->comment('Data pagamento');
 
-            $table->date('cancellation_at')->nullable();
-            $table->string('invoice_number', 30)->nullable();
-            $table->date('invoice_at')->nullable();
-            $table->date('paided_at')->nullable();
-
-            $table->boolean('is_storno')->nullable();
-            $table->date('storned_at')->nullable();
+            $table->boolean('is_storno')->nullable()->comment('Storno provvigionale');
+            $table->date('storned_at')->nullable()->comment('Data storno');
             $table->decimal('storno_amount', 10)->nullable()->comment('Importo provvigionale stornato');
 
             $table->timestamp('created_at')->nullable()->useCurrent();

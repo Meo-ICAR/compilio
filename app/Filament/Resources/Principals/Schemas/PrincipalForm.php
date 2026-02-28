@@ -60,6 +60,18 @@ class PrincipalForm
                                     'Utility' => 'Utility',
                                 ])
                                 ->searchable(),
+                            Select::make('principal_type')
+                                ->label('Tipo Mandante')
+                                ->options([
+                                    'no' => 'Non Specificato',
+                                    'banca' => 'Banca',
+                                    'assicurazione' => 'Compagnia Assicurativa',
+                                    'agente' => 'Agente',
+                                    'agente_captive' => 'Agente Captive',
+                                ])
+                                ->default('no')
+                                ->searchable()
+                                ->helperText('Tipologia del mandante per classificazione interna'),
                         ]),
                         Grid::make(2)->schema([
                             Toggle::make('is_active')

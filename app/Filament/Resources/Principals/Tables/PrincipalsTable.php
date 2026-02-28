@@ -7,6 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Excel;
 
@@ -18,6 +19,25 @@ class PrincipalsTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('principal_type')
+                    ->label('Tipo Mandante')
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'no' => 'Non Specificato',
+                        'banca' => 'Banca',
+                        'assicurazione' => 'Assicurazione',
+                        'agente' => 'Agente',
+                        'agente_captive' => 'Agente Captive',
+                        default => $state,
+                    })
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'no' => 'gray',
+                        'banca' => 'blue',
+                        'assicurazione' => 'green',
+                        'agente' => 'purple',
+                        'agente_captive' => 'orange',
+                        default => 'gray',
+                    }),
                 TextColumn::make('abi')
                     ->searchable(),
                 TextColumn::make('stipulated_at')
@@ -63,7 +83,15 @@ class PrincipalsTable
                     ->tooltip(fn($record) => $record->is_dummy ? 'Mandante fittizio / non convenzionato' : 'Mandante convenzionato'),
             ])
             ->filters([
-                //
+                SelectFilter::make('principal_type')
+                    ->label('Tipo Mandante')
+                    ->options([
+                        'no' => 'Non Specificato',
+                        'banca' => 'Banca',
+                        'assicurazione' => 'Compagnia Assicurativa',
+                        'agente' => 'Agente',
+                        'agente_captive' => 'Agente Captive',
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),

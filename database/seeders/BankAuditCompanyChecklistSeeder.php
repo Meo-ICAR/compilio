@@ -240,6 +240,10 @@ class BankAuditCompanyChecklistSeeder extends Seeder
             }, $items);
             DB::table('checklist_items')->insert($formattedItems);
 
+            $checklistAgentId = DB::table('checklists')
+                ->where('code', 'OAM_RETE_10GG')
+                ->first();
+
             if (!$checklistAgentId) {
                 $checklistAgentId = DB::table('checklists')->insertGetId([
                     'company_id' => $companyId,
