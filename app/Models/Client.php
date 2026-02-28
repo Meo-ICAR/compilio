@@ -152,6 +152,29 @@ class Client extends Model implements HasMedia
         return $this->hasMany(ClientMandate::class);
     }
 
+    public function activeMandates(): HasMany
+    {
+        return $this->clientMandates()->where('stato', 'attivo');
+    }
+
+    public function hasActiveMandates(): bool
+    {
+        return $this->activeMandates()->exists();
+    }
+
+    public function getLatestMandate()
+    {
+        return $this->clientMandates()->latest()->first();
+    }
+
+    public function getTotalMandateAmount(): float
+    {
+        return $this
+            ->clientMandates()
+            ->whereNotNull('importo_richiesto_mandato')
+            ->sum('importo_richiesto_mandato');
+    }
+
     public function practices(): HasMany
     {
         return $this->hasMany(Practice::class);

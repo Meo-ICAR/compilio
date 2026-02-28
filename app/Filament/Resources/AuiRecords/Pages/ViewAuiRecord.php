@@ -3,17 +3,17 @@
 namespace App\Filament\Resources\AuiRecords\Pages;
 
 use App\Filament\Resources\AuiRecords\AuiRecordResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\EditAction;
+use Filament\Resources\Pages\ViewRecord;
 
-class ListAuiRecords extends ListRecords
+class ViewAuiRecord extends ViewRecord
 {
     protected static string $resource = AuiRecordResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            EditAction::make(),
         ];
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\ClientMandates\Pages;
 
-use App\Filament\Resources\ClientMandateResource;
-use Filament\Actions;
+use App\Filament\Resources\ClientMandates\ClientMandateResource;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListClientMandates extends ListRecords
@@ -13,7 +13,7 @@ class ListClientMandates extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

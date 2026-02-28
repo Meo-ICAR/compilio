@@ -9,10 +9,13 @@ use Filament\Tables\Table as FilamentTable;
 use Filament\Actions;
 use Illuminate\Contracts\Support\Htmlable;  // CORRETTO
 use Illuminate\Support\HtmlString;
+use UnitEnum;
 
 class ListPracticeOAMs extends ListRecords
 {
     protected static string $resource = PracticeResource::class;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
     public function getTable(): FilamentTable
     {

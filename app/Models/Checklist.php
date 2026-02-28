@@ -33,6 +33,11 @@ class Checklist extends Model
         return $this->hasMany(ChecklistItem::class);
     }
 
+    public function items(): HasMany
+    {
+        return $this->checklistItems();
+    }
+
     public function principal(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Principal::class);

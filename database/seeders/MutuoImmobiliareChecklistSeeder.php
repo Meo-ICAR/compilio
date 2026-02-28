@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ class MutuoImmobiliareChecklistSeeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
+        $companyId = Company::first()->id;
 
         $checklist = DB::table('checklists')
             ->where('code', 'MUT')
@@ -22,7 +24,7 @@ class MutuoImmobiliareChecklistSeeder extends Seeder
         if (!$checklist) {
             // 1. Creazione della Checklist (Modello Mutuo)
             $checklistId = DB::table('checklists')->insertGetId([
-                'company_id' => null,
+                'company_id' => $companyId,
                 'name' => 'Lavorazione Pratica - Mutuo Immobiliare',
                 'code' => 'MUT',
                 'type' => 'loan_management',

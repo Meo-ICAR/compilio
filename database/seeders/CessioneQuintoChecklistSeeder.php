@@ -1,6 +1,7 @@
 <?php
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,7 @@ class CessioneQuintoChecklistSeeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
+        $companyId = Company::first()->id;
 
         // 1. Creazione della Checklist (Template) - solo se non esiste
         $checklist = DB::table('checklists')

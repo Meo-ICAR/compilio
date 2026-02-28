@@ -46,7 +46,9 @@ return new class extends Migration {
             $table->timestamp('consent_profiling_at')->nullable()->comment('Consenso profilazione abitudini di consumo/spesa');
 
             // Stati del Workflow (Spatie Model States o Enum)
-            $table->string('status')->default('raccolta_dati')->comment('raccolta_dati, valutazione_aml, approvata, sos_inviata, chiusa');
+            $table->string('status')->default('raccolta_dati')->comment('raccolta_dati, valutazione_aml, approvata, sos_inviata, chiusa')->nullable();
+
+            $table->string('contoCOGE')->nullable()->comment('Conto COGE');
 
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data acquisizione cliente');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Ultima modifica anagrafica');

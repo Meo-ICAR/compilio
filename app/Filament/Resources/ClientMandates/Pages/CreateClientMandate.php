@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\ClientMandates\Pages;
 
-use App\Filament\Resources\ClientMandateResource;
+use App\Filament\Resources\ClientMandates\ClientMandateResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateClientMandate extends CreateRecord

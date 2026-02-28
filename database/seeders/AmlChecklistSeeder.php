@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ class AmlChecklistSeeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
+        $companyId = Company::first()->id;
 
         // 1. Creazione della Checklist (Template) - solo se non esiste
         $checklist = DB::table('checklists')
@@ -22,7 +24,7 @@ class AmlChecklistSeeder extends Seeder
 
         if (!$checklist) {
             $checklistId = DB::table('checklists')->insertGetId([
-                'company_id' => null,
+                'company_id' => $companyId,
                 'name' => 'Adeguata Verifica Antiriciclaggio (KYC / AML)',
                 'code' => 'AML',
                 'type' => 'loan_management',  // Legata all'apertura di una pratica o anagrafica

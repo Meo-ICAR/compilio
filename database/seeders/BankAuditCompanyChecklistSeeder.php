@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ class BankAuditCompanyChecklistSeeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
+        $companyId = Company::first()->id;
 
         $checklist = DB::table('checklists')
             ->where('code', 'BANK_AUDIT')
@@ -21,7 +23,7 @@ class BankAuditCompanyChecklistSeeder extends Seeder
 
         if (!$checklist) {
             $checklistId = DB::table('checklists')->insertGetId([
-                'company_id' => null,  // Lasciato null per         'company_id' => null,  // Modello base disponibile nel sistema
+                'company_id' => $companyId,
                 'name' => 'Verifica Ispettiva Mandante - Audit Banca su Mediatore',
                 'code' => 'BANK_AUDIT',
                 'type' => 'audit',
@@ -37,7 +39,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
             $items = [
                 // --- FASE 1: GOVERNANCE E REQUISITI OAM ---
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '10',
                     'name' => 'Visura Camerale Aggiornata',
                     'item_code' => 'bank_visura_company',
@@ -51,7 +52,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'depends_on_value' => null,
                 ],
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '20',
                     'name' => 'Attestazione Iscrizione OAM',
                     'item_code' => 'bank_oam_company',
@@ -65,7 +65,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'depends_on_value' => null,
                 ],
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '30',
                     'name' => 'Polizza RC Professionale',
                     'item_code' => 'bank_rc_company',
@@ -80,7 +79,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                 ],
                 // --- FASE 2: ANTIRICICLAGGIO (AML) E PROCEDURE INTERNE ---
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '40',
                     'name' => 'Manuale Antiriciclaggio',
                     'item_code' => 'bank_manuale_aml',
@@ -94,7 +92,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'depends_on_value' => null,
                 ],
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '50',
                     'name' => 'Copia Manuale AML',
                     'item_code' => 'bank_doc_manuale_aml',
@@ -108,7 +105,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'depends_on_value' => '1',
                 ],
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '60',
                     'name' => 'Relazione Annuale Funzione Controllo',
                     'item_code' => 'bank_relazione_controlli',
@@ -123,7 +119,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                 ],
                 // --- FASE 3: PRIVACY, GDPR E IT SECURITY ---
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '70',
                     'name' => 'Nomina DPO',
                     'item_code' => 'bank_has_dpo',
@@ -137,7 +132,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'depends_on_value' => null,
                 ],
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '80',
                     'name' => 'Documentazione GDPR',
                     'item_code' => 'bank_doc_gdpr',
@@ -152,7 +146,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                 ],
                 // --- FASE 4: CONTROLLO RETE E TRASPARENZA ---
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '90',
                     'name' => 'Presenza Rete Agenti',
                     'item_code' => 'bank_has_rete',
@@ -166,7 +159,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'depends_on_value' => null,
                 ],
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '100',
                     'name' => 'Piano Ispezioni Rete',
                     'item_code' => 'bank_piano_ispezioni',
@@ -180,7 +172,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'depends_on_value' => '1',
                 ],
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '110',
                     'name' => 'Materiale Pubblicitario',
                     'item_code' => 'bank_materiale_pubblicitario',
@@ -195,7 +186,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                 ],
                 // --- FASE 5: VERIFICA PRATICHE DELLA BANCA (TEST A CAMPIONE) ---
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '120',
                     'name' => 'Test Sostanziali su Pratiche Banca',
                     'item_code' => 'bank_test_pratiche',
@@ -209,7 +199,6 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'depends_on_value' => null,
                 ],
                 [
-                    'checklist_id' => $checklistId,
                     'ordine' => '130',
                     'name' => 'Dettaglio Anomalie Pratiche',
                     'item_code' => 'bank_dettaglio_anomalie',
@@ -225,8 +214,9 @@ class BankAuditCompanyChecklistSeeder extends Seeder
             ];
 
             // Mappatura automatica dei campi default
-            $formattedItems = array_map(function ($item) use ($now) {
+            $formattedItems = array_map(function ($item) use ($now, $checklistId) {
                 return array_merge([
+                    'checklist_id' => $checklistId,
                     'answer' => null,
                     'annotation' => null,
                     'attach_model_id' => null,
@@ -237,6 +227,125 @@ class BankAuditCompanyChecklistSeeder extends Seeder
             }, $items);
 
             DB::table('checklist_items')->insert($formattedItems);
+
+            $checklistAgent = DB::table('checklists')
+                ->where('code', 'OAM_RETE_10GG')
+                ->first();
+
+            if (!$checklistAgent) {
+                $checklistAgentId = DB::table('checklists')->insertGetId([
+                    //  'company_id' => $companyId,  // Lasciato null per
+                    'type' => 'audit',
+                    'principal_id' => null,  // Potrebbe essere valorizzato se si crea un template specifico per una singola banca
+                    'is_practice' => 0,
+                    'is_audit' => 1,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                    'name' => 'Carico/Scarico Rete (Regola 10 Giorni OAM)',
+                    'code' => 'OAM_RETE_10GG',
+                    'type' => 'audit',
+                    'description' => "Procedura obbligatoria per comunicare a OAM inizio o fine del mandato di un collaboratore entro 10 giorni dall'evento.",
+                ]);
+
+                // 2. Creazione delle Domande / Voci di Audit
+                $itemsAgent = [
+                    // STEP 1: Scelta del tipo di operazione
+                    [
+                        'ordine' => '10',
+                        'name' => 'Tipo Movimentazione',
+                        'item_code' => 'MOV_TIPO',
+                        'question' => 'Seleziona il tipo di comunicazione:',
+                        'description' => 'Inserisci "carico" per un nuovo agente o "scarico" per una cessazione.',
+                        'is_required' => 1,
+                        'n_documents' => 0,
+                    ],
+                    // STEP 2: Data evento (Fondamentale per calcolare i 10 giorni)
+                    [
+                        'ordine' => '20',
+                        'name' => 'Data Riferimento Evento',
+                        'item_code' => 'MOV_DATA',
+                        'question' => 'Qual è la data di firma del mandato o la data di efficacia della cessazione?',
+                        'description' => 'ATTENZIONE: Da questa data hai esattamente 10 giorni solari per completare la procedura sul portale OAM.',
+                        'is_required' => 1,
+                        'n_documents' => 0,
+                    ],
+                    // STEP 3A (Condizionale CARICO): Contratto Firmato
+                    [
+                        'ordine' => '30',
+                        'name' => 'Contratto di Collaborazione',
+                        'item_code' => 'DOC_CONTRATTO',
+                        'question' => "Allega il contratto di agenzia o lettera d'incarico firmata da entrambe le parti.",
+                        'is_required' => 1,
+                        'depends_on_code' => 'MOV_TIPO',
+                        'depends_on_value' => 'carico',
+                        'dependency_type' => 'show_if',
+                        'attach_model' => 'agent',  // Si salva nel fascicolo dell'agente!
+                        'n_documents' => 1,
+                    ],
+                    // STEP 3B (Condizionale CARICO): Requisiti Formativi
+                    [
+                        'ordine' => '31',
+                        'name' => 'Attestato Formazione OAM',
+                        'item_code' => 'DOC_FORMAZIONE',
+                        'question' => "Allega l'attestato del corso di formazione iniziale o aggiornamento (60 ore / 30 ore).",
+                        'is_required' => 1,
+                        'depends_on_code' => 'MOV_TIPO',
+                        'depends_on_value' => 'carico',
+                        'dependency_type' => 'show_if',
+                        'attach_model' => 'agent',
+                        'n_documents' => 1,
+                    ],
+                    // STEP 3C (Condizionale SCARICO): Lettera Cessazione
+                    [
+                        'ordine' => '32',
+                        'name' => 'Lettera di Cessazione / Dimissioni',
+                        'item_code' => 'DOC_CESSAZIONE',
+                        'question' => 'Allega la lettera di dimissioni del collaboratore o la revoca del mandato da parte della società.',
+                        'is_required' => 1,
+                        'depends_on_code' => 'MOV_TIPO',
+                        'depends_on_value' => 'scarico',
+                        'dependency_type' => 'show_if',
+                        'attach_model' => 'agent',
+                        'n_documents' => 1,
+                    ],
+                    // STEP 4: Azione sul Portale Esterno
+                    [
+                        'ordine' => '40',
+                        'name' => 'Comunicazione Portale OAM',
+                        'item_code' => 'AZIONE_PORTALE',
+                        'question' => "Hai effettuato l'inserimento della variazione nell'area privata del portale OAM?",
+                        'description' => "Clicca sul link per accedere direttamente all'area riservata OAM.",
+                        'is_required' => 1,
+                        'url_step' => 'https://www.organismo-am.it/area-privata',  // Link comodo per l'operatore
+                        'n_documents' => 0,
+                    ],
+                    // STEP 5: La Prova di Legge (Ricevuta Protocollo)
+                    [
+                        'ordine' => '50',
+                        'name' => 'Ricevuta Protocollo OAM',
+                        'item_code' => 'DOC_RICEVUTA_OAM',
+                        'question' => "Allega il PDF della ricevuta di protocollo rilasciata dall'OAM a conferma della comunicazione.",
+                        'description' => "Questo documento è l'unica prova legale in caso di ispezione per dimostrare il rispetto dei 10 giorni.",
+                        'is_required' => 1,
+                        'attach_model' => 'audit',  // Questo lo leghiamo all'audit compliance
+                        'n_documents' => 1,
+                    ],
+                ];
+
+                // Mappatura automatica dei campi default
+                $formattedAgentItems = array_map(function ($item) use ($now, $checklistAgentId) {
+                    return array_merge([
+                        'checklist_id' => $checklistAgentId,
+                        'answer' => null,
+                        'annotation' => null,
+                        'attach_model_id' => null,
+                        'repeatable_code' => null,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ], $item);
+                }, $items);
+                DB::table('checklist_items')->insert($formattedAgentItems);
+            }
         }
     }
 }

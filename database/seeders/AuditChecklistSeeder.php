@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,7 @@ class AuditChecklistSeeder extends Seeder
     public function run(): void
     {
         $now = Carbon::now();
-
+        $companyId = Company::first()->id;
         // 1. Creazione della Checklist (Template) - solo se non esiste
         $checklist = DB::table('checklists')
             ->where('code', 'AUDIT_RETE_AGENTI')
@@ -22,7 +23,7 @@ class AuditChecklistSeeder extends Seeder
 
         if (!$checklist) {
             $checklistId = DB::table('checklists')->insertGetId([
-                'company_id' => null,  // Lasciato null per essere disponibile a tutti i tenant/globale
+                'company_id' => $companyId,  // Lasciato null per essere disponibile a tutti i tenant/globale
                 'name' => 'Verifica Ispettiva Ordinaria - Rete Agenti',
                 'code' => 'AUDIT_RETE_AGENTI',
                 'type' => 'audit',

@@ -39,6 +39,8 @@ return new class extends Migration {
             $table->boolean('is_exclusive')->nullable()->default(false)->comment("Indica se il mandato prevede l'esclusiva per quella categoria");
             $table->enum('status', ['ATTIVO', 'SCADUTO', 'RECEDUTO', 'SOPESO'])->nullable()->default('ATTIVO')->comment('Stato operativo del mandato');
             $table->text('notes')->nullable()->comment('Note su provvigioni particolari o patti specifici');
+            $table->foreign(['company_id'], 'principals_ibfk_1')->references(['id'])->on('companies')->onUpdate('no action')->onDelete('no action');
+            $table->string('contoCOGE')->nullable()->comment('Conto COGE');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
         });

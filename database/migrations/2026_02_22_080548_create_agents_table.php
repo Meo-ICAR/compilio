@@ -29,7 +29,7 @@ return new class extends Migration {
             $table->string('vat_name')->nullable()->comment('Ragione Sociale Fiscale');
             $table->string('enasarco')->nullable()->comment('Enasarco no / monomandatario / plurimandatario / societa');
             $table->boolean('is_active')->default(true)->comment('Indica se la banca è attualmente convenzionata');
-
+            $table->string('contoCOGE')->nullable()->comment('Conto COGE');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
 
