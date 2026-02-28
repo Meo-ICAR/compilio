@@ -60,6 +60,11 @@ class Agent extends Model
         return $this->belongsTo(Employee::class, 'coordinated_by_id');
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function coordinatedByAgent(): BelongsTo
     {
         return $this->belongsTo(Agent::class, 'coordinated_by_agent_id');

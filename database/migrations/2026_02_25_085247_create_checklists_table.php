@@ -29,15 +29,6 @@ return new class extends Migration {
             // target_type sarà es. 'App\Models\Agent' o 'App\Models\Pratica'
             // target_id sarà l'ID dell'agente o della pratica
             $table->nullableMorphs('target');
-
-            // Stato di completamento
-            $table->enum('status', ['da_compilare', 'in_corso', 'completata'])->default('da_compilare')->after('target_id');
-
-            // Relazione Polimorfica: a chi appartiene questa specifica copia?
-            // target_type sarà es. 'App\Models\Agent' o 'App\Models\Pratica'
-            // target_id sarà l'ID dell'agente o della pratica
-            $table->nullableMorphs('target');
-
             // Stato di completamento
             $table->enum('status', ['da_compilare', 'in_corso', 'completata'])->default('da_compilare')->nullable();
 

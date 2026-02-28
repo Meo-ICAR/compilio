@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Agents;
 
-use App\Filament\RelationManagers\ChecklistsRelationManager;
 use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Agents\Pages\CreateAgent;
 use App\Filament\Resources\Agents\Pages\EditAgent;
 use App\Filament\Resources\Agents\Pages\ListAgents;
+use App\Filament\Resources\Agents\RelationManagers\ChecklistsRelationManager;
 use App\Filament\Resources\Agents\RelationManagers\TrainingRecordsRelationManager;
 use App\Filament\Resources\Agents\Schemas\AgentForm;
 use App\Filament\Resources\Agents\Tables\AgentsTable;

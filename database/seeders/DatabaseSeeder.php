@@ -25,9 +25,9 @@ class DatabaseSeeder extends Seeder
             FilamentUserSeeder::class,
             AmlChecklistSeeder::class,
             AuditChecklistSeeder::class,
-            BankAuditCompanyChecklistSeeder::class,
             CessioneQuintoChecklistSeeder::class,
             MutuoImmobiliareChecklistSeeder::class,
+            BankAuditCompanyChecklistSeeder::class,
             ComplianceSeeder::class,
         ]);
     }

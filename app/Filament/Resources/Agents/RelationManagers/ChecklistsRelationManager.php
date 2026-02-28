@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\AgentResource\RelationManagers;
+namespace App\Filament\Resources\Agents\RelationManagers;
 
 use App\Models\Checklist;
 use Filament\Actions\Action;

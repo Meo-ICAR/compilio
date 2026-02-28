@@ -3,10 +3,14 @@
 namespace App\Filament\Resources\Agents\Tables;
 
 use App\Filament\Imports\AgentsImporter;
+use App\Models\Agent;
+use App\Services\ChecklistService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -82,7 +86,7 @@ class AgentsTable
                     ->label('Esente art. 108')
                     ->boolean()
                     ->trueIcon('heroicon-s-shield-check')
-                    ->falseIcon('heroicon-o-shield-x')
+                    ->falseIcon('heroicon-o-x-mark')
                     ->color(fn($state) => $state ? 'success' : 'gray'),
                 TextColumn::make('updated_at')
                     ->label('Aggiornato')

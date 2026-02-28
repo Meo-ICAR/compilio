@@ -209,8 +209,7 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'attach_model' => null,
                     'dependency_type' => 'show_if',
                     'depends_on_code' => 'bank_test_pratiche',
-                    'depends_on_value' => '1',  // Mostrato solo se ci sono state anomalie
-                ],
+                ]
             ];
 
             // Mappatura automatica dei campi default
@@ -223,16 +222,25 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                     'repeatable_code' => null,
                     'created_at' => $now,
                     'updated_at' => $now,
+                    // Campi obbligatori della tabella checklist_items
+                    'ordine' => $item['ordine'] ?? null,
+                    'name' => $item['name'] ?? null,
+                    'item_code' => $item['item_code'] ?? null,
+                    'question' => $item['question'] ?? null,
+                    'description' => $item['description'] ?? null,
+                    'is_required' => $item['is_required'] ?? 0,
+                    'n_documents' => $item['n_documents'] ?? 0,
+                    'attach_model' => $item['attach_model'] ?? null,
+                    'depends_on_code' => $item['depends_on_code'] ?? null,
+                    'depends_on_value' => $item['depends_on_value'] ?? null,
+                    'dependency_type' => $item['dependency_type'] ?? null,
+                    'url_step' => $item['url_step'] ?? null,
+                    'url_callback' => $item['url_callback'] ?? null,
                 ], $item);
             }, $items);
-
             DB::table('checklist_items')->insert($formattedItems);
 
-            $checklistAgent = DB::table('checklists')
-                ->where('code', 'OAM_RETE_10GG')
-                ->first();
-
-            if (!$checklistAgent) {
+            if (!$checklistAgentId) {
                 $checklistAgentId = DB::table('checklists')->insertGetId([
                     'company_id' => $companyId,
                     'type' => 'audit',
@@ -342,6 +350,20 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                         'repeatable_code' => null,
                         'created_at' => $now,
                         'updated_at' => $now,
+                        // Campi obbligatori della tabella checklist_items
+                        'ordine' => $item['ordine'] ?? null,
+                        'name' => $item['name'] ?? null,
+                        'item_code' => $item['item_code'] ?? null,
+                        'question' => $item['question'] ?? null,
+                        'description' => $item['description'] ?? null,
+                        'is_required' => $item['is_required'] ?? 0,
+                        'n_documents' => $item['n_documents'] ?? 0,
+                        'attach_model' => $item['attach_model'] ?? null,
+                        'depends_on_code' => $item['depends_on_code'] ?? null,
+                        'depends_on_value' => $item['depends_on_value'] ?? null,
+                        'dependency_type' => $item['dependency_type'] ?? null,
+                        'url_step' => $item['url_step'] ?? null,
+                        'url_callback' => $item['url_callback'] ?? null,
                     ], $item);
                 }, $itemsAgent);
                 DB::table('checklist_items')->insert($formattedAgentItems);

@@ -73,7 +73,7 @@ class ClientsTable
                     ->label('Esente art. 108')
                     ->boolean()
                     ->trueIcon('heroicon-s-shield-check')
-                    ->falseIcon('heroicon-o-shield-x')
+                    ->falseIcon('heroicon-o-x-mark')
                     ->color(fn($state) => $state ? 'success' : 'gray'),
                 // Dati Finanziari
                 TextColumn::make('salary')
