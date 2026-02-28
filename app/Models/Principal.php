@@ -22,6 +22,12 @@ class Principal extends Model
         'is_dummy',
     ];
 
+    public function checklists()
+    {
+        // Un agente ha molte checklist (le sue copie assegnate)
+        return $this->morphMany(Checklist::class, 'target');
+    }
+
     public function mandates()
     {
         return $this->hasMany(PrincipalMandate::class);

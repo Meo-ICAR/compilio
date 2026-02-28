@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Practices\Pages;
 
 use App\Filament\Resources\Practices\Tables\PracticeOAMsTable;
-use App\Filament\Resources\Practices\PracticeResource;
+use App\Filament\Resources\Practices\PracticeOAMResource;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Table as FilamentTable;
 use Filament\Actions;
@@ -13,9 +13,19 @@ use UnitEnum;
 
 class ListPracticeOAMs extends ListRecords
 {
-    protected static string $resource = PracticeResource::class;
+    protected static string $resource = PracticeOAMResource::class;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Compliance';
+    // Definisci il gruppo di navigazione solo per questa pagina
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Compilance';
+    }
+
+    // Definisci l'etichetta che apparirà nel menu
+    public static function getNavigationLabel(): string
+    {
+        return 'Nuovo Utente';
+    }
 
     public function getTable(): FilamentTable
     {

@@ -44,6 +44,12 @@ class Agent extends Model
         'is_art108' => 'boolean',
     ];
 
+    public function checklists()
+    {
+        // Un agente ha molte checklist (le sue copie assegnate)
+        return $this->morphMany(Checklist::class, 'target');
+    }
+
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');

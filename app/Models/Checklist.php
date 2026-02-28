@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,6 +29,12 @@ class Checklist extends Model
         'is_audit' => 'boolean',
     ];
 
+    public function target()
+    {
+        // Questa checklist a chi appartiene? (Agente, Pratica, ecc.)
+        return $this->morphTo();
+    }
+
     public function checklistItems(): HasMany
     {
         return $this->hasMany(ChecklistItem::class);
@@ -38,7 +45,7 @@ class Checklist extends Model
         return $this->checklistItems();
     }
 
-    public function principal(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function principal(): BelongsTo
     {
         return $this->belongsTo(Principal::class);
     }

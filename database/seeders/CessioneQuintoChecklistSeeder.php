@@ -23,7 +23,7 @@ class CessioneQuintoChecklistSeeder extends Seeder
 
         if (!$checklist) {
             $checklistId = DB::table('checklists')->insertGetId([
-                'company_id' => null,
+                'company_id' => $companyId,
                 'name' => 'Lavorazione Pratica - Cessione del Quinto (CQS/CQP)',
                 'code' => 'CQS',
                 'type' => 'loan_management',

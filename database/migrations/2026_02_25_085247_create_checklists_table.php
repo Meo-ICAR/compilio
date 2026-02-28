@@ -20,11 +20,30 @@ return new class extends Migration {
             $table->enum('type', ['loan_management', 'audit'])->comment('Tipo di checklist')->nullable();
             $table->text('description')->nullable()->comment('Descrizione della checklist');
             $table->unsignedInteger('principal_id')->nullable()->comment('Principal specifico (se applicabile)');
-            $table->boolean('is_practice')->default(false)->comment('Se riferisce a pratiche');
-            $table->boolean('is_audit')->default(false)->comment('Se per audit/compliance');
-            $table->timestamps();
+            $table->boolean('is_practice')->default(false)->comment('Se riferisce a pratiche')->nullable();
+            $table->boolean('is_audit')->default(false)->comment('Se per audit/compliance')->nullable();
 
+            $table->boolean('is_template')->default(true)->nullable();
+
+            // Relazione Polimorfica: a chi appartiene questa specifica copia?
+            // target_type sarà es. 'App\Models\Agent' o 'App\Models\Pratica'
+            // target_id sarà l'ID dell'agente o della pratica
+            $table->nullableMorphs('target');
+
+            // Stato di completamento
+            $table->enum('status', ['da_compilare', 'in_corso', 'completata'])->default('da_compilare')->after('target_id');
+
+            // Relazione Polimorfica: a chi appartiene questa specifica copia?
+            // target_type sarà es. 'App\Models\Agent' o 'App\Models\Pratica'
+            // target_id sarà l'ID dell'agente o della pratica
+            $table->nullableMorphs('target');
+
+            // Stato di completamento
+            $table->enum('status', ['da_compilare', 'in_corso', 'completata'])->default('da_compilare')->nullable();
+
+            $table->timestamps();
             // Indici
+
             $table->index(['company_id', 'type']);
             $table->index('principal_id');
 

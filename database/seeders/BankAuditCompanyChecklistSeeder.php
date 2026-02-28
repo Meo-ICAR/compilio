@@ -234,7 +234,7 @@ class BankAuditCompanyChecklistSeeder extends Seeder
 
             if (!$checklistAgent) {
                 $checklistAgentId = DB::table('checklists')->insertGetId([
-                    //  'company_id' => $companyId,  // Lasciato null per
+                    'company_id' => $companyId,
                     'type' => 'audit',
                     'principal_id' => null,  // Potrebbe essere valorizzato se si crea un template specifico per una singola banca
                     'is_practice' => 0,
@@ -343,7 +343,7 @@ class BankAuditCompanyChecklistSeeder extends Seeder
                         'created_at' => $now,
                         'updated_at' => $now,
                     ], $item);
-                }, $items);
+                }, $itemsAgent);
                 DB::table('checklist_items')->insert($formattedAgentItems);
             }
         }

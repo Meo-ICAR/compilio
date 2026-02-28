@@ -34,6 +34,12 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         return 'Company';
     }
 
+    public function checklists()
+    {
+        // Un agente ha molte checklist (le sue copie assegnate)
+        return $this->morphMany(Checklist::class, 'target');
+    }
+
     public function registerMediaCollections(): void
     {
         $this

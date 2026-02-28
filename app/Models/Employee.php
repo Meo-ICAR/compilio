@@ -33,6 +33,12 @@ class Employee extends Model
         'hire_date' => 'date',
     ];
 
+    public function checklists()
+    {
+        // Un agente ha molte checklist (le sue copie assegnate)
+        return $this->morphMany(Checklist::class, 'target');
+    }
+
     public function trainingRecords()
     {
         return $this->morphMany(TrainingRecord::class, 'trainable');

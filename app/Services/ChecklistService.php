@@ -98,4 +98,52 @@ class ChecklistService
 
         return $schema;
     }
+
+    /**
+     * Clona un template di checklist e lo assegna a un'entità (Agente, Pratica, ecc.)
+     *
+     * @param Model $target Il modello a cui assegnare la checklist (es. istanza di Agent o Pratica)
+     * @param string $templateCode Il codice univoco del template OAM/Audit da clonare
+     * @return Checklist La nuova checklist appena generata
+     * @throws Exception Se il template non esiste o c'è un errore nel database
+     */
+    public function assignTemplate(Model $target, string $templateCode): Checklist
+    {
+        // Usiamo una Transaction: se fallisce la copia delle domande, non salviamo nemmeno la testata. Tutto o niente.
+        return DB::transaction(function () use ($target, $templateCode) {
+            // 1. Troviamo il Template originale (quello intoccabile)
+            $template = Checklist::where('code', $templateCode)
+                ->where('is_template', true)
+                ->firstOrFail();
+
+            // 2. Fotocopiamo la testata
+            $nuovaChecklist = $template->replicate();
+            $nuovaChecklist->is_template = false;  // Questa è un'istanza operativa
+
+            // Magia del polimorfismo: capisce da solo se $target è un Agent, Pratica, ecc.
+            $nuovaChecklist->target_type = get_class($target);
+            $nuovaChecklist->target_id = $target->id;
+
+            $nuovaChecklist->status = 'da_compilare';
+            $nuovaChecklist->save();
+
+            // 3. Fotocopiamo tutte le domande (Items)
+            foreach ($template->items as $item) {
+                $nuovoItem = $item->replicate();
+                $nuovoItem->checklist_id = $nuovaChecklist->id;
+
+                // Pulizia preventiva: ci assicuriamo che parta intonsa
+                $nuovoItem->answer = null;
+
+                // Se la domanda prevedeva un allegato sul modello (es. attach_model = 'agent'), leghiamo l'ID
+                if ($nuovoItem->attach_model) {
+                    $nuovoItem->attach_model_id = $target->id;
+                }
+
+                $nuovoItem->save();
+            }
+
+            return $nuovaChecklist;
+        });
+    }
 }

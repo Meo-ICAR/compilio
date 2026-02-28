@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ClientMandate extends Model
@@ -32,6 +32,12 @@ class ClientMandate extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
+
+    public function checklists()
+    {
+        // Un agente ha molte checklist (le sue copie assegnate)
+        return $this->morphMany(Checklist::class, 'target');
+    }
 
     public function client(): BelongsTo
     {

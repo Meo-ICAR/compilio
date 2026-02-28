@@ -136,6 +136,12 @@ class Practice extends Model
         });
     }
 
+    public function checklists()
+    {
+        // Un agente ha molte checklist (le sue copie assegnate)
+        return $this->morphMany(Checklist::class, 'target');
+    }
+
     public function isWorkingStatus()
     {
         return $this->practiceStatus?->is_working ?? false;

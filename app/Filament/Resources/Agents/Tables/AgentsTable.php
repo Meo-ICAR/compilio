@@ -95,6 +95,27 @@ class AgentsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('assegnaChecklistOam')
+                    ->label('Avvia Procedura 10 Giorni OAM')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->action(function (Agent $record, ChecklistService $checklistService) {
+                        try {
+                            // Chiamiamo il nostro Service pulitissimo
+                            $checklistService->assignTemplate($record, 'OAM_RETE_10GG');
+
+                            Notification::make()
+                                ->success()
+                                ->title('Checklist Assegnata!')
+                                ->body("La procedura OAM è pronta per essere compilata nel fascicolo dell'agente.")
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Errore')
+                                ->body('Template checklist non trovato.')
+                                ->send();
+                        }
+                    })
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

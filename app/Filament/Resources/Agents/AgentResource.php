@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Agents;
 
+use App\Filament\RelationManagers\ChecklistsRelationManager;
 use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Agents\Pages\CreateAgent;
 use App\Filament\Resources\Agents\Pages\EditAgent;
@@ -44,8 +45,9 @@ class AgentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\Agents\RelationManagers\TrainingRecordsRelationManager::class,
+            TrainingRecordsRelationManager::class,
             DocumentsRelationManager::class,
+            ChecklistsRelationManager::class,
         ];
     }
 
