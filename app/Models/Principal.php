@@ -19,6 +19,7 @@ class Principal extends Model
         'start_date',
         'type',
         'principal_type',
+        'submission_type',
         'status',
         'is_dummy',
     ];

@@ -42,7 +42,13 @@ return new class extends Migration {
             $table
                 ->enum('principal_type', ['--', 'banca', 'agente_assicurativo', 'agente_captive'])
                 ->default('banca')
+                ->nullable()
                 ->comment('Tipologia del mandante');
+            $table
+                ->enum('submission_type', ['--', 'accesso portale', 'inoltro'])
+                ->default('portale banca')
+                ->nullable()
+                ->comment('Modalita inoltro pratiche');
             $table->foreign(['company_id'], 'principals_ibfk_1')->references(['id'])->on('companies')->onUpdate('no action')->onDelete('no action');
             $table->string('contoCOGE')->nullable()->comment('Conto COGE');
             $table->timestamp('created_at')->nullable()->useCurrent();

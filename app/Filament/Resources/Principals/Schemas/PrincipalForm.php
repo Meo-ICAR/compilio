@@ -72,6 +72,16 @@ class PrincipalForm
                                 ->default('no')
                                 ->searchable()
                                 ->helperText('Tipologia del mandante per classificazione interna'),
+                            Select::make('submission_type')
+                                ->label('Modalita Inoltro')
+                                ->options([
+                                    'no' => 'Non Specificato',
+                                    'accesso portale' => 'Accesso Portale',
+                                    'inoltro' => 'Inoltro',
+                                ])
+                                ->default('no')
+                                ->searchable()
+                                ->helperText('Tipologia del mandante per classificazione interna'),
                         ]),
                         Grid::make(2)->schema([
                             Toggle::make('is_active')
