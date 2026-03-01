@@ -8,6 +8,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('company_functions', function (Blueprint $table) {
+            $table->comment('Organigramma aziendale e funzioni aziendali');
             $table->id()->comment('ID univoco funzione azienda');
 
             // Relazione con l'Azienda (es. il Mediatore Creditizio)
@@ -18,12 +19,12 @@ return new class extends Migration {
                 ->foreignId('business_function_id')
                 ->constrained('business_functions')
                 ->onDelete('cascade');
-
+            $table->string('code')->nullable()->comment('Codice identificativo funzione azienda');
             // Referente Interno (Dipendente/Esponente aziendale delegato al controllo)
             $table
                 ->unsignedInteger('employee_id')
                 ->nullable()
-                ->comment('ID del dipendente referente interno');
+                ->comment('Referente interno');
 
             // Foreign key verso employees
             $table
@@ -36,7 +37,7 @@ return new class extends Migration {
             $table
                 ->unsignedInteger('client_id')
                 ->nullable()
-                ->comment('ID del cliente referente esterno');
+                ->comment('Consulente esterno');
 
             // Foreign key verso clients
             $table
@@ -44,13 +45,12 @@ return new class extends Migration {
                 ->references('id')
                 ->on('clients')
                 ->onDelete('set null');
+            $table->date('contract_expiry_date')->nullable()->comment('Data scadenza contratto esternalizzazione');
 
-            $table->string('code')->nullable()->comment('Codice identificativo funzione azienda');
-            $table->boolean('is_privacy')->default(false)->comment('Se la funzione tratta dati personali');
-            // Dettagli operativi dell'assegnazione
-            $table->boolean('is_outsourced')->default(false)->comment('Se la funzione è esternalizzata');
-            $table->string('report_frequency')->nullable()->comment('Frequenza report (mensile, trimestrale, annuale)');  // Es. Mensile, Trimestrale
-            $table->date('contract_expiry_date')->nullable()->comment('Data scadenza contratto esternalizzazione');  // Scadenza contratto outsourcer
+            $table->boolean('is_privacy')->default(false)->comment('La funzione tratta dati personali ?');
+            $table->boolean('is_outsourced')->default(false)->comment('La funzione è esternalizzata ?');
+            $table->string('report_frequency')->nullable()->comment('Frequenza report (mensile, trimestrale, annuale)');
+
             $table->text('notes')->nullable()->comment('Note aggiuntive sulla funzione');
 
             $table->timestamps();

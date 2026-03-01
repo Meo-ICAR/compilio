@@ -7,6 +7,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('business_functions', function (Blueprint $table) {
+            $table->comment('Funzioni aziendali per funzionogramma');
             $table->id()->comment('ID univoco funzione business');
             // Il nuovo campo code univoco
             $table->string('code')->unique()->comment('Codice identificativo univoco funzione');

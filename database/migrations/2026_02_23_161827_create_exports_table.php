@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('exports', function (Blueprint $table): void {
+            $table->comment('Log Esportazioni dati');
             $table->id()->comment('ID univoco esportazione');
             $table->timestamp('completed_at')->nullable()->comment('Data e ora completamento esportazione');
             $table->string('file_disk')->comment('Storage disk dove salvare file');

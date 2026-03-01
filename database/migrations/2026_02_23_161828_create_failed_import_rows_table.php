@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('failed_import_rows', function (Blueprint $table): void {
+            $table->comment('Log errori importazioni dati');
             $table->id()->comment('ID univoco riga importazione fallita');
             $table->json('data')->comment('Dati originali della riga fallita in formato JSON');
             $table->foreignId('import_id')->constrained()->cascadeOnDelete()->comment('Riferimento importazione principale');

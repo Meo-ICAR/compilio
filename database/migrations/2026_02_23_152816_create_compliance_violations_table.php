@@ -12,7 +12,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('compliance_violations', function (Blueprint $table) {
-            $table->id()->comment('ID univoco violazione compliance');
+            $table->comment('Registro violazioni privacy');
+            $table->id()->comment('ID univoco violazione');
             $table->foreignUuid('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
             $table->unique(['company_id', 'violation_type']);
 

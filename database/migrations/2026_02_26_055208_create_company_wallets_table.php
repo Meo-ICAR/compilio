@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('company_wallets', function (Blueprint $table) {
+            $table->comment('Wallet azienda per utilizzo API');
             $table->id()->comment('ID univoco wallet azienda');
 
             // Relazioni

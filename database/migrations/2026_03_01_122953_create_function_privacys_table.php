@@ -7,6 +7,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('function_privacys', function (Blueprint $table) {
+            $table->comment('Schede Privacy per funzioni aziendali');
             $table->id()->comment('ID univoco scheda privacy funzione');
 
             // Collegamento al reparto/funzione aziendale che effettua il trattamento

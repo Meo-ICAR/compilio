@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('comunes', function (Blueprint $table) {
+            $table->comment('Comuni italiani ISTAT');
             $table->bigIncrements('id')->comment('ID univoco comune');
             $table->string('codice_regione', 3)->index()->comment('Codice regione ISTAT');
             $table->string('codice_unita_territoriale', 6)->comment('Codice unità territoriale ISTAT');

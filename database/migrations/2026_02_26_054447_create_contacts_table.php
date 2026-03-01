@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('contacts', function (Blueprint $table) {
+            $table->comment('Contatti aziendali es. sollecito pagamenti, referente');
             $table->id()->comment('ID univoco contatto');
             $table->foreignUuid('company_id')->nullable()->constrained('companies')->onDelete('cascade');
 

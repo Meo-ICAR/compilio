@@ -8,6 +8,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('remediations', function (Blueprint $table) {
+            $table->comment('Rimedi alle violazioni');
             $table->id();
 
             $table

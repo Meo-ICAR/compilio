@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('practice_commission_statuses', function (Blueprint $table) {
+            $table->comment('Stati provvigioni pratiche');
             $table->tinyIncrements('id');
             $table->string('name', 255)->nullable()->comment('Stato pagamento');
             $table->string('code', 20)->nullable();

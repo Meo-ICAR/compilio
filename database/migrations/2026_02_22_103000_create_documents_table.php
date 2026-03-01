@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('documents', function (Blueprint $table) {
+            $table->comment('Documentazione');
             $table->char('id', 36)->primary()->comment('UUID del documento');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
@@ -33,7 +34,8 @@ return new class extends Migration {
             $table->date('expires_at')->nullable()->comment('Scadenza documento');
             $table->date('emitted_at')->nullable()->comment('Data emissione documento');
             $table->string('docnumber')->nullable()->comment('Numero documento');
-
+            $table->timestamp('delivered_at')->nullable()->comment('Documento consegnato il');
+            $table->timestamp('signed_at')->nullable()->comment('Firmato il');
             // Campi audit aggiunti
             $table->text('rejection_note')->nullable()->comment('Motivazione in caso di documento rifiutato');
             $table->timestamp('verified_at')->nullable()->comment('Data e ora della verifica');

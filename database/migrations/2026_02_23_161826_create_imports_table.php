@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('imports', function (Blueprint $table): void {
+            $table->comment('Log Importazioni dati');
             $table->id()->comment('ID univoco importazione');
             $table->timestamp('completed_at')->nullable()->comment('Data e ora completamento importazione');
             $table->string('file_name')->comment('Nome file importato');

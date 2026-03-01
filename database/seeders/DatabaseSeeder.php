@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             DocumentStatusSeederFixed::class,
             DocumentStatusSeeder::class,
             DocumentTypeSeeder::class,
+            OamCodeSeeder::class,
             FilamentUserSeeder::class,
             AmlChecklistSeeder::class,
             AuditChecklistSeeder::class,

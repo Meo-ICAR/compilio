@@ -11,11 +11,12 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('principal_employees', function (Blueprint $table) {
+            $table->comment('Dipendenti autorizzati a lavorare con mandante');
             $table->id();
             $table->unsignedInteger('principal_id')->constrained('principals')->onDelete('cascade');
-            $table->string('usercode')->unique()->comment('Codice identificativo utente');
+            $table->string('usercode')->unique()->comment('Codice identificativo utente sul portale')->nullable();
             $table->string('description')->nullable()->comment('Descrizione ruolo o note');
-            $table->date('start_date')->comment('Data inizio autorizzazione');
+            $table->date('start_date')->comment('Data inizio autorizzazione')->nullable();
             $table->date('end_date')->nullable()->comment('Data fine autorizzazione');
             $table->boolean('is_active')->default(true)->comment('Stato attivo/inattivo');
             $table->timestamps();

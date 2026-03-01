@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('client_relations', function (Blueprint $table) {
+            $table->comment('Composizione societaria');
             $table->id()->comment('ID univoco relazione cliente');
 
             // La società (persona giuridica) - DEVE puntare a companies table
