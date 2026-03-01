@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->id()->comment('ID univoco codice OAM');
             $table->string('code')->comment('Codice identificativo OAM');
             $table->enum('fase', ['1-Procacciamento', '2-Trasparenza', '3-Mediazione'])->comment('Fase del rilievo OAM');
-            $table->string('name')->comment('Descrizione codice OAM');
+            $table->text('name')->comment('Descrizione codice OAM');
             $table->timestamps();
         });
     }
