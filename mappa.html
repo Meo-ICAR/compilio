@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mappa Interattiva Database MySQL</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        body {  
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            background-color: #f4f7f6;
+        }
+        #header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        #header h1 { margin: 0; font-size: 1.5em; }
+        input[type="file"] { background: #fff; color: #333; padding: 5px; border-radius: 4px; }
+        
+        #workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* Area della mappa */
+        #mynetwork {
+            flex: 2; /* Occupa 2/3 dello schermo */
+            background-color: #ffffff;
+            border-right: 2px solid #ddd;
+        }
+        
+        /* Pannello laterale dei dettagli */
+        #infoPanel {
+            flex: 1; /* Occupa 1/3 dello schermo */
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #fafafa;
+        }
+        
+        .placeholder { color: #7f8c8d; font-style: italic; text-align: center; margin-top: 50px; }
+        
+        .table-title { font-size: 1.5em; color: #2980b9; margin-bottom: 5px; font-weight: bold; }
+        .table-comment { background: #e8f4f8; padding: 10px; border-left: 4px solid #3498db; margin-bottom: 20px; font-size: 0.95em; color: #34495e;}
+        
+        table.fields { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
+        table.fields th, table.fields td { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; }
+        table.fields th { background-color: #f1f1f1; color: #333; }
+        .f-name { font-weight: bold; color: #d35400; }
+        .f-type { font-family: monospace; color: #16a085; }
+        .f-comment { color: #7f8c8d; font-size: 0.85em; }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1>Mappa Relazionale MySQL (Pesata sulle Relazioni)</h1>
+        <div>
+            <label for="sqlFileInput">Carica il file <strong>db.sql</strong>: </label>
+            <input type="file" id="sqlFileInput" accept=".sql,.txt">
+        </div>
+    </div>
+
+    <div id="workspace">
+        <div id="mynetwork"></div>
+        <div id="infoPanel">
+            <div class="placeholder">Carica il file e clicca su una tabella nella mappa per visualizzare i dettagli e i commenti.</div>
+        </div>
+    </div>
+
+    <script>
+        let parsedTables = [];
+
+        document.getElementById('sqlFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const sqlContent = e.target.result;
+                parsedTables = parseSQL(sqlContent);
+                drawNetwork(parsedTables);
+            };
+            reader.readAsText(file);
+        });
+
+        function parseSQL(sql) {
+            const tables = [];
+            const tableRegex = /CREATE\s+TABLE\s+`([^`]+)`\s*\(([\s\S]*?)\)\s*(?:ENGINE=[^\s;]+)?\s*(?:DEFAULT\s+CHARSET=[^\s;]+)?\s*(?:COLLATE=[^\s;]+)?\s*(?:COMMENT='([^']+)')?\s*;/gi;
+            
+            let match;
+            while ((match = tableRegex.exec(sql)) !== null) {
+                const tableName = match[1];
+                const body = match[2];
+                const tableComment = match[3] || 'Nessun commento sulla tabella.';
+                
+                const fields = [];
+                const fks = [];
+                const lines = body.split('\n');
+                
+                for (let line of lines) {
+                    line = line.trim();
+                    if (!line) continue;
+                    
+                    // Cerca relazioni (FOREIGN KEY)
+                    const fkMatch = line.match(/FOREIGN\s+KEY\s*\(`([^`]+)`\)\s*REFERENCES\s+`([^`]+)`/i);
+                    if (fkMatch) {
+                        fks.push({
+                            fromField: fkMatch[1],
+                            toTable: fkMatch[2]
+                        });
+                        continue;
+                    }
+                    
+                    // Salta le definizioni degli indici che non sono campi
+                    if (line.startsWith('PRIMARY KEY') || line.startsWith('UNIQUE KEY') || line.startsWith('KEY') || line.startsWith('CONSTRAINT') || line.startsWith(')')) {
+                        continue;
+                    }
+                    
+                    // Estrae il nome del campo, il tipo e il commento
+                    const fieldRegex = /^`([^`]+)`\s+([a-zA-Z0-9_]+(?:\([^)]+\))?(?:\s+unsigned)?)[^,]*?(?:COMMENT\s+'([^']+)')?/i;
+                    const fMatch = line.match(fieldRegex);
+                    
+                    if (fMatch) {
+                        fields.push({
+                            name: fMatch[1],
+                            type: fMatch[2],
+                            comment: fMatch[3] || '-'
+                        });
+                    }
+                }
+                
+                tables.push({
+                    name: tableName,
+                    comment: tableComment,
+                    fields: fields,
+                    fks: fks
+                });
+            }
+            return tables;
+        }
+
+        function drawNetwork(tables) {
+            const nodes = new vis.DataSet();
+            const edges = new vis.DataSet();
+
+            // 1. Calcola il numero di relazioni in entrata e in uscita per ogni tabella
+            const relationshipsCount = {};
+            tables.forEach(t => {
+                if (!relationshipsCount[t.name]) {
+                    relationshipsCount[t.name] = { in: 0, out: 0 };
+                }
+                // Relazioni in uscita (definite in questa tabella)
+                relationshipsCount[t.name].out += t.fks.length;
+                
+                // Relazioni in entrata (puntano a questa tabella)
+                t.fks.forEach(fk => {
+                    if (!relationshipsCount[fk.toTable]) {
+                        relationshipsCount[fk.toTable] = { in: 0, out: 0 };
+                    }
+                    relationshipsCount[fk.toTable].in += 1;
+                });
+            });
+
+            // 2. Disegna i nodi (tabelle) calcolandone la dimensione
+            tables.forEach(t => {
+                const rels = relationshipsCount[t.name] || { in: 0, out: 0 };
+                const totalRels = rels.in + rels.out;
+                
+                // Logica di ingrandimento: base fissa + un moltiplicatore per ogni relazione. 
+                // Usiamo un limite massimo (es. 20) per non far esplodere graficamente le tabelle troppo collegate
+                const scaleFactor = Math.min(totalRels, 20);
+                const dynamicFontSize = 14 + (scaleFactor * 2); // Il font parte da 14px e cresce
+                const dynamicMargin = 10 + (scaleFactor * 1.5); // I bordi del riquadro si allargano
+
+                // Testo da mostrare: Nome tabella e sotto il numero di relazioni
+                let labelText = t.name;
+                if (totalRels > 0) {
+                    labelText += `\n[ ${totalRels} relazioni ]`;
+                }
+
+                nodes.add({ 
+                    id: t.name, 
+                    label: labelText, 
+                    title: t.comment, // Mostrato al passaggio del mouse
+                    shape: 'box', 
+                    color: { 
+                        background: totalRels > 0 ? '#3498db' : '#95a5a6', // Grigie se non hanno relazioni
+                        border: totalRels > 0 ? '#2980b9' : '#7f8c8d' 
+                    },
+                    font: { color: 'white', size: dynamicFontSize, face: 'Tahoma' },
+                    margin: dynamicMargin
+                });
+
+                // 3. Disegna le linee di collegamento (Foreign Keys)
+                t.fks.forEach(fk => {
+                    edges.add({ 
+                        from: t.name, 
+                        to: fk.toTable, 
+                        label: fk.fromField, 
+                        arrows: 'to', 
+                        font: { align: 'middle', size: 10, color: '#7f8c8d' },
+                        color: { color: '#bdc3c7', highlight: '#e74c3c' }
+                    });
+                });
+            });
+
+            const container = document.getElementById('mynetwork');
+            const data = { nodes: nodes, edges: edges };
+            const options = {
+                physics: {
+                    stabilization: false,
+                    barnesHut: { springLength: 250, gravitationalConstant: -4000 } // Spazi più ampi per fare posto a tabelle grandi
+                },
+                interaction: { hover: true }
+            };
+
+            const network = new vis.Network(container, data, options);
+
+            // Evento click per i dettagli
+            network.on('click', function(params) {
+                if (params.nodes.length > 0) {
+                    const clickedNodeId = params.nodes[0];
+                    const table = tables.find(t => t.name === clickedNodeId);
+                    showTableDetails(table, relationshipsCount[clickedNodeId]);
+                } else {
+                    document.getElementById('infoPanel').innerHTML = '<div class="placeholder">Clicca su una tabella per visualizzarne i dettagli.</div>';
+                }
+            });
+        }
+
+        function showTableDetails(table, relsInfo) {
+            if (!table) return;
+            
+            const totalRels = relsInfo ? (relsInfo.in + relsInfo.out) : 0;
+            const inRels = relsInfo ? relsInfo.in : 0;
+            const outRels = relsInfo ? relsInfo.out : 0;
+
+            let html = `
+                <div class="table-title">🗄️ ${table.name}</div>
+                <div class="table-comment"><strong>Commento Tabella:</strong> ${table.comment}</div>
+                
+                <div style="background: #fff; padding: 10px; border-radius: 5px; border: 1px solid #ddd; margin-bottom: 20px;">
+                    <strong>Statistiche Relazioni:</strong><br>
+                    🔄 Totali: ${totalRels}<br>
+                    ➡️ In uscita (FK in questa tabella): ${outRels}<br>
+                    ⬅️ In entrata (Altre tabelle puntano qui): ${inRels}
+                </div>
+
+                <h3>Campi (${table.fields.length})</h3>
+                <table class="fields">
+                    <tr>
+                        <th>Campo</th>
+                        <th>Tipo</th>
+                        <th>Commento</th>
+                    </tr>
+            `;
+
+            table.fields.forEach(field => {
+                const isFk = table.fks.some(fk => fk.fromField === field.name);
+                const icon = isFk ? '🔑 ' : '';
+
+                html += `
+                    <tr>
+                        <td class="f-name">${icon}${field.name}</td>
+                        <td class="f-type">${field.type}</td>
+                        <td class="f-comment">${field.comment}</td>
+                    </tr>
+                `;
+            });
+
+            html += `</table>`;
+            document.getElementById('infoPanel').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
