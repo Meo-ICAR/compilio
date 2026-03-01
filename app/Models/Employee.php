@@ -23,6 +23,8 @@ class Employee extends Model
         'department',
         'hire_date',
         'employment_type_id',
+        'employee_types',
+        'supervisor_type',
         'is_structure',
         'is_ghost',
     ];
@@ -31,6 +33,8 @@ class Employee extends Model
         'is_structure' => 'boolean',
         'is_ghost' => 'boolean',
         'hire_date' => 'date',
+        'employee_types' => 'string',
+        'supervisor_type' => 'string',
     ];
 
     public function checklists()
@@ -105,5 +109,109 @@ class Employee extends Model
             return 'Prestato';
         }
         return 'Regolare';
+    }
+
+    // Helper methods per employee_types
+    public function getEmployeeTypesLabelAttribute(): string
+    {
+        return match ($this->employee_types) {
+            'dipendente' => 'Dipendente',
+            'collaboratore' => 'Collaboratore',
+            'stagista' => 'Stagista',
+            'consulente' => 'Consulente',
+            'amministratore' => 'Amministratore',
+            default => $this->employee_types,
+        };
+    }
+
+    public function getSupervisorTypeLabelAttribute(): string
+    {
+        return match ($this->supervisor_type) {
+            'no' => 'Non Supervisore',
+            'si' => 'Supervisore',
+            'filiale' => 'Supervisore di Filiale',
+            default => $this->supervisor_type,
+        };
+    }
+
+    public function isEmployee(): bool
+    {
+        return $this->employee_types === 'dipendente';
+    }
+
+    public function isCollaborator(): bool
+    {
+        return $this->employee_types === 'collaboratore';
+    }
+
+    public function isIntern(): bool
+    {
+        return $this->employee_types === 'stagista';
+    }
+
+    public function isConsultant(): bool
+    {
+        return $this->employee_types === 'consulente';
+    }
+
+    public function isAdministrator(): bool
+    {
+        return $this->employee_types === 'amministratore';
+    }
+
+    public function isSupervisor(): bool
+    {
+        return in_array($this->supervisor_type, ['si', 'filiale']);
+    }
+
+    public function isBranchSupervisor(): bool
+    {
+        return $this->supervisor_type === 'filiale';
+    }
+
+    // Scope per filtrare per tipologia
+    public function scopeByEmployeeType($query, string $type)
+    {
+        return $query->where('employee_types', $type);
+    }
+
+    public function scopeBySupervisorType($query, string $type)
+    {
+        return $query->where('supervisor_type', $type);
+    }
+
+    public function scopeEmployees($query)
+    {
+        return $query->where('employee_types', 'dipendente');
+    }
+
+    public function scopeCollaborators($query)
+    {
+        return $query->where('employee_types', 'collaboratore');
+    }
+
+    public function scopeInterns($query)
+    {
+        return $query->where('employee_types', 'stagista');
+    }
+
+    public function scopeConsultants($query)
+    {
+        return $query->where('employee_types', 'consulente');
+    }
+
+    public function scopeAdministrators($query)
+    {
+        return $query->where('employee_types', 'amministratore');
+    }
+
+    public function scopeSupervisors($query)
+    {
+        return $query->whereIn('supervisor_type', ['si', 'filiale']);
+    }
+
+    public function scopeBranchSupervisors($query)
+    {
+        return $query->where('supervisor_type', 'filiale');
     }
 }

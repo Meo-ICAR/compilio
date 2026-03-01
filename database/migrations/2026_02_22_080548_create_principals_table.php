@@ -45,8 +45,8 @@ return new class extends Migration {
                 ->nullable()
                 ->comment('Tipologia del mandante');
             $table
-                ->enum('submission_type', ['--', 'accesso portale', 'inoltro'])
-                ->default('portale banca')
+                ->enum('submission_type', ['--', 'accesso portale', 'inoltro', 'entrambi'])
+                ->default('accesso portale')
                 ->nullable()
                 ->comment('Modalita inoltro pratiche');
             $table->foreign(['company_id'], 'principals_ibfk_1')->references(['id'])->on('companies')->onUpdate('no action')->onDelete('no action');

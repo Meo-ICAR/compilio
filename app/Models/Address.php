@@ -8,6 +8,8 @@ class Address extends Model
 {
     protected $fillable = [
         'name',
+        'address',
+        'n_civico',
         'numero',
         'street',
         'city',
@@ -25,6 +27,14 @@ class Address extends Model
     public function getFullAddressAttribute(): string
     {
         $parts = [];
+
+        if ($this->address) {
+            $parts[] = $this->address;
+        }
+
+        if ($this->n_civico) {
+            $parts[] = $this->n_civico;
+        }
 
         if ($this->street) {
             $parts[] = $this->street;
@@ -49,11 +59,38 @@ class Address extends Model
     {
         $street = $this->street ?? '';
         $numero = $this->numero ?? '';
+        $n_civico = $this->n_civico ?? '';
 
-        if ($street && $numero) {
-            return $street . ' ' . $numero;
+        // Priorità: n_civico > numero
+        $number = $n_civico ?: $numero;
+
+        if ($street && $number) {
+            return $street . ' ' . $number;
         }
 
-        return $street . $numero;
+        return $street . $number;
+    }
+
+    public function getFullStreetAttribute(): string
+    {
+        $parts = [];
+
+        if ($this->address) {
+            $parts[] = $this->address;
+        }
+
+        if ($this->n_civico) {
+            $parts[] = $this->n_civico;
+        }
+
+        if ($this->street) {
+            $parts[] = $this->street;
+        }
+
+        if ($this->numero) {
+            $parts[] = $this->numero;
+        }
+
+        return implode(' ', $parts);
     }
 }

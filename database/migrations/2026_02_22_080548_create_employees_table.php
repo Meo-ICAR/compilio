@@ -39,6 +39,16 @@ return new class extends Migration {
             $table->date('hiring_date')->nullable()->comment('Data di assunzione');
             $table->date('termination_date')->nullable()->comment('Data di fine rapporto');
             $table->unsignedInteger('company_branch_id')->nullable()->comment('Sede fisica di assegnazione');
+            $table
+                ->enum('employee_types', ['dipendente', 'collaboratore', 'stagista', 'consulente', 'amministratore'])
+                ->default('dipendente')
+                ->nullable()
+                ->comment('Tipologia di dipendente');
+            $table
+                ->enum('supervisor_type', ['no', 'si', 'filiale'])
+                ->default('no')
+                ->nullable()
+                ->comment('Se supervisore indicare e specificare se di filiale');
 
             $table->string('privacy_role')->nullable()->comment('Ruolo Privacy (es. Titolare Autonomo, Responsabile Esterno)');
             $table->text('purpose')->nullable()->comment('Finalità del trattamento');

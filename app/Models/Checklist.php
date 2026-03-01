@@ -19,6 +19,7 @@ class Checklist extends Model
         'type',
         'description',
         'principal_id',
+        'document_type_id',
         'is_practice',
         'is_audit',
     ];
@@ -48,5 +49,49 @@ class Checklist extends Model
     public function principal(): BelongsTo
     {
         return $this->belongsTo(Principal::class);
+    }
+
+    public function documentType(): BelongsTo
+    {
+        return $this->belongsTo(DocumentType::class);
+    }
+
+    // Helper methods per document_type
+    public function hasDocumentType(): bool
+    {
+        return !is_null($this->document_type_id);
+    }
+
+    public function getDocumentTypeNameAttribute(): string
+    {
+        return $this->documentType ? $this->documentType->name : 'Non Specificato';
+    }
+
+    public function getDocumentTypeCodeAttribute(): string
+    {
+        return $this->documentType ? $this->documentType->code : '';
+    }
+
+    // Scope per filtrare per document_type
+    public function scopeByDocumentType($query, $documentTypeId)
+    {
+        return $query->where('document_type_id', $documentTypeId);
+    }
+
+    public function scopeWithDocumentType($query)
+    {
+        return $query->whereNotNull('document_type_id');
+    }
+
+    public function scopeWithoutDocumentType($query)
+    {
+        return $query->whereNull('document_type_id');
+    }
+
+    public function scopeForMonitoredDocuments($query)
+    {
+        return $query->whereHas('documentType', function ($q) {
+            $q->where('is_monitored', true);
+        });
     }
 }

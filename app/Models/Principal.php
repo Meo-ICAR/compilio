@@ -61,6 +61,11 @@ class Principal extends Model
         return $this->morphMany(Document::class, 'documentable');
     }
 
+    public function audits(): MorphMany
+    {
+        return $this->morphMany(Audit::class, 'auditable');
+    }
+
     public function principalContacts(): HasMany
     {
         return $this->hasMany(PrincipalContact::class);

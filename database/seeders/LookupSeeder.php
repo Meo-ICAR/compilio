@@ -232,6 +232,35 @@ class LookupSeeder extends Seeder
             // --- TRASPARENZA E OAM ---
             ['name' => 'Lettera di Incarico di Mediazione', 'scopes' => [$oamScope->id]],
             ['name' => 'Avviso sulla Trasparenza (Presa Visione)', 'scopes' => [$oamScope->id]],
+            ['name' => 'Trasparenza sito web', 'scopes' => [$oamScope->id]],
+            ['name' => 'Privacy sito web', 'scopes' => [$oamScope->id]],
+            ['name' => 'Relazione sui requisiti organizzativi ex. art 6', 'scopes' => [$oamScope->id]],
+            // 1. Assetto Organizzativo
+            ['name' => 'Procedura organizzativa - Assetto Organizzativo - Manuale Operativo e Organizzativo', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Assetto Organizzativo - Sistema di Deleghe', 'scopes' => [$oamScope->id]],
+            // 2. Sistema di Controllo Interno
+            ['name' => 'Procedura organizzativa - Sistema di Controllo Interno - Compliance e Risk Management', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Sistema di Controllo Interno - Internal Audit', 'scopes' => [$oamScope->id]],
+            // 3. Normativa Antiriciclaggio (AML)
+            ['name' => 'Procedura organizzativa - Normativa Antiriciclaggio (AML) - Adeguata Verifica della Clientela', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Normativa Antiriciclaggio (AML) - Profilatura del Rischio', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Normativa Antiriciclaggio (AML) - Segnalazione Operazioni Sospette (SOS)', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Normativa Antiriciclaggio (AML) - Conservazione dei Dati', 'scopes' => [$oamScope->id]],
+            // 4. Trasparenza e Tutela del Consumatore
+            ['name' => 'Procedura organizzativa - Trasparenza e Tutela del Consumatore - Informativa Precontrattuale', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Trasparenza e Tutela del Consumatore - Controllo della Pubblicità', 'scopes' => [$oamScope->id]],
+            // 5. Gestione dei Reclami
+            ['name' => 'Procedura organizzativa - Gestione dei Reclami - Ricezione e Trattazione', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Gestione dei Reclami - Informativa sui Sistemi di Risoluzione', 'scopes' => [$oamScope->id]],
+            // 6. Gestione e Monitoraggio della Rete
+            ['name' => 'Procedura organizzativa - Gestione e Monitoraggio della Rete - Selezione e Inserimento', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Gestione e Monitoraggio della Rete - Formazione Continua', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Gestione e Monitoraggio della Rete - Controlli di Rete', 'scopes' => [$oamScope->id]],
+            // 7. Sicurezza Informatica e Privacy
+            ['name' => 'Procedura organizzativa - Sicurezza Informatica e Privacy - GDPR e Data Protection', 'scopes' => [$oamScope->id]],
+            ['name' => 'Procedura organizzativa - Sicurezza Informatica e Privacy - Business Continuity e Disaster Recovery', 'scopes' => [$oamScope->id]],
+            // 8. Modello 231 e Codice Etico
+            ['name' => 'Procedura organizzativa - Modello 231 e Codice Etico - Prevenzione dei Reati', 'scopes' => [$oamScope->id]],
             ['name' => 'Modulo SECCI (Informazioni Europee di Base)', 'scopes' => [$oamScope->id, $istruttoriaScope->id]],
             ['name' => 'Modulo Segnalazione OAM', 'scopes' => [$oamScope->id]],
             // --- ISTRUTTORIA REDDITUALE (Dipendenti) ---

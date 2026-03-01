@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
 
 class CompanyBranch extends Model
@@ -27,6 +28,11 @@ class CompanyBranch extends Model
     public function address()
     {
         return $this->morphOne(Address::class, 'addressable');
+    }
+
+    public function audits(): MorphMany
+    {
+        return $this->morphMany(Audit::class, 'auditable');
     }
 
     // Boot method per gestire il salvataggio automatico dell'indirizzo

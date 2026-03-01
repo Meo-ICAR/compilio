@@ -16,8 +16,8 @@ return new class extends Migration {
             $table->string('name')->nullable()->comment('Descrizione');
             $table->string('code')->nullable()->comment('Codice documento');
             $table->boolean('is_person')->default(true)->comment('Documento inerente Persona o azienda');
-
             $table->boolean('is_signed')->default(false)->comment('Indica se il documento deve essere firmato');
+            $table->boolean('is_monitored')->default(false)->comment('Indica se la scadenza documento deve essere monitorata nel tempo');
             $table->integer('duration')->nullable()->comment('Validità dal rilascio in giorni');
             $table->string('emitted_by')->nullable()->comment('Ente di rilascio');
             $table->boolean('is_sensible')->default(false)->comment('Indica se contiene dati sensibili');

@@ -46,6 +46,22 @@ class ChecklistForm
                                 ->inline(false)
                                 ->default(false),
                         ]),
+                        Grid::make(2)->schema([
+                            Select::make('principal_id')
+                                ->label('Principal Specifico (Opzionale)')
+                                ->relationship('principal', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->nullable()
+                                ->helperText('Se la checklist è specifica per un mandante'),
+                            Select::make('document_type_id')
+                                ->label('Tipo Documento (Opzionale)')
+                                ->relationship('documentType', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->nullable()
+                                ->helperText('Se la checklist è associata a un tipo di documento specifico'),
+                        ]),
                         Textarea::make('description')
                             ->label('Descrizione generale')
                             ->columnSpanFull(),

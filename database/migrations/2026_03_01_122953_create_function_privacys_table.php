@@ -1,0 +1,68 @@
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up()
+    {
+        Schema::create('ropa_entries', function (Blueprint $table) {
+            $table->id();
+
+            // Collegamento al reparto/funzione aziendale che effettua il trattamento
+            $table
+                ->foreignId('function_id')
+                ->constrained('functions')
+                ->onDelete('cascade');  // Se elimino il reparto, elimino le sue schede privacy
+
+            // Nome dell'attività di trattamento (es. "Gestione Pratiche Mutuo")
+            $table->string('processing_activity');
+
+            // Categorie di Interessati (es. "Clienti", "Dipendenti", "Collaboratori")
+            $table->string('data_subjects');
+
+            // Categorie di Dati Personali trattati (es. "Dati anagrafici, reddituali, sanitari")
+            $table->text('data_categories');
+
+            // Finalità del trattamento
+            $table->text('purpose');
+
+            // Base Giuridica (Art. 6 GDPR)
+            $table->enum('legal_basis', [
+                'Consenso',
+                'Esecuzione di un contratto',
+                'Obbligo di legge',
+                'Legittimo interesse',
+                'Interesse vitale',
+                'Interesse pubblico'
+            ]);
+
+            // Categorie di Destinatari (a chi vengono inviati i dati? es. Banche, OAM)
+            $table->string('recipients')->nullable();
+
+            // Trasferimento extra-UE (Sì/No o dettagli)
+            $table->string('non_eu_transfer')->default('Nessuno');
+
+            // Tempi di conservazione (Data Retention)
+            $table->string('retention_period');
+
+            // Misure di sicurezza generali applicate (es. "Crittografia, Pseudonimizzazione")
+            $table->text('security_measures')->nullable();
+
+            // Stato della scheda (per tenere lo storico)
+            $table->boolean('is_active')->default(true);
+
+            // Data di creazione
+            $table->timestamp('start_at')->nullable()->comment('Data di inizio validità');
+            // Data di ultima modifica
+            $table->timestamp('end_at')->nullable()->comment('Data di fine validità');
+
+            $table->timestamps();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('ropa_entries');
+    }
+};

@@ -52,6 +52,13 @@ class DocumentStatusSeeder extends Seeder
                 'description' => 'Il documento presenta anomalie o non è conforme',
             ],
             [
+                'name' => 'Documento scaduto',
+                'status' => 'SCADUTO',
+                'is_ok' => false,
+                'is_rejected' => true,
+                'description' => 'Il documento scaduto',
+            ],
+            [
                 'name' => 'Informazioni Mancanti',
                 'status' => 'RICHIESTA INFO',
                 'is_ok' => false,

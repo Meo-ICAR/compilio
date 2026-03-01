@@ -13,8 +13,13 @@ return new class extends Migration {
         Schema::create('agents', function (Blueprint $table) {
             $table->comment('Tabella globale agenti convenzionati.');
             $table->increments('id')->comment('ID univoco agente');
-            $table->string('name')->comment("Nome dell'istituto bancario o finanziaria (es. Intesa Sanpaolo, Compass)");
+            $table->string('name')->comment('Nome agente');
             $table->string('description')->nullable()->comment('Descrizione');
+            $table
+                ->enum('supervisor_type', ['no', 'si', 'filiale'])
+                ->nullable()
+                ->default('no')
+                ->comment('Se supervisore indicare e specificare se di filiale');
             $table->string('oam', 30)->nullable()->comment('Oam');
             $table->date('oam_at')->nullable()->comment('Data iscrizione OAM');
             $table->string('oam_name')->nullable()->comment('Denominazione sociale registrata in OAM');
