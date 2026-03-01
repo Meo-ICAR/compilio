@@ -6,13 +6,13 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up()
     {
-        Schema::create('ropa_entries', function (Blueprint $table) {
+        Schema::create('function_privacys', function (Blueprint $table) {
             $table->id();
 
             // Collegamento al reparto/funzione aziendale che effettua il trattamento
             $table
-                ->foreignId('function_id')
-                ->constrained('functions')
+                ->foreignId('business_function_id')
+                ->constrained('business_functions')
                 ->onDelete('cascade');  // Se elimino il reparto, elimino le sue schede privacy
 
             // Nome dell'attività di trattamento (es. "Gestione Pratiche Mutuo")
@@ -63,6 +63,6 @@ return new class extends Migration {
 
     public function down()
     {
-        Schema::dropIfExists('ropa_entries');
+        Schema::dropIfExists('function_privacys');
     }
 };

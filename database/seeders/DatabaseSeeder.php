@@ -20,10 +20,8 @@ class DatabaseSeeder extends Seeder
             OperationalSeeder::class,
             SupportSeeder::class,
             OamScopeSeeder::class,
-            OamSeeder::class,
             FirrSeeder::class,
             FinancialSeeder::class,
-            ComuneSeeder::class,
             PracticeCommissionStatusSeeder::class,
             PracticeStatusLookupSeeder::class,
             DocumentStatusSeederFixed::class,
@@ -35,13 +33,18 @@ class DatabaseSeeder extends Seeder
             CessioneQuintoChecklistSeeder::class,
             MutuoImmobiliareChecklistSeeder::class,
             BankAuditCompanyChecklistSeeder::class,
-            AgenteInAttivitaFinanziariaSeeder::class,
             ComplianceSeeder::class,
             RemediationSeeder::class,
             BusinessFunctionSeeder::class,
-            FunctionSeeder::class,
             CompanyFunctionSeeder::class,
             FunctionPrivacySeeder::class,
+
+            /*
+             * AbiSeeder::class,
+             * OamSeeder::class,
+             * AgenteInAttivitaFinanziariaSeeder::class,
+             * ComuneSeeder::class,
+             */
         ]);
     }
 }

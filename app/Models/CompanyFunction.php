@@ -10,7 +10,7 @@ class CompanyFunction extends Model
 {
     use HasFactory;
 
-    protected $table = 'company_function';
+    protected $table = 'company_functions';
 
     protected $fillable = [
         'company_id',

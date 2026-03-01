@@ -10,7 +10,7 @@ class BusinessFunction extends Model
 {
     use HasFactory;
 
-    protected $table = 'functions';
+    protected $table = 'business_functions';
 
     protected $fillable = [
         'code',

@@ -13,10 +13,10 @@ class AgenteInAttivitaFinanziariaSeeder extends Seeder
      */
     public function run(): void
     {
-        $csvPath = storage_path('app/private/EsportazioneElencoAgentiInAttivitaFinanziaria.csv');
+        $csvPath = public_path('EsportazioneElencoAgentiInAttivitaFinanziaria.csv');
 
-        if (! file_exists($csvPath)) {
-            $this->command->error('CSV file not found: '.$csvPath);
+        if (!file_exists($csvPath)) {
+            $this->command->error('CSV file not found: ' . $csvPath);
 
             return;
         }
@@ -68,7 +68,7 @@ class AgenteInAttivitaFinanziariaSeeder extends Seeder
                     $this->command->info("Imported {$rowCount} records...");
                 }
             } catch (\Exception $e) {
-                $this->command->error("Error importing row {$rowCount}: ".$e->getMessage());
+                $this->command->error("Error importing row {$rowCount}: " . $e->getMessage());
 
                 continue;
             }

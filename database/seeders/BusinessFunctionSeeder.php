@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\CompanyFunction;
+use App\Models\BusinessFunction;
 use Illuminate\Database\Seeder;
 
 class BusinessFunctionSeeder extends Seeder
@@ -125,7 +125,7 @@ class BusinessFunctionSeeder extends Seeder
         ];
 
         foreach ($funzioniAziendali as $item) {
-            CompanyFunction::updateOrCreate(
+            BusinessFunction::updateOrCreate(
                 ['code' => $item['code']],  // Usa il code come chiave per evitare duplicati
                 $item
             );

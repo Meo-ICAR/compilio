@@ -15,44 +15,42 @@ return new class extends Migration {
 
             // Relazione con la Funzione (es. Compliance, AML, Direzione)
             $table
-                ->foreignId('function_id')
-                ->constrained('functions')
+                ->foreignId('business_function_id')
+                ->constrained('business_functions')
                 ->onDelete('cascade');
 
             // Referente Interno (Dipendente/Esponente aziendale delegato al controllo)
             $table
-                ->unsignedInteger('internal_employee_id')
+                ->unsignedInteger('employee_id')
                 ->nullable()
                 ->comment('ID del dipendente referente interno');
 
             // Foreign key verso employees
             $table
-                ->foreign('internal_employee_id')
+                ->foreign('employee_id')
                 ->references('id')
                 ->on('employees')
                 ->onDelete('set null');
 
             // Referente Esterno / Outsourcer (usando la tua tabella clients)
             $table
-                ->unsignedInteger('external_client_id')
+                ->unsignedInteger('client_id')
                 ->nullable()
                 ->comment('ID del cliente referente esterno');
 
             // Foreign key verso clients
             $table
-                ->foreign('external_client_id')
+                ->foreign('client_id')
                 ->references('id')
                 ->on('clients')
                 ->onDelete('set null');
+            $table->string('code')->nullable();  // Es. Mensile, Trimestrale
             $table->boolean('is_privacy')->default(true);
             // Dettagli operativi dell'assegnazione
             $table->boolean('is_outsourced')->default(false);
             $table->string('report_frequency')->nullable();  // Es. Mensile, Trimestrale
             $table->date('contract_expiry_date')->nullable();  // Scadenza contratto outsourcer
             $table->text('notes')->nullable();
-
-            // Indice univoco: un'azienda non può avere due volte la stessa funzione assegnata
-            $table->unique(['company_id', 'function_id']);
 
             $table->timestamps();
         });

@@ -18,10 +18,10 @@ class ComuneSeeder extends Seeder implements ToModel, WithChunkReading, WithCust
      */
     public function run(): void
     {
-        $csvPath = storage_path('app/private/Elenco-comuni-italiani.csv');
+        $csvPath = public_path('Elenco-comuni-italiani.csv');
 
-        if (! file_exists($csvPath)) {
-            $this->command->error('CSV file not found: '.$csvPath);
+        if (!file_exists($csvPath)) {
+            $this->command->error('CSV file not found: ' . $csvPath);
 
             return;
         }
