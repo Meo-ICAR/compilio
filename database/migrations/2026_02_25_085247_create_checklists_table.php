@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('checklists', function (Blueprint $table) {
             $table->comment('Checklist per workflow con domande e allegati');
-            $table->id();
+            $table->id()->comment('ID univoco checklist');
             $table->char('company_id', 36)->nullable()->comment('Agenzia proprietaria (multi-tenant)');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->string('name')->comment('Nome della checklist')->nullable();
@@ -23,14 +23,14 @@ return new class extends Migration {
             $table->boolean('is_practice')->default(false)->comment('Se riferisce a pratiche')->nullable();
             $table->boolean('is_audit')->default(false)->comment('Se per audit/compliance')->nullable();
 
-            $table->boolean('is_template')->default(true)->nullable();
+            $table->boolean('is_template')->default(true)->comment('Se è un template riutilizzabile')->nullable();
 
             // Relazione Polimorfica: a chi appartiene questa specifica copia?
             // target_type sarà es. 'App\Models\Agent' o 'App\Models\Pratica'
             // target_id sarà l'ID dell'agente o della pratica
             $table->nullableMorphs('target');
             // Stato di completamento
-            $table->enum('status', ['da_compilare', 'in_corso', 'completata'])->default('da_compilare')->nullable();
+            $table->enum('status', ['da_compilare', 'in_corso', 'completata'])->default('da_compilare')->comment('Stato checklist')->nullable();
 
             $table->timestamps();
             // Indici

@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('contacts', function (Blueprint $table) {
-            $table->id();
+            $table->id()->comment('ID univoco contatto');
             $table->foreignUuid('company_id')->nullable()->constrained('companies')->onDelete('cascade');
 
             // Relazione polimorfica - può essere Client, Principal, Agent

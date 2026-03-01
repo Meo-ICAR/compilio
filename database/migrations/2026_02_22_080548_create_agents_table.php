@@ -37,13 +37,6 @@ return new class extends Migration {
             $table->string('contoCOGE')->nullable()->comment('Conto COGE');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
-
-            // Ora il vincolo funzionerà
-            $table
-                ->foreign('company_id')
-                ->references('id')
-                ->on('companies')
-                ->onDelete('set null');  // o cascade
             //             $table->char('company_id', 36)->comment('Tenant di appartenenza');
             $table
                 ->foreignId('user_id')

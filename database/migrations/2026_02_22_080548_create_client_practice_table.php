@@ -28,17 +28,10 @@ return new class extends Migration {
             $table->boolean('oam_delivered')->default(false)->comment('Foglio informativo consegnato a questo soggetto?');
 
             // 3. Rischio specifico per il ruolo (Il garante potrebbe avere rischio basso, il richiedente alto)
-            $table->enum('role_risk_level', ['basso', 'medio', 'alto'])->nullable();
+            $table->enum('role_risk_level', ['basso', 'medio', 'alto'])->nullable()->comment('Livello rischio specifico ruolo nella pratica');
 
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
-
-            // Ora il vincolo funzionerà
-            $table
-                ->foreign('company_id')
-                ->references('id')
-                ->on('companies')
-                ->onDelete('set null');  // o cascade
 
             $table->timestamps();
 

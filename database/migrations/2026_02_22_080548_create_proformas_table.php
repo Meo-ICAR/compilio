@@ -15,13 +15,6 @@ return new class extends Migration {
             $table->increments('id')->comment('ID intero autoincrementante');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
-
-            // Ora il vincolo funzionerà
-            $table
-                ->foreign('company_id')
-                ->references('id')
-                ->on('companies')
-                ->onDelete('set null');  // o cascade
             $table->unsignedInteger('agent_id')->comment("L'agente beneficiario delle provvigioni");
             $table->string('name')->nullable()->comment('Riferimento documento (es. Proforma 01/2026 - Rossi Mario)');
             $table->string('commission_label')->nullable();

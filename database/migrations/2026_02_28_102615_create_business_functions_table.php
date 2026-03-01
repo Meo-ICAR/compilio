@@ -7,10 +7,9 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('business_functions', function (Blueprint $table) {
-            $table->id();
-
+            $table->id()->comment('ID univoco funzione business');
             // Il nuovo campo code univoco
-            $table->string('code')->unique();
+            $table->string('code')->unique()->comment('Codice identificativo univoco funzione');
 
             $table->enum('macro_area', [
                 'Governance',
@@ -19,7 +18,7 @@ return new class extends Migration {
                 'Controlli (II Livello)',
                 'Controlli (III Livello)',
                 'Controlli / Privacy'
-            ]);
+            ])->comment('Macro area di appartenenza');
 
             $table->enum('name', [
                 'Consiglio di Amministrazione / Direzione',
@@ -36,18 +35,18 @@ return new class extends Migration {
                 'Antiriciclaggio (AML)',
                 'Internal Audit (Revisione Interna)',
                 'Data Protection Officer (DPO)'
-            ]);
+            ])->comment('Nome specifico funzione business');
 
             $table->enum('type', [
                 'Strategica',
                 'Operativa',
                 'Supporto',
                 'Controllo'
-            ]);
+            ])->comment('Tipologia funzione');
 
-            $table->text('description')->nullable();
+            $table->text('description')->nullable()->comment('Descrizione dettagliata funzione');
 
-            $table->enum('outsourcable_status', ['si', 'no', 'parziale'])->default('no');
+            $table->enum('outsourcable_status', ['si', 'no', 'parziale'])->default('no')->comment('Esternalizzabile: si/no/parziale');
 
             $table->timestamps();
         });

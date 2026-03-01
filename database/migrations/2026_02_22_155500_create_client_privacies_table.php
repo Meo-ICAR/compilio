@@ -11,7 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('client_privacies', function (Blueprint $table) {
-            $table->increments('id');
+            $table->comment('Privacy consents and data processing preferences for clients.');
+            $table->increments('id')->comment('ID univoco privacy cliente');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
 

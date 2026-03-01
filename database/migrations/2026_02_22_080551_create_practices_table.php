@@ -19,13 +19,6 @@ return new class extends Migration {
 
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
-
-            // Ora il vincolo funzionerà
-            $table
-                ->foreign('company_id')
-                ->references('id')
-                ->on('companies')
-                ->onDelete('set null');  // o cascade
             $table->unsignedInteger('principal_id')->nullable()->comment('Mandante (banca)');
             $table->foreign('principal_id')->references('id')->on('principals')->onDelete('set null');
 
@@ -40,7 +33,6 @@ return new class extends Migration {
             $table->decimal('net', 12)->nullable()->comment('Netto erogato');
             $table->decimal('brokerage_fee', 10, 2)->nullable()->comment('Provvigione pattuita');
             $table->unsignedInteger('practice_scope_id')->nullable()->comment('Ambito della pratica');
-            $table->foreign('practice_scope_id')->references('id')->on('practice_scopes')->onDelete('set null');
             // Lo stato governato da Spatie Model States
             $table->string('status', 50)->nullable()->default('working')->comment('Stato interno: working, rejected, perfected');
             $table->string('statoproforma', 50)->nullable()->comment('Stato proforma: Inserito / Sospeso / Annullato / Inviato / Abbinato');

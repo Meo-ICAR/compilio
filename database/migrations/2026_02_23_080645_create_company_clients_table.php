@@ -11,7 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('company_clients', function (Blueprint $table) {
-            $table->id();
+            $table->comment('Pivot table linking companies to their assigned clients.');
+            $table->id()->comment('ID univoco relazione azienda-cliente');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
 

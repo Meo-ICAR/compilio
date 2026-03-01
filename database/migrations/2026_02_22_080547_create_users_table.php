@@ -17,13 +17,6 @@ return new class extends Migration {
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
 
-            // Ora il vincolo funzionerà
-            $table
-                ->foreign('company_id')
-                ->references('id')
-                ->on('companies')
-                ->onDelete('set null');  // o cascade
-
             $table->string('name')->comment("Nome e Cognome dell'utente");
             $table->string('email')->unique()->comment('Email usata per il login');
             $table->timestamp('email_verified_at')->nullable()->comment('Data verifica email');

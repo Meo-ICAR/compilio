@@ -11,14 +11,14 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('imports', function (Blueprint $table): void {
-            $table->id();
-            $table->timestamp('completed_at')->nullable();
-            $table->string('file_name');
-            $table->string('file_path');
-            $table->string('importer');
-            $table->unsignedInteger('processed_rows')->default(0);
-            $table->unsignedInteger('total_rows');
-            $table->unsignedInteger('successful_rows')->default(0);
+            $table->id()->comment('ID univoco importazione');
+            $table->timestamp('completed_at')->nullable()->comment('Data e ora completamento importazione');
+            $table->string('file_name')->comment('Nome file importato');
+            $table->string('file_path')->comment('Percorso completo file importato');
+            $table->string('importer')->comment('Classe/entità che gestisce importazione');
+            $table->unsignedInteger('processed_rows')->default(0)->comment('Numero righe processate');
+            $table->unsignedInteger('total_rows')->comment('Numero totale righe da importare');
+            $table->unsignedInteger('successful_rows')->default(0)->comment('Numero righe importate con successo');
             // Chi ha causato l'anomalia? (Può essere null se è un attacco esterno)
             $table
                 ->foreignId('user_id')

@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('company_wallets', function (Blueprint $table) {
-            $table->id();
+            $table->id()->comment('ID univoco wallet azienda');
 
             // Relazioni
             $table->foreignUuid('company_id')->constrained('companies')->onDelete('cascade');

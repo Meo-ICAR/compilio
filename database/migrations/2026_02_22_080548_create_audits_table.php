@@ -34,7 +34,7 @@ return new class extends Migration {
             $table->string('reference_period', 100)->nullable()->comment('Periodo oggetto di analisi (es. Q1-Q2 2025)');
             $table->date('start_date')->comment('Data inizio ispezione')->nullable();
             $table->date('end_date')->nullable()->comment('Data chiusura ispezione');
-            $table->enum('status', ['PROGRAMMATO', 'IN_CORSO', 'COMPLETATO', 'ARCHIVIATO'])->nullable()->default('PROGRAMMATO');
+            $table->enum('status', ['PROGRAMMATO', 'IN_CORSO', 'COMPLETATO', 'ARCHIVIATO'])->nullable()->default('PROGRAMMATO')->comment('Stato di avanzamento audit');
             $table->string('overall_score', 50)->nullable()->comment('Valutazione sintetica finale (es. Conforme, Conforme con rilievi, Non Conforme)');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();

@@ -12,7 +12,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('compliance_violations', function (Blueprint $table) {
-            $table->id();
+            $table->id()->comment('ID univoco violazione compliance');
             $table->foreignUuid('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
             $table->unique(['company_id', 'violation_type']);
 
@@ -20,7 +20,7 @@ return new class extends Migration {
             $table
                 ->foreignId('user_id')
                 ->nullable()
-                ->comment("ID dell'utente collegato")
+                ->comment("ID dell'utente che ha causato la violazione")
                 ->constrained('users')  // Indica esplicitamente la tabella users
                 ->onDelete('set null');
 
@@ -28,27 +28,27 @@ return new class extends Migration {
             $table->nullableMorphs('violatable');
 
             // Dettagli della violazione
-            $table->string('violation_type')->comment('Es: accesso_non_autorizzato, kyc_scaduto, forzatura_stato, data_breach');
-            $table->enum('severity', ['basso', 'medio', 'alto', 'critico'])->default('medio');
+            $table->string('violation_type')->comment('Tipo violazione (es. accesso_non_autorizzato, kyc_scaduto)');
+            $table->enum('severity', ['basso', 'medio', 'alto', 'critico'])->default('medio')->comment('Livello di gravità');
             $table->text('description')->comment("Descrizione dettagliata dell'evento");
 
             // Campi specifici per GDPR / Data Breach
-            $table->integer('affected_subjects_count')->nullable()->comment('Numero approssimativo di clienti/utenti coinvolti');
-            $table->text('likely_consequences')->nullable()->comment("Possibili conseguenze per gli interessati (es. furto d'identità, frode finanziaria)");
-            $table->dateTime('discovery_date')->nullable()->comment("Data e ora in cui l'azienda ha scoperto la violazione (inizio delle 72h)");
+            $table->integer('affected_subjects_count')->nullable()->comment('Numero approssimativo clienti/utenti coinvolti');
+            $table->text('likely_consequences')->nullable()->comment('Possibili conseguenze per gli interessati');
+            $table->dateTime('discovery_date')->nullable()->comment('Data e ora scoperta violazione (inizio 72h)');
 
             // Dati tecnici e legali (Fondamentali per il Garante Privacy)
-            $table->ipAddress('ip_address')->nullable();
+            $table->ipAddress('ip_address')->nullable()->comment('Indirizzo IP sorgente');
             $table->text('user_agent')->nullable()->comment('Browser e dispositivo utilizzato');
 
             // Checkbox e date legali
             $table->boolean('is_dpa_notified')->default(false)->comment('Il Garante Privacy è stato notificato?');
-            $table->dateTime('dpa_notified_at')->nullable();
-            $table->text('dpa_not_notified_reason')->nullable()->comment('Se non notificato, motivazione legale (es. rischio improbabile per i diritti)');
+            $table->dateTime('dpa_notified_at')->nullable()->comment('Data e ora notifica Garante');
+            $table->text('dpa_not_notified_reason')->nullable()->comment('Se non notificato, motivazione legale');
             $table->boolean('are_subjects_notified')->default(false)->comment('I clienti coinvolti sono stati avvisati?');
 
             // Gestione e Risoluzione (L'Admin deve chiudere l'incidente)
-            $table->timestamp('resolved_at')->nullable();
+            $table->timestamp('resolved_at')->nullable()->comment('Data e ora risoluzione violazione');
             $table
                 ->foreignId('resolved_by')
                 ->nullable()

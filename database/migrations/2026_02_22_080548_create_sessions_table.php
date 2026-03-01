@@ -11,12 +11,14 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->comment('Password reset tokens for user authentication.');
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
         Schema::create('sessions', function (Blueprint $table) {
+            $table->comment('User sessions for web authentication.');
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
             $table->string('ip_address', 45)->nullable();

@@ -12,15 +12,17 @@ class CreateCacheTable extends Migration
     public function up(): void
     {
         Schema::create('cache', function (Blueprint $table) {
-            $table->string('key')->primary();
-            $table->mediumText('value');
-            $table->integer('expiration');
+            $table->comment('Application cache storage for Laravel cache system.');
+            $table->string('key')->primary()->comment('Chiave univoca cache');
+            $table->mediumText('value')->comment('Valore memorizzato in cache');
+            $table->integer('expiration')->comment('Timestamp scadenza cache');
         });
 
         Schema::create('cache_locks', function (Blueprint $table) {
-            $table->string('key')->primary();
-            $table->string('owner');
-            $table->integer('expiration');
+            $table->comment('Cache locks for atomic cache operations in Laravel.');
+            $table->string('key')->primary()->comment('Chiave univoca lock cache');
+            $table->string('owner')->comment('Proprietario del lock');
+            $table->integer('expiration')->comment('Timestamp scadenza lock');
         });
     }
 

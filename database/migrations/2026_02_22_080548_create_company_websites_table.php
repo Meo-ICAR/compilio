@@ -15,13 +15,6 @@ return new class extends Migration {
             $table->increments('id')->comment('ID univoco del sito');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
-
-            // Ora il vincolo funzionerà
-            $table
-                ->foreign('company_id')
-                ->references('id')
-                ->on('companies')
-                ->onDelete('set null');  // o cascade
             $table->string('name')->comment('Nome del sito (es. Portale Agenti Roma)');
             $table->string('domain')->unique()->comment('Dominio o sottodominio (es. agenzia-x.mediaconsulence.it)');
             $table->string('type')->nullable()->comment('Tipologia sito (Vetrina, Portale, Landing)');

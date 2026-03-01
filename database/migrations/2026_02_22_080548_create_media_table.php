@@ -11,6 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('media', function (Blueprint $table) {
+            $table->comment('Media files storage for Laravel Media Library.');
             $table->bigIncrements('id');
             $table->string('model_type');
             $table->string('model_id');

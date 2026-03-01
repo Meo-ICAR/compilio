@@ -26,13 +26,6 @@ return new class extends Migration {
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
 
-            // Ora il vincolo funzionerà
-            $table
-                ->foreign('company_id')
-                ->references('id')
-                ->on('companies')
-                ->onDelete('set null');  // o cascade
-
             $table->string('mandate_number', 100)->nullable()->comment('Numero di protocollo o identificativo del contratto di mandato');
             $table->date('start_date')->nullable()->comment('Data di decorrenza del mandato');
             $table->date('end_date')->nullable()->comment('Data di scadenza (NULL se a tempo indeterminato)');

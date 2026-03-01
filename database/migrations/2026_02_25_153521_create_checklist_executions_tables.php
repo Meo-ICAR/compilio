@@ -12,7 +12,8 @@ return new class extends Migration {
     {
         // 1. TABELLA DELLE SOTTOMISSIONI (L'istanza della checklist)
         Schema::create('checklist_submissions', function (Blueprint $table) {
-            $table->id();
+            $table->comment('Checklist execution instances attached to practices, audits, or other entities.');
+            $table->id()->comment('ID univoco istanza checklist');
 
             // Corretto per usare char(36) come nelle altre tabelle
             $table->char('company_id', 36)->nullable()->comment('Agenzia proprietaria (multi-tenant)');
@@ -53,7 +54,8 @@ return new class extends Migration {
 
         // 2. TABELLA DELLE RISPOSTE (I dati inseriti dall'utente)
         Schema::create('checklist_answers', function (Blueprint $table) {
-            $table->id();
+            $table->comment('Individual answers for checklist submissions with various response types.');
+            $table->id()->comment('ID univoco risposta checklist');
 
             $table
                 ->foreignId('checklist_submission_id')

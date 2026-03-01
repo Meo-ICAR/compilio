@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('checklist_items', function (Blueprint $table) {
             $table->comment('Elementi delle checklist con domande e allegati');
-            $table->id();
+            $table->id()->comment('ID univoco elemento checklist');
             $table->unsignedBigInteger('checklist_id')->comment('Checklist di appartenenza');
             $table->string('ordine')->comment('Ordine della domanda/elemento');
             $table->string('name')->comment('Nome della domanda/elemento');

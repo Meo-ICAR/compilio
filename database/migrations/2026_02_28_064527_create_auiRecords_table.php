@@ -11,20 +11,21 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('aui_records', function (Blueprint $table) {
-            $table->id();
+            $table->comment('Archivio Unico Informatico (AUI) records for Bank of Italy reporting.');
+            $table->id()->comment('ID univoco record AUI');
             // Colleghiamo il record definitivo al log che lo ha generato
             $table->foreignId('activity_log_id')->nullable()->constrained('activity_log')->nullOnDelete();
             $table->unsignedInteger('practice_id')->comment('Riferimento alla pratica')->nullable();
             $table->unsignedInteger('client_id')->comment('Riferimento al cliente')->nullable();
             // I dati intoccabili per Banca d'Italia
-            $table->string('codice_univoco_aui')->unique();  // Es: AUI-2026-0001
-            $table->string('tipo_registrazione');
-            $table->date('data_registrazione');
-            $table->decimal('importo_operazione', 15, 2);
-            $table->string('profilo_rischio')->default('basso');
+            $table->string('codice_univoco_aui')->unique()->comment("Codice univoco AUI per Banca d'Italia");  // Es: AUI-2026-0001
+            $table->string('tipo_registrazione')->comment('Tipo di registrazione AUI');
+            $table->date('data_registrazione')->comment('Data di registrazione AUI');
+            $table->decimal('importo_operazione', 15, 2)->comment("Importo dell'operazione finanziaria");
+            $table->string('profilo_rischio')->default('basso')->comment('Profilo di rischio cliente');
 
-            $table->boolean('is_annullato')->default(false);
-            $table->string('motivo_annullamento')->nullable();
+            $table->boolean('is_annullato')->default(false)->comment('Se il record è stato annullato');
+            $table->string('motivo_annullamento')->nullable()->comment("Motivo dell'annullamento");
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
             // Ora il vincolo funzionerà

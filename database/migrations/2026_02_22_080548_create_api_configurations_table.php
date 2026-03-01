@@ -15,13 +15,6 @@ return new class extends Migration {
             $table->increments('id')->comment('ID univoco configurazione');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
-
-            // Ora il vincolo funzionerà
-            $table
-                ->foreign('company_id')
-                ->references('id')
-                ->on('companies')
-                ->onDelete('set null');  // o cascade
             $table->unsignedInteger('software_application_id')->comment('Software con cui interfacciarsi');
             $table->string('name')->nullable()->comment('Nome mnemonico della connessione');
             $table->string('base_url')->nullable()->comment("URL base dell'API (es. https://api.crmesterno.it/v1)");

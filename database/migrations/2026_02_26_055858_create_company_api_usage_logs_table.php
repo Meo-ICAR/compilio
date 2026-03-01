@@ -11,7 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('company_api_usage_logs', function (Blueprint $table) {
-            $table->id();
+            $table->comment('API usage tracking and rate limiting for company API access.');
+            $table->id()->comment('ID univoco log API azienda');
 
             // Relazioni
             $table->foreignUuid('company_id')->constrained('companies')->onDelete('cascade');

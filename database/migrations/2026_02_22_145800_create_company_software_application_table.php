@@ -11,7 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('company_software_application', function (Blueprint $table) {
-            $table->id();
+            $table->comment('Software applications assigned to companies for service access.');
+            $table->id()->comment('ID univoco applicazione software azienda');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
 

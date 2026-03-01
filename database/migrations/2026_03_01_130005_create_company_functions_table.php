@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('company_functions', function (Blueprint $table) {
-            $table->id();
+            $table->id()->comment('ID univoco funzione azienda');
 
             // Relazione con l'Azienda (es. il Mediatore Creditizio)
             $table->foreignUuid('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
@@ -44,13 +44,14 @@ return new class extends Migration {
                 ->references('id')
                 ->on('clients')
                 ->onDelete('set null');
-            $table->string('code')->nullable();  // Es. Mensile, Trimestrale
-            $table->boolean('is_privacy')->default(true);
+
+            $table->string('code')->nullable()->comment('Codice identificativo funzione azienda');
+            $table->boolean('is_privacy')->default(false)->comment('Se la funzione tratta dati personali');
             // Dettagli operativi dell'assegnazione
-            $table->boolean('is_outsourced')->default(false);
-            $table->string('report_frequency')->nullable();  // Es. Mensile, Trimestrale
-            $table->date('contract_expiry_date')->nullable();  // Scadenza contratto outsourcer
-            $table->text('notes')->nullable();
+            $table->boolean('is_outsourced')->default(false)->comment('Se la funzione è esternalizzata');
+            $table->string('report_frequency')->nullable()->comment('Frequenza report (mensile, trimestrale, annuale)');  // Es. Mensile, Trimestrale
+            $table->date('contract_expiry_date')->nullable()->comment('Data scadenza contratto esternalizzazione');  // Scadenza contratto outsourcer
+            $table->text('notes')->nullable()->comment('Note aggiuntive sulla funzione');
 
             $table->timestamps();
         });

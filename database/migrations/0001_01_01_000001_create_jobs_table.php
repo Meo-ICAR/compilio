@@ -12,36 +12,39 @@ class CreateJobsTable extends Migration
     public function up(): void
     {
         Schema::create('jobs', function (Blueprint $table) {
-            $table->id();
-            $table->string('queue')->index();
-            $table->longText('payload');
-            $table->unsignedTinyInteger('attempts');
-            $table->unsignedInteger('reserved_at')->nullable();
-            $table->unsignedInteger('available_at');
-            $table->unsignedInteger('created_at');
+            $table->comment('Queue jobs for Laravel task processing.');
+            $table->id()->comment('ID univoco job queue');
+            $table->string('queue')->index()->comment('Nome queue');
+            $table->longText('payload')->comment('Dati serializzati job');
+            $table->unsignedTinyInteger('attempts')->comment('Numero tentativi esecuzione');
+            $table->unsignedInteger('reserved_at')->nullable()->comment('Timestamp prenotazione');
+            $table->unsignedInteger('available_at')->comment('Timestamp disponibilità esecuzione');
+            $table->unsignedInteger('created_at')->comment('Timestamp creazione job');
         });
 
         Schema::create('job_batches', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->string('name');
-            $table->integer('total_jobs');
-            $table->integer('pending_jobs');
-            $table->integer('failed_jobs');
-            $table->longText('failed_job_ids');
-            $table->mediumText('options')->nullable();
-            $table->integer('cancelled_at')->nullable();
-            $table->integer('created_at');
-            $table->integer('finished_at')->nullable();
+            $table->comment('Batch tracking for Laravel queue jobs.');
+            $table->string('id')->primary()->comment('ID univoco batch');
+            $table->string('name')->comment('Nome batch');
+            $table->integer('total_jobs')->comment('Numero totale job nel batch');
+            $table->integer('pending_jobs')->comment('Numero job in attesa');
+            $table->integer('failed_jobs')->comment('Numero job falliti');
+            $table->longText('failed_job_ids')->comment('ID job falliti serializzati');
+            $table->mediumText('options')->nullable()->comment('Opzioni batch serializzate');
+            $table->integer('cancelled_at')->nullable()->comment('Timestamp cancellazione');
+            $table->integer('created_at')->comment('Timestamp creazione batch');
+            $table->integer('finished_at')->nullable()->comment('Timestamp completamento batch');
         });
 
         Schema::create('failed_jobs', function (Blueprint $table) {
-            $table->id();
-            $table->string('uuid')->unique();
-            $table->text('connection');
-            $table->text('queue');
-            $table->longText('payload');
-            $table->longText('exception');
-            $table->timestamp('failed_at')->useCurrent();
+            $table->comment('Failed queue jobs for Laravel debugging and retry.');
+            $table->id()->comment('ID univoco job fallito');
+            $table->string('uuid')->unique()->comment('UUID univoco job fallito');
+            $table->text('connection')->comment('Nome connessione queue');
+            $table->text('queue')->comment('Nome queue');
+            $table->longText('payload')->comment('Dati serializzati job');
+            $table->longText('exception')->comment('Eccezione completa');
+            $table->timestamp('failed_at')->useCurrent()->comment('Timestamp fallimento');
         });
     }
 
