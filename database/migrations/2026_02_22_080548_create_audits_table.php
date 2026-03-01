@@ -23,16 +23,16 @@ return new class extends Migration {
                 ->on('companies')
                 ->onDelete('set null');  // o cascade
 
-            $table->enum('requester_type', ['OAM', 'PRINCIPAL', 'INTERNAL', 'EXTERNAL'])->comment("Chi richiede l'audit: Ente Regolatore, Mandante o Auto-controllo interno");
+            $table->enum('requester_type', ['OAM', 'PRINCIPAL', 'INTERNAL', 'EXTERNAL'])->comment("Chi richiede l'audit: Ente Regolatore, Mandante o Auto-controllo interno")->nullable();
 
             // Campi polimorfici per associare l'audit a diversi modelli
             $table->string('auditable_type')->nullable()->comment('Tipo del modello auditabile (agent, employee, company_branch, principal)');
             $table->unsignedInteger('auditable_id')->nullable()->comment('ID del modello auditabile');
 
-            $table->string('title')->comment("Titolo dell'ispezione (es. Audit Semestrale Trasparenza 2026)");
-            $table->string('emails')->default('')->comment('Lista email per notifiche esiti audit');
+            $table->string('title')->comment("Titolo dell'ispezione (es. Audit Semestrale Trasparenza 2026)")->nullable();
+            $table->string('emails')->default('')->comment('Lista email per notifiche esiti audit')->nullable();
             $table->string('reference_period', 100)->nullable()->comment('Periodo oggetto di analisi (es. Q1-Q2 2025)');
-            $table->date('start_date')->comment('Data inizio ispezione');
+            $table->date('start_date')->comment('Data inizio ispezione')->nullable();
             $table->date('end_date')->nullable()->comment('Data chiusura ispezione');
             $table->enum('status', ['PROGRAMMATO', 'IN_CORSO', 'COMPLETATO', 'ARCHIVIATO'])->nullable()->default('PROGRAMMATO');
             $table->string('overall_score', 50)->nullable()->comment('Valutazione sintetica finale (es. Conforme, Conforme con rilievi, Non Conforme)');

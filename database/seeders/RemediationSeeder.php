@@ -12,11 +12,11 @@ class RemediationSeeder extends Seeder
 {
     public function run()
     {
-        $oamScopeId = OamScope::firstOrCreate(['name' => 'OAM'])->id;
+        // $oamScopeId = OamScope::firstOrCreate(['name' => 'OAM'])->id;
 
         $audit = Audit::firstOrCreate([
-            'title' => 'Audit Interno OAM - Q1 2026',
-            'date' => now(),
+            'title' => 'Audit Interno OAM',
+            'start_date' => now(),
         ]);
 
         // Recupero le funzioni tramite il loro "code" univoco
@@ -88,7 +88,7 @@ class RemediationSeeder extends Seeder
         foreach ($azioniDiRimedio as $item) {
             $remediation = Remediation::create([
                 'audit_id' => $audit->id,
-                'function_id' => $item['function_id'],  // Inserisco il riferimento
+                'business_function_id' => $item['function_id'],  // Inserisco il riferimento
                 'remediation_type' => $item['remediation_type'],
                 'name' => $item['name'],
                 'description' => $item['description'],
