@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Audit;
+use App\Models\AuditItem;
 use App\Models\BusinessFunction;  // Importo il modello delle funzioni
 use App\Models\OamScope;
 use App\Models\Remediation;
@@ -18,6 +19,19 @@ class RemediationSeeder extends Seeder
             'title' => 'Audit Interno OAM',
             'start_date' => now(),
         ]);
+
+        // Recupero il primo audit item esistente
+        $auditItem = AuditItem::first();
+
+        if (!$auditItem) {
+            // Se non esiste, ne creo uno
+            $auditItem = AuditItem::create([
+                'audit_id' => $audit->id,
+                'business_function_id' => 1,  // Default
+                'title' => 'Audit Item di esempio',
+                'description' => 'Audit item per remediation',
+            ]);
+        }
 
         // Recupero le funzioni tramite il loro "code" univoco
         $funcAml = BusinessFunction::where('code', 'CTRL-AML')->first();
@@ -87,7 +101,7 @@ class RemediationSeeder extends Seeder
 
         foreach ($azioniDiRimedio as $item) {
             $remediation = Remediation::create([
-                'audit_id' => $audit->id,
+                'audit_item_id' => $auditItem->id,  // Use actual audit item ID
                 'business_function_id' => $item['function_id'],  // Inserisco il riferimento
                 'remediation_type' => $item['remediation_type'],
                 'name' => $item['name'],

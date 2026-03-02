@@ -6,6 +6,8 @@ use AlizHarb\ActivityLog\ActivityLogPlugin;
 use App\Models\Company;
 use App\Models\User;  // <-- AGGIUNGI QUESTA RIGA
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use DutchCodingCompany\FilamentSocialite\Models\Contracts\FilamentSocialiteUser as FilamentSocialiteUserContract;
+use DutchCodingCompany\FilamentSocialite\Models\SocialiteUser;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Http\Middleware\Authenticate;
@@ -92,9 +94,8 @@ class AdminPanelProvider extends PanelProvider
                             ->color('red')  // or 'gray' for a lighter gray
                             ->label('Google')
                     ])
-                    ->redirectAfterLoginUsing(function (string $provider, $oauthUser, $user) {
-                        // 1. Trova il primo tenant associato all'utente
-                        // Sostituisci 'getTenants' con il metodo che usi nel tuo modello User per i tenant
+                    ->redirectAfterLoginUsing(function (string $provider, FilamentSocialiteUserContract $socialiteUser, FilamentSocialitePlugin $plugin) {
+                        // Change the redirect behaviour here.
                         $tenant = $user->getTenants($user->panel('admin'))->first();
 
                         if ($tenant) {
@@ -102,9 +103,6 @@ class AdminPanelProvider extends PanelProvider
                             return \Filament\Facades\Filament::getPanel('admin')
                                 ->getUrl($tenant);
                         }
-
-                        // Fallback se l'utente non ha tenant (opzionale)
-                        return '/admin';
                     })
                     ->createUserUsing(function (string $provider, $oauthUser, $plugin) {
                         // Logica personalizzata per creare l'utente

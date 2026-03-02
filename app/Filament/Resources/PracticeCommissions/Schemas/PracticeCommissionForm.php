@@ -11,7 +11,6 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -22,6 +21,7 @@ use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
@@ -72,7 +72,7 @@ class PracticeCommissionForm
                         ]),
                         Select::make('practice_commission_status_id')
                             ->label('Stato Commissione')
-                            ->relationship('practiceCommissionStatus', 'status_payment')
+                            ->relationship('practiceCommissionStatus', 'name')
                             ->searchable()
                             ->preload()
                             ->nullable()

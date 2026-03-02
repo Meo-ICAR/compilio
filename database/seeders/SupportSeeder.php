@@ -127,7 +127,13 @@ class SupportSeeder extends Seeder
         ];
 
         foreach ($violations as $violation) {
-            \App\Models\ComplianceViolation::create($violation);
+            \App\Models\ComplianceViolation::firstOrCreate(
+                [
+                    'company_id' => $violation['company_id'],
+                    'violation_type' => $violation['violation_type']
+                ],
+                $violation
+            );
         }
 
         // Proformas

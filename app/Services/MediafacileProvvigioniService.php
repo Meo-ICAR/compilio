@@ -250,6 +250,8 @@ class MediafacileProvvigioniService
 
                 $provvigioneData['name'] = $provvigioneData['descrizione'];
 
+                $provvigioneData['is_insurance'] = false;
+
                 $existing = PracticeCommission::create($provvigioneData);
             }
         }
@@ -263,6 +265,12 @@ class MediafacileProvvigioniService
          * ]);
          */
         if ($existing) {
+            if ($existing->invoice_at) {
+                $existing->update(['paided_at' => $existing->invoice_at]);
+                if (empty($existing->perfected_at)) {
+                    $existing->update(['perfected_at' => $existing->invoice_at]);
+                }
+            }
             if ($existing->isPerfectedStatus()) {
                 if (!$practice->isPerfectedStatus()) {
                     $practice->update(['perfected_at' => $existing->status_at, 'status' => 'perfected']);

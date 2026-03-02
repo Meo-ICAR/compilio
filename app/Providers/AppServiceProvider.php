@@ -42,7 +42,8 @@ class AppServiceProvider extends ServiceProvider
                 $activityLog->company_id = Filament::getTenant()->id;
             }
         });
-        //    ClientMandate::observe(ClientMandateObserver::class);
-        // Practice::observe(PraticaObserver::class);
     }
+
+    //    ClientMandate::observe(ClientMandateObserver::class);
+    // Practice::observe(PraticaObserver::class);
 }

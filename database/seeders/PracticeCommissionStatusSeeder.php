@@ -47,7 +47,10 @@ class PracticeCommissionStatusSeeder extends Seeder
             ],
         ];
         foreach ($statuses as $status) {
-            PracticeCommissionStatus::create($status);
+            PracticeCommissionStatus::firstOrCreate(
+                ['id' => $status['id']],
+                $status
+            );
         }
     }
 }

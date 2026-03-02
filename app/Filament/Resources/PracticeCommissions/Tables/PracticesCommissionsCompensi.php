@@ -12,14 +12,18 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Maatwebsite\Excel\Excel;
 
-class PracticeCommissionsTable
+class PracticeCompensiTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('agent.name')
-                    ->label('Agente')
+                TextColumn::make('principal.name')
+                    ->label('Mandante')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('practice.name')
+                    ->label('Practica')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('amount')
@@ -32,10 +36,9 @@ class PracticeCommissionsTable
                     ->label('Perfezionata')
                     ->date()
                     ->sortable(),
-                TextColumn::make('practice.name')
-                    ->label('Practica')
-                    ->searchable()
-                    ->sortable(),
+                TextColumn::make('description')
+                    ->label('Descrizione')
+                    ->searchable(),
                 TextColumn::make('proforma.name')
                     ->label('Proforma')
                     ->searchable()
@@ -49,13 +52,10 @@ class PracticeCommissionsTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('Nessuno stato'),
-                TextColumn::make('principal.name')
-                    ->label('Mandante')
+                TextColumn::make('agent.name')
+                    ->label('Agente')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('description')
-                    ->label('Descrizione')
-                    ->searchable(),
                 IconColumn::make('is_coordination')
                     ->label('Coord.')
                     ->boolean(),

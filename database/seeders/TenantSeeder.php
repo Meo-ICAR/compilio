@@ -25,14 +25,17 @@ class TenantSeeder extends Seeder
                 'oam_at' => '2012-11-26',
                 'oam_name' => 'RACES FINANCE SRL'
             ],
-            [
-                'name' => 'Credifacile S.r.l.',
-                'vat_number' => '02450210419',
-                'vat_name' => 'Credifacile',
-                'oam' => 'M168',  // Iscritta come Mediatore Creditizio
-                'oam_at' => '2013-04-12',
-                'oam_name' => 'CREDIFACILE S.R.L.'
-            ]
+
+            /*
+             * [
+             *     'name' => 'Credifacile S.r.l.',
+             *     'vat_number' => '02450210419',
+             *     'vat_name' => 'Credifacile',
+             *     'oam' => 'M168',  // Iscritta come Mediatore Creditizio
+             *     'oam_at' => '2013-04-12',
+             *     'oam_name' => 'CREDIFACILE S.R.L.'
+             * ]
+             */
         ];
 
         foreach ($companiesData as $data) {

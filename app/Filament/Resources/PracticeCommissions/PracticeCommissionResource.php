@@ -5,9 +5,11 @@ namespace App\Filament\Resources\PracticeCommissions;
 use App\Filament\Resources\PracticeCommissions\Pages\CreatePracticeCommission;
 use App\Filament\Resources\PracticeCommissions\Pages\EditPracticeCommission;
 use App\Filament\Resources\PracticeCommissions\Pages\ListPracticeCommissions;
+use App\Filament\Resources\PracticeCommissions\Pages\ListPracticeCompensi;
 use App\Filament\Resources\PracticeCommissions\Schemas\PracticeCommissionForm;
 use App\Filament\Resources\PracticeCommissions\Tables\PracticeCommissionsTable;
 use App\Models\PracticeCommission;
+use Filament\Navigation\NavigationItem;  // Add this import at the top
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -41,10 +43,14 @@ class PracticeCommissionResource extends Resource
         return PracticeCommissionsTable::configure($table);
     }
 
-    public static function getRelations(): array
+    public static function getNavigationItems(): array
     {
         return [
-            //
+            ...parent::getNavigationItems(),
+            NavigationItem::make('Provvigioni Attive')
+                ->icon('heroicon-o-check-circle')
+                ->url(static::getUrl('attive'))
+                ->sort(2),
         ];
     }
 
@@ -54,6 +60,7 @@ class PracticeCommissionResource extends Resource
             'index' => ListPracticeCommissions::route('/'),
             'create' => CreatePracticeCommission::route('/create'),
             'edit' => EditPracticeCommission::route('/{record}/edit'),
+            'attive' => ListPracticeCompensi::route('/attive'),
         ];
     }
 }

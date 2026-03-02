@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -14,6 +15,7 @@ class FilamentUserSeeder extends Seeder
      */
     public function run(): void
     {
+        $companyId = Company::where('vat_number', '05822361007')->first()->id;
         // Crea utente Filament admin
         User::updateOrCreate(
             ['email' => 'hassistosrl@gmail.com'],
@@ -21,7 +23,7 @@ class FilamentUserSeeder extends Seeder
                 'name' => 'Hassisto Admin',
                 'email' => 'hassistosrl@gmail.com',
                 'password' => Hash::make('password'),
-                'company_id' => null,  // NULL per Super Admin globali
+                'company_id' => $companyId,  // NULL per Super Admin globali
             ]
         );
         User::updateOrCreate(
@@ -30,10 +32,17 @@ class FilamentUserSeeder extends Seeder
                 'name' => 'Mario Gargiulo',
                 'email' => 'mario@globadvisor.it',
                 'password' => Hash::make('password'),
-                'company_id' => null,  // NULL per Super Admin globali
+                'company_id' => $companyId,  // NULL per Super Admin globali
             ]
         );
-
-        $this->command->info('Utente Filament creato: hassistosrl@gmail.com / hassisto');
+        User::updateOrCreate(
+            ['email' => 'sergio@bracale.it'],
+            [
+                'name' => 'Sergio Bracale',
+                'email' => 'sergio.bracale@races.it',
+                'password' => Hash::make('password'),
+                'company_id' => $companyId,  // NULL per Super Admin globali
+            ]
+        );
     }
 }
