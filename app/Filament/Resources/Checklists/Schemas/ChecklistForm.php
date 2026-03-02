@@ -47,6 +47,22 @@ class ChecklistForm
                                 ->default(false),
                         ]),
                         Grid::make(2)->schema([
+                            Toggle::make('is_template')
+                                ->label('Template Riutilizzabile')
+                                ->inline(false)
+                                ->default(true)
+                                ->helperText('Se è un template che può essere riutilizzato'),
+                            Select::make('status')
+                                ->label('Stato Checklist')
+                                ->options([
+                                    'da_compilare' => 'Da Compilare',
+                                    'in_corso' => 'In Corso',
+                                    'completata' => 'Completata',
+                                ])
+                                ->default('da_compilare')
+                                ->native(false),
+                        ]),
+                        Grid::make(2)->schema([
                             Select::make('principal_id')
                                 ->label('Principal Specifico (Opzionale)')
                                 ->relationship('principal', 'name')
@@ -60,7 +76,20 @@ class ChecklistForm
                                 ->searchable()
                                 ->preload()
                                 ->nullable()
-                                ->helperText('Se la checklist è associata a un tipo di documento specifico'),
+                                ->helperText('Template documento es. manuale operativo'),
+                        ]),
+                        Grid::make(2)->schema([
+                            Select::make('document_id')
+                                ->label('Documento Operativo (Opzionale)')
+                                ->relationship('document', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->nullable()
+                                ->helperText('Documento operativo di company'),
+                            TextInput::make('code')
+                                ->label('Codice Checklist (Opzionale)')
+                                ->maxLength(255)
+                                ->helperText('Codice identificativo interno'),
                         ]),
                         Textarea::make('description')
                             ->label('Descrizione generale')
@@ -75,7 +104,7 @@ class ChecklistForm
                             ->relationship('checklistItems')  // Punta alla relazione HasMany nel modello Checklist
                             ->schema([
                                 // Riga 1: Dati Base Domanda
-                                Grid::make(2)->schema([
+                                Grid::make(3)->schema([
                                     TextInput::make('item_code')
                                         ->label('Codice Univoco (es. doc_id, q1)')
                                         ->required()
@@ -84,6 +113,22 @@ class ChecklistForm
                                         ->label('Titolo / Nome Breve')
                                         ->required()
                                         ->maxLength(255),
+                                    TextInput::make('ordine')
+                                        ->label('Ordine')
+                                        ->nullable()
+                                        ->numeric()
+                                        ->helperText('Ordine di visualizzazione'),
+                                ]),
+                                Grid::make(2)->schema([
+                                    TextInput::make('phase')
+                                        ->label('Fase della checklist')
+                                        ->nullable()
+                                        ->helperText('Fase a cui appartiene questo elemento'),
+                                    Toggle::make('is_phaseclose')
+                                        ->label('Attività di chiusura fase')
+                                        ->default(false)
+                                        ->inline(false)
+                                        ->helperText("Se è l'attività finale della fase"),
                                 ]),
                                 Textarea::make('question')
                                     ->label('Testo della Domanda / Richiesta')
@@ -92,6 +137,11 @@ class ChecklistForm
                                     ->columnSpanFull(),
                                 Textarea::make('description')
                                     ->label("Istruzioni per l'operatore (Opzionale)")
+                                    ->rows(2)
+                                    ->columnSpanFull(),
+                                Textarea::make('descriptioncheck')
+                                    ->label('Descrizione Verifica Conformità')
+                                    ->helperText('Descrizione verifica conformità da effettuare')
                                     ->rows(2)
                                     ->columnSpanFull(),
                                 // Riga 2: Impostazioni Allegati e Obbligatorietà

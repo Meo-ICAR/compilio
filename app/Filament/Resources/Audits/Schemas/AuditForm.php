@@ -3,10 +3,17 @@
 namespace App\Filament\Resources\Audits\Schemas;
 
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
 class AuditForm
 {
@@ -19,15 +26,44 @@ class AuditForm
                         TextInput::make('title')
                             ->label('Titolo Audit')
                             ->required(),
-                        Select::make('requester_type')
-                            ->label('Tipo Richiedente')
-                            ->options([
-                                'OAM' => 'OAM',
-                                'PRINCIPAL' => 'Mandante',
-                                'INTERNAL' => 'Interno',
-                                'EXTERNAL' => 'Esterno',
-                            ])
-                            ->required(),
+                        Section::make('Richiedente Audit (Polimorfico)')
+                            ->schema([
+                                Select::make('requester_type')
+                                    ->label('Tipo Richiedente')
+                                    ->options([
+                                        'App\Models\Principal' => 'Mandante',
+                                        'App\Models\Agent' => 'Agente',
+                                        'App\Models\RegulatoryBody' => 'Ente Regolatore',
+                                        'App\Models\Company' => 'Azienda',
+                                        'App\Models\Employee' => 'Dipendente',
+                                    ])
+                                    ->reactive()
+                                    ->afterStateUpdated(fn($state, callable $set) => $set('requester_id', null))
+                                    ->required(),
+                                Select::make('requester_id')
+                                    ->label('Richiedente Selezionato')
+                                    ->searchable()
+                                    ->getSearchResultsUsing(function (string $search, callable $get) {
+                                        $type = $get('requester_type');
+                                        if (!$type)
+                                            return [];
+
+                                        $model = new $type;
+                                        return $model::where('name', 'like', "%{$search}%")
+                                            ->limit(50)
+                                            ->pluck('name', 'id');
+                                    })
+                                    ->getOptionLabelUsing(function ($value, callable $get) {
+                                        $type = $get('requester_type');
+                                        if (!$type || !$value)
+                                            return '';
+
+                                        $model = new $type;
+                                        $record = $model::find($value);
+                                        return $record?->name ?? '';
+                                    })
+                                    ->required(),
+                            ]),
                         TextInput::make('emails')
                             ->label('Email Notifiche')
                             ->email()
@@ -77,24 +113,23 @@ class AuditForm
                     ->schema([
                         Select::make('principal_id')
                             ->label('Mandante (Legacy)')
-                            ->relationship('principal', 'name')
                             ->searchable()
-                            ->nullable(),
+                            ->nullable()
+                            ->helperText('Usa il campo polimorfico sopra per nuove associazioni'),
                         Select::make('agent_id')
                             ->label('Agente (Legacy)')
-                            ->relationship('agent', 'name')
                             ->searchable()
-                            ->nullable(),
+                            ->nullable()
+                            ->helperText('Usa il campo polimorfico sopra per nuove associazioni'),
                         Select::make('regulatory_body_id')
                             ->label('Ente Regolatore')
-                            ->relationship('regulatoryBody', 'name')
                             ->searchable()
                             ->nullable(),
                         Select::make('client_id')
                             ->label('Cliente')
-                            ->relationship('client', 'name')
                             ->searchable()
-                            ->nullable(),
+                            ->nullable()
+                            ->helperText('Usa il campo polimorfico sopra per nuove associazioni'),
                     ])
                     ->collapsed(),
                 Section::make('Date e Stato')

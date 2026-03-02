@@ -20,14 +20,19 @@ class Checklist extends Model
         'description',
         'principal_id',
         'document_type_id',
+        'document_id',
         'is_practice',
         'is_audit',
+        'is_template',
+        'status',
     ];
 
     protected $casts = [
         'type' => 'string',
         'is_practice' => 'boolean',
         'is_audit' => 'boolean',
+        'is_template' => 'boolean',
+        'status' => 'string',
     ];
 
     public function target()
@@ -54,6 +59,11 @@ class Checklist extends Model
     public function documentType(): BelongsTo
     {
         return $this->belongsTo(DocumentType::class);
+    }
+
+    public function document(): BelongsTo
+    {
+        return $this->belongsTo(Document::class);
     }
 
     // Helper methods per document_type

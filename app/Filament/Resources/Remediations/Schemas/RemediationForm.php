@@ -2,11 +2,18 @@
 
 namespace App\Filament\Resources\Remediations\Schemas;
 
-use Filament\Forms\Components\Section;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 
 class RemediationForm
@@ -20,13 +27,13 @@ class RemediationForm
                     ->description("Dati principali dell'azione di rimedio")
                     ->schema([
                         Grid::make(2)->schema([
-                            Select::make('audit_id')
-                                ->label('Audit di Riferimento')
-                                ->relationship('audit', 'title')
+                            Select::make('audit_item_id')
+                                ->label('Audit item di Riferimento')
+                                ->relationship('auditItem', 'title')
                                 ->searchable()
                                 ->preload()
                                 ->nullable()
-                                ->helperText('Audit a cui è associata questa azione di rimedio'),
+                                ->helperText('Audit item a cui è associata questa azione di rimedio'),
                             Select::make('business_function_id')
                                 ->label('Funzione Aziendale')
                                 ->relationship('businessFunction', 'name')

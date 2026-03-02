@@ -29,6 +29,11 @@ return new class extends Migration {
             // target_type sarà es. 'App\Models\Agent' o 'App\Models\Pratica'
             // target_id sarà l'ID dell'agente o della pratica
             $table->nullableMorphs('target');
+
+            // Documenti associati
+            $table->char('document_id', 36)->nullable()->comment('Documento operativo di company');
+            $table->foreign('document_id')->references('id')->on('documents')->onDelete('set null');
+
             // Stato di completamento
             $table->enum('status', ['da_compilare', 'in_corso', 'completata'])->default('da_compilare')->comment('Stato checklist')->nullable();
 

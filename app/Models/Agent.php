@@ -13,6 +13,7 @@ class Agent extends Model
 
     protected $fillable = [
         'company_id',
+        'company_branch_id',
         'coordinated_by_id',
         'coordinated_by_agent_id',
         'name',
@@ -63,6 +64,11 @@ class Agent extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function companyBranch(): BelongsTo
+    {
+        return $this->belongsTo(CompanyBranch::class);
     }
 
     public function coordinatedByAgent(): BelongsTo

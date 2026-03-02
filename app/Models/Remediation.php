@@ -26,9 +26,9 @@ class Remediation extends Model
     ];
 
     // Relazioni
-    public function audit(): BelongsTo
+    public function auditItem(): BelongsTo
     {
-        return $this->belongsTo(Audit::class);
+        return $this->belongsTo(AuditItem::class);
     }
 
     public function businessFunction(): BelongsTo

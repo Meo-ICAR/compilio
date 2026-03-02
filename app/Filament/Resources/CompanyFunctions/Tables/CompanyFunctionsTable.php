@@ -16,19 +16,13 @@ class CompanyFunctionsTable
     {
         return $table
             ->columns([
-                TextColumn::make('company.name')
-                    ->label('Azienda')
-                    ->searchable()
-                    ->sortable()
-                    ->badge()
-                    ->color('primary'),
                 TextColumn::make('function.name')
                     ->label('Funzione')
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('success'),
-                TextColumn::make('internalEmployee.full_name')
+                TextColumn::make('internalEmployee.name')
                     ->label('Referente Interno')
                     ->searchable()
                     ->sortable()
@@ -62,11 +56,6 @@ class CompanyFunctionsTable
                     ->placeholder('Non specificata'),
             ])
             ->filters([
-                SelectFilter::make('company_id')
-                    ->label('Azienda')
-                    ->relationship('company', 'name')
-                    ->searchable()
-                    ->preload(),
                 SelectFilter::make('function_id')
                     ->label('Funzione')
                     ->relationship('function', 'name')
@@ -86,7 +75,7 @@ class CompanyFunctionsTable
                     ]),
                 SelectFilter::make('internal_employee_id')
                     ->label('Referente Interno')
-                    ->relationship('internalEmployee', 'full_name')
+                    ->relationship('internalEmployee', 'name')
                     ->searchable()
                     ->preload(),
             ])

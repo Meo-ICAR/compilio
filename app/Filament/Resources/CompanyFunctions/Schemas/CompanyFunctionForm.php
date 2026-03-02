@@ -2,13 +2,17 @@
 
 namespace App\Filament\Resources\CompanyFunctions\Schemas;
 
+use Filament\Forms\Components\Builder;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class CompanyFunctionForm
@@ -22,13 +26,6 @@ class CompanyFunctionForm
                     ->description('Associazione tra azienda e funzione aziendale')
                     ->schema([
                         Grid::make(2)->schema([
-                            Select::make('company_id')
-                                ->label('Azienda')
-                                ->relationship('company', 'name')
-                                ->searchable()
-                                ->preload()
-                                ->required()
-                                ->helperText('Azienda a cui è assegnata la funzione'),
                             Select::make('function_id')
                                 ->label('Funzione Aziendale')
                                 ->relationship('function', 'name')
@@ -38,14 +35,14 @@ class CompanyFunctionForm
                                 ->helperText('Funzione specifica da assegnare'),
                         ]),
                         Grid::make(2)->schema([
-                            Select::make('internal_employee_id')
+                            Select::make('employee_id')
                                 ->label('Referente Interno')
-                                ->relationship('internalEmployee', 'full_name')
+                                ->relationship('internalEmployee', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->nullable()
                                 ->helperText('Dipendente responsabile interno'),
-                            Select::make('external_client_id')
+                            Select::make('client_id')
                                 ->label('Referente Esterno')
                                 ->relationship('externalClient', 'name')
                                 ->searchable()

@@ -19,7 +19,7 @@ class AuditsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with(['auditable', 'principal', 'agent', 'regulatoryBody', 'client']))
+            ->modifyQueryUsing(fn($query) => $query->with(['auditable', 'requester']))
             ->columns([
                 TextColumn::make('title')
                     ->label('Titolo')
@@ -44,13 +44,19 @@ class AuditsTable
                 TextColumn::make('requester_type')
                     ->label('Tipo Richiedente')
                     ->formatStateUsing(fn($state) => match ($state) {
-                        'OAM' => 'OAM',
-                        'PRINCIPAL' => 'Mandante',
-                        'INTERNAL' => 'Interno',
-                        'EXTERNAL' => 'Esterno',
+                        'App\Models\Principal' => 'Mandante',
+                        'App\Models\Agent' => 'Agente',
+                        'App\Models\RegulatoryBody' => 'Ente Regolatore',
+                        'App\Models\Company' => 'Azienda',
+                        'App\Models\Employee' => 'Dipendente',
                         default => $state,
                     })
-                    ->badge(),
+                    ->badge()
+                    ->sortable(),
+                TextColumn::make('requester.name')
+                    ->label('Richiedente')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('principal.name')
                     ->label('Mandante (Legacy)')
                     ->searchable()

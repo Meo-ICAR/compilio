@@ -62,14 +62,16 @@ class PracticeResource extends Resource
         ];
     }
 
-    public static function getNavigationItems(): array
-    {
-        return [
-            ...parent::getNavigationItems(),
-            NavigationItem::make('OAM Vigilanza')
-                ->icon('heroicon-o-check-circle')
-                ->url(static::getUrl('oam'))
-                ->sort(2),
-        ];
-    }
+    /*
+     * public static function getNavigationItems(): array
+     * {
+     *     return [
+     *         ...parent::getNavigationItems(),
+     *         NavigationItem::make('OAM Vigilanza')
+     *             ->icon('heroicon-o-check-circle')
+     *             ->url(static::getUrl('oam'))
+     *             ->sort(2),
+     *     ];
+     * }
+     */
 }

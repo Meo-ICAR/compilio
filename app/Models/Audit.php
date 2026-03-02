@@ -14,6 +14,7 @@ class Audit extends Model
         'auditable_type',
         'auditable_id',
         'requester_type',
+        'requester_id',
         'remediation_type',
         'title',
         'emails',
@@ -32,6 +33,11 @@ class Audit extends Model
     ];
 
     public function auditable()
+    {
+        return $this->morphTo();
+    }
+
+    public function requester()
     {
         return $this->morphTo();
     }

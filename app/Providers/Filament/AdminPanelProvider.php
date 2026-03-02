@@ -4,7 +4,10 @@ namespace App\Providers\Filament;
 
 use AlizHarb\ActivityLog\ActivityLogPlugin;
 use App\Models\Company;
+use App\Models\User;  // <-- AGGIUNGI QUESTA RIGA
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
+use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -20,7 +23,11 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use SocialiteProviders\Manager\SocialiteWasCalled;
+use SocialiteProviders\Microsoft\MicrosoftExtendSocialite;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -76,9 +83,40 @@ class AdminPanelProvider extends PanelProvider
                     ->pluralLabel('Logs')
                     ->navigationGroup('Compliance'),
                 // ->cluster('System'),  // Optional: Group inside a cluster
-            ])
-            ->authMiddleware([
-                Authenticate::class,
+                FilamentSocialitePlugin::make()
+                    ->providers([
+                        Provider::make('microsoft')
+                            ->color('blue')  // or 'gray' for a lighter gray
+                            ->label('Microsoft'),
+                        Provider::make('google')
+                            ->color('red')  // or 'gray' for a lighter gray
+                            ->label('Google')
+                    ])
+                    ->redirectAfterLoginUsing(function (string $provider, $oauthUser, $user) {
+                        // 1. Trova il primo tenant associato all'utente
+                        // Sostituisci 'getTenants' con il metodo che usi nel tuo modello User per i tenant
+                        $tenant = $user->getTenants($user->panel('admin'))->first();
+
+                        if ($tenant) {
+                            // 2. Genera l'URL per la dashboard del tenant specifico
+                            return \Filament\Facades\Filament::getPanel('admin')
+                                ->getUrl($tenant);
+                        }
+
+                        // Fallback se l'utente non ha tenant (opzionale)
+                        return '/admin';
+                    })
+                    ->createUserUsing(function (string $provider, $oauthUser, $plugin) {
+                        // Logica personalizzata per creare l'utente
+                        return User::create([
+                            'name' => $oauthUser->getName(),
+                            'email' => $oauthUser->getEmail(),
+                            'password' => null,  // Password nullable obbligatoria per Socialite
+                            'avatar_url' => $oauthUser->getAvatar(),  // Salva l'URL di Google
+                            'email_verified_at' => now(),  // Google certifica l'email, quindi la segniamo come verificata
+                            'password' => Hash::make(Str::random(32)),  // Password casuale sicura
+                        ]);
+                    }),
             ]);
     }
 }

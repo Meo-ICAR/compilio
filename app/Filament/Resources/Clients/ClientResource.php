@@ -28,11 +28,11 @@ class ClientResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Pratiche';
 
-    protected static ?string $navigationLabel = 'Contraenti';
+    protected static ?string $navigationLabel = 'Anagrafiche';
 
-    protected static ?string $modelLabel = 'Contraente';
+    protected static ?string $modelLabel = 'Anagrafica';
 
-    protected static ?string $pluralModelLabel = 'Contraenti';
+    protected static ?string $pluralModelLabel = 'Anagrafiche';
 
     protected static ?int $navigationSort = 8;
 

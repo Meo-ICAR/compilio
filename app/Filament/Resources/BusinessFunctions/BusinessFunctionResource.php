@@ -19,7 +19,17 @@ class BusinessFunctionResource extends Resource
 {
     protected static ?string $model = BusinessFunction::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static bool $isScopedToTenant = false;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+
+    protected static ?string $navigationLabel = 'Funzioni aziendali';
+
+    protected static ?string $modelLabel = 'Funzione aziendale';
+
+    protected static ?string $pluralModelLabel = 'Funzioni aziendali';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Elenchi';
 
     //  protected static string|BackedEnum|null $navigationGroup = 'Impostazioni';
 

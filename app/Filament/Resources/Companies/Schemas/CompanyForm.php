@@ -41,36 +41,53 @@ class CompanyForm
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->required(),
-                TextInput::make('vat_number'),
-                TextInput::make('vat_name'),
-                TextInput::make('oam'),
-                DatePicker::make('oam_at'),
-                TextInput::make('oam_name'),
-                Select::make('company_type_id')
-                    ->relationship('companyType', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->nullable(),
-                SpatieMediaLibraryFileUpload::make('logo')
-                    ->label('Logo Azienda')
-                    ->image()
-                    ->imageEditor()
-                    ->directory('companies/logos')
-                    ->visibility('public')
-                    ->collection('logo')
-                    ->maxSize(2048)
-                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/svg+xml', 'image/webp'])
-                    ->helperText("Carica il logo dell'azienda (max 2MB, formati: JPG, PNG, SVG, WebP)"),
-                RichEditor::make('page_header')
-                    ->label('Intestazione Carta Intestata')
-                    ->helperText("Testo che apparirà nell'intestazione dei documenti ufficiali")
-                    ->columnSpanFull(),
-                RichEditor::make('page_footer')
-                    ->label('Piè di Pagina Carta Intestata')
-                    ->helperText('Testo che apparirà nel piè di pagina dei documenti ufficiali')
-                    ->columnSpanFull(),
+                Grid::make(2)->schema([
+                    // Colonna sinistra - Informazioni principali
+                    Section::make('Informazioni Azienda')
+                        ->schema([
+                            TextInput::make('name')
+                                ->required(),
+                            TextInput::make('vat_number'),
+                        ]),
+                    // Colonna destra - Dettagli e Brand
+                    Section::make('Dettagli')
+                        ->description('Ulteriori dettagli azienda')
+                        ->collapsed()
+                        ->schema([
+                            TextInput::make('vat_name'),
+                            TextInput::make('oam'),
+                            DatePicker::make('oam_at'),
+                            TextInput::make('oam_name'),
+                            Select::make('company_type_id')
+                                ->relationship('companyType', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->nullable(),
+                        ]),
+                    Section::make('Brand e Documentazione')
+                        ->description('Logo aziendale e intestazione carta intestata')
+                        ->collapsed()
+                        ->schema([
+                            SpatieMediaLibraryFileUpload::make('logo')
+                                ->label('Logo Azienda')
+                                ->image()
+                                ->imageEditor()
+                                ->directory('companies/logos')
+                                ->visibility('public')
+                                ->collection('logo')
+                                ->maxSize(2048)
+                                ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg', 'image/svg+xml', 'image/webp'])
+                                ->helperText("Carica il logo dell'azienda (max 2MB, formati: JPG, PNG, SVG, WebP)"),
+                            RichEditor::make('page_header')
+                                ->label('Intestazione Carta Intestata')
+                                ->helperText("Testo che apparirà nell'intestazione dei documenti ufficiali")
+                                ->columnSpanFull(),
+                            RichEditor::make('page_footer')
+                                ->label('Piè di Pagina Carta Intestata')
+                                ->helperText('Testo che apparirà nel piè di pagina dei documenti ufficiali')
+                                ->columnSpanFull(),
+                        ]),
+                ]),
             ]);
     }
 }

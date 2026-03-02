@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\ChecklistItems\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
@@ -18,15 +18,29 @@ class ChecklistItemForm
                     ->relationship('checklist', 'name')
                     ->required(),
                 TextInput::make('ordine')
-                    ->required(),
+                    ->label('Ordine')
+                    ->nullable(),
+                TextInput::make('phase')
+                    ->label('Fase della checklist')
+                    ->nullable()
+                    ->helperText('Fase a cui appartiene questo elemento'),
+                Toggle::make('is_phaseclose')
+                    ->label('Attività di chiusura fase')
+                    ->default(false)
+                    ->helperText("Se è l'attività finale della fase"),
                 TextInput::make('name')
-                    ->required(),
+                    ->label('Nome elemento')
+                    ->nullable(),
                 TextInput::make('item_code'),
                 Textarea::make('question')
                     ->columnSpanFull(),
                 Textarea::make('answer')
                     ->columnSpanFull(),
                 Textarea::make('description')
+                    ->columnSpanFull(),
+                Textarea::make('descriptioncheck')
+                    ->label('Descrizione Verifica Conformità')
+                    ->helperText('Descrizione verifica conformità da effettuare')
                     ->columnSpanFull(),
                 Textarea::make('annotation')
                     ->columnSpanFull(),

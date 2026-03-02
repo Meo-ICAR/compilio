@@ -14,12 +14,16 @@ return new class extends Migration {
             $table->comment('Elementi delle checklist con domande e allegati');
             $table->id()->comment('ID univoco elemento checklist');
             $table->unsignedBigInteger('checklist_id')->comment('Checklist di appartenenza');
-            $table->string('ordine')->comment('Ordine della domanda/elemento');
-            $table->string('name')->comment('Nome della domanda/elemento');
+
+            $table->string('ordine')->comment('Ordine della domanda/elemento')->nullable();
+            $table->string('phase')->comment('Fase della checklist')->nullable();
+            $table->boolean('is_phaseclose')->default(false)->comment('Se attività di chiusura della fase');
+            $table->string('name')->comment('Nome della domanda/elemento')->nullable();
             $table->string('item_code')->nullable()->comment('Codice univoco della domanda');
             $table->text('question')->nullable()->comment('Testo della domanda');
             $table->text('answer')->nullable()->comment("Risposta data dall'utente");
             $table->text('description')->nullable()->comment('Descrizione o note aggiuntive');
+            $table->text('descriptioncheck')->nullable()->comment('Descrizione verifica conformita da effettuare');
             $table->text('annotation')->nullable()->comment('Annotazioni interne');
             $table->boolean('is_required')->default(false)->comment('Se obbligatorio');
             $table->enum('attach_model', ['principal', 'agent', 'company', 'audit'])->nullable()->comment('Modello a cui allegare documento');

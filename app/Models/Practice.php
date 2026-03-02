@@ -16,6 +16,7 @@ class Practice extends Model
         'company_id',
         'principal_id',
         'agent_id',
+        'employee_id',
         'practice_status_id',
         'stato_pratica',
         'name',
@@ -76,6 +77,11 @@ class Practice extends Model
     public function agent()
     {
         return $this->belongsTo(Agent::class);
+    }
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     public function practiceScope()

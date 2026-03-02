@@ -120,6 +120,11 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         return $this->hasMany(CompanyWallet::class);
     }
 
+    public function companyFunctions(): HasMany
+    {
+        return $this->hasMany(CompanyFunction::class);
+    }
+
     public function apiUsageLogs(): HasMany
     {
         return $this->hasMany(CompanyApiUsageLog::class);

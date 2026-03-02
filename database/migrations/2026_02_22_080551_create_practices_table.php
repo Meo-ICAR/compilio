@@ -25,7 +25,10 @@ return new class extends Migration {
             $table->unsignedInteger('agent_id')->nullable()->comment('Agente o collaboratore per provvigioni');
             $table->foreign('agent_id')->references('id')->on('agents')->onDelete('set null');
 
-            $table->string('name')->comment('Codice o nome identificativo (es. Mutuo Acquisto Prima Casa Rossi)');
+            $table->unsignedInteger('employee_id')->nullable()->comment('Dipendente che segue la pratica');
+            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('set null');
+
+            $table->string('name')->nullable()->comment('Codice o nome identificativo (es. Mutuo Acquisto Prima Casa Rossi)');
 
             $table->string('CRM_code')->nullable()->comment('Codice CRM interno');
             $table->string('principal_code')->nullable()->comment('Codice mandante');

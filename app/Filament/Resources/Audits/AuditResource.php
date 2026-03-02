@@ -25,6 +25,12 @@ class AuditResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
+    protected static ?string $navigationLabel = 'Audit';
+
+    protected static ?string $modelLabel = 'Audit';
+
+    protected static ?string $pluralModelLabel = 'Audit';
+
     public static function form(Schema $schema): Schema
     {
         return AuditForm::configure($schema);

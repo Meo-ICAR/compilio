@@ -214,4 +214,9 @@ class Employee extends Model
     {
         return $query->where('supervisor_type', 'filiale');
     }
+
+    protected function full_name(): string
+    {
+        return $this->name . ' ' . $this->first_name;
+    }
 }

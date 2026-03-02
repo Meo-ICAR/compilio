@@ -7,6 +7,7 @@ use App\Filament\Resources\Companies\Pages\EditCompany;
 use App\Filament\Resources\Companies\Pages\ListCompanies;
 use App\Filament\Resources\Companies\RelationManagers\BranchesRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\CompanyClientsRelationManager;
+use App\Filament\Resources\Companies\RelationManagers\CompanyFunctionsRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\SoftwareApplicationsRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\WebsitesRelationManager;
 use App\Filament\Resources\Companies\Schemas\CompanyForm;
@@ -54,6 +55,7 @@ class CompanyResource extends Resource
             //  DocumentsRelationManager::class,
             BranchesRelationManager::class,
             CompanyClientsRelationManager::class,
+            CompanyFunctionsRelationManager::class,
             WebsitesRelationManager::class,
             SoftwareApplicationsRelationManager::class,
         ];

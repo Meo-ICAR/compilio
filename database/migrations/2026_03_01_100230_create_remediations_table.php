@@ -12,15 +12,15 @@ return new class extends Migration {
             $table->id();
 
             $table
-                ->unsignedInteger('audit_id')
+                ->unsignedInteger('audit_item_id')
                 ->nullable()
-                ->comment("ID dell'audit di riferimento");
+                ->comment('ID della riga audit di riferimento');
 
             // Foreign key verso audits
             $table
-                ->foreign('audit_id')
+                ->foreign('audit_item_id')
                 ->references('id')
-                ->on('audits')
+                ->on('audit_items')
                 ->nullable()
                 ->onDelete('cascade');
 

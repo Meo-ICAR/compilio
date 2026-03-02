@@ -19,9 +19,17 @@ class RemediationResource extends Resource
 {
     protected static ?string $model = Remediation::class;
 
-    // protected static ?string $navigationIcon = Heroicon::OutlinedExclamationTriangle;
+    protected static bool $isScopedToTenant = false;
 
-    // protected static ?string $navigationGroup = 'Compliance';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+
+    protected static ?string $navigationLabel = 'Azioni di rimedio';
+
+    protected static ?string $modelLabel = 'Rimedio';
+
+    protected static ?string $pluralModelLabel = 'Azioni di rimedio';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Elenchi';
 
     public static function form(Schema $schema): Schema
     {

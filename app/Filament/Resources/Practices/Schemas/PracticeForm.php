@@ -26,6 +26,13 @@ class PracticeForm
                     ->searchable()
                     ->preload()
                     ->required(),
+                Select::make('employee_id')
+                    ->label('Dipendente che segue la pratica')
+                    ->relationship('employee', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Dipendente interno responsabile della pratica'),
                 Select::make('practice_status_id')
                     ->label('Stato Pratica')
                     ->relationship('practiceStatus', 'name')

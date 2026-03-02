@@ -23,11 +23,13 @@ return new class extends Migration {
                 ->on('companies')
                 ->onDelete('set null');  // o cascade
 
-            $table->enum('requester_type', ['OAM', 'PRINCIPAL', 'INTERNAL', 'EXTERNAL'])->comment("Chi richiede l'audit: Ente Regolatore, Mandante o Auto-controllo interno")->nullable();
+            // Campi polimorfici per il richiedente
+            $table->string('requester_type')->nullable()->comment('Tipo del modello requester (principal, agent, regulatory_body, company)');
+            $table->string('requester_id')->nullable()->comment('ID del modello requester (supporta UUID e integer)');
 
             // Campi polimorfici per associare l'audit a diversi modelli
-            $table->string('auditable_type')->nullable()->comment('Tipo del modello auditabile (agent, employee, company_branch, principal)');
-            $table->unsignedInteger('auditable_id')->nullable()->comment('ID del modello auditabile');
+            $table->string('auditable_type')->nullable()->comment('Tipo del modello auditabile (agent, employee, company_branch, principal, company)');
+            $table->string('auditable_id')->nullable()->comment('ID del modello auditabile (supporta UUID e integer)');
 
             $table->string('title')->comment("Titolo dell'ispezione (es. Audit Semestrale Trasparenza 2026)")->nullable();
             $table->string('emails')->default('')->comment('Lista email per notifiche esiti audit')->nullable();

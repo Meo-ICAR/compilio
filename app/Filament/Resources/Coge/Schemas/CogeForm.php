@@ -12,8 +12,6 @@ class CogeForm
     {
         return $schema
             ->components([
-                Select::make('company_id')
-                    ->relationship('company', 'name'),
                 TextInput::make('fonte')
                     ->required(),
                 TextInput::make('entrata_uscita')

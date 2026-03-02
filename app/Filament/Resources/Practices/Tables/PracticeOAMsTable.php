@@ -7,6 +7,9 @@ use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -138,6 +141,9 @@ class PracticeOAMsTable
             ->filters([])
             ->actions([
                 ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+                CreateAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

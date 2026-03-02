@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\CompanyClients\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class CompanyClientForm
@@ -13,9 +13,6 @@ class CompanyClientForm
     {
         return $schema
             ->components([
-                Select::make('company_id')
-                    ->relationship('company', 'name')
-                    ->required(),
                 Select::make('client_id')
                     ->relationship('client', 'name')
                     ->required(),

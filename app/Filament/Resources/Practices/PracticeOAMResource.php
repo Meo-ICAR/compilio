@@ -20,7 +20,7 @@ class PracticeOAMResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
-    protected static ?string $navigationLabel = 'Pratiche OAM';
+    protected static ?string $navigationLabel = 'Vigilanza OAM';
 
     protected static ?string $modelLabel = 'Pratica OAM';
 

@@ -72,11 +72,13 @@ class AgentForm
                                 ->helperText("Associa questo profilo a un account per l'accesso al CRM."),
                             // company_id solitamente si gestisce in background col multi-tenancy,
                             // ma se serve selezionarlo a mano:
-                            Select::make('company_id')
-                                ->label('Agenzia Proprietaria')
-                                ->relationship('company', 'name')
+                            Select::make('company_branch_id')
+                                ->label('Filiale di Riferimento')
+                                ->relationship('companyBranch', 'name')
                                 ->searchable()
-                                ->preload(),
+                                ->preload()
+                                ->nullable()
+                                ->helperText('Filiale specifica di riferimento per questo agente'),
                         ]),
                         Textarea::make('description')
                             ->label('Note / Descrizione interna')

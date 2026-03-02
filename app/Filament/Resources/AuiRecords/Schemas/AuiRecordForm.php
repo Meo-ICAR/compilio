@@ -35,8 +35,6 @@ class AuiRecordForm
                 Toggle::make('is_annullato')
                     ->required(),
                 TextInput::make('motivo_annullamento'),
-                Select::make('company_id')
-                    ->relationship('company', 'name'),
             ]);
     }
 }

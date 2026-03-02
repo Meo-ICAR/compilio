@@ -14,13 +14,15 @@ class ChecklistItem extends Model
 
     protected $fillable = [
         'checklist_id',
-        'company_id',
         'ordine',
+        'phase',
+        'is_phaseclose',
         'name',
         'item_code',
         'question',
         'answer',
         'description',
+        'descriptioncheck',
         'annotation',
         'is_required',
         'attach_model',
@@ -36,6 +38,7 @@ class ChecklistItem extends Model
 
     protected $casts = [
         'is_required' => 'boolean',
+        'is_phaseclose' => 'boolean',
         'n_documents' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -44,11 +47,6 @@ class ChecklistItem extends Model
     public function checklist(): BelongsTo
     {
         return $this->belongsTo(Checklist::class);
-    }
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class, 'company_id');
     }
 
     public function attachedModel(): MorphTo

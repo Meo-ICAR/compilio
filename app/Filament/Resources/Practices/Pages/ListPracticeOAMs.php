@@ -4,6 +4,10 @@ namespace App\Filament\Resources\Practices\Pages;
 
 use App\Filament\Resources\Practices\Tables\PracticeOAMsTable;
 use App\Filament\Resources\Practices\PracticeOAMResource;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Table as FilamentTable;
 use Filament\Actions;
@@ -21,10 +25,11 @@ class ListPracticeOAMs extends ListRecords
         return 'Compilance';
     }
 
-    // Definisci l'etichetta che apparirà nel menu
-    public static function getNavigationLabel(): string
+    protected function getHeaderActions(): array
     {
-        return 'Nuovo Utente';
+        return [
+            CreateAction::make(),
+        ];
     }
 
     public function getTable(): FilamentTable
@@ -32,23 +37,16 @@ class ListPracticeOAMs extends ListRecords
         return PracticeOAMsTable::configure(parent::getTable());
     }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            // Actions se necessarie
-        ];
-    }
-
     public function getTitle(): string
     {
-        return 'Pratiche OAM';
+        return 'Segnalazioni OAM';
     }
 
     public function getSubheading(): string|Htmlable|null
     {
         // $record = $this->getRecord();
 
-        return new HtmlString('OAM Vigilanza annuale');
+        return new HtmlString('OAM Vigilanza semestrale');
     }
 
     protected function getHeaderWidgets(): array

@@ -35,6 +35,7 @@ return new class extends Migration {
             $table->string('enasarco')->nullable()->comment('Enasarco no / monomandatario / plurimandatario / societa');
             $table->boolean('is_active')->default(true)->comment('Indica se la banca è attualmente convenzionata');
             $table->string('contoCOGE')->nullable()->comment('Conto COGE');
+            $table->unsignedInteger('company_branch_id')->nullable()->comment('Filiale di riferimento');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
             //             $table->char('company_id', 36)->comment('Tenant di appartenenza');

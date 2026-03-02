@@ -38,7 +38,7 @@ class CompanyFunction extends Model
 
     public function function(): BelongsTo
     {
-        return $this->belongsTo(BusinessFunction::class, 'function_id');
+        return $this->belongsTo(BusinessFunction::class, 'business_function_id');
     }
 
     public function internalEmployee(): BelongsTo
