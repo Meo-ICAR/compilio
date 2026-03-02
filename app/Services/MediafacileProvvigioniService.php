@@ -265,7 +265,7 @@ class MediafacileProvvigioniService
          * ]);
          */
         if ($existing) {
-            if ($existing->invoice_at) {
+            if (!empty($existing->invoice_at)) {
                 $existing->update(['paided_at' => $existing->invoice_at]);
                 if (empty($existing->perfected_at)) {
                     $existing->update(['perfected_at' => $existing->invoice_at]);

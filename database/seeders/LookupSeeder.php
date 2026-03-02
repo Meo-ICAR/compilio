@@ -393,7 +393,7 @@ class LookupSeeder extends Seeder
             ['name' => 'Utenza Luce', 'code' => 'LUCE', 'oam_code' => '', 'is_oneclient' => 1],
             ['name' => 'Utenza Telefono', 'code' => 'TELEFONIA', 'oam_code' => '', 'is_oneclient' => 1],
             ['name' => 'Utenza GAS', 'code' => 'GAS', 'oam_code' => '', 'is_oneclient' => 1],
-            ['name' => 'TFS', 'code' => 'TFS', 'oam_code' => 'A.2', 'is_oneclient' => 1],
+            ['name' => 'TFS', 'code' => 'TFS', 'oam_code' => 'A.4', 'is_oneclient' => 1],
             ['name' => 'Altro', 'code' => 'Altro', 'oam_code' => '', 'is_oneclient' => 1],
             ['name' => 'ASSICURAZIONE', 'code' => 'ASSICURAZIONE', 'oam_code' => '', 'is_oneclient' => 1],
             ['name' => 'Aziendale', 'code' => 'Aziendale', 'oam_code' => '', 'is_oneclient' => 1],

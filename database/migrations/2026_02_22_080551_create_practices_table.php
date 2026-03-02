@@ -31,6 +31,7 @@ return new class extends Migration {
             $table->string('name')->nullable()->comment('Codice o nome identificativo (es. Mutuo Acquisto Prima Casa Rossi)');
 
             $table->string('CRM_code')->nullable()->comment('Codice CRM interno');
+            $table->string('tipo_prodotto')->nullable()->comment('tipo prodotto CRM');
             $table->string('principal_code')->nullable()->comment('Codice mandante');
             $table->decimal('amount', 12)->nullable()->comment('Importo del finanziamento/mutuo richiesto o erogato');
             $table->decimal('net', 12)->nullable()->comment('Netto erogato');
