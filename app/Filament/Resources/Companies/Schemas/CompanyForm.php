@@ -47,7 +47,8 @@ class CompanyForm
                         ->schema([
                             TextInput::make('name')
                                 ->required(),
-                            TextInput::make('vat_number'),
+                            TextInput::make('vat_number')
+                                ->label('CF / Partita IVA'),
                         ]),
                     // Colonna destra - Dettagli e Brand
                     Section::make('Dettagli')
@@ -64,6 +65,8 @@ class CompanyForm
                                 ->preload()
                                 ->nullable(),
                         ]),
+                    Section::make('---')
+                        ->schema([]),
                     Section::make('Brand e Documentazione')
                         ->description('Logo aziendale e intestazione carta intestata')
                         ->collapsed()

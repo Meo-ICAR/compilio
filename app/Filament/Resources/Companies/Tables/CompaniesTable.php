@@ -27,6 +27,7 @@ class CompaniesTable
                     ->label('Tipo Società')
                     ->searchable(),
                 TextColumn::make('vat_number')
+                    ->label('CF / Partita IVA')
                     ->searchable(),
                 TextColumn::make('vat_name')
                     ->searchable(),

@@ -122,7 +122,7 @@ class AgentForm
                                 ->label('Ragione Sociale Fiscale')
                                 ->maxLength(255),
                             TextInput::make('vat_number')
-                                ->label('Partita IVA / Codice Fiscale')
+                                ->label('CF / Partita IVA')
                                 ->maxLength(16),
                             Select::make('enasarco')
                                 ->label('Posizione Enasarco')

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\PrincipalContacts\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
@@ -20,7 +20,7 @@ class PrincipalContactForm
                 TextInput::make('role_title'),
                 TextInput::make('department'),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label('Email')
                     ->email()
                     ->required(),
                 TextInput::make('phone_office')

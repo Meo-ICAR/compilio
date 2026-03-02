@@ -74,7 +74,7 @@ class AgentsTable
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('vat_number')
-                    ->label('P.IVA')
+                    ->label('CF / Partita IVA')
                     ->searchable(),
                 TextColumn::make('vat_name')
                     ->label('Ragione Sociale')

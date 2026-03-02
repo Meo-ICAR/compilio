@@ -13,13 +13,13 @@ class AuiRecordInfolist
         return $schema
             ->components([
                 TextEntry::make('activityLog.id')
-                    ->label('Activity log')
+                    ->label('Log Attività')
                     ->placeholder('-'),
                 TextEntry::make('practice.name')
-                    ->label('Practice')
+                    ->label('Pratica')
                     ->placeholder('-'),
                 TextEntry::make('client.name')
-                    ->label('Client')
+                    ->label('Cliente')
                     ->placeholder('-'),
                 TextEntry::make('codice_univoco_aui'),
                 TextEntry::make('tipo_registrazione'),
@@ -33,7 +33,7 @@ class AuiRecordInfolist
                 TextEntry::make('motivo_annullamento')
                     ->placeholder('-'),
                 TextEntry::make('company.name')
-                    ->label('Company')
+                    ->label('Azienda')
                     ->placeholder('-'),
                 TextEntry::make('created_at')
                     ->dateTime()

@@ -47,6 +47,7 @@ class PrincipalsTable
                     ->date()
                     ->sortable(),
                 TextColumn::make('vat_number')
+                    ->label('CF / Partita IVA')
                     ->searchable(),
                 TextColumn::make('vat_name')
                     ->searchable(),

@@ -106,7 +106,7 @@ class PrincipalForm
                                 ->label('Ragione Sociale Fiscale')
                                 ->maxLength(13),  // Attenzione: Consigliato modificare il DB a 255
                             TextInput::make('vat_number')
-                                ->label('Partita IVA')
+                                ->label('CF / Partita IVA')
                                 ->maxLength(13),
                             TextInput::make('abi')
                                 ->label('Codice ABI / ISVASS')

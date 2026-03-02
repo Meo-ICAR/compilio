@@ -110,7 +110,7 @@ class ComplianceViolationForm
                                 ->label('Indirizzo IP')
                                 ->helperText('Indirizzo IP sorgente'),
                             TextInput::make('user_agent')
-                                ->label('User Agent')
+                                ->label('User Agent (Browser)')
                                 ->helperText('Browser e dispositivo utilizzato'),
                         ]),
                         DateTimePicker::make('discovery_date')
