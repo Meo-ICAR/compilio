@@ -29,7 +29,8 @@
         "spatie/laravel-cookie-consent": "^3.3",
         "spatie/laravel-medialibrary": "^11.20",
         "spatie/laravel-model-states": "^2.13",
-        "spatie/laravel-permission": "*"
+        "spatie/laravel-permission": "*",
+        "spatie/pdf-to-text": "^1.55"
     },
     "require-dev": {
         "brainmaestro/composer-git-hooks": "^3.0",

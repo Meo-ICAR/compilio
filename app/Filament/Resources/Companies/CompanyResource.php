@@ -8,10 +8,10 @@ use App\Filament\Resources\Companies\Pages\ListCompanies;
 use App\Filament\Resources\Companies\RelationManagers\BranchesRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\CompanyClientsRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\CompanyFunctionsRelationManager;
+use App\Filament\Resources\Companies\RelationManagers\SendersRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\SoftwareApplicationsRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\WebsitesRelationManager;
 use App\Filament\Resources\Companies\Schemas\CompanyForm;
-use App\Filament\Resources\Companies\Tables\CompaniesTable;
 use App\Filament\Resources\RelationManagers\DocumentsRelationManager;
 use App\Models\Company;
 use Filament\Resources\Resource;
@@ -52,12 +52,13 @@ class CompanyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //  DocumentsRelationManager::class,
             BranchesRelationManager::class,
             CompanyClientsRelationManager::class,
             CompanyFunctionsRelationManager::class,
-            WebsitesRelationManager::class,
+            SendersRelationManager::class,
             SoftwareApplicationsRelationManager::class,
+            WebsitesRelationManager::class,
+            DocumentsRelationManager::class,
         ];
     }
 

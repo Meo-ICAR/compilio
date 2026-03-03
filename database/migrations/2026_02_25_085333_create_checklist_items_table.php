@@ -30,6 +30,8 @@ return new class extends Migration {
             $table->string('attach_model_id')->nullable()->comment('ID del modello per allegato');
             $table->integer('n_documents')->default(false)->comment('Numero documenti da allegare 0= no, 99=multi');
             $table->string('repeatable_code')->nullable()->comment('Codice se ripetibile (es. documenti annuali)');
+            $table->string('document_type_codegroup')->nullable()->comment('Codice gruppo documenti');
+            $table->string('document_type_code')->nullable()->comment('Codice gruppo documenti');
 
             // Logica condizionale
 
