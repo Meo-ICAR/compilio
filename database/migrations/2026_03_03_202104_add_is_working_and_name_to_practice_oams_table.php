@@ -11,10 +11,11 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('practice_oams', function (Blueprint $table) {
-            $table->boolean('is_working')->default(true)->comment('PracticeOam is working boolean');
+            $table->boolean('is_working')->default(true)->comment('PracticeOam is working boolean')->nullable();
             $table->string('name')->nullable()->comment('Mandanti');
             $table->string('tipo_prodotto')->nullable()->comment('Prodotto');
             $table->integer('mese')->nullable()->comment('Mese');
+            $table->date('perfected_at')->comment('Data inizio autorizzazione')->nullable();
         });
     }
 

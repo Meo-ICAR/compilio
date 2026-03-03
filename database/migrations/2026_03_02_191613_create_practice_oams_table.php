@@ -32,9 +32,9 @@ return new class extends Migration {
             $table->decimal('provvigione_assicurazione', 10, 2)->nullable();
             $table->decimal('provvigione_storno', 10, 2)->nullable();
 
-            $table->boolean('is_active')->default(true)->comment('Campo per escludere manualmente');
-            $table->boolean('is_perfected')->default(false)->comment('Pratica perfezionata nel periodo');
-
+            $table->boolean('is_active')->default(true)->comment('Campo per escludere manualmente')->nullable();
+            $table->boolean('is_perfected')->default(false)->comment('Pratica perfezionata nel periodo')->nullable();
+            $table->decimal('erogato', 10, 2)->nullable();
             $table->timestamps();
 
             $table->index('practice_id');
