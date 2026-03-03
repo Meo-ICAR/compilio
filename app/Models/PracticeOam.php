@@ -31,6 +31,7 @@ class PracticeOam extends Model
         'name',
         'tipo_prodotto',
         'mese',
+        'erogato',
     ];
 
     protected $casts = [
@@ -54,6 +55,7 @@ class PracticeOam extends Model
         'is_working' => 'boolean',
         'name' => 'string',
         'mese' => 'integer',
+        'erogato' => 'decimal:2',
     ];
 
     public function is_notperfected()

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\PracticeOams\Tables;
 
-use App\Model\PracticeOam;
+use App\Models\PracticeOam;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -31,6 +31,7 @@ class PracticeOamsTable
                     ->label('Prodotto')
                     ->collapsible(),  // SOSTITUISCE le vecchie impostazioni di groupingSettings
             ])
+            ->collapsedGroupsByDefault()
             ->columns([
                 TextColumn::make('practice.scopeOAM.oam_code')
                     ->label('OAM Code')
@@ -81,6 +82,11 @@ class PracticeOamsTable
                     ->sortable(),
                 TextColumn::make('practice.name')
                     ->label('Pratica')
+                    ->sortable(),
+                TextColumn::make('erogato')
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('compenso')
                     ->money('EUR')  // Forza Euro e formato italiano
@@ -152,34 +158,31 @@ class PracticeOamsTable
                 Filter::make('is_perfected')
                     ->label('Perfezionata')
                     ->query(fn($query) => $query->where('is_perfected', true)),
-                Filter::make('is_notperfected')
+                Filter::make('is_working')
                     ->label('Lavorazione')
-                    ->query(fn($query) => $query->where('is_perfected', false)),
-
-                /*
-                 * SelectFilter::make('tipo_prodotto')
-                 *     ->label('Filtra per Tipo')
-                 *     ->multiple()  // Abilita la selezione multipla
-                 *     ->options(
-                 *         // Recupera i valori unici della colonna 'type' dal database
-                 *         fn() => PracticeOam::query()
-                 *             ->pluck('tipo_prodotto', 'tipo_prodotto')  // 'valore' => 'etichetta'
-                 *             ->distinct()
-                 *             ->toArray()
-                 *     )
-                 *     ->searchable(),  // Opzionale: aggiunge una barra di ricerca nel dropdown
-                 * SelectFilter::make('name')
-                 *     ->label('Mandante')
-                 *     ->multiple()  // Abilita la selezione multipla
-                 *     ->options(
-                 *         // Recupera i valori unici della colonna 'type' dal database
-                 *         fn() => PracticeOam::query()
-                 *             ->pluck('name', 'name')  // 'valore' => 'etichetta'
-                 *             ->distinct()
-                 *             ->toArray()
-                 *     )
-                 *     ->searchable(),  // Opzionale: aggiunge una barra di
-                 */
+                    ->query(fn($query) => $query->where('is_working', true)),
+                SelectFilter::make('tipo_prodotto')
+                    ->label('Filtra per Tipo')
+                    ->multiple()  // Abilita la selezione multipla
+                    ->options(
+                        // Recupera i valori unici della colonna 'type' dal database
+                        fn() => PracticeOam::query()
+                            ->pluck('tipo_prodotto', 'tipo_prodotto')  // 'valore' => 'etichetta'
+                            ->sort()
+                            ->toArray()
+                    )
+                    ->searchable(),  // Opzionale: aggiunge una barra di ricerca nel dropdown
+                SelectFilter::make('name')
+                    ->label('Mandante')
+                    ->multiple()  // Abilita la selezione multipla
+                    ->options(
+                        // Recupera i valori unici della colonna 'type' dal database
+                        fn() => PracticeOam::query()
+                            ->pluck('name', 'name')  // 'valore' => 'etichetta'
+                            ->sort()
+                            ->toArray()
+                    )
+                    ->searchable(),  // Opzionale: aggiunge una barra di
                 SelectFilter::make('mese')
                     ->label('Mese perfezionamento')
                     ->multiple()

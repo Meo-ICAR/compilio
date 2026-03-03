@@ -19,7 +19,7 @@ class PracticeOamService
      *    - inserted_at < $endDate AND perfected_at IS NULL
      *    - OR perfected_at BETWEEN $startDate AND $endDate
      */
-    public function syncPracticeOamsForCompany(string $companyId, string $endDate = '2026-01-01', string $startDate = '2025-07-01'): void
+    public function syncPracticeOamsForCompany(string $companyId, string $startDate = '2025-07-01', string $endDate = '2026-01-01'): void
     {
         if (empty($companyId)) {
             $companyId = Company::first()->id;
@@ -52,17 +52,17 @@ class PracticeOamService
             Log::info("Deleted {$deletedCount} practice_oam records for company {$companyId}");
 
             // Step 2: Get practices that meet the criteria
-            $practices = Practice::where(function ($query) {
+            $practices = Practice::where(function ($query) use ($startDate, $endDate) {
                 // Blocco A: (inserted_at nel range E perfected_at null)
                 $query
-                    ->where(function ($q) {
+                    ->where(function ($q) use ($startDate, $endDate) {
                         $q
-                            ->whereBetween('inserted_at', ['2025-07-01', '2025-12-31 23:59:59'])
+                            ->whereBetween('inserted_at', [$startDate, $endDate])
                             ->whereNull('perfected_at');
                     })
                     // Blocco B: OR (perfected_at nel range)
-                    ->orWhere(function ($q) {
-                        $q->whereBetween('perfected_at', ['2025-07-01', '2025-12-31 23:59:59']);
+                    ->orWhere(function ($q) use ($startDate, $endDate) {
+                        $q->whereBetween('perfected_at', [$startDate, $endDate]);
                     });
             })
                 ->whereNull('rejected_at')  // <--- Questa condizione "AND" si applica a entrambi i blocchi sopra
@@ -101,6 +101,7 @@ class PracticeOamService
                         'tipo_prodotto' => $practice->tipo_prodotto,
                         'name' => $practice->principal->name,
                         // Commission sums based on tipo grouping
+                        'erogato' => $practice->amount,
                         'compenso' => $commissionSums['compenso'] ?? 0,
                         'compenso_lavorazione' => $commissionSums['compenso_lavorazione'] ?? 0,
                         'compenso_premio' => $commissionSums['premio'] ?? 0,
