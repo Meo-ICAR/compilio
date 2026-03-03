@@ -8,6 +8,7 @@ use App\Models\PracticeCommission;
 use App\Models\PracticeOam;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Carbon;
 
 class PracticeOamService
 {
@@ -45,39 +46,42 @@ class PracticeOamService
             ", [$companyId, $companyId]);
 
             // Step 1: Delete all existing practice_oam records for the company
-            $deletedCount = PracticeOam::where('company_id', $companyId)->delete();
+            $deletedCount = PracticeOam::where('company_id', $companyId)
+                ->where('is_active', true)
+                ->delete();
             Log::info("Deleted {$deletedCount} practice_oam records for company {$companyId}");
 
             // Step 2: Get practices that meet the criteria
-            $practices = Practice::where('company_id', $companyId)
-                //  ->limit(20)
-                ->where('status', '!=', 'rejected')
-                ->where(function ($query) use ($startDate, $endDate) {
-                    $query
-                        ->where(function ($subQuery) use ($endDate) {
-                            // inserted_at < $endDate AND perfected_at IS NULL
-                            $subQuery
-                                ->where('inserted_at', '<', $endDate)
-                                ->whereNull('perfected_at');
-                        })
-                        ->orWhere(function ($subQuery) use ($startDate, $endDate) {
-                            // perfected_at BETWEEN $startDate AND $endDate
-                            $subQuery->where('perfected_at', '>', $startDate);
-                        });
-                })
+            $practices = Practice::where(function ($query) {
+                // Blocco A: (inserted_at nel range E perfected_at null)
+                $query
+                    ->where(function ($q) {
+                        $q
+                            ->whereBetween('inserted_at', ['2025-07-01', '2025-12-31 23:59:59'])
+                            ->whereNull('perfected_at');
+                    })
+                    // Blocco B: OR (perfected_at nel range)
+                    ->orWhere(function ($q) {
+                        $q->whereBetween('perfected_at', ['2025-07-01', '2025-12-31 23:59:59']);
+                    });
+            })
+                ->whereNull('rejected_at')  // <--- Questa condizione "AND" si applica a entrambi i blocchi sopra
                 ->get();
 
             // Step 3: Insert new practice_oam records
             $insertedCount = 0;
+
             foreach ($practices as $practice) {
                 $commissionSums = $this->getPracticeCommissionSums($practice);
-                if ($commissionSums['somma'] <> 0) {
-                    $is_inperiod = true;
-                    $is_perfected = !empty($practice->perfected_at);
-                    if ($is_perfected) {
-                        $is_perfected = $practice->perfected_at >= $startDate && $practice->perfected_at <= $endDate;
-                    }
+                $somma = $commissionSums['somma'];
+                if ($somma > 0) {
+                    // Assicuriamoci che entrambi siano oggetti Carbon per un confronto granulare
 
+                    $is_perfected = $practice->perfected_at >= $practice->inserted_at;
+                    $mese = 0;
+                    if ($is_perfected) {
+                        $mese = $practice->perfected_at->month;
+                    }
                     if (!$is_perfected) {
                         $commissionSums['compenso_lavorazione'] = $commissionSums['compenso'];
                         $commissionSums['provvigione_lavorazione'] = $commissionSums['provvigione'];
@@ -89,7 +93,13 @@ class PracticeOamService
                     PracticeOam::create([
                         'company_id' => $companyId,
                         'practice_id' => $practice->id,
-                        'oam_code_id' => $this->getOamCodeId($practice),
+                        'perfected_at' => $practice->perfected_at,
+                        'inserted_at' => $practice->inserted_at,
+                        'is_perfected' => $is_perfected,
+                        'is_working' => !$is_perfected,
+                        'mese' => $mese,
+                        'tipo_prodotto' => $practice->tipo_prodotto,
+                        'name' => $practice->principal->name,
                         // Commission sums based on tipo grouping
                         'compenso' => $commissionSums['compenso'] ?? 0,
                         'compenso_lavorazione' => $commissionSums['compenso_lavorazione'] ?? 0,
@@ -158,6 +168,7 @@ class PracticeOamService
         $provvigione = 0;
         $premio = 0;
         $premioagente = 0;
+        $assicurazione = 0;
         $storno = 0;
         $somma = 0;
         $i = 0;
@@ -216,7 +227,8 @@ class PracticeOamService
             'premio' => $premio ?: 0,
             'premioagente' => $premioagente ?: 0,
             'storno' => $storno ?: 0,
-            'somma' => $compenso + $provvigione + $premio + $premioagente + $cliente + $storno,
+            'assicurazione' => $assicurazione ?: 0,
+            'somma' => $compenso + $provvigione + $premio + $premioagente + $cliente + $storno + $assicurazione,
         ];
 
         //   Log::info("All commissiona data for practice {$practice->id}: " . json_encode($commissionsa));

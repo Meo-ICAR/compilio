@@ -23,6 +23,14 @@ class PracticeOam extends Model
         'provvigione_rimborso',
         'provvigione_assicurazione',
         'provvigione_storno',
+        'perfected_at',
+        'inserted_at',
+        'is_active',
+        'is_perfected',
+        'is_working',
+        'name',
+        'tipo_prodotto',
+        'mese',
     ];
 
     protected $casts = [
@@ -39,7 +47,19 @@ class PracticeOam extends Model
         'provvigione_rimborso' => 'decimal:2',
         'provvigione_assicurazione' => 'decimal:2',
         'provvigione_storno' => 'decimal:2',
+        'is_active' => 'boolean',
+        'is_perfected' => 'boolean',
+        'perfected_at' => 'datetime',
+        'inserted_at' => 'datetime',
+        'is_working' => 'boolean',
+        'name' => 'string',
+        'mese' => 'integer',
     ];
+
+    public function is_notperfected()
+    {
+        return !$this->is_perfected;
+    }
 
     public function practice()
     {

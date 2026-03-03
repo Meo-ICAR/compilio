@@ -6,6 +6,9 @@ use App\Models\ChecklistDocument;
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
+// Rimuovi eventuali "use App\Models\BelongsTo;" se presenti
+use Illuminate\Database\Eloquent\Relations\BelongsTo;  // <--- Import corretto
+use Illuminate\Database\Eloquent\Relations\HasMany;  // <--- Per la relazione scopes
 
 class Practice extends Model
 {
@@ -88,6 +91,25 @@ class Practice extends Model
     public function practiceScope()
     {
         return $this->belongsTo(PracticeScope::class);
+    }
+
+    public function practiceOAM()
+    {
+        return $this->belongsTo(PracticeScope::class);
+    }
+
+    public function practiceOams()
+    {
+        return $this->hasMany(PracticeOam::class);
+    }
+
+    public function scopeOAM(): BelongsTo
+    {
+        return $this->belongsTo(
+            PracticeScope::class,
+            'tipo_prodotto',  // Chiave esterna su practice_scopes
+            'tipo_prodotto'  // Chiave locale su practices
+        );
     }
 
     public function clientMandate()

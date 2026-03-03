@@ -27,6 +27,12 @@ class AgentsTable
                 TextColumn::make('name')
                     ->label('Nome Agente')
                     ->searchable(),
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable(),
+                TextColumn::make('phone')
+                    ->label('Telefono')
+                    ->searchable(),
                 TextColumn::make('coordinatedBy.name')
                     ->label('Coordinato da (Dip.)')
                     ->searchable()

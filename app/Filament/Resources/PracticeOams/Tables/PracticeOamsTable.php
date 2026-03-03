@@ -2,10 +2,17 @@
 
 namespace App\Filament\Resources\PracticeOams\Tables;
 
+use App\Model\PracticeOam;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 
 class PracticeOamsTable
@@ -13,65 +20,183 @@ class PracticeOamsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->paginated([25, 50, 100, 'all'])
+            ->reorderableColumns()
+            ->selectable()
+            ->groups([
+                Group::make('practice.scopeOAM.oam_code')
+                    ->label('OAM')
+                    ->collapsible(),  // SOSTITUISCE le vecchie impostazioni di groupingSettings
+                Group::make('tipo_prodotto')
+                    ->label('Prodotto')
+                    ->collapsible(),  // SOSTITUISCE le vecchie impostazioni di groupingSettings
+            ])
             ->columns([
-                TextColumn::make('company_id')
-                    ->searchable(),
-                TextColumn::make('practice_id')
-                    ->numeric()
+                TextColumn::make('practice.scopeOAM.oam_code')
+                    ->label('OAM Code')
                     ->sortable(),
-                TextColumn::make('oam_code_id')
-                    ->numeric()
+                TextColumn::make('practice.scopeOAM.tipo_prodotto')
+                    ->label('OAM Tipo')
+                    ->sortable(),
+                TextColumn::make('tipo_prodotto')
+                    ->label('Prodotto')
+                    ->searchable()
+                    ->sortable(),
+                IconColumn::make('is_perfected')
+                    ->label('Perfezionata')
+                    ->boolean()
+                    ->summarize(
+                        Sum::make()
+                            ->label(false)
+                            // Questo forza il database a trattare true come 1 e false come 0
+                            ->numeric()
+                    )
+                    ->sortable(),
+                IconColumn::make('is_working')
+                    ->label('Lavorazione')
+                    ->boolean()
+                    ->summarize(
+                        Sum::make()
+                            ->label(false)
+                            // Questo forza il database a trattare true come 1 e false come 0
+                            ->numeric()
+                    )
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->label('Mandante')
+                    ->sortable(),
+                TextColumn::make('practice.principal.type')
+                    ->label('Tipo fin.')
+                    ->sortable(),
+                TextColumn::make('practice.inserted_at')
+                    ->label('Inserita')
+                    ->date()
+                    ->sortable(),
+                TextColumn::make('practice.perfected_at')
+                    ->label('Perfezionata')
+                    ->date()
+                    ->sortable(),
+                TextColumn::make('practice.CRM_code')
+                    ->label('Codice')
+                    ->sortable(),
+                TextColumn::make('practice.name')
+                    ->label('Pratica')
                     ->sortable(),
                 TextColumn::make('compenso')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('compenso_lavorazione')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('compenso_premio')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('compenso_rimborso')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('compenso_assicurazione')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('compenso_cliente')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('storno')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('provvigione')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('provvigione_lavorazione')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('provvigione_premio')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('provvigione_rimborso')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('provvigione_assicurazione')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('provvigione_storno')
-                    ->numeric()
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('is_perfected')
+                    ->label('Perfezionata')
+                    ->query(fn($query) => $query->where('is_perfected', true)),
+                Filter::make('is_notperfected')
+                    ->label('Lavorazione')
+                    ->query(fn($query) => $query->where('is_perfected', false)),
+
+                /*
+                 * SelectFilter::make('tipo_prodotto')
+                 *     ->label('Filtra per Tipo')
+                 *     ->multiple()  // Abilita la selezione multipla
+                 *     ->options(
+                 *         // Recupera i valori unici della colonna 'type' dal database
+                 *         fn() => PracticeOam::query()
+                 *             ->pluck('tipo_prodotto', 'tipo_prodotto')  // 'valore' => 'etichetta'
+                 *             ->distinct()
+                 *             ->toArray()
+                 *     )
+                 *     ->searchable(),  // Opzionale: aggiunge una barra di ricerca nel dropdown
+                 * SelectFilter::make('name')
+                 *     ->label('Mandante')
+                 *     ->multiple()  // Abilita la selezione multipla
+                 *     ->options(
+                 *         // Recupera i valori unici della colonna 'type' dal database
+                 *         fn() => PracticeOam::query()
+                 *             ->pluck('name', 'name')  // 'valore' => 'etichetta'
+                 *             ->distinct()
+                 *             ->toArray()
+                 *     )
+                 *     ->searchable(),  // Opzionale: aggiunge una barra di
+                 */
+                SelectFilter::make('mese')
+                    ->label('Mese perfezionamento')
+                    ->multiple()
+                    ->options([
+                        '01' => 'Gennaio',
+                        '02' => 'Febbraio',
+                        '03' => 'Marzo',
+                        '04' => 'Aprile',
+                        '05' => 'Maggio',
+                        '06' => 'Giugno',
+                        '07' => 'Luglio',
+                        '08' => 'Agosto',
+                        '09' => 'Settembre',
+                        '10' => 'Ottobre',
+                        '11' => 'Novembre',
+                        '12' => 'Dicembre',
+                    ])
             ])
             ->recordActions([
                 EditAction::make(),

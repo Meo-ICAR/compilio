@@ -20,6 +20,8 @@ class Agent extends Model implements HasMedia
         'coordinated_by_id',
         'coordinated_by_agent_id',
         'name',
+        'email',
+        'phone',
         'description',
         'supervisor_type',
         'oam',

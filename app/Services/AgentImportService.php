@@ -2,21 +2,21 @@
 
 namespace App\Services;
 
-use App\Models\Employee;
+use App\Models\Agent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
-class EmployeeExcelImportService
+class AgentImportService
 {
     /**
-     * Import employees from Excel file
+     * Import Agents from Excel file
      *
      * @param string $filePath Path to the Excel file
-     * @param string $companyId Company ID to assign to employees
+     * @param string $companyId Company ID to assign to Agents
      * @return array Import results
      */
-    public function importEmployees(string $filePath, string $companyId): array
+    public function importAgents(string $filePath, string $companyId): array
     {
         try {
             $results = [
@@ -26,69 +26,40 @@ class EmployeeExcelImportService
             ];
 
             // Load Excel file
-            $spreadsheet = \Maatwebsite\Excel\Facades\Excel::toArray([], $filePath);
+            $spreadsheet = Excel::toArray([], $filePath);
 
-            // Get 'responsabile interni' sheet (should be sheet 2 based on debug)
-            $sheetData = $this->getSheetData($spreadsheet, 2);  // Use sheet index 2
+            // Get 'responsabile esterni' sheet (should be sheet 1 based on debug)
+            $sheetData = $this->getSheetData($spreadsheet, 1);  // Use sheet index 1
 
             if (empty($sheetData)) {
-                $results['errors'][] = 'Sheet "responsabile interni" not found or is empty';
+                $results['errors'][] = 'Sheet "responsabile esterni" not found or is empty';
                 return $results;
             }
 
-            // Debug: Show specific rows with termination dates
-            $terminationDateRows = [];
-            foreach ($sheetData as $index => $row) {
-                $name = $row[0] ?? '';
-                if (strpos(strtoupper($name), 'CACCAVARO EMILIO') !== false) {
-                    $terminationDateRows[] = [
-                        'row' => $index + 1,
-                        'name' => $name,
-                        'termination_date_raw' => $row[6] ?? '',
-                        'termination_date_parsed' => $this->mapDate($row[6] ?? '')
-                    ];
-                }
-            }
-
-            if (!empty($terminationDateRows)) {
-                $this->logDebug('CACCAVARO EMILIO termination date analysis:', $terminationDateRows);
-            } else {
-                $this->logDebug('CACCAVARO EMILIO not found in data');
-            }
-
-            // Also show all rows for CACCAVARO EMILIO to debug
-            $caccavaroRows = [];
-            foreach ($sheetData as $index => $row) {
-                $name = $row[0] ?? '';
-                if (strpos(strtoupper($name), 'CACCAVARO EMILIO') !== false) {
-                    $caccavaroRows[] = [
-                        'row' => $index + 1,
-                        'all_columns' => $row,
-                        'column_F' => $row[6] ?? 'EMPTY'
-                    ];
-                }
-            }
-
-            $this->logDebug('CACCAVARO EMILIO all rows data:', $caccavaroRows);
-
-            // Try to find actual employee data by looking for non-empty, non-formula cells
-            $employeeRows = [];
+            // Try to find actual Agent data by looking for non-empty, non-formula cells
+            $agentRows = [];
             foreach ($sheetData as $rowIndex => $row) {
-                // Skip header rows and look for actual employee names
+                // Skip first 2 header rows and look for actual Agent names
+                if ($rowIndex < 2) {
+                    continue;
+                }
+
+                // Skip header rows and look for actual Agent names
                 if (isset($row[0]) && !empty($row[0]) && !$this->isFormula($row[0])) {
-                    $employeeRows[] = $row;
+                    $agentRows[] = $row;
                 }
             }
 
-            // Process found employee rows
-            DB::transaction(function () use ($employeeRows, $companyId, &$results) {
-                foreach ($employeeRows as $index => $row) {
+            // Process found Agent rows
+            DB::transaction(function () use ($agentRows, $companyId, &$results) {
+                foreach ($agentRows as $index => $row) {
                     try {
-                        $employeeData = $this->mapRowToEmployeeData($row, $companyId);
+                        $agentData = $this->mapRowToAgentData($row, $companyId);
 
                         // Skip rows with empty or formula-based names
-                        if (empty($employeeData['name']) || $this->isFormula($employeeData['name'])) {
+                        if (empty($agentData['name']) || $this->isFormula($agentData['name'])) {
                             $results['skipped']++;
+                            $this->logDebug('Skipping row ' . ($index + 1) . ': empty name or formula');
                             continue;
                         }
 
@@ -98,18 +69,18 @@ class EmployeeExcelImportService
                             return;
                         }
 
-                        // Check if employee already exists
-                        $existingEmployee = Employee::where('company_id', $companyId)
-                            ->where('name', $employeeData['name'])
+                        // Check if Agent already exists
+                        $existingAgent = Agent::where('company_id', $companyId)
+                            ->where('name', $agentData['name'])
                             ->first();
 
-                        if ($existingEmployee) {
-                            // Update existing employee
-                            $existingEmployee->update($employeeData);
-                            $results['imported']++;
+                        if ($existingAgent) {
+                            // Skip if agent exists (as requested)
+                            $results['skipped']++;
+                            continue;
                         } else {
-                            // Create new employee
-                            Employee::create($employeeData);
+                            // Create new Agent
+                            Agent::create($agentData);
                             $results['imported']++;
                         }
                     } catch (\Exception $e) {
@@ -121,7 +92,7 @@ class EmployeeExcelImportService
 
             return $results;
         } catch (\Exception $e) {
-            Log::error('Employee import failed: ' . $e->getMessage());
+            Log::error('Agent import failed: ' . $e->getMessage());
             return [
                 'imported' => 0,
                 'skipped' => 0,
@@ -151,28 +122,24 @@ class EmployeeExcelImportService
     }
 
     /**
-     * Map Excel row to employee data
+     * Map Excel row to Agent data
      *
      * @param array $row
      * @param string $companyId
      * @return array
      */
-    private function mapRowToEmployeeData(array $row, string $companyId): array
+    private function mapRowToAgentData(array $row, string $companyId): array
     {
-        // Sheet 2 structure: ["Nominativo Dipendente","sede","email","Nomina","Data Firma nomina Responsabile al Trattamento ","Data Dimissioni ",...]
+        // Agent structure: ["Nominativo Dipendente","sede","email","Nomina","Data Firma nomina Responsabile al Trattamento ","Data Dimissioni ",...]
         return [
             'company_id' => $companyId,
-            'name' => $this->cleanString($row[0] ?? ''),  // Nominativo Dipendente
-            'email' => $this->cleanString($row[2] ?? ''),  // email
-            'phone' => $this->truncatePhone($this->cleanString($row[1] ?? '')),  // sede (using as phone temporarily)
-            'role_title' => $this->cleanString($row[3] ?? ''),  // Nomina
-            'department' => $this->cleanString($row[1] ?? ''),  // sede
-            'employee_types' => $this->mapEmployeeType($row[3] ?? ''),  // Based on Nomina
+            'name' => $this->cleanString($row[0] ?? ''),  // Nominativo Dipendente (column A)
+            'email' => $this->cleanString($row[1] ?? ''),  // email (column B) - for reference only
+            'phone' => $this->truncatePhone($this->cleanString($row[2] ?? '')),  // sede (column C) - for reference only
+            'description' => $this->cleanString($row[3] ?? ''),  // Nomina (column D)
             'supervisor_type' => $this->mapSupervisorType($row[3] ?? ''),  // Based on Nomina
-            'is_structure' => $this->mapBoolean($row[5] ?? ''),  // Data Firma nomina
-            'is_ghost' => $this->mapBoolean($row[6] ?? ''),  // Data Dimissioni
-            'hiring_date' => $this->mapDate($row[5] ?? ''),  // Data Firma nomina Responsabile (column F)
-            'termination_date' => $this->mapDate($row[6] ?? ''),  // Data Dimissioni (column G)
+            'stipulated_at' => $this->mapDate($row[5] ?? ''),  // Data Firma nomina Responsabile (column F)
+            'dismissed_at' => $this->mapDate($row[6] ?? ''),  // Data Dimissioni (column G)
         ];
     }
 
@@ -210,17 +177,17 @@ class EmployeeExcelImportService
     }
 
     /**
-     * Map employee type to standard value
+     * Map Agent type to standard value
      *
      * @param string $value
      * @return string
      */
-    private function mapEmployeeType(string $value): string
+    private function mapAgentType(string $value): string
     {
         $value = strtolower(trim($value));
 
         return match ($value) {
-            'dipendente', 'employee' => 'dipendente',
+            'dipendente', 'agent' => 'dipendente',
             'collaboratore', 'collaborator' => 'collaboratore',
             'stagista', 'intern' => 'stagista',
             'consulente', 'consultant' => 'consulente',
@@ -296,27 +263,6 @@ class EmployeeExcelImportService
     }
 
     /**
-     * Log debug information
-     *
-     * @param string $message
-     * @param array $context
-     * @return void
-     */
-    private function logDebug(string $message, array $context = []): void
-    {
-        Log::debug($message, $context);
-
-        // Also output to console for immediate debugging
-        echo "[DEBUG] {$message}\n";
-        if (!empty($context)) {
-            foreach ($context as $key => $value) {
-                echo "  {$key}: " . (is_array($value) ? json_encode($value) : $value) . "\n";
-            }
-            echo "\n";
-        }
-    }
-
-    /**
      * Import from public/Registro Trattamenti.xlsx
      *
      * @param string $companyId
@@ -334,6 +280,6 @@ class EmployeeExcelImportService
             ];
         }
 
-        return $this->importEmployees($filePath, $companyId);
+        return $this->importAgents($filePath, $companyId);
     }
 }

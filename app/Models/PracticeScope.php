@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;  // <--- Import corretto
+use Illuminate\Database\Eloquent\Relations\HasMany;  // <--- Per la relazione scopes
 use Illuminate\Database\Eloquent\Model;
 
 class PracticeScope extends Model
@@ -17,6 +19,15 @@ class PracticeScope extends Model
     public function oamScope()
     {
         return $this->belongsTo(OamScope::class, 'oam_code');
+    }
+
+    public function practiceOamscope(): HasMany
+    {
+        return $this->hasMany(
+            Practice::class,
+            'tipo_prodotto',  // Chiave esterna su practice_scopes
+            'tipo_prodotto'  // Chiave proprietaria su practices
+        );
     }
 
     public function oamName()

@@ -73,6 +73,14 @@ class AgentForm
                                             ->send();
                                     }
                                 }),
+                            TextInput::make('email')
+                                ->label('Email')
+                                ->email()
+                                ->maxLength(100),
+                            TextInput::make('phone')
+                                ->label('Telefono')
+                                ->tel()
+                                ->maxLength(20),
                             Select::make('type')
                                 ->label('Tipologia Collaboratore')
                                 ->options([

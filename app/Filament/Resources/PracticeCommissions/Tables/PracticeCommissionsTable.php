@@ -26,7 +26,6 @@ class PracticeCommissionsTable
                     ->label('Importo')
                     ->money('EUR')  // Forza Euro e formato italiano
                     ->alignEnd()
-                    ->numeric()
                     ->sortable(),
                 TextColumn::make('perfected_at')
                     ->label('Perfezionata')
