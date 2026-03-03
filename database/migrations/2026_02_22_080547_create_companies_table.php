@@ -16,9 +16,20 @@ return new class extends Migration {
             $table->string('name')->comment('Ragione Sociale della società di mediazione');
             $table->string('vat_number', 50)->nullable()->comment("Partita IVA o Codice Fiscale dell'agenzia");
             $table->string('vat_name', 50)->nullable()->comment('Denominazione fiscale per fatturazione');
-            $table->string('oam', 50)->nullable()->comment('Numero iscrizione OAM Società');
-            $table->date('oam_at')->nullable()->comment('Data iscrizione OAM Società');
+            $table->string('oam', 50)->nullable()->comment('Numero iscrizione OAM');
+            $table->date('oam_at')->nullable()->comment('Data iscrizione OAM ');
             $table->string('oam_name')->nullable()->comment('Nome registrato negli elenchi OAM');
+            $table->string('ivass', 30)->nullable()->comment('Codice di iscrizione IVASS');
+            $table->date('ivass_at')->nullable()->comment('Data iscrizione IVASS');
+            $table->string('ivass_name')->nullable()->comment('Denominazione  IVASS');
+            $table->enum('ivass_section', [
+                'A',
+                'B',
+                'C',
+                'D',
+                'E',
+            ])->nullable()->comment('Sezione IVASS');
+
             $table->unsignedInteger('company_type_id')->nullable()->comment('Tipo forma giuridica della società');
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data di creazione del tenant');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Data di ultima modifica');

@@ -27,6 +27,22 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         'company_type_id',
         'page_header',
         'page_footer',
+        'smtp_host',
+        'smtp_port',
+        'smtp_username',
+        'smtp_password',
+        'smtp_encryption',
+        'smtp_from_email',
+        'smtp_from_name',
+        'smtp_enabled',
+        'smtp_verify_ssl',
+    ];
+
+    protected $casts = [
+        'oam_at' => 'date',
+        'smtp_enabled' => 'boolean',
+        'smtp_verify_ssl' => 'boolean',
+        'smtp_port' => 'integer',
     ];
 
     public function getCurrentTenantLabel(): string

@@ -29,6 +29,7 @@ return new class extends Migration {
 
             $table->unsignedInteger('document_type_id')->nullable()->comment('ID del tipo di documento associato');
             $table->string('name')->nullable()->comment('Nome del documento');
+            $table->string('emitted_by')->nullable()->comment('Ente di rilascio');
             $table->string('status')->default('uploaded')->comment('Stato del documento');
             $table->boolean('is_template')->default(false)->comment('Indica se forniamo noi il documento');
             $table->date('expires_at')->nullable()->comment('Scadenza documento');

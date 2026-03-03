@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Agents\Schemas;
 
+use App\Model\Oam;
+use App\Services\GeminiVisionService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -50,7 +52,27 @@ class AgentForm
                                 ->label('Nome / Denominazione')
                                 ->required()
                                 ->maxLength(255)
-                                ->columnSpan(2),
+                                ->columnSpan(2)
+                                ->live(debounce: 300)
+                                ->afterStateUpdated(function (string $state, callable $set) {
+                                    if (strlen($state) < 2) {
+                                        return;
+                                    }
+
+                                    $suggestions = \App\Models\Oam::where('name', 'LIKE', '%' . $state . '%')
+                                        ->limit(5)
+                                        ->pluck('name')
+                                        ->toArray();
+
+                                    if (!empty($suggestions)) {
+                                        // Notifica l'utente con i suggerimenti
+                                        \Filament\Notifications\Notification::make()
+                                            ->title('Suggerimenti OAM')
+                                            ->body('Nomi trovati: ' . implode(', ', $suggestions))
+                                            ->info()
+                                            ->send();
+                                    }
+                                }),
                             Select::make('type')
                                 ->label('Tipologia Collaboratore')
                                 ->options([
@@ -60,10 +82,24 @@ class AgentForm
                                     'Call Center' => 'Call Center',
                                 ])
                                 ->searchable(),
+                            Select::make('supervisor_type')
+                                ->label('Tipo Supervisore')
+                                ->options([
+                                    'no' => 'No',
+                                    'si' => 'Sì',
+                                    'filiale' => 'Filiale',
+                                ])
+                                ->default('no')
+                                ->helperText('Se supervisore indicare e specificare se di filiale'),
                             Toggle::make('is_active')
                                 ->label('Attivo/Convenzionato')
                                 ->default(true)
                                 ->inline(false),
+                            Toggle::make('is_art108')
+                                ->label('Esente Art. 108')
+                                ->default(false)
+                                ->inline(false)
+                                ->helperText('Esente art. 108 - ex art. 128-novies TUB'),
                             Select::make('user_id')
                                 ->label('Utente di Sistema Collegato')
                                 ->relationship('user', 'name')
@@ -93,13 +129,56 @@ class AgentForm
                         Grid::make(2)->schema([
                             TextInput::make('oam')
                                 ->label('Numero Iscrizione OAM')
-                                ->maxLength(30),
+                                ->maxLength(30)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(function (string $state, callable $set, callable $get) {
+                                    if (empty($state)) {
+                                        $set('oam_name', null);
+                                        $set('oam_at', null);
+                                        return;
+                                    }
+
+                                    $oam = \App\Models\Oam::where('numero_iscrizione', $state)->first();
+
+                                    if ($oam) {
+                                        $set('oam_name', $oam->name);
+                                        $set('oam_at', $oam->data_iscrizione);
+                                    } else {
+                                        $set('oam_name', null);
+                                        $set('oam_at', null);
+                                    }
+                                }),
                             TextInput::make('oam_name')
                                 ->label('Denominazione registrata in OAM')
                                 ->maxLength(255),
                             DatePicker::make('oam_at')
                                 ->label('Data Iscrizione OAM')
                                 ->displayFormat('d/m/Y'),
+                            TextInput::make('ivass')
+                                ->label('Codice Iscrizione IVASS')
+                                ->maxLength(30),
+                            TextInput::make('ivass_name')
+                                ->label('Denominazione IVASS')
+                                ->maxLength(255),
+                            Select::make('ivass_section')
+                                ->label('Sezione IVASS')
+                                ->options([
+                                    'A' => 'Sezione A',
+                                    'B' => 'Sezione B',
+                                    'C' => 'Sezione C',
+                                    'D' => 'Sezione D',
+                                    'E' => 'Sezione E',
+                                ])
+                                ->nullable(),
+                            DatePicker::make('ivass_at')
+                                ->label('Data Iscrizione IVASS')
+                                ->displayFormat('d/m/Y'),
+                            SpatieMediaLibraryFileUpload::make('identity_document')
+                                ->collection('identity_documents')
+                                ->label('Documento di Identità'),
+                            // TextInput::make('nome'),
+                            // TextInput::make('cognome'),
+                            // TextInput::make('numero_documento'),
                         ]),
                         Grid::make(2)->schema([
                             DatePicker::make('stipulated_at')

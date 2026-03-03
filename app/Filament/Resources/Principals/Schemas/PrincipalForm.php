@@ -57,6 +57,7 @@ class PrincipalForm
                                     'Banca' => 'Banca',
                                     'Finanziaria' => 'Finanziaria',
                                     'Assicurazione' => 'Assicurazione',
+                                    'Broker' => 'Broker Assicurativo',
                                     'Utility' => 'Utility',
                                 ])
                                 ->searchable(),
@@ -84,6 +85,16 @@ class PrincipalForm
                                 ->helperText('Tipologia del mandante per classificazione interna'),
                         ]),
                         Grid::make(2)->schema([
+                            TextInput::make('website')
+                                ->label('Sito Web')
+                                ->url()
+                                ->prefix('https://')
+                                ->maxLength(255),
+                            TextInput::make('portalsite')
+                                ->label('Portale Accesso')
+                                ->url()
+                                ->prefix('https://')
+                                ->maxLength(255),
                             Toggle::make('is_active')
                                 ->label('Convenzione Attiva')
                                 ->default(true)
@@ -118,9 +129,24 @@ class PrincipalForm
                             TextInput::make('oam')
                                 ->label('Codice Iscrizione OAM')
                                 ->maxLength(30),
+                            TextInput::make('oam_name')
+                                ->label('Nome OAM')
+                                ->maxLength(255),
+                            DatePicker::make('oam_at')
+                                ->label('Data Iscrizione OAM')
+                                ->displayFormat('d/m/Y'),
                             TextInput::make('ivass')
                                 ->label('Codice Iscrizione IVASS')
                                 ->maxLength(30),
+                            TextInput::make('ivass_name')
+                                ->label('Nome IVASS')
+                                ->maxLength(255),
+                            TextInput::make('ivass_section')
+                                ->label('Sezione IVASS')
+                                ->maxLength(100),
+                            DatePicker::make('ivass_at')
+                                ->label('Data Iscrizione IVASS')
+                                ->displayFormat('d/m/Y'),
                         ]),
                     ]),
                 // 3. SEZIONE DATI DEL MANDATO

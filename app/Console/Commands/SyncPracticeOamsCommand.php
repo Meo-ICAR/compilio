@@ -13,7 +13,7 @@ class SyncPracticeOamsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'practice-oams:sync {--company-id= : Company ID (optional, will use first company if not provided)} {--start-date= : Start date (default: 2025-07-01)} {--end-date= : End date (default: 2026-01-01)} {--stats : Show statistics only without syncing}';
+    protected $signature = 'oam:import {--company-id= : Company ID (optional, will use first company if not provided)} {--start-date= : Start date (default: 2025-07-01)} {--end-date= : End date (default: 2026-01-01)} {--stats : Show statistics only without syncing}';
 
     /**
      * The console command description.

@@ -6,13 +6,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class DocumentType extends Model
 {
-    protected $fillable = ['name', 'code', 'is_person', 'is_signed', 'is_stored', 'is_practice', 'duration', 'emitted_by', 'is_sensible'];
+    protected $fillable = [
+        'name',
+        'code',
+        'is_person',
+        'is_signed',
+        'is_stored',
+        'is_practice',
+        'is_monitored',
+        'is_template',
+        'duration',
+        'emitted_by',
+        'is_sensible'
+    ];
 
     protected $casts = [
         'is_person' => 'boolean',
         'is_signed' => 'boolean',
         'is_stored' => 'boolean',
         'is_practice' => 'boolean',
+        'is_monitored' => 'boolean',
+        'is_template' => 'boolean',
+        'duration' => 'integer',
         'is_sensible' => 'boolean',
     ];
 

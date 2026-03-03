@@ -90,6 +90,59 @@ class CompanyForm
                                 ->helperText('Testo che apparirà nel piè di pagina dei documenti ufficiali')
                                 ->columnSpanFull(),
                         ]),
+                    Section::make('Configurazione SMTP')
+                        ->description('Impostazioni server email per invio comunicazioni')
+                        ->collapsed()
+                        ->schema([
+                            Toggle::make('smtp_enabled')
+                                ->label('Abilita Invio SMTP')
+                                ->helperText('Attiva invio email tramite server SMTP personalizzato')
+                                ->default(false),
+                            Grid::make(2)->schema([
+                                TextInput::make('smtp_host')
+                                    ->label('Host SMTP')
+                                    ->placeholder('smtp.esempio.com')
+                                    ->helperText('Server SMTP per invio email'),
+                                TextInput::make('smtp_port')
+                                    ->label('Porta SMTP')
+                                    ->numeric()
+                                    ->default(587)
+                                    ->helperText('Porta server SMTP (solitamente 587 per TLS, 465 per SSL)'),
+                            ]),
+                            Grid::make(2)->schema([
+                                TextInput::make('smtp_username')
+                                    ->label('Username SMTP')
+                                    ->helperText('Nome utente per autenticazione SMTP'),
+                                TextInput::make('smtp_password')
+                                    ->label('Password SMTP')
+                                    ->password()
+                                    ->helperText('Password per autenticazione SMTP'),
+                            ]),
+                            Grid::make(2)->schema([
+                                Select::make('smtp_encryption')
+                                    ->label('Crittografia')
+                                    ->options([
+                                        'tls' => 'TLS',
+                                        'ssl' => 'SSL',
+                                        '' => 'Nessuna',
+                                    ])
+                                    ->default('tls')
+                                    ->helperText('Tipo di crittografia della connessione'),
+                                Toggle::make('smtp_verify_ssl')
+                                    ->label('Verifica SSL')
+                                    ->default(true)
+                                    ->helperText('Verifica certificato SSL del server'),
+                            ]),
+                            Grid::make(2)->schema([
+                                TextInput::make('smtp_from_email')
+                                    ->label('Email Mittente')
+                                    ->email()
+                                    ->helperText('Email da cui verranno inviate le comunicazioni'),
+                                TextInput::make('smtp_from_name')
+                                    ->label('Nome Mittente')
+                                    ->helperText('Nome visualizzato come mittente delle email'),
+                            ]),
+                        ]),
                 ]),
             ]);
     }

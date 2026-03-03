@@ -72,18 +72,18 @@ class PracticeOamService
             foreach ($practices as $practice) {
                 $commissionSums = $this->getPracticeCommissionSums($practice);
                 if ($commissionSums['somma'] <> 0) {
+                    $is_inperiod = true;
                     $is_perfected = !empty($practice->perfected_at);
+                    if ($is_perfected) {
+                        $is_perfected = $practice->perfected_at >= $startDate && $practice->perfected_at <= $endDate;
+                    }
 
                     if (!$is_perfected) {
                         $commissionSums['compenso_lavorazione'] = $commissionSums['compenso'];
                         $commissionSums['provvigione_lavorazione'] = $commissionSums['provvigione'];
 
-                        //    $commissionSums['compenso'] = 0;
-                        //   $commissionSums['provvigione'] = 0;
-                    } else {
-                        // Keep original values for perfected practices
-                        //    $commissionSums['compenso_lavorazione'] = 0;
-                        // $commissionSums['provvigione_lavorazione'] = 0;
+                        $commissionSums['compenso'] = 0;
+                        $commissionSums['provvigione'] = 0;
                     }
 
                     PracticeOam::create([

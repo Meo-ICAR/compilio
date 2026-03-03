@@ -55,8 +55,30 @@ class PrincipalsTable
                     ->searchable(),
                 TextColumn::make('oam')
                     ->searchable(),
+                TextColumn::make('oam_name')
+                    ->label('Nome OAM')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('oam_at')
+                    ->label('Data OAM')
+                    ->date()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('ivass')
                     ->searchable(),
+                TextColumn::make('ivass_name')
+                    ->label('Nome IVASS')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('ivass_section')
+                    ->label('Sezione IVASS')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('ivass_at')
+                    ->label('Data IVASS')
+                    ->date()
+                    ->sortable()
+                    ->toggleable(),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('updated_at')
@@ -82,6 +104,16 @@ class PrincipalsTable
                     ->falseIcon('heroicon-o-building-office')
                     ->color(fn($state) => $state ? 'warning' : 'success')
                     ->tooltip(fn($record) => $record->is_dummy ? 'Mandante fittizio / non convenzionato' : 'Mandante convenzionato'),
+                TextColumn::make('website')
+                    ->label('Sito Web')
+                    ->url(fn($record) => $record->website)
+                    ->openUrlInNewTab()
+                    ->toggleable(),
+                TextColumn::make('portalsite')
+                    ->label('Portale')
+                    ->url(fn($record) => $record->portalsite)
+                    ->openUrlInNewTab()
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('principal_type')

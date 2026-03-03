@@ -14,7 +14,9 @@ return new class extends Migration {
             $table->comment("Tabella di lookup globale (Senza Tenant): Tipologie di documenti riconosciuti per l'Adeguata Verifica.");
             $table->increments('id')->comment('ID intero autoincrementante');
             $table->string('name')->nullable()->comment('Descrizione');
-            $table->string('code')->nullable()->comment('Codice documento');
+            $table->string('code')->nullable()->comment('Codice univoco documento menomico es CI = Carta Identita VISURA = Visura aziendale CCIA');
+            $table->string('codegroup')->nullable()->comment('Raggruppa documenti simili es. Documento di riconoscimento');
+            $table->string('phase')->nullable()->comment('Fase di processo');
             $table->boolean('is_person')->default(true)->comment('Documento inerente Persona o azienda');
             $table->boolean('is_signed')->default(false)->comment('Indica se il documento deve essere firmato');
             $table->boolean('is_monitored')->default(false)->comment('Indica se la scadenza documento deve essere monitorata nel tempo');

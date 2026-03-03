@@ -15,8 +15,12 @@ class PracticesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'practiceScope', 'practiceStatus']))
+            ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'practiceScope', 'practiceStatus', 'clientMandate']))
             ->columns([
+                TextColumn::make('clientMandate.id')
+                    ->label('ID Mandato')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('clients_names')
                     ->label('Contraenti')
                     ->searchable()
@@ -39,6 +43,11 @@ class PracticesTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('Nessuno stato'),
+                TextColumn::make('stato_pratica')
+                    ->label('Stato Originale')
+                    ->searchable()
+                    ->toggleable()
+                    ->placeholder('Nessuno stato originale'),
                 TextColumn::make('name')
                     ->label('Nome Pratica')
                     ->searchable()
@@ -51,6 +60,11 @@ class PracticesTable
                     ->label('Codice Mandante')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('tipo_prodotto')
+                    ->label('Tipo Prodotto')
+                    ->searchable()
+                    ->toggleable()
+                    ->placeholder('Nessun tipo prodotto'),
                 TextColumn::make('amount')
                     ->label('Importo')
                     ->money('EUR')
@@ -64,6 +78,44 @@ class PracticesTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('Nessun ambito'),
+                TextColumn::make('statoproforma')
+                    ->label('Stato Proforma')
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'Inserito' => 'blue',
+                        'Sospeso' => 'yellow',
+                        'Annullato' => 'red',
+                        'Inviato' => 'green',
+                        'Abbinato' => 'purple',
+                        default => 'gray',
+                    })
+                    ->searchable()
+                    ->toggleable()
+                    ->placeholder('Nessuno stato proforma'),
+                TextColumn::make('inserted_at')
+                    ->label('Data Inserimento')
+                    ->date()
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('Non definita'),
+                TextColumn::make('erogated_at')
+                    ->label('Data Erogazione')
+                    ->date()
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('Non definita'),
+                TextColumn::make('rejected_at')
+                    ->label('Data Rifiuto')
+                    ->date()
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('Non definita'),
+                TextColumn::make('status_at')
+                    ->label('Data Stato')
+                    ->date()
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('Non definita'),
                 TextColumn::make('status')
                     ->label('Stato')
                     ->badge()
@@ -80,6 +132,11 @@ class PracticesTable
                     ->money('EUR')
                     ->sortable()
                     ->placeholder('Non definita'),
+                TextColumn::make('rejected_reason')
+                    ->label('Causale Rifiuto')
+                    ->searchable()
+                    ->toggleable()
+                    ->placeholder('Nessuna causale'),
                 IconColumn::make('is_active')
                     ->label('Attiva')
                     ->boolean(),

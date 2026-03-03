@@ -5,11 +5,13 @@ namespace App\Filament\Resources\Agents\Tables;
 use App\Filament\Imports\AgentsImporter;
 use App\Models\Agent;
 use App\Services\ChecklistService;
+use App\Services\GeminiVisionService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -36,6 +38,21 @@ class AgentsTable
                 TextColumn::make('description')
                     ->label('Descrizione')
                     ->searchable(),
+                TextColumn::make('supervisor_type')
+                    ->label('Tipo Supervisore')
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'no' => 'gray',
+                        'si' => 'green',
+                        'filiale' => 'blue',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn($state) => match ($state) {
+                        'no' => 'No',
+                        'si' => 'Sì',
+                        'filiale' => 'Filiale',
+                        default => $state,
+                    }),
                 TextColumn::make('oam')
                     ->label('Numero OAM')
                     ->searchable(),
@@ -46,6 +63,31 @@ class AgentsTable
                 TextColumn::make('oam_name')
                     ->label('Nome OAM')
                     ->searchable(),
+                TextColumn::make('ivass')
+                    ->label('Codice IVASS')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('ivass_name')
+                    ->label('Nome IVASS')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('ivass_section')
+                    ->label('Sezione IVASS')
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'A' => 'blue',
+                        'B' => 'green',
+                        'C' => 'yellow',
+                        'D' => 'orange',
+                        'E' => 'purple',
+                        default => 'gray',
+                    })
+                    ->toggleable(),
+                TextColumn::make('ivass_at')
+                    ->label('Data IVASS')
+                    ->date()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('stipulated_at')
                     ->label('Stipula')
                     ->date()
@@ -99,6 +141,51 @@ class AgentsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('estrai_dati_ocr')
+                    ->label('Estrai Dati (IA)')
+                    ->icon('heroicon-o-sparkles')  // Un'icona per indicare l'AI
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->modalHeading('Estrai dati dal documento')
+                    ->modalDescription('Vuoi usare Gemini per leggere il documento e aggiornare i campi di questo agente?')
+                    ->action(function (Customer $record, GeminiVisionService $geminiService) {
+                        // 1. Recuperiamo il path fisico del file da Spatie Media Library
+                        $imagePath = $record->getFirstMediaPath('identity_documents');
+
+                        if (!file_exists($imagePath)) {
+                            Notification::make()
+                                ->title('Errore')
+                                ->body('Nessun documento fisico trovato sul server.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        // 2. Chiamiamo il nostro Service Gemini
+                        $extractedData = $geminiService->extractIdentityData($imagePath);
+
+                        if (!$extractedData) {
+                            Notification::make()
+                                ->title('Estrazione Fallita')
+                                ->body("Impossibile leggere il documento d'identità.")
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        // 3. Aggiorniamo il record nel database con i dati estratti
+                        $record->update([
+                            'nome' => $extractedData['nome'] ?? $record->nome,
+                            'cognome' => $extractedData['cognome'] ?? $record->cognome,
+                            'numero_documento' => $extractedData['numero_documento'] ?? $record->numero_documento,
+                        ]);
+
+                        // 4. Mostriamo una notifica di successo in stile Filament
+                        Notification::make()
+                            ->title('Dati Estratti con Successo!')
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('assegnaChecklistOam')
                     ->label('Avvia Procedura 10 Giorni OAM')
                     ->icon('heroicon-o-clipboard-document-check')

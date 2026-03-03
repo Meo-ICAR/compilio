@@ -40,4 +40,7 @@ return [
         'redirect' => env('MICROSOFT_REDIRECT_URI'),
         'tenant' => env('MICROSOFT_TENANT_ID'),  // Opzionale (es. 'common')
     ],
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
 ];

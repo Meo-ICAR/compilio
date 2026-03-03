@@ -37,6 +37,7 @@ class Practice extends Model
         'annotation',
         'perfected_at',
         'is_active',
+        'tipo_prodotto',
     ];
 
     protected $appends = ['clients_names'];

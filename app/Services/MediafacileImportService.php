@@ -236,7 +236,7 @@ class MediafacileImportService
                     $principal = Principal::firstOrCreate(
                         ['name' => $praticaData['denominazione_banca'], 'company_id' => $this->companyId],
                         [
-                            // altri campi se necessari
+                            'ivass_section' => $praticaData['tipo_prodotto'] == 'Polizza' ? 'B' : null,
                         ]
                     );
                     $praticaData['principal_id'] = $principal->id;

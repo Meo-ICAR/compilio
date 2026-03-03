@@ -58,7 +58,6 @@ class PracticeResource extends Resource
             'index' => ListPractices::route('/'),
             'create' => CreatePractice::route('/create'),
             'edit' => EditPractice::route('/{record}/edit'),
-            'oam' => ListPracticeOAMs::route('/oam'),
         ];
     }
 

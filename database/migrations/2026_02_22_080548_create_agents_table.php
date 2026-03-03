@@ -23,6 +23,16 @@ return new class extends Migration {
             $table->string('oam', 30)->nullable()->comment('Oam');
             $table->date('oam_at')->nullable()->comment('Data iscrizione OAM');
             $table->string('oam_name')->nullable()->comment('Denominazione sociale registrata in OAM');
+            $table->string('ivass', 30)->nullable()->comment('Codice di iscrizione IVASS');
+            $table->date('ivass_at')->nullable()->comment('Data iscrizione IVASS');
+            $table->string('ivass_name')->nullable()->comment('Denominazione  IVASS');
+            $table->enum('ivass_section', [
+                'A',
+                'B',
+                'C',
+                'D',
+                'E',
+            ])->nullable()->comment('Sezione IVASS');
             $table->date('stipulated_at')->nullable()->comment('Data stipula contratto collaborazione');
             $table->date('dismissed_at')->nullable()->comment('Data cessazione rapporto');
             $table->string('type', 30)->nullable()->comment('Agente / Mediatore / Consulente / Call Center ');

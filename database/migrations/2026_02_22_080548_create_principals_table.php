@@ -14,14 +14,25 @@ return new class extends Migration {
             $table->comment('Tabella globale delle banche ed enti eroganti convenzionati.');
             $table->increments('id')->comment('ID intero autoincrementante');
             $table->string('name')->comment("Nome dell'istituto bancario o finanziaria (es. Intesa Sanpaolo, Compass)");
-            $table->string('abi', 5)->nullable()->comment('Abi per banche o codice ISVASS');
+            $table->string('abi', 30)->nullable()->comment('Abi per banche o numero RUI ISVASS');
             $table->date('stipulated_at')->nullable()->comment('Data stipula contratto convenzione');
             $table->date('dismissed_at')->nullable()->comment('Data cessazione rapporto convenzione');
             $table->string('vat_number', 13)->nullable()->comment("Partita IVA dell'istituto");
             $table->string('vat_name', 13)->nullable()->comment('Ragione sociale fiscale');
             $table->string('type', 30)->nullable()->comment('Banca / Assicurazione / Utility');
             $table->string('oam', 30)->nullable()->comment('Codice di iscrizione OAM');
+            $table->string('oam_name')->nullable()->comment('Denominazione  OAM');
+            $table->date('oam_at')->nullable()->comment('Data iscrizione OAM');
             $table->string('ivass', 30)->nullable()->comment('Codice di iscrizione IVASS');
+            $table->date('ivass_at')->nullable()->comment('Data iscrizione IVASS');
+            $table->string('ivass_name')->nullable()->comment('Denominazione  OAM');
+            $table->enum('ivass_section', [
+                'A',
+                'B',
+                'C',
+                'D',
+                'E',
+            ])->nullable()->comment('Sezione IVASS');
             $table->boolean('is_active')->default(true)->comment('Indica se la banca è attualmente convenzionata');
             // Questa DEVE essere char(36) per combaciare con companies.id
             $table->char('company_id', 36)->nullable();
@@ -43,6 +54,8 @@ return new class extends Migration {
                 ->nullable()
                 ->comment('Modalita inoltro pratiche');
             $table->foreign(['company_id'], 'principals_ibfk_1')->references(['id'])->on('companies')->onUpdate('no action')->onDelete('no action');
+            $table->string('website')->nullable()->comment('sito web');
+            $table->string('portalsite')->nullable()->comment('Portale pratiche');
             $table->string('contoCOGE')->nullable()->comment('Conto COGE');
             $table->timestamp('created_at')->nullable()->useCurrent();
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent();
