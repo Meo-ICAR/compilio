@@ -12,6 +12,7 @@ use App\Models\Principal;
 use App\Models\SoftwareApplication;
 use App\Models\SoftwareMapping;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -30,6 +31,7 @@ class MediafacileProvvigioniService
         $this->apiUrl = config('services.mediafacile.url', env('MEDIAFACILE_BASE_URL', 'https://races.mediafacile.it/ws/hassisto.php'));
 
         $this->apiKey = config('services.mediafacile.key', env('MEDIAFACILE_HEADER_KEY'));
+
         $this->companyId = Company::where('oam_name', 'RACES FINANCE SRL')->first()->id;
 
         $this->softwareId = SoftwareApplication::where('name', 'Mediafacile')->first()->id;
@@ -84,6 +86,34 @@ class MediafacileProvvigioniService
                     $result['errors']++;
                 }
             }
+            // Update practices perfected_at based on commission data
+            DB::statement("
+                INSERT IGNORE INTO principal_scopes (
+    principal_id,
+    tipo_prodotto,
+    start_date,
+    is_active,
+    is_forced,
+    name
+)
+SELECT
+    x.principal_id,
+    x.tipo_prodotto,
+    MIN(p.inserted_at) as start_date,
+    1 as is_active, -- Impostiamo a 1 (attivo) di default
+    0 as is_forced, -- Impostiamo a 0 (non forzato) di default
+    CONCAT('Ambito ', x.tipo_prodotto) as name -- Generiamo un nome basato sul tipo prodotto
+FROM practice_commissions p
+INNER JOIN practices x ON x.id = p.practice_id
+WHERE p.tipo <> 'Cliente'
+  AND x.principal_id IS NOT NULL
+  AND x.tipo_prodotto IS NOT NULL
+  AND x.company_id = ?
+GROUP BY x.principal_id, x.tipo_prodotto
+ORDER BY x.principal_id, x.tipo_prodotto;
+            ", [$this->companyId]);
+
+            // Step 1: Delete all existing practice_oam records for the company
         } catch (Exception $e) {
             Log::error("Errore critico durante l'importazione Pratiche: " . $e->getMessage());
             $result['success'] = false;

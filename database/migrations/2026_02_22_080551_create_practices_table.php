@@ -36,14 +36,19 @@ return new class extends Migration {
             $table->decimal('amount', 12)->nullable()->comment('Importo del finanziamento/mutuo richiesto o erogato');
             $table->decimal('net', 12)->nullable()->comment('Netto erogato');
             $table->decimal('brokerage_fee', 10, 2)->nullable()->comment('Provvigione pattuita');
+            $table->decimal('principal_fee', 10, 2)->nullable()->comment('Provvigione mandante');
+            $table->decimal('client_fee', 10, 2)->nullable()->comment('Provvigione cliente');
+            $table->decimal('prize_fee', 10, 2)->nullable()->comment('Provvigione assicurativa');
+            $table->decimal('insurance_fee', 10, 2)->nullable()->comment('Provvigione assicurazione');
             $table->unsignedInteger('practice_scope_id')->nullable()->comment('Ambito della pratica');
             // Lo stato governato da Spatie Model States
-            $table->string('status', 50)->nullable()->default('working')->comment('Stato interno: working, rejected, perfected');
+            $table->string('status', 50)->nullable()->default('working')->comment('Stato interno attuale: working, rejected, perfected');
             $table->string('statoproforma', 50)->nullable()->comment('Stato proforma: Inserito / Sospeso / Annullato / Inviato / Abbinato');
             // --- DATE OPERATIVE E CRM ---
 
             // --- DATE COMPLIANCE: BUSINESS, ENASARCO, AUI ---
             $table->date('inserted_at')->nullable()->comment('Data inserimento pratica');  // Quando entra nel CRM
+            $table->date('approved_at')->nullable()->comment('Data approvazione pratica');  // Quando viene approvata
             // --- DATE COMPLIANCE: BUSINESS, ENASARCO, AUI ---
             $table->date('erogated_at')->nullable()->comment('Data erogazione finanziamento / stipula mutuo notaio');  // Innesca Enasarco, AUI operazione e Statistica OAM -Alimenta l'AUI di Esecuzione Operazione - in genere Alimenta l'AUI di Chiusura Rapporto ma non so se la fatturazione a cliente e' successiva cosa accade
             $table->date('rejected_at')->nullable()->comment('Data rifiuto pratica');  // Alimenta l'AUI di Chiusura Rapporto

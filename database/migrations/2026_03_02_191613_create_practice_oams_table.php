@@ -34,6 +34,8 @@ return new class extends Migration {
 
             $table->boolean('is_active')->default(true)->comment('Campo per escludere manualmente')->nullable();
             $table->boolean('is_perfected')->default(false)->comment('Pratica perfezionata nel periodo')->nullable();
+            $table->boolean('is_conventioned')->default(false)->comment('Pratica convenzionata')->nullable();
+            $table->boolean('is_notconventioned')->default(false)->comment('Pratica non convenzionata')->nullable();
             $table->decimal('erogato', 10, 2)->nullable();
             $table->timestamps();
 
