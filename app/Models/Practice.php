@@ -41,6 +41,7 @@ class Practice extends Model
         'perfected_at',
         'is_active',
         'tipo_prodotto',
+        'is_convenctioned'
     ];
 
     protected $appends = ['clients_names'];
@@ -56,6 +57,7 @@ class Practice extends Model
         'net' => 'decimal:2',
         'brokerage_fee' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_convenctioned' => 'boolean',
     ];
 
     public function documents(): MorphMany

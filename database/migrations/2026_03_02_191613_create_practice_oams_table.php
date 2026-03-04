@@ -36,7 +36,11 @@ return new class extends Migration {
             $table->boolean('is_perfected')->default(false)->comment('Pratica perfezionata nel periodo')->nullable();
             $table->boolean('is_conventioned')->default(false)->comment('Pratica convenzionata')->nullable();
             $table->boolean('is_notconventioned')->default(false)->comment('Pratica non convenzionata')->nullable();
+            $table->date('inserted_at')->nullable()->comment('Data di inserimento');
             $table->decimal('erogato', 10, 2)->nullable();
+            $table->date('start_date')->nullable()->comment('Data di inizio');
+            $table->date('perfected_at')->nullable()->comment('Data di perfezionamento');
+            $table->date('end_date')->nullable()->comment('Data di fine');
             $table->timestamps();
 
             $table->index('practice_id');

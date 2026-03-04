@@ -28,10 +28,13 @@ class PracticeOam extends Model
         'is_active',
         'is_perfected',
         'is_working',
+        'is_convenctioned',
         'name',
         'tipo_prodotto',
         'mese',
         'erogato',
+        'start_date',
+        'end_date',
     ];
 
     protected $casts = [
@@ -53,9 +56,12 @@ class PracticeOam extends Model
         'perfected_at' => 'datetime',
         'inserted_at' => 'datetime',
         'is_working' => 'boolean',
+        'is_convenctioned' => 'boolean',
         'name' => 'string',
         'mese' => 'integer',
         'erogato' => 'decimal:2',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function is_notperfected()

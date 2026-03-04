@@ -66,6 +66,9 @@ return new class extends Migration {
             $table->date('perfected_at')->nullable()->comment('Data perfezionamento pratica');
 
             $table->boolean('is_active')->default(true)->comment('Pratica attiva/inattiva');
+
+            $table->boolean('is_convenctioned')->default(true)->comment('Pratica convenzionata');
+
             $table->timestamps();
         });
     }

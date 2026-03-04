@@ -12,6 +12,8 @@ return new class extends Migration {
     {
         Schema::table('practice_oams', function (Blueprint $table) {
             $table->boolean('is_working')->default(true)->comment('PracticeOam is working boolean')->nullable();
+            $table->boolean('is_convenctioned')->default(true)->comment('Pratica convenzionata')->nullable();
+            $table->boolean('is_notconvenctioned')->default(false)->comment('Pratica convenzionata')->nullable();
             $table->string('name')->nullable()->comment('Mandanti');
             $table->string('tipo_prodotto')->nullable()->comment('Prodotto');
             $table->integer('mese')->nullable()->comment('Mese');
