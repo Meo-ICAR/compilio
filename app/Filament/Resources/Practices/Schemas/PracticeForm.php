@@ -34,13 +34,6 @@ class PracticeForm
                     ->searchable()
                     ->preload()
                     ->required(),
-                Select::make('employee_id')
-                    ->label('Dipendente che segue la pratica')
-                    ->relationship('employee', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->nullable()
-                    ->helperText('Dipendente interno responsabile della pratica'),
                 Select::make('practice_status_id')
                     ->label('Stato Pratica')
                     ->relationship('practiceStatus', 'name')
@@ -109,6 +102,14 @@ class PracticeForm
                     ->label('Data Inserimento')
                     ->nullable()
                     ->helperText('Data inserimento pratica'),
+                DatePicker::make('approved_at')
+                    ->label('Data Approvazione')
+                    ->nullable()
+                    ->helperText('Data approvazione pratica'),
+                DatePicker::make('sended_at')
+                    ->label('Data Invio in Istruttoria')
+                    ->nullable()
+                    ->helperText('Data invio in istruttoria'),
                 DatePicker::make('erogated_at')
                     ->label('Data Erogazione')
                     ->nullable()
@@ -130,6 +131,34 @@ class PracticeForm
                     ->prefix('€')
                     ->step(0.01)
                     ->helperText('Provvigione pattuita per questa pratica'),
+                TextInput::make('principal_fee')
+                    ->label('Provvigione Mandante')
+                    ->numeric()
+                    ->prefix('€')
+                    ->step(0.01)
+                    ->nullable()
+                    ->helperText('Provvigione mandante'),
+                TextInput::make('client_fee')
+                    ->label('Provvigione Cliente')
+                    ->numeric()
+                    ->prefix('€')
+                    ->step(0.01)
+                    ->nullable()
+                    ->helperText('Provvigione cliente'),
+                TextInput::make('prize_fee')
+                    ->label('Provvigione Assicurativa')
+                    ->numeric()
+                    ->prefix('€')
+                    ->step(0.01)
+                    ->nullable()
+                    ->helperText('Provvigione assicurativa'),
+                TextInput::make('insurance_fee')
+                    ->label('Provvigione Assicurazione')
+                    ->numeric()
+                    ->prefix('€')
+                    ->step(0.01)
+                    ->nullable()
+                    ->helperText('Provvigione assicurazione'),
                 Textarea::make('description')
                     ->label('Descrizione Pratica')
                     ->rows(3)
@@ -147,6 +176,10 @@ class PracticeForm
                 Toggle::make('is_active')
                     ->label('Attiva')
                     ->default(true),
+                Toggle::make('is_convenctioned')
+                    ->label('Convenzionata')
+                    ->default(true)
+                    ->helperText('Pratica convenzionata'),
             ]);
     }
 }

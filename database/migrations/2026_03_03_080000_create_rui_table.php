@@ -23,11 +23,11 @@ return new class extends Migration {
             $table->string('comune_nascita', 100)->comment('Comune di nascita')->nullable();
             $table->date('data_nascita')->comment('Data di nascita')->nullable();
             $table->string('ragione_sociale', 255)->comment('Ragione sociale')->nullable();
-            $table->string('provincia_nascita', 50)->comment('Provincia di nascita');
-            $table->string('titolo_individuale_sez_a', 100)->comment('Titolo individuale Sezione A');
-            $table->string('attivita_esercitata_sez_a', 100)->comment('Attività esercitata Sezione A');
-            $table->string('titolo_individuale_sez_b', 100)->comment('Titolo individuale Sezione B');
-            $table->string('attivita_esercitata_sez_b', 100)->comment('Attività esercitata Sezione B');
+            $table->string('provincia_nascita', 50)->comment('Provincia di nascita')->nullable();
+            $table->string('titolo_individuale_sez_a', 100)->comment('Titolo individuale Sezione A')->nullable();
+            $table->string('attivita_esercitata_sez_a', 100)->comment('Attività esercitata Sezione A')->nullable();
+            $table->string('titolo_individuale_sez_b', 100)->comment('Titolo individuale Sezione B')->nullable();
+            $table->string('attivita_esercitata_sez_b', 100)->comment('Attività esercitata Sezione B')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('rui_section_id')->comment('ID sezione RUI')->nullable();
             $table->foreign('rui_section_id')->references('id')->on('rui_sections')->onDelete('set null');

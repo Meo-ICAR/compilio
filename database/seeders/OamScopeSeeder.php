@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -41,5 +42,42 @@ class OamScopeSeeder extends Seeder
         }
 
         $this->command->info('OAM Scopes seeded successfully');
+
+        $practices = [
+            // --- MUTUI ---
+            ['id' => 1, 'name' => 'Mutui', 'code' => 'MUT', 'oam_code' => 'A.1', 'tipo_prodotto' => 'Mutuo', 'is_oneclient' => 0],
+            ['id' => 34, 'name' => 'IPOTECARIO', 'code' => 'MUT_IPOTECARIO', 'oam_code' => 'A.1', 'tipo_prodotto' => 'Mutuo', 'is_oneclient' => 0],
+            // --- CESSIONI ---
+            ['id' => 2, 'name' => 'Cessioni del V dello stipendio', 'code' => 'CessioneCQS', 'oam_code' => 'A.2', 'tipo_prodotto' => 'Cessione', 'is_oneclient' => 1],
+            ['id' => 3, 'name' => 'Cessioni del V pensione', 'code' => 'CessioneCQP', 'oam_code' => 'A.2', 'tipo_prodotto' => 'Cessione', 'is_oneclient' => 1],
+            // --- DELEGA ---
+            ['id' => 4, 'name' => 'Delegazioni di pagamento', 'code' => 'Delega', 'oam_code' => 'A.2', 'tipo_prodotto' => 'Delega', 'is_oneclient' => 1],
+            // --- PRESTITI ---
+            ['id' => 12, 'name' => 'Credito personale', 'code' => 'CRED_PERS', 'oam_code' => 'A.10', 'tipo_prodotto' => 'Prestito', 'is_oneclient' => 1],
+            ['id' => 13, 'name' => 'Credito finalizzato', 'code' => 'CRED_FIN', 'oam_code' => 'A.11', 'tipo_prodotto' => 'Prestito', 'is_oneclient' => 1],
+            ['id' => 29, 'name' => 'Chirografario', 'code' => 'Chirografario', 'oam_code' => 'A.10', 'tipo_prodotto' => 'Prestito', 'is_oneclient' => 1],
+            ['id' => 30, 'name' => 'Microcredito', 'code' => 'Microcredito', 'oam_code' => 'A.10', 'tipo_prodotto' => 'Prestito', 'is_oneclient' => 1],
+            ['id' => 35, 'name' => 'Prestito', 'code' => 'PREST', 'oam_code' => 'A.10', 'tipo_prodotto' => 'Prestito', 'is_oneclient' => 1],
+            // --- TFS ---
+            ['id' => 24, 'name' => 'TFS', 'code' => 'TFS', 'oam_code' => 'A.4', 'tipo_prodotto' => 'TFS', 'is_oneclient' => 1],
+            // --- AZIENDALE ---
+            ['id' => 27, 'name' => 'Aziendale', 'code' => 'Aziendale', 'oam_code' => 'A.15', 'tipo_prodotto' => 'Aziendale', 'is_oneclient' => 1],
+            ['id' => 33, 'name' => 'PRESTITO AZIENDALE', 'code' => 'PRESTITO AZIENDALE', 'oam_code' => 'A.15', 'tipo_prodotto' => 'Aziendale', 'is_oneclient' => 1],
+            // --- ALTRI (Mappati su categorie logiche o lasciati null se non rientrano) ---
+            ['id' => 5, 'name' => 'Factoring crediti', 'code' => 'FACT', 'oam_code' => 'A.3', 'tipo_prodotto' => 'Aziendale', 'is_oneclient' => 1],
+            ['id' => 11, 'name' => 'Aperture di credito in conto corrente', 'code' => 'APERT_CCC', 'oam_code' => 'A.9', 'tipo_prodotto' => 'Aziendale', 'is_oneclient' => 1],
+        ];
+        $companyId = Company::first()->id;
+        foreach ($practices as $practice) {
+            DB::table('practice_scopes')->updateOrInsert(
+                ['id' => $practice['id']],
+                array_merge($practice, [
+                    'company_id' => $companyId,
+                    'updated_at' => now(),
+                ])
+            );
+        }
+
+        $this->command->info('practice Scopes seeded successfully');
     }
 }

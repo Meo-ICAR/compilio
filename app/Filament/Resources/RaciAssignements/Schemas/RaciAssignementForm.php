@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\Ruis\Schemas;
+namespace App\Filament\Resources\RaciAssignements\Schemas;
 
 use Filament\Schemas\Schema;
 
-class RuiForm
+class RaciAssignementForm
 {
     public static function configure(Schema $schema): Schema
     {

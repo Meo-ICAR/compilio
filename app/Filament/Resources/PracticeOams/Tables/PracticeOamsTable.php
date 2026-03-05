@@ -24,7 +24,7 @@ class PracticeOamsTable
             ->reorderableColumns()
             ->selectable()
             ->groups([
-                Group::make('practice.scopeOAM.oam_code')
+                Group::make('oam_code')
                     ->label('OAM')
                     ->collapsible(),  // SOSTITUISCE le vecchie impostazioni di groupingSettings
                 Group::make('tipo_prodotto')
@@ -42,6 +42,26 @@ class PracticeOamsTable
                 TextColumn::make('tipo_prodotto')
                     ->label('Prodotto')
                     ->searchable()
+                    ->sortable(),
+                IconColumn::make('is_conventioned')
+                    ->label('Convenzionata')
+                    ->boolean()
+                    ->summarize(
+                        Sum::make()
+                            ->label(false)
+                            // Questo forza il database a trattare true come 1 e false come 0
+                            ->numeric()
+                    )
+                    ->sortable(),
+                IconColumn::make('is_notconventioned')
+                    ->label('NON Convenz.')
+                    ->boolean()
+                    ->summarize(
+                        Sum::make()
+                            ->label(false)
+                            // Questo forza il database a trattare true come 1 e false come 0
+                            ->numeric()
+                    )
                     ->sortable(),
                 IconColumn::make('is_perfected')
                     ->label('Perfezionata')
@@ -155,12 +175,29 @@ class PracticeOamsTable
                     ->sortable(),
             ])
             ->filters([
+                Filter::make('is_conventioned')
+                    ->label('Convenzionata')
+                    ->query(fn($query) => $query->where('is_conventioned', true)),
+                Filter::make('is_notconventioned')
+                    ->label('NON Convenzionata')
+                    ->query(fn($query) => $query->where('is_conventioned', true)),
                 Filter::make('is_perfected')
                     ->label('Perfezionata')
                     ->query(fn($query) => $query->where('is_perfected', true)),
                 Filter::make('is_working')
                     ->label('Lavorazione')
                     ->query(fn($query) => $query->where('is_working', true)),
+                SelectFilter::make('practice.scopeOAM.oam_code')
+                    ->label('Filtra per Tipo')
+                    ->multiple()  // Abilita la selezione multipla
+                    ->options(
+                        // Recupera i valori unici della colonna 'type' dal database
+                        fn() => PracticeOam::query()
+                            ->pluck('tipo_prodotto', 'tipo_prodotto')  // 'valore' => 'etichetta'
+                            ->sort()
+                            ->toArray()
+                    )
+                    ->searchable(),  // Opzionale: aggiunge una barra di ricerca nel dropdown
                 SelectFilter::make('tipo_prodotto')
                     ->label('Filtra per Tipo')
                     ->multiple()  // Abilita la selezione multipla

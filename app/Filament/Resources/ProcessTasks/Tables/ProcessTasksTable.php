@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\Ruis\Tables;
+namespace App\Filament\Resources\ProcessTasks\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
-class RuisTable
+class ProcessTasksTable
 {
     public static function configure(Table $table): Table
     {

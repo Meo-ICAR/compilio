@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Company;
+use App\Models\OamCode;
 use App\Models\Practice;
 use App\Models\PracticeCommission;
 use App\Models\PracticeOam;
@@ -28,23 +29,24 @@ class PracticeOamService
         try {
             DB::beginTransaction();
 
-            // Update practices perfected_at based on commission data
-            DB::statement("
-                UPDATE practices p
-                JOIN (
-                    SELECT
-                        pc.practice_id,
-                        MIN(pc.status_at) AS perfected_at
-                    FROM practice_commissions pc
-                    JOIN practices p2 ON pc.practice_id = p2.id
-                    WHERE pc.status_payment = 'Pratica perfezionata'
-                    AND p2.company_id = ?
-                    GROUP BY pc.practice_id
-                ) AS subquery ON p.id = subquery.practice_id
-                SET p.perfected_at = subquery.perfected_at
-                WHERE p.company_id = ?
-            ", [$companyId, $companyId]);
-
+            /*
+             * // Update practices perfected_at based on commission data
+             * DB::statement("
+             *     UPDATE practices p
+             *     JOIN (
+             *         SELECT
+             *             pc.practice_id,
+             *             MIN(pc.status_at) AS perfected_at
+             *         FROM practice_commissions pc
+             *         JOIN practices p2 ON pc.practice_id = p2.id
+             *         WHERE pc.status_payment = 'Pratica perfezionata'
+             *         AND p2.company_id = ?
+             *         GROUP BY pc.practice_id
+             *     ) AS subquery ON p.id = subquery.practice_id
+             *     SET p.perfected_at = subquery.perfected_at
+             *     WHERE p.company_id = ?
+             * ", [$companyId, $companyId]);
+             */
             // Step 1: Delete all existing practice_oam records for the company
             $deletedCount = PracticeOam::where('company_id', $companyId)
                 ->where('is_active', true)
@@ -53,19 +55,16 @@ class PracticeOamService
 
             // Step 2: Get practices that meet the criteria
             $practices = Practice::where(function ($query) use ($startDate, $endDate) {
-                // Blocco A: (inserted_at nel range E perfected_at null)
+                // Practices sent before end date AND (perfected after start date OR not perfected yet)
                 $query
-                    ->where(function ($q) use ($startDate, $endDate) {
+                    ->where('sended_at', '<', $endDate)
+                    ->where(function ($q) use ($startDate) {
                         $q
-                            ->whereBetween('inserted_at', [$startDate, $endDate])
-                            ->whereNull('perfected_at');
-                    })
-                    // Blocco B: OR (perfected_at nel range)
-                    ->orWhere(function ($q) use ($startDate, $endDate) {
-                        $q->whereBetween('perfected_at', [$startDate, $endDate]);
+                            ->where('erogated_at', '>=', $startDate)
+                            ->orWhereNull('erogated_at');
                     });
             })
-                ->whereNull('rejected_at')  // <--- Questa condizione "AND" si applica a entrambi i blocchi sopra
+                ->whereNull('rejected_at')
                 ->get();
 
             // Step 3: Insert new practice_oam records
@@ -77,11 +76,12 @@ class PracticeOamService
                 if ($somma > 0) {
                     // Assicuriamoci che entrambi siano oggetti Carbon per un confronto granulare
 
-                    $is_perfected = $practice->perfected_at >= $practice->inserted_at;
+                    $is_perfected = $practice->erogated_at >= $practice->inserted_at;
                     $mese = 0;
                     if ($is_perfected) {
-                        $mese = $practice->perfected_at->month;
+                        $mese = $practice->erogated_at->month;
                     }
+                    $compenso = $commissionSums['compenso'];
                     if (!$is_perfected) {
                         $commissionSums['compenso_lavorazione'] = $commissionSums['compenso'];
                         $commissionSums['provvigione_lavorazione'] = $commissionSums['provvigione'];
@@ -93,14 +93,15 @@ class PracticeOamService
                     PracticeOam::create([
                         'company_id' => $companyId,
                         'practice_id' => $practice->id,
+                        'oam_code' => $practice?->practiceScope?->oam_code,
                         'start_date' => $startDate,
                         'end_date' => $endDate,
-                        'perfected_at' => $practice->perfected_at,
+                        'perfected_at' => $practice->erogated_at,
                         'inserted_at' => $practice->inserted_at,
                         'is_perfected' => $is_perfected,
                         'is_working' => !$is_perfected,
-                        'is_convenctioned' => $practice->is_convenctioned,
-                        'is_notconvenctioned' => $practice->is_convenctioned,
+                        'is_conventioned' => $compenso > 0,
+                        'is_notconventioned' => $compenso == 0,
                         'mese' => $mese,
                         'tipo_prodotto' => $practice->tipo_prodotto,
                         'name' => $practice->principal->name,
@@ -135,26 +136,6 @@ class PracticeOamService
     }
 
     /**
-     * Get OAM code ID for a practice based on its scope
-     */
-    private function getOamCodeId(Practice $practice): ?int
-    {
-        if (!$practice->practice_scope_id) {
-            return null;
-        }
-
-        // Get the OAM code from the practice scope
-        $practiceScope = $practice->practiceScope;
-        if (!$practiceScope || !$practiceScope->oam_code) {
-            return null;
-        }
-
-        // Find the OAM code record
-        $oamCode = \App\Models\OamCode::where('code', $practiceScope->oam_code)->first();
-        return $oamCode ? $oamCode->id : null;
-    }
-
-    /**
      * Get practice commission sums grouped by tipo
      */
     private function getPracticeCommissionSums(Practice $practice): array
@@ -186,7 +167,6 @@ class PracticeOamService
 
             $tipo = strtolower($commission->tipo ?? '');
             $name = strtolower($commission->name ?? '');
-            $compenso += $amount;
 
             if ($tipo === 'cliente') {
                 $cliente += $amount;

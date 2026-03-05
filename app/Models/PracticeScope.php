@@ -16,6 +16,11 @@ class PracticeScope extends Model
         'is_oneclient'
     ];
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(ProcessTask::class)->orderBy('sort_order');
+    }
+
     public function oamScope()
     {
         return $this->belongsTo(OamScope::class, 'oam_code');
