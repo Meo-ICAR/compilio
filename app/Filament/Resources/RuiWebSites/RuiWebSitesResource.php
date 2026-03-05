@@ -7,17 +7,17 @@ use App\Filament\Resources\RuiWebSites\Pages\EditRuiWebSites;
 use App\Filament\Resources\RuiWebSites\Pages\ListRuiWebSites;
 use App\Filament\Resources\RuiWebSites\Schemas\RuiWebSitesForm;
 use App\Filament\Resources\RuiWebSites\Tables\RuiWebSitesTable;
-use App\Models\RuiWebSites;
-use BackedEnum;
+use App\Models\RuiWebsite;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class RuiWebSitesResource extends Resource
 {
-    protected static ?string $model = RuiWebSites::class;
-
+    protected static ?string $model = RuiWebsite::class;
+    protected static bool $isScopedToTenant = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema

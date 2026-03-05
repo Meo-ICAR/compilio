@@ -33,18 +33,21 @@ class RaciAssignementsTable
                     ->color(fn($state) => str_contains($state, 'A:') ? 'danger' : 'gray'),
             ])
             ->filters([
-                SelectFilter::make('scope')
-                    ->relationship('scope', 'name')
-            ])
-            // 4. Validazione Critica (Business Logic)
-            // Un mediatore non può avere due Accountable (A) per lo stesso task. In Filament 5.2 puoi aggiungere un ValidationRule nel form:
-            ->rules([
-                fn() => function (string $attribute, $value, \Closure $fail) {
-                    $accountables = collect($value)->where('role', 'A')->count();
-                    if ($accountables !== 1) {
-                        $fail('Deve esserci esattamente un Accountable (A) per ogni task.');
-                    }
-                },
+                //  SelectFilter::make('scope')
+                //      ->relationship('scope', 'name')
             ]);
+        // 4. Validazione Critica (Business Logic)
+        // Un mediatore non può avere due Accountable (A) per lo stesso task. In Filament 5.2 puoi aggiungere un ValidationRule nel form:
+
+        /*
+         * ->rules([
+         *     fn() => function (string $attribute, $value, \Closure $fail) {
+         *         $accountables = collect($value)->where('role', 'A')->count();
+         *         if ($accountables !== 1) {
+         *             $fail('Deve esserci esattamente un Accountable (A) per ogni task.');
+         *         }
+         *     },
+         * ]);
+         */
     }
 }

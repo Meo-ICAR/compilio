@@ -7,7 +7,7 @@ use App\Filament\Resources\RaciAssignements\Pages\EditRaciAssignement;
 use App\Filament\Resources\RaciAssignements\Pages\ListRaciAssignements;
 use App\Filament\Resources\RaciAssignements\Schemas\RaciAssignementForm;
 use App\Filament\Resources\RaciAssignements\Tables\RaciAssignementsTable;
-use App\Models\RaciAssignement;
+use App\Models\RaciAssignment;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -17,7 +17,7 @@ use UnitEnum;
 
 class RaciAssignementResource extends Resource
 {
-    protected static ?string $model = RaciAssignement::class;
+    protected static ?string $model = RaciAssignment::class;
 
     protected static bool $isScopedToTenant = false;
 

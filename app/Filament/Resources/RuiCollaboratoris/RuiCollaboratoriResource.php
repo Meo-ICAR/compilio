@@ -8,16 +8,16 @@ use App\Filament\Resources\RuiCollaboratoris\Pages\ListRuiCollaboratoris;
 use App\Filament\Resources\RuiCollaboratoris\Schemas\RuiCollaboratoriForm;
 use App\Filament\Resources\RuiCollaboratoris\Tables\RuiCollaboratorisTable;
 use App\Models\RuiCollaboratori;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class RuiCollaboratoriResource extends Resource
 {
     protected static ?string $model = RuiCollaboratori::class;
-
+    protected static bool $isScopedToTenant = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema

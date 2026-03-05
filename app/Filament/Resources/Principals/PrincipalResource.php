@@ -7,6 +7,7 @@ use App\Filament\Resources\Principals\Imports\PrincipalsImport;
 use App\Filament\Resources\Principals\Pages\CreatePrincipal;
 use App\Filament\Resources\Principals\Pages\EditPrincipal;
 use App\Filament\Resources\Principals\Pages\ListPrincipals;
+use App\Filament\Resources\Principals\Pages\ListPrincipalScopes;
 use App\Filament\Resources\Principals\RelationManagers\ContactsRelationManager;
 use App\Filament\Resources\Principals\RelationManagers\PrincipalMandatesRelationManager;
 use App\Filament\Resources\Principals\RelationManagers\PrincipalScopesRelationManager;
@@ -47,11 +48,11 @@ class PrincipalResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\Principals\RelationManagers\ContactsRelationManager::class,
+            ContactsRelationManager::class,
             PrincipalMandatesRelationManager::class,
             PrincipalScopesRelationManager::class,
             DocumentsRelationManager::class,
-            \App\Filament\Resources\Principals\RelationManagers\EmployeesRelationManager::class,
+            EmployeesRelationManager::class,
         ];
     }
 
@@ -59,6 +60,7 @@ class PrincipalResource extends Resource
     {
         return [
             'index' => ListPrincipals::route('/'),
+            'scopes' => ListPrincipalScopes::route('/scopes'),
             'create' => CreatePrincipal::route('/create'),
             'edit' => EditPrincipal::route('/{record}/edit'),
         ];

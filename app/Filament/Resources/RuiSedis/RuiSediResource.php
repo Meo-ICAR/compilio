@@ -8,16 +8,16 @@ use App\Filament\Resources\RuiSedis\Pages\ListRuiSedis;
 use App\Filament\Resources\RuiSedis\Schemas\RuiSediForm;
 use App\Filament\Resources\RuiSedis\Tables\RuiSedisTable;
 use App\Models\RuiSedi;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class RuiSediResource extends Resource
 {
     protected static ?string $model = RuiSedi::class;
-
+    protected static bool $isScopedToTenant = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema

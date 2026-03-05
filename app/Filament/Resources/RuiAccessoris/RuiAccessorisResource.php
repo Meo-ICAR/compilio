@@ -8,16 +8,16 @@ use App\Filament\Resources\RuiAccessoris\Pages\ListRuiAccessoris;
 use App\Filament\Resources\RuiAccessoris\Schemas\RuiAccessorisForm;
 use App\Filament\Resources\RuiAccessoris\Tables\RuiAccessorisTable;
 use App\Models\RuiAccessoris;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class RuiAccessorisResource extends Resource
 {
     protected static ?string $model = RuiAccessoris::class;
-
+    protected static bool $isScopedToTenant = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema

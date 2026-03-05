@@ -8,16 +8,16 @@ use App\Filament\Resources\RuiCariches\Pages\ListRuiCariches;
 use App\Filament\Resources\RuiCariches\Schemas\RuiCaricheForm;
 use App\Filament\Resources\RuiCariches\Tables\RuiCarichesTable;
 use App\Models\RuiCariche;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class RuiCaricheResource extends Resource
 {
     protected static ?string $model = RuiCariche::class;
-
+    protected static bool $isScopedToTenant = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
