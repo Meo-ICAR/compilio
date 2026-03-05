@@ -29,7 +29,7 @@ return new class extends Migration {
                 'D',
                 'E',
             ])->nullable()->comment('Sezione IVASS');
-
+            $table->string('sponsor')->nullable()->comment('Provenienza del ns. cliente');
             $table->unsignedInteger('company_type_id')->nullable()->comment('Tipo forma giuridica della società');
             $table->timestamp('created_at')->nullable()->useCurrent()->comment('Data di creazione del tenant');
             $table->timestamp('updated_at')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Data di ultima modifica');

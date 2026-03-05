@@ -64,6 +64,9 @@ class PracticeExcelImportService
                         $updateData = array_filter([
                             'net' => $practiceData['net'],
                             'amount' => $practiceData['amount'],
+                            'principal_fee' => $practiceData['principal_fee'],
+                            'brokerage_fee' => $practiceData['brokerage_fee'],
+                            //   'client_fee' => $practiceData['client_fee'],
                             'sended_at' => $practiceData['sended_at'],
                             'approved_at' => $practiceData['approved_at'],
                             'erogated_at' => $practiceData['erogated_at'],
@@ -117,6 +120,8 @@ class PracticeExcelImportService
             'CRM_code' => $this->cleanString($row[1] ?? ''),  // Column B (index 1)
             'net' => $this->cleanDecimal($row[11] ?? ''),  // Column L (index 11)
             'amount' => $this->cleanDecimal($row[12] ?? ''),  // Column M (index 12)
+            'principal_fee' => $this->cleanDecimal($row[13] ?? ''),  // Column N (index 13)
+            'brokerage_fee' => $this->cleanDecimal($row[14] ?? ''),  // Column O (index 14)
             'sended_at' => $this->mapDate($row[29] ?? ''),  // Column AD (index 29)
             'approved_at' => $this->mapDate($row[30] ?? ''),  // Column AE (index 30)
             'erogated_at' => $this->mapDate($row[31] ?? ''),  // Column AF (index 31)

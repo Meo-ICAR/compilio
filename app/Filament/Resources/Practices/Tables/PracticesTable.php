@@ -2,12 +2,22 @@
 
 namespace App\Filament\Resources\Practices\Tables;
 
+use App\Filament\Imports\PracticesImporter;
+use App\Models\Practice;
+use App\Models\PracticeStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Excel;
 
 class PracticesTable
@@ -17,20 +27,51 @@ class PracticesTable
         return $table
             ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'practiceScope', 'practiceStatus', 'clientMandate']))
             ->columns([
-                TextColumn::make('clientMandate.id')
-                    ->label('ID Mandato')
-                    ->searchable()
-                    ->toggleable(),
-                TextColumn::make('clients_names')
-                    ->label('Contraenti')
+                TextColumn::make('tipo_prodotto')
+                    ->label('Tipo Prodotto')
                     ->searchable()
                     ->sortable()
-                    ->placeholder('Nessun cliente'),
+                    ->placeholder('Assente'),
                 TextColumn::make('principal.name')
                     ->label('Mandante')
                     ->searchable()
                     ->sortable()
                     ->placeholder('Nessun mandante'),
+                TextColumn::make('inserted_at')
+                    ->label('Data Inserimento')
+                    ->date()
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('Non definita'),
+                TextColumn::make('sended_at')
+                    ->label('Istruttoria')
+                    ->date()
+                    ->sortable()
+                    ->placeholder('Non definita'),
+                TextColumn::make('approved_at')
+                    ->label('Delibera')
+                    ->date()
+                    ->sortable()
+                    ->placeholder('Non definita'),
+                TextColumn::make('erogated_at')
+                    ->label('Erogazione')
+                    ->date()
+                    ->sortable()
+                    ->placeholder('Non definita'),
+                TextColumn::make('perfected_at')
+                    ->label('Perfezionata')
+                    ->date()
+                    ->sortable()
+                    ->placeholder('Non definita'),
+                IconColumn::make('is_invoiced')
+                    ->label('Fatturata')
+                    ->boolean()
+                    ->sortable(),
+                TextColumn::make('clients_names')
+                    ->label('Contraenti')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Nessun cliente'),
                 TextColumn::make('agent.name')
                     ->label('Agente')
                     ->searchable()
@@ -60,11 +101,6 @@ class PracticesTable
                     ->label('Codice Mandante')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('tipo_prodotto')
-                    ->label('Tipo Prodotto')
-                    ->searchable()
-                    ->toggleable()
-                    ->placeholder('Nessun tipo prodotto'),
                 TextColumn::make('amount')
                     ->label('Importo')
                     ->money('EUR')
@@ -92,18 +128,6 @@ class PracticesTable
                     ->searchable()
                     ->toggleable()
                     ->placeholder('Nessuno stato proforma'),
-                TextColumn::make('inserted_at')
-                    ->label('Data Inserimento')
-                    ->date()
-                    ->sortable()
-                    ->toggleable()
-                    ->placeholder('Non definita'),
-                TextColumn::make('erogated_at')
-                    ->label('Data Erogazione')
-                    ->date()
-                    ->sortable()
-                    ->toggleable()
-                    ->placeholder('Non definita'),
                 TextColumn::make('rejected_at')
                     ->label('Data Rifiuto')
                     ->date()
@@ -119,14 +143,9 @@ class PracticesTable
                 TextColumn::make('status')
                     ->label('Stato')
                     ->badge()
-                    ->color(fn($state) => \App\Models\PracticeStatus::where('name', $state)->value('color') ?? 'gray')
+                    ->color(fn($state) => PracticeStatus::where('name', $state)->value('color') ?? 'gray')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('perfected_at')
-                    ->label('Data Perfezionamento')
-                    ->date()
-                    ->sortable()
-                    ->placeholder('Non definita'),
                 TextColumn::make('brokerage_fee')
                     ->label('Provvigione')
                     ->money('EUR')
@@ -163,28 +182,107 @@ class PracticesTable
                     ->falseIcon('heroicon-o-check-circle')
                     ->color(fn($state) => $state ? 'danger' : 'success')
                     ->tooltip(fn($record) => $record->isRejected() ? 'Respinta' : 'Non respinta'),
-                TextColumn::make('updated_at')
-                    ->label('Data Aggiornamento')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('Istruttoria')
+                    ->label('Inviate in Istruttoria')
+                    ->options([
+                        'stipulated' => 'Inviati in Istruttoria',
+                        'not_stipulated' => 'Non Inviati in Istruttoria',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['value'] === 'stipulated',
+                                fn(Builder $query): Builder => $query->whereNotNull('sended_at'),
+                            )
+                            ->when(
+                                $data['value'] === 'not_stipulated',
+                                fn(Builder $query): Builder => $query->whereNull('sended_at'),
+                            );
+                    }),
+                SelectFilter::make('Deliberati')
+                    ->label('Pratiche deliberate')
+                    ->options([
+                        'stipulated' => 'Deliberati',
+                        'not_stipulated' => 'Non Deliberati',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['value'] === 'stipulated',
+                                fn(Builder $query): Builder => $query->whereNotNull('approved_at'),
+                            )
+                            ->when(
+                                $data['value'] === 'not_stipulated',
+                                fn(Builder $query): Builder => $query->whereNull('approved_at'),
+                            );
+                    }),
+                SelectFilter::make('Erogati')
+                    ->label('Pratiche erogate')
+                    ->options([
+                        'stipulated' => 'Erogati',
+                        'not_stipulated' => 'Non Erogati',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['value'] === 'stipulated',
+                                fn(Builder $query): Builder => $query->whereNotNull('erogated_at'),
+                            )
+                            ->when(
+                                $data['value'] === 'not_stipulated',
+                                fn(Builder $query): Builder => $query->whereNull('erogated_at'),
+                            );
+                    }),
+                SelectFilter::make('Perfezionate')
+                    ->label('Pratiche perfezionate')
+                    ->options([
+                        'stipulated' => 'Perfezionate',
+                        'not_stipulated' => 'Non Perfezionate',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['value'] === 'stipulated',
+                                fn(Builder $query): Builder => $query->whereNotNull('perfected_at'),
+                            )
+                            ->when(
+                                $data['value'] === 'not_stipulated',
+                                fn(Builder $query): Builder => $query->whereNull('perfected_at'),
+                            );
+                    }),
+                TernaryFilter::make('is_invoiced')
+                    ->label('Fatturato')
+                    ->placeholder('Tutti gli stati')
+                    ->trueLabel('Almeno una provvigione fatturata')
+                    ->falseLabel('Nessuna provvigione fatturata')
+                    ->queries(
+                        true: fn(Builder $query) => $query->whereHas('practiceCommissions', function ($commissionQuery) {
+                            $commissionQuery->whereNotNull('invoice_at');
+                        }),
+                        false: fn(Builder $query) => $query->whereDoesntHave('practices.practiceCommissions', function ($commissionQuery) {
+                            $commissionQuery->whereNotNull('invoice_at');
+                        })
+                    ),
+                SelectFilter::make('tipo_prodotto')
+                    ->label('Filtra per Tipo')
+                    ->multiple()  // Abilita la selezione multipla
+                    ->options(
+                        // Recupera i valori unici della colonna 'type' dal database
+                        fn() => Practice::query()
+                            ->whereNotNull('tipo_prodotto')  // Esclude null values
+                            ->pluck('tipo_prodotto', 'tipo_prodotto')  // 'valore' => 'etichetta'
+                            ->sort()
+                            ->toArray()
+                    )
+                    ->searchable()  // Opzionale: aggiunge una barra di ricerca nel dropdown
             ])
             ->recordActions([
                 EditAction::make(),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-                \Filament\Actions\ImportAction::make('import')
-                    ->label('Importa Excel')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('success')
-                    ->importer(\App\Filament\Imports\PracticesImporter::class)
-                    ->maxRows(1000),
+                BulkActionGroup::make([]),
             ]);
     }
 }

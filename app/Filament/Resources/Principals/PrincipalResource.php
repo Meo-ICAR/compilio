@@ -9,6 +9,7 @@ use App\Filament\Resources\Principals\Pages\EditPrincipal;
 use App\Filament\Resources\Principals\Pages\ListPrincipals;
 use App\Filament\Resources\Principals\Pages\ListPrincipalScopes;
 use App\Filament\Resources\Principals\RelationManagers\ContactsRelationManager;
+use App\Filament\Resources\Principals\RelationManagers\EmployeesRelationManager;
 use App\Filament\Resources\Principals\RelationManagers\PrincipalMandatesRelationManager;
 use App\Filament\Resources\Principals\RelationManagers\PrincipalScopesRelationManager;
 use App\Filament\Resources\Principals\Schemas\PrincipalForm;

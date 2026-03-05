@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->increments('id')->comment('ID intero autoincrementante');
             $table->string('name')->comment("Nome dell'istituto bancario o finanziaria (es. Intesa Sanpaolo, Compass)");
             $table->string('abi', 30)->nullable()->comment('Abi per banche o numero RUI ISVASS');
+            $table->string('abi_name')->comment('Nome ufficiale banca');
             $table->date('stipulated_at')->nullable()->comment('Data stipula contratto convenzione');
             $table->date('dismissed_at')->nullable()->comment('Data cessazione rapporto convenzione');
             $table->string('vat_number', 13)->nullable()->comment("Partita IVA dell'istituto");

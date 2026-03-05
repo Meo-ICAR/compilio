@@ -86,6 +86,18 @@ class Practice extends Model
         return $this->hasMany(PracticeCommission::class);
     }
 
+    /**
+     * Determina se esiste almeno una commissione fatturata.
+     */
+    protected function isInvoiced(): Attribute
+    {
+        return Attribute::get(fn() =>
+            $this
+                ->practiceCommissions()
+                ->whereNotNull('invoice_at')
+                ->exists());
+    }
+
     public function principal()
     {
         return $this->belongsTo(Principal::class);

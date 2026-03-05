@@ -36,6 +36,7 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         'smtp_from_name',
         'smtp_enabled',
         'smtp_verify_ssl',
+        'sponsor'
     ];
 
     protected $casts = [

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Company;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class OamScopeSeeder extends Seeder
 {
@@ -67,12 +68,10 @@ class OamScopeSeeder extends Seeder
             ['id' => 5, 'name' => 'Factoring crediti', 'code' => 'FACT', 'oam_code' => 'A.3', 'tipo_prodotto' => 'Aziendale', 'is_oneclient' => 1],
             ['id' => 11, 'name' => 'Aperture di credito in conto corrente', 'code' => 'APERT_CCC', 'oam_code' => 'A.9', 'tipo_prodotto' => 'Aziendale', 'is_oneclient' => 1],
         ];
-        $companyId = Company::first()->id;
         foreach ($practices as $practice) {
             DB::table('practice_scopes')->updateOrInsert(
                 ['id' => $practice['id']],
                 array_merge($practice, [
-                    'company_id' => $companyId,
                     'updated_at' => now(),
                 ])
             );

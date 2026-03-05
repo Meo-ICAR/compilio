@@ -2,13 +2,20 @@
 
 namespace App\Filament\Resources\Principals\Tables;
 
+use App\Models\Abi;  // Assicurati che il modello Abi esista
+use App\Models\Principal;  // Assicurati che il modello Abi esista
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Excel;
 
 class PrincipalsTable
@@ -18,6 +25,28 @@ class PrincipalsTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('abi')
+                    ->sortable()
+                    ->searchable(),
+                IconColumn::make('is_dummy')
+                    ->label('Fittizio')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-exclamation-triangle')
+                    ->falseIcon('heroicon-o-building-office')
+                    ->color(fn($state) => $state ? 'warning' : 'success')
+                    ->tooltip(fn($record) => $record->is_dummy ? 'Mandante fittizio / non convenzionato' : 'Mandante convenzionato'),
+                TextColumn::make('stipulated_at')
+                    ->date()
+                    ->sortable(),
+                TextColumn::make('dismissed_at')
+                    ->date()
+                    ->sortable(),
+                TextColumn::make('vat_number')
+                    ->label('CF / Partita IVA')
+                    ->searchable(),
+                TextColumn::make('oam')
                     ->searchable(),
                 TextColumn::make('principal_type')
                     ->label('Tipo Mandante')
@@ -38,55 +67,12 @@ class PrincipalsTable
                         'agente_captive' => 'orange',
                         default => 'gray',
                     }),
-                TextColumn::make('abi')
-                    ->searchable(),
-                TextColumn::make('stipulated_at')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('dismissed_at')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('vat_number')
-                    ->label('CF / Partita IVA')
-                    ->searchable(),
-                TextColumn::make('vat_name')
-                    ->searchable(),
-                TextColumn::make('type')
-                    ->searchable(),
-                TextColumn::make('oam')
-                    ->searchable(),
-                TextColumn::make('oam_name')
-                    ->label('Nome OAM')
-                    ->searchable()
-                    ->toggleable(),
-                TextColumn::make('oam_at')
-                    ->label('Data OAM')
-                    ->date()
-                    ->sortable()
-                    ->toggleable(),
                 TextColumn::make('ivass')
                     ->searchable(),
-                TextColumn::make('ivass_name')
-                    ->label('Nome IVASS')
-                    ->searchable()
-                    ->toggleable(),
                 TextColumn::make('ivass_section')
                     ->label('Sezione IVASS')
                     ->searchable()
                     ->toggleable(),
-                TextColumn::make('ivass_at')
-                    ->label('Data IVASS')
-                    ->date()
-                    ->sortable()
-                    ->toggleable(),
-                IconColumn::make('is_active')
-                    ->boolean(),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('mandate_number')
-                    ->searchable(),
                 TextColumn::make('start_date')
                     ->date()
                     ->sortable(),
@@ -97,13 +83,6 @@ class PrincipalsTable
                     ->boolean(),
                 TextColumn::make('status')
                     ->badge(),
-                IconColumn::make('is_dummy')
-                    ->label('Fittizio')
-                    ->boolean()
-                    ->trueIcon('heroicon-s-exclamation-triangle')
-                    ->falseIcon('heroicon-o-building-office')
-                    ->color(fn($state) => $state ? 'warning' : 'success')
-                    ->tooltip(fn($record) => $record->is_dummy ? 'Mandante fittizio / non convenzionato' : 'Mandante convenzionato'),
                 TextColumn::make('website')
                     ->label('Sito Web')
                     ->url(fn($record) => $record->website)
@@ -116,29 +95,47 @@ class PrincipalsTable
                     ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('principal_type')
-                    ->label('Tipo Mandante')
-                    ->options([
-                        'no' => 'Non Specificato',
-                        'banca' => 'Banca',
-                        'assicurazione' => 'Compagnia Assicurativa',
-                        'agente' => 'Agente',
-                        'agente_captive' => 'Agente Captive',
-                    ]),
+                Filter::make('senza_abi')
+                    ->label('Senza ABI')
+                    ->query(fn(Builder $query): Builder => $query->whereNull('principals.abi'))
+                    ->indicator('ABI Mancante')  // Mostra un badge sopra la tabella quando è attivo
             ])
             ->recordActions([
                 EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    //    DeleteBulkAction::make(),
+                    BulkAction::make('assegnaAbi')
+                        ->label('Assegna ABI ai Mandanti')
+                        ->icon('heroicon-o-banknotes')
+                        ->color('warning')
+                        // Definiamo il form che appare nel modal dopo il click
+                        ->form([
+                            Select::make('abi')
+                                ->label('Seleziona ABI')
+                                ->options(Abi::query()->pluck('name', 'abi'))  // Sostituisci nome_banca col tuo campo
+                                ->searchable()
+                                ->required(),
+                        ])
+                        // Logica di esecuzione sui record selezionati
+                        ->action(function (Collection $records, array $data): void {
+                            $abiId = $data['abi'];
+
+                            // Recuperiamo gli ID univoci dei Principal dai record selezionati
+                            // (Necessario perché la query raggruppata potrebbe avere duplicati di ID per diversi prodotti)
+                            $principalIds = $records->pluck('id')->unique();
+
+                            // Aggiornamento massivo sul database
+                            Principal::whereIn('id', $principalIds)
+                                ->update(['abi' => $abiId]);
+                        })
+                        ->deselectRecordsAfterCompletion()  // Pulisce la selezione a fine operazione
+                        ->requiresConfirmation()
+                        ->modalHeading('Assegnazione Massiva ABI')
+                        ->modalDescription("Seleziona l'istituto da associare a tutti i mandanti selezionati.")
+                        ->modalSubmitActionLabel('Conferma Assegnazione'),
                 ]),
-                \Filament\Actions\ImportAction::make('import')
-                    ->label('Importa Excel')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('success')
-                    ->importer(\App\Filament\Imports\PrincipalsImporter::class)
-                    ->maxRows(1000),
             ]);
     }
 }
