@@ -2,11 +2,16 @@
 
 namespace App\Filament\Resources\PracticeOams\Tables;
 
+use App\Exports\PracticeOamBaseExport;
+use App\Filament\Exports\PracticeOamAnaliticoExporter;
+use App\Filament\Exports\PracticeOamExporter;
 use App\Models\PracticeOam;
+use App\Models\PracticeOamBase;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
@@ -15,7 +20,11 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
-use Maatwebsite\Excel\Excel;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Facades\Excel;  // USA LA FACADE!
 
 class PracticeOamsTable
 {
@@ -267,49 +276,101 @@ class PracticeOamsTable
             ->recordActions([
                 EditAction::make(),
             ])
+            ->headerActions([
+                Action::make('exportSintetico')
+                    ->label('Export Prospetto BASE')
+                    ->color('success')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->action(function () {
+                        // 1. Svuota la tabella di appoggio
+                        PracticeOamBase::truncate();
+
+                        // 2. Query raggruppata con gli alias che hai definito
+                        $totals = DB::table('practice_oams')
+                            ->select([
+                                'oam_name as B_OAM',
+                                DB::raw('SUM(is_conventioned) as C_Convenzionata'),
+                                DB::raw('SUM(is_notconventioned) as D_Non_Convenzionata'),
+                                DB::raw('SUM(is_perfected) as E_Intermediate'),
+                                DB::raw('SUM(is_working) as F_Lavorazione'),
+                                DB::raw('SUM(erogato) as G_Erogato'),
+                                DB::raw('SUM(erogato_lavorazione) as H_Erogato_Lavorazione'),
+                                DB::raw('SUM(compenso_cliente) as I_Provvigione_Cliente'),
+                                DB::raw('SUM(compenso) as J_Provvigione_Istituto'),
+                                DB::raw('SUM(compenso_lavorazione) as K_Provvigione_Istituto_Lavorazione'),
+                                DB::raw('SUM(provvigione) as O_Provvigione_Rete'),
+                            ])
+                            ->groupBy('oam_name')
+                            ->get();
+
+                        // 3. Inserimento massivo (molto veloce)
+                        foreach ($totals as $row) {
+                            PracticeOamBase::create((array) $row);
+                        }
+                        // 4. Download immediato dalla tabella piatta
+                        return Excel::download(
+                            new class implements FromQuery, WithHeadings, WithMapping {
+                                public function query()
+                                {
+                                    return PracticeOamBase::query()->select([
+                                        'B_OAM', 'C_Convenzionata', 'D_Non_Convenzionata', 'E_Intermediate',
+                                        'F_Lavorazione', 'G_Erogato', 'H_Erogato_Lavorazione',
+                                        'I_Provvigione_Cliente', 'J_Provvigione_Istituto',
+                                        'K_Provvigione_Istituto_Lavorazione',
+                                        'O_Provvigione_Rete'
+                                    ]);
+                                }
+
+                                public function map($row): array
+                                {
+                                    return [
+                                        0,
+                                        $row->B_OAM,
+                                        (int) $row->C_Convenzionata,  // Cast esplicito a intero
+                                        (int) $row->D_Non_Convenzionata,
+                                        (int) $row->E_Intermediate,
+                                        (int) $row->F_Lavorazione,
+                                        (float) $row->G_Erogato,  // Cast a float per i monetari
+                                        (float) $row->H_Erogato_Lavorazione,
+                                        (float) $row->I_Provvigione_Cliente,
+                                        (float) $row->J_Provvigione_Istituto,
+                                        (float) $row->K_Provvigione_Istituto_Lavorazione,
+                                        0,
+                                        0,
+                                        0,
+                                        (float) $row->O_Provvigione_Rete,
+                                    ];
+                                }
+
+                                public function headings(): array
+                                {
+                                    return [
+                                        '-',  // Colonna A vuota '',  // Colonna A vuota
+                                        'B-OAM', 'C-Convenzionata', 'D-Non_Convenzionata', 'E-Intermediate',
+                                        'F-Lavorazione', 'G-Erogato', 'H-Lavorazione',
+                                        'I-Provv_Cliente', 'J-Provv_Istituto',
+                                        'K-Provv_Istituto_Lavorazione',
+                                        '-',  //  L
+                                        '-',  //  M
+                                        '-',  //  N
+                                        'O-Provv_Rete'
+                                    ];
+                                }
+                            },
+                            'OAM_Base_' . now()->format('d-m-Y') . '.xlsx'
+                        );
+                    }),
+                ExportAction::make('Dettagliato')
+                    ->label('Export elenco pratiche')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('primary')
+                    ->exporter(PracticeOamExporter::class)
+                    ->columnMapping(false)  // Impedisce all'utente di deselezionare colonne se vuoi un report fisso
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-                Action::make('export-excel')
-                    ->label('Esporta Excel')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function ($livewire) {
-                        // Get current query with filters applied
-                        $query = $livewire->getFilteredTableQuery();
-                        $records = $query->get();
-
-                        // Prepare data for export
-                        $exportData = [];
-                        foreach ($records as $record) {
-                            $exportData[] = [
-                                'Codice OAM' => $record->practice->scopeOAM->oam_code ?? '',
-                                'Tipo OAM' => $record->practice->scopeOAM->tipo_prodotto ?? '',
-                                'Prodotto' => $record->tipo_prodotto,
-                                'Convenzionata' => $record->is_conventioned ? 'Sì' : 'No',
-                                'Codice Pratica' => $record->practice->CRM_code ?? '',
-                                'Nome Pratica' => $record->practice->name ?? '',
-                                'Cliente' => $record->practice->clients->full_name ?? '',
-                                'Provvigione Assicurazione' => number_format($record->provvigione_assicurazione, 2, ',', '.') . ' €',
-                                'Provvigione Storno' => number_format($record->provvigione_storno, 2, ',', '.') . ' €',
-                                'Importo Lordo' => number_format($record->importo_lordo, 2, ',', '.') . ' €',
-                                'Netto Incassato' => number_format($record->netto_incassato, 2, ',', '.') . ' €',
-                                'Erogato' => number_format($record->erogato, 2, ',', '.') . ' €',
-                                'Data Perfezionamento' => $record->data_perfezionamento ? $record->data_perfezionamento->format('d/m/Y') : '',
-                                'Mandante' => $record->name,
-                                'Mese' => $record->mese,
-                            ];
-                        }
-
-                        // Generate filename with current date
-                        $filename = 'practice_oams_' . now()->format('Y-m-d_H-i-s') . '.xlsx';
-
-                        // Export using Maatwebsite Excel
-                        return Excel::download(
-                            new \App\Exports\PracticeOamsExport($exportData),
-                            $filename
-                        );
-                    }),
             ]);
     }
 }

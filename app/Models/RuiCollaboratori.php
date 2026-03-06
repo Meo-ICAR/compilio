@@ -18,6 +18,9 @@ class RuiCollaboratori extends Model
         'num_iscr_collaboratori_i_liv',
         'num_iscr_collaboratori_ii_liv',
         'qualifica_rapporto',
+        'intermediario',
+        'collaboratore',
+        'dipendente',
     ];
 
     public function intermediario()

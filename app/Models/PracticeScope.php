@@ -37,6 +37,6 @@ class PracticeScope extends Model
 
     public function oamName()
     {
-        return $this->oamScope ? ($this->oamScope->code . ' ' . $this->oamScope->name) : null;
+        return $this->oamScope ? ($this->oamScope->code . ' ' . $this->oamScope->name) : '--';
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Company;
 use App\Models\OamCode;
+use App\Models\OamScope;
 use App\Models\Practice;
 use App\Models\PracticeCommission;
 use App\Models\PracticeOam;
@@ -36,6 +37,10 @@ class PracticeOamService
             $endDate = Carbon::parse($startDate)->addMonths(6)->format('Y-m-d');
         }
 
+        // Convert dates to Carbon objects for comparisons
+        $startDateCarbon = Carbon::parse($startDate);
+        $endDateCarbon = Carbon::parse($endDate);
+
         try {
             DB::beginTransaction();
 
@@ -46,13 +51,13 @@ class PracticeOamService
             Log::info("Deleted {$deletedCount} practice_oam records for company {$companyId}");
 
             // Step 2: Get practices that meet the criteria
-            $practices = Practice::where(function ($query) use ($startDate, $endDate) {
+            $practices = Practice::where(function ($query) use ($startDateCarbon, $endDateCarbon) {
                 // Practices sent before end date AND (perfected after start date OR not perfected yet)
                 $query
-                    ->where('sended_at', '<', $endDate)
-                    ->where(function ($q) use ($startDate) {
+                    ->where('sended_at', '<', $endDateCarbon)
+                    ->where(function ($q) use ($startDateCarbon) {
                         $q
-                            ->where('erogated_at', '>=', $startDate)
+                            ->where('erogated_at', '>=', $startDateCarbon)
                             ->orWhereNull('erogated_at');
                     });
             })
@@ -71,10 +76,10 @@ class PracticeOamService
                     // Assicuriamoci che entrambi siano oggetti Carbon per un confronto granulare
 
                     $is_perfected = $practice->erogated_at >= $practice->inserted_at;
-                    $is_perfected = $is_perfected && ($practice->erogated_at < $endDate);
+                    $is_perfected = $is_perfected && ($practice->erogated_at < $endDateCarbon);
                     $mese = 0;
                     if ($is_perfected) {
-                        $mese = $practice->erogated_at->month;
+                        $mese = (int) $practice->erogated_at->month;
                     }
                     $tipoProdotto = $practice->tipo_prodotto;
                     $compenso = $commissionSums['compenso'];
@@ -95,20 +100,28 @@ class PracticeOamService
                         $erogato = 0;
                         $commissionSums['provvigione'] = 0;
                     }
+                    $oam_code = $practice?->practiceScope?->oam_code;
+                    if (!empty($oam_code)) {
+                        $oam_name = OamScope::where('code', $oam_code)->first()?->name;
 
+                        $oam_name = $oam_code . ' ' . $oam_name;
+                    } else {
+                        $oam_name = '--';
+                    }
                     PracticeOam::create([
                         'company_id' => $companyId,
                         'practice_id' => $practice->id,
-                        'oam_code' => $practice?->practiceScope?->oam_code,
+                        'oam_code' => $oam_code,
+                        'oam_name' => $oam_name,
                         'start_date' => $startDate,
                         'end_date' => $endDate,
-                        'perfected_at' => $practice->erogated_at,
-                        'inserted_at' => $practice->inserted_at,
-                        'is_perfected' => $is_perfected,
-                        'is_working' => !$is_perfected,
-                        'is_conventioned' => $compenso > 0,
-                        'is_notconventioned' => !($compenso > 0),
-                        'mese' => $mese,
+                        'perfected_at' => $practice->erogated_at ? $practice->erogated_at->format('Y-m-d H:i:s') : null,
+                        'inserted_at' => $practice->inserted_at ? $practice->inserted_at->format('Y-m-d H:i:s') : null,
+                        'is_perfected' => $is_perfected ? 1 : 0,
+                        'is_working' => !$is_perfected ? 1 : 0,
+                        'is_conventioned' => ($compenso > 0) ? 1 : 0,
+                        'is_notconventioned' => !($compenso > 0) ? 1 : 0,
+                        'mese' => 0,  // Temporarily hardcoded
                         'tipo_prodotto' => $tipoProdotto,
                         'name' => $practice->principal->name,
                         // Commission sums based on tipo grouping
@@ -249,19 +262,23 @@ class PracticeOamService
             $endDate = Carbon::parse($startDate)->addMonths(6)->format('Y-m-d');
         }
 
+        // Convert dates to Carbon objects for comparisons
+        $startDateCarbon = Carbon::parse($startDate);
+        $endDateCarbon = Carbon::parse($endDate);
+
         $totalPractices = Practice::where('company_id', $companyId)->count();
 
         $eligiblePractices = Practice::where('company_id', $companyId)
             ->where('status', '!=', 'rejected')
-            ->where(function ($query) use ($startDate, $endDate) {
+            ->where(function ($query) use ($startDateCarbon, $endDateCarbon) {
                 $query
-                    ->where(function ($subQuery) use ($endDate) {
+                    ->where(function ($subQuery) use ($endDateCarbon) {
                         $subQuery
-                            ->where('inserted_at', '<', $endDate)
+                            ->where('inserted_at', '<', $endDateCarbon)
                             ->whereNull('erogated_at');
                     })
-                    ->orWhere(function ($subQuery) use ($startDate, $endDate) {
-                        $subQuery->whereBetween('erogated_at', [$startDate, $endDate]);
+                    ->orWhere(function ($subQuery) use ($startDateCarbon, $endDateCarbon) {
+                        $subQuery->whereBetween('erogated_at', [$startDateCarbon, $endDateCarbon]);
                     });
             })
             ->count();
