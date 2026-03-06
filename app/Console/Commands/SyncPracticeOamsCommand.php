@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Company;
 use App\Services\PracticeOamService;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class SyncPracticeOamsCommand extends Command
@@ -13,7 +14,7 @@ class SyncPracticeOamsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'oam:import {--company-id= : Company ID (optional, will use first company if not provided)} {--start-date= : Start date (default: 2025-07-01)} {--end-date= : End date (default: 2026-01-01)} {--stats : Show statistics only without syncing}';
+    protected $signature = 'oam:import {--company-id= : Company ID (optional, will use first company if not provided)} {--start-date= : Start date (optional, will calculate based on current date)} {--end-date= : End date (optional, will calculate as startDate + 6 months)} {--stats : Show statistics only without syncing}';
 
     /**
      * The console command description.
@@ -28,8 +29,8 @@ class SyncPracticeOamsCommand extends Command
     public function handle(PracticeOamService $service)
     {
         $companyId = $this->option('company-id');
-        $startDate = $this->option('start-date') ?? '2025-07-01';
-        $endDate = $this->option('end-date') ?? '2026-01-01';
+        $startDate = $this->option('start-date');
+        $endDate = $this->option('end-date');
         $statsOnly = $this->option('stats');
 
         if (empty($companyId)) {
@@ -43,6 +44,13 @@ class SyncPracticeOamsCommand extends Command
         $this->info("End Date: {$endDate}");
         $this->info('Stats Only: ' . ($statsOnly ? 'Yes' : 'No'));
         $this->newLine();
+
+        // If endDate is null, show calculated value for info
+        if (empty($endDate)) {
+            $calculatedEndDate = Carbon::parse($startDate)->addMonths(6)->format('Y-m-d');
+            $this->info("Note: End Date will be calculated as: {$calculatedEndDate}");
+            $this->newLine();
+        }
 
         try {
             if ($statsOnly) {
@@ -59,7 +67,7 @@ class SyncPracticeOamsCommand extends Command
         }
     }
 
-    private function showStats(PracticeOamService $service, ?string $companyId, string $startDate, string $endDate)
+    private function showStats(PracticeOamService $service, ?string $companyId, ?string $startDate, ?string $endDate)
     {
         $this->info('Showing statistics...');
 
@@ -84,7 +92,7 @@ class SyncPracticeOamsCommand extends Command
         }
     }
 
-    private function performSync(PracticeOamService $service, ?string $companyId, string $startDate, string $endDate)
+    private function performSync(PracticeOamService $service, ?string $companyId, ?string $startDate, ?string $endDate)
     {
         $this->info('Starting sync process...');
 

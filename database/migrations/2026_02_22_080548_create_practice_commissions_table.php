@@ -33,6 +33,7 @@ return new class extends Migration {
             $table->decimal('amount', 10)->nullable()->comment('Importo provvigionale lordo per questa singola pratica');
             $table->string('description')->nullable()->comment('Dettaglio (es. Bonus extra o Provvigione base)');
             $table->string('status_payment')->nullable()->comment('Stato pagamento perfezionata');
+            $table->date('erogated_at')->nullable()->comment('Data maturazione provvigioni ovvero data erogazione');
             $table->date('status_at')->nullable()->comment('Data stato pagamento');
             $table->date('perfected_at')->nullable()->comment('Data perfezionamento provvigione');
             $table->date('cancellation_at')->nullable()->comment('Data annullamento provvigione');

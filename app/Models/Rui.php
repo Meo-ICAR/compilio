@@ -41,4 +41,34 @@ class Rui extends Model
     {
         return $this->belongsTo(RuiSection::class);
     }
+
+    public function websites()
+    {
+        return $this->hasMany(RuiWebsite::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
+    }
+
+    public function carichePg()
+    {
+        return $this->hasMany(RuiCariche::class, 'numero_iscrizione_rui_pg', 'numero_iscrizione_rui');
+    }
+
+    public function sedi()
+    {
+        return $this->hasMany(RuiSedi::class, 'numero_iscrizione_int', 'numero_iscrizione_rui');
+    }
+
+    public function collaboratori()
+    {
+        return $this->hasMany(RuiCollaboratori::class, 'num_iscr_intermediario', 'numero_iscrizione_rui');
+    }
+
+    public function collaboratoriILiv()
+    {
+        return $this->hasMany(RuiCollaboratori::class, 'num_iscr_collaboratori_i_liv', 'numero_iscrizione_rui');
+    }
+
+    public function collaboratoriIILiv()
+    {
+        return $this->hasMany(RuiCollaboratori::class, 'num_iscr_collaboratori_ii_liv', 'numero_iscrizione_rui');
+    }
 }

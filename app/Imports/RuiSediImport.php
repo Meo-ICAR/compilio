@@ -27,11 +27,6 @@ class RuiSediImport implements ToModel, WithHeadingRow, WithBatchInserts, WithCh
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiSedi Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
         return new RuiSedi([
             'oss' => $row['oss'] ?? '',
             'numero_iscrizione_int' => $row['numero_iscrizione_int'] ?? '',

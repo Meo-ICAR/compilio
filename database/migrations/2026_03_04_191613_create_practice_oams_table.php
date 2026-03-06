@@ -41,10 +41,13 @@ return new class extends Migration {
             $table->date('invoice_at')->nullable()->comment('Data di fatturazione');
             $table->boolean('is_invoice')->default(false)->comment('Pratica fatturata')->nullable();
             $table->decimal('erogato', 10, 2)->nullable();
+            $table->decimal('erogato_lavorazione', 10, 2)->nullable();
             $table->date('start_date')->nullable()->comment('Data di inizio');
             $table->date('perfected_at')->nullable()->comment('Data di perfezionamento');
             $table->date('end_date')->nullable()->comment('Data di fine');
 
+            $table->boolean('is_cancel')->default(false)->comment('Pratica stornata')->nullable();
+            $table->date('canceled_at')->nullable()->comment('Data di storno');
             $table->boolean('is_notconvenctioned')->default(false)->comment('Pratica convenzionata')->nullable();
             $table->string('name')->nullable()->comment('Mandanti');
             $table->string('tipo_prodotto')->nullable()->comment('Prodotto');

@@ -27,11 +27,6 @@ class RuiSezdsImport implements ToModel, WithHeadingRow, WithBatchInserts, WithC
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiSezds Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
         return new RuiSezds([
             'numero_iscrizione_d' => $row['numero_iscrizione_d'] ?? '',
             'ragione_sociale' => $row['ragione_sociale'] ?? '',

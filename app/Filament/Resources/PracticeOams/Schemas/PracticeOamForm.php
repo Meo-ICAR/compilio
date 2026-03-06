@@ -14,12 +14,8 @@ class PracticeOamForm
     {
         return $schema
             ->components([
-                Select::make('practice_id')
-                    ->label('Pratica')
-                    ->relationship('practice', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->nullable(),
+                TextInput::make('practice_id')
+                    ->label('ID Pratica'),
                 Select::make('oam_code_id')
                     ->label('Codice OAM')
                     ->relationship('oamCode', 'code')

@@ -28,11 +28,6 @@ class RuiAgentisImport implements ToModel, WithHeadingRow, WithBatchInserts, Wit
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiAgentis Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
         $dataConferimento = !empty($row['data_conferimento']) ? Carbon::parse($row['data_conferimento'])->format('Y-m-d H:i:s') : null;
 
         return new RuiAgentis([

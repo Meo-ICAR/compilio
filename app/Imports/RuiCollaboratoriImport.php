@@ -27,11 +27,6 @@ class RuiCollaboratoriImport implements ToModel, WithHeadingRow, WithBatchInsert
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiCollaboratori Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
         return new RuiCollaboratori([
             'oss' => $row['oss'] ?? '',
             'livello' => $row['livello'] ?? '',

@@ -31,6 +31,8 @@ return new class extends Migration {
             $table->string('name')->nullable()->comment('Codice o nome identificativo (es. Mutuo Acquisto Prima Casa Rossi)');
 
             $table->string('CRM_code')->nullable()->comment('Codice CRM interno');
+            $table->string('abi')->nullable()->comment('Abi banca erogatrice');
+            $table->string('bank_name')->nullable()->comment('Nome banca erogatrice');
             $table->string('tipo_prodotto')->nullable()->comment('tipo prodotto CRM');
             $table->string('principal_code')->nullable()->comment('Codice mandante');
             $table->decimal('amount', 12)->nullable()->comment('Importo del finanziamento/mutuo richiesto o erogato');
@@ -45,7 +47,7 @@ return new class extends Migration {
             $table->string('status', 50)->nullable()->default('working')->comment('Stato interno attuale: working, rejected, perfected');
             $table->string('statoproforma', 50)->nullable()->comment('Stato proforma: Inserito / Sospeso / Annullato / Inviato / Abbinato');
             // --- DATE OPERATIVE E CRM ---
-
+            $table->string('oam_principal')->nullable()->comment('Differenzia istituti non convenzionati');
             // --- DATE COMPLIANCE: BUSINESS, ENASARCO, AUI ---
             $table->date('inserted_at')->nullable()->comment('Data inserimento pratica');  // Quando entra nel CRM
             $table->date('approved_at')->nullable()->comment('Data approvazione pratica');  // Quando viene approvata

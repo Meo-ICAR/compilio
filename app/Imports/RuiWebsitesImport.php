@@ -27,14 +27,8 @@ class RuiWebsitesImport implements ToModel, WithHeadingRow, WithBatchInserts, Wi
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiWebsites Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
-        // Skip rows with empty numero_iscrizione_rui to avoid unique constraint violations
+        // Skip rows with empty numero_iscrizione_rui to avoid issues
         if (empty($row['numero_iscrizione'])) {
-            \Log::info("Skipping RuiWebsites Row {$this->importedCount}: empty numero_iscrizione_rui");
             return null;
         }
 

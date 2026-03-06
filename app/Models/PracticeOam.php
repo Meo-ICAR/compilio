@@ -11,6 +11,8 @@ class PracticeOam extends Model
         'practice_id',
         'oam_code_id',
         'oam_code',
+        'erogato',
+        'erogato_lavorazione',
         'compenso',
         'compenso_lavorazione',
         'compenso_premio',
@@ -31,7 +33,6 @@ class PracticeOam extends Model
         'inserted_at',
         'invoice_at',
         'is_invoice',
-        'erogato',
         'start_date',
         'perfected_at',
         'end_date',
@@ -41,6 +42,8 @@ class PracticeOam extends Model
         'mese',
         'is_working',
         'accepted_at',
+        'is_cancel',
+        'canceled_at'
     ];
 
     protected $casts = [
@@ -74,6 +77,8 @@ class PracticeOam extends Model
         'tipo_prodotto' => 'string',
         'mese' => 'integer',
         'erogato' => 'decimal:2',
+        'is_cancel' => 'boolean',
+        'canceled_at' => 'date',
     ];
 
     public function is_notperfected()

@@ -15,4 +15,9 @@ class RuiWebsite extends Model
         'numero_iscrizione_rui' => 'string',
         'web_url' => 'string',
     ];
+
+    public function rui()
+    {
+        return $this->belongsTo(Rui::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
+    }
 }

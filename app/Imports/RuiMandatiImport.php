@@ -27,11 +27,6 @@ class RuiMandatiImport implements ToModel, WithHeadingRow, WithBatchInserts, Wit
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiMandati Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
         return new RuiMandati([
             'oss' => $row['oss'] ?? '',
             'matricola' => $row['matricola'] ?? '',

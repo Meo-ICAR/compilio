@@ -28,11 +28,6 @@ class RuiAccessorisImport implements ToModel, WithHeadingRow, WithBatchInserts, 
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiAccessoris Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
         $dataNascita = !empty($row['data_nascita']) ? Carbon::parse($row['data_nascita'])->format('Y-m-d') : null;
 
         return new RuiAccessoris([

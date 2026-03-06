@@ -27,11 +27,6 @@ class RuiCaricheImport implements ToModel, WithHeadingRow, WithBatchInserts, Wit
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiCariche Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
         return new RuiCariche([
             'oss' => $row['oss'] ?? '',
             'numero_iscrizione_rui_pf' => $row['numero_iscrizione_rui_pf'] ?? '',

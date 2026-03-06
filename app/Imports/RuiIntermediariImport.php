@@ -28,11 +28,6 @@ class RuiIntermediariImport implements ToModel, WithHeadingRow, WithBatchInserts
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiIntermediari Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
         $dataInizioInoperativita = !empty($row['data_inizio_inoperativita']) ? Carbon::createFromFormat('d/m/Y', $row['data_inizio_inoperativita'])->format('Y-m-d') : null;
         $dataIscrizione = !empty($row['data_iscrizione']) ? Carbon::createFromFormat('d/m/Y', $row['data_iscrizione'])->format('Y-m-d') : null;
         $dataNascita = !empty($row['data_nascita']) ? Carbon::createFromFormat('d/m/Y', $row['data_nascita'])->format('Y-m-d') : null;

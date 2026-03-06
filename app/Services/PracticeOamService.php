@@ -17,36 +17,28 @@ class PracticeOamService
      * Sync practice_oams for a company:
      * 1. Delete all existing practice_oam records for the company
      * 2. Insert practices that meet the criteria:
-     *    - inserted_at < $endDate AND perfected_at IS NULL
-     *    - OR perfected_at BETWEEN $startDate AND $endDate
+     *    - inserted_at < $endDate AND erogated_at IS NULL
+     *    - OR erogated_at BETWEEN $startDate AND $endDate
      */
-    public function syncPracticeOamsForCompany(string $companyId, string $startDate = '2025-07-01', string $endDate = '2026-01-01'): void
+    public function syncPracticeOamsForCompany(string $companyId, ?string $startDate, ?string $endDate): void
     {
         if (empty($companyId)) {
             $companyId = Company::first()->id;
+        }
+        if (empty($startDate)) {
+            $startDate = Carbon::now()->startOfYear()->format('Y-m-d');
+            if (now()->month() < 5) {
+                $startDate = Carbon::parse($startDate)->subMonths(6)->format('Y-m-d');
+            }
+        }
+        // Always calculate endDate based on the final startDate value
+        if (empty($endDate)) {
+            $endDate = Carbon::parse($startDate)->addMonths(6)->format('Y-m-d');
         }
 
         try {
             DB::beginTransaction();
 
-            /*
-             * // Update practices perfected_at based on commission data
-             * DB::statement("
-             *     UPDATE practices p
-             *     JOIN (
-             *         SELECT
-             *             pc.practice_id,
-             *             MIN(pc.status_at) AS perfected_at
-             *         FROM practice_commissions pc
-             *         JOIN practices p2 ON pc.practice_id = p2.id
-             *         WHERE pc.status_payment = 'Pratica perfezionata'
-             *         AND p2.company_id = ?
-             *         GROUP BY pc.practice_id
-             *     ) AS subquery ON p.id = subquery.practice_id
-             *     SET p.perfected_at = subquery.perfected_at
-             *     WHERE p.company_id = ?
-             * ", [$companyId, $companyId]);
-             */
             // Step 1: Delete all existing practice_oam records for the company
             $deletedCount = PracticeOam::where('company_id', $companyId)
                 ->where('is_active', true)
@@ -71,22 +63,36 @@ class PracticeOamService
             $insertedCount = 0;
 
             foreach ($practices as $practice) {
+                $erogato = $practice->amount;
+                $erogato_lavorazione = 0;
                 $commissionSums = $this->getPracticeCommissionSums($practice);
                 $somma = $commissionSums['somma'];
                 if ($somma > 0) {
                     // Assicuriamoci che entrambi siano oggetti Carbon per un confronto granulare
 
                     $is_perfected = $practice->erogated_at >= $practice->inserted_at;
+                    $is_perfected = $is_perfected && ($practice->erogated_at < $endDate);
                     $mese = 0;
                     if ($is_perfected) {
                         $mese = $practice->erogated_at->month;
                     }
+                    $tipoProdotto = $practice->tipo_prodotto;
                     $compenso = $commissionSums['compenso'];
+                    $premio = $commissionSums['premio'];
+                    $assicurazione = $commissionSums['assicurazione'];
+
+                    if (!($tipoProdotto == 'Non so')) {
+                        $compenso = $compenso + $premio + $assicurazione;
+                        $premio = 0;
+                        $assicurazione = 0;
+                    }
                     if (!$is_perfected) {
                         $commissionSums['compenso_lavorazione'] = $commissionSums['compenso'];
                         $commissionSums['provvigione_lavorazione'] = $commissionSums['provvigione'];
+                        $erogato_lavorazione = $erogato;
 
                         $commissionSums['compenso'] = 0;
+                        $erogato = 0;
                         $commissionSums['provvigione'] = 0;
                     }
 
@@ -101,24 +107,25 @@ class PracticeOamService
                         'is_perfected' => $is_perfected,
                         'is_working' => !$is_perfected,
                         'is_conventioned' => $compenso > 0,
-                        'is_notconventioned' => $compenso == 0,
+                        'is_notconventioned' => !($compenso > 0),
                         'mese' => $mese,
-                        'tipo_prodotto' => $practice->tipo_prodotto,
+                        'tipo_prodotto' => $tipoProdotto,
                         'name' => $practice->principal->name,
                         // Commission sums based on tipo grouping
-                        'erogato' => $practice->amount,
-                        'compenso' => $commissionSums['compenso'] ?? 0,
+                        'erogato' => $erogato ?? 0,
+                        'erogato_lavorazione' => $erogato_lavorazione ?? 0,
+                        'compenso' => $compenso ?? 0,
                         'compenso_lavorazione' => $commissionSums['compenso_lavorazione'] ?? 0,
-                        'compenso_premio' => $commissionSums['premio'] ?? 0,
+                        'compenso_premio' => $premio ?? 0,  // premio assicurativo
                         'compenso_rimborso' => $commissionSums['rimborso'] ?? 0,
-                        'compenso_assicurazione' => $commissionSums['assicurazione'] ?? 0,
+                        'compenso_assicurazione' => $assicurazione ?? 0,
                         'compenso_cliente' => $commissionSums['cliente'] ?? 0,
                         'storno' => $commissionSums['storno'] ?? 0,
                         'provvigione' => $commissionSums['provvigione'] ?? 0,
                         'provvigione_lavorazione' => $commissionSums['provvigione_lavorazione'] ?? 0,
                         'provvigione_premio' => $commissionSums['premioagente'] ?? 0,
                         'provvigione_rimborso' => $commissionSums['rimborso'] ?? 0,
-                        'provvigione_assicurazione' => $commissionSums['assicurazione'] ?? null,
+                        'provvigione_assicurazione' => $commissionSums['provvigione_assicurazione'] ?? null,
                         'provvigione_storno' => $commissionSums['storno'] ?? null,
                     ]);
                     $insertedCount++;
@@ -157,6 +164,8 @@ class PracticeOamService
         $assicurazione = 0;
         $storno = 0;
         $somma = 0;
+        $erogato = 0;
+
         $i = 0;
         // Process each commission
         foreach ($commissions as $commission) {
@@ -167,6 +176,22 @@ class PracticeOamService
 
             $tipo = strtolower($commission->tipo ?? '');
             $name = strtolower($commission->name ?? '');
+
+            // Non-agent, non-client commissions
+            if ($tipo === 'istituto') {
+                $compenso += $amount;
+                //
+                // Non-agent premiums
+                if (strpos($name, 'premio')) {
+                    $premio += $amount;
+                } else {
+                    if (strpos($name, 'polizza') || strpos($name, 'broker')) {
+                        $assicurazione += $amount;
+                    } else {
+                        //   $compenso += $amount;
+                    }
+                }
+            }
 
             if ($tipo === 'cliente') {
                 $cliente += $amount;
@@ -179,21 +204,6 @@ class PracticeOamService
                     $premioagente += $amount;
                 } else {
                     $provvigione += $amount;
-                }
-            }
-            // Non-agent, non-client commissions
-            if ($tipo === 'istituto') {
-                $compenso += $amount;
-                //
-                // Non-agent premiums
-                if (strpos($name, 'premio')) {
-                    $premio += $amount;
-                } else {
-                    if (strpos($name, 'polizza') || strpos($name, 'broker')) {
-                        $assicurazione += $amount;
-                    } else {
-                        $compenso += $amount;
-                    }
                 }
             }
 
@@ -213,18 +223,32 @@ class PracticeOamService
             'premioagente' => $premioagente ?: 0,
             'storno' => $storno ?: 0,
             'assicurazione' => $assicurazione ?: 0,
+            'provvigione_assicurazione' => $assicurazione ?: 0,
             'somma' => $compenso + $provvigione + $premio + $premioagente + $cliente + $storno + $assicurazione,
         ];
 
-        //   Log::info("All commissiona data for practice {$practice->id}: " . json_encode($commissionsa));
+        if ($practice->CRM_code == 'QT00919') {
+            Log::info("All commissiona data for practice {$practice->id}: " . json_encode($commissionsa));
+        }
         return $commissionsa;
     }
 
     /**
      * Get statistics about the sync operation
      */
-    public function getSyncStats(string $companyId, string $startDate = '2025-07-01', string $endDate = '2026-01-01'): array
+    public function getSyncStats(string $companyId, ?string $startDate = null, ?string $endDate = null): array
     {
+        // Use default values if null
+        if (empty($startDate)) {
+            $startDate = Carbon::now()->startOfYear()->format('Y-m-d');
+            if (now()->month() < 5) {
+                $startDate = Carbon::parse($startDate)->subMonths(6)->format('Y-m-d');
+            }
+        }
+        if (empty($endDate)) {
+            $endDate = Carbon::parse($startDate)->addMonths(6)->format('Y-m-d');
+        }
+
         $totalPractices = Practice::where('company_id', $companyId)->count();
 
         $eligiblePractices = Practice::where('company_id', $companyId)
@@ -234,10 +258,10 @@ class PracticeOamService
                     ->where(function ($subQuery) use ($endDate) {
                         $subQuery
                             ->where('inserted_at', '<', $endDate)
-                            ->whereNull('perfected_at');
+                            ->whereNull('erogated_at');
                     })
                     ->orWhere(function ($subQuery) use ($startDate, $endDate) {
-                        $subQuery->whereBetween('perfected_at', [$startDate, $endDate]);
+                        $subQuery->whereBetween('erogated_at', [$startDate, $endDate]);
                     });
             })
             ->count();

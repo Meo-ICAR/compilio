@@ -27,11 +27,6 @@ class RuiIntermediarisImport implements ToModel, WithHeadingRow, WithBatchInsert
     {
         $this->importedCount++;
 
-        // Debug: Log the first few rows to see what data we're getting
-        if ($this->importedCount <= 3) {
-            \Log::info("Debug RuiIntermediaris Row {$this->importedCount}: " . json_encode($row, JSON_UNESCAPED_UNICODE));
-        }
-
         return new RuiIntermediaris([
             'oss' => $row['OSS'] ?? '',
             'matricola' => $row['MATRICOLA'] ?? '',
