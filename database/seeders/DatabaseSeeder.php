@@ -19,15 +19,13 @@ class DatabaseSeeder extends Seeder
             CoreDataSeeder::class,
             OperationalSeeder::class,
             SupportSeeder::class,
-            OamScopeSeeder::class,
             FirrSeeder::class,
             FinancialSeeder::class,
             PracticeCommissionStatusSeeder::class,
             PracticeStatusLookupSeeder::class,
-            DocumentStatusSeederFixed::class,
             DocumentStatusSeeder::class,
+            DocumentStatusSeederFixed::class,
             DocumentTypeSeeder::class,
-            OamCodeSeeder::class,
             FilamentUserSeeder::class,
             AmlChecklistSeeder::class,
             AuditChecklistSeeder::class,
@@ -39,13 +37,17 @@ class DatabaseSeeder extends Seeder
             BusinessFunctionSeeder::class,
             CompanyFunctionSeeder::class,
             FunctionPrivacySeeder::class,
-
-            /*
-             * AbiSeeder::class,
-             * OamSeeder::class,
-             * AgenteInAttivitaFinanziariaSeeder::class,
-             * ComuneSeeder::class,
-             */
+            // Additional seeders that were missing or commented out
+            AbiSeeder::class,
+            //    ComuneSeeder::class,
+            ProcessTaskSeeder::class,
+            RaciAssignmentSeeder::class,
+            // OamSeeder::class,
+            //  OamScopeSeeder::class,
+            //   OamCodeSeeder::class,
+            //  RuiSeeder::class,
+            //  RuiSectionSeeder::class,
+            //   AgenteInAttivitaFinanziariaSeeder::class,
         ]);
     }
 }

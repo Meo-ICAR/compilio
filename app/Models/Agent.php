@@ -45,6 +45,7 @@ class Agent extends Model implements HasMedia
         'is_art108',
         'contoCOGE',
         'user_id',
+        'numero_iscrizione_rui',
     ];
 
     protected $casts = [

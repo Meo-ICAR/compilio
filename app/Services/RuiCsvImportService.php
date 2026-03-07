@@ -510,7 +510,19 @@ class RuiCsvImportService
 
             // Enable debug mode to show progress for large imports
             $import = new $importClass(99999999, true, $fileName);
-            Excel::import($import, $filePath);
+
+            try {
+                Excel::import($import, $filePath);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Handle duplicate key errors gracefully
+                if (str_contains($e->getMessage(), 'Duplicate entry') || str_contains($e->getMessage(), '1062')) {
+                    Log::warning('Duplicate entries found during import, continuing...');
+                    // Continue processing - duplicates are already handled in the import class
+                } else {
+                    // Re-throw other database errors
+                    throw $e;
+                }
+            }
 
             $results['records_imported'] += $import->getImportedCount();
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\RuiCollaboratori;
 use Filament\Models\Contracts\HasCurrentTenantLabel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;  // <--- Deve esserci
@@ -143,9 +144,38 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         return $this->hasMany(CompanyFunction::class);
     }
 
+    public function principals(): HasMany
+    {
+        return $this->hasMany(Principal::class);
+    }
+
     public function apiUsageLogs(): HasMany
     {
         return $this->hasMany(CompanyApiUsageLog::class);
+    }
+
+    public function ruiCollaboratori()
+    {
+        return $this->hasMany(
+            RuiCollaboratori::class,
+            'num_iscr_collaboratori_i_liv',
+            'numero_iscrizione_rui'
+        )->where('num_iscr_collaboratori_i_liv', '=', $this->numero_iscrizione_rui);
+    }
+
+    public function ruiCollaboratoriPrincipal()
+    {
+        return $this
+            ->ruiCollaboratori()
+            ->whereNull('num_iscr_collaboratori_ii_liv')
+            ->orWhere('num_iscr_collaboratori_ii_liv', '');
+    }
+
+    public function ruiCollaboratoriEmployee()
+    {
+        return $this
+            ->ruiCollaboratori()
+            ->whereNotNull('num_iscr_collaboratori_ii_liv');
     }
 
     public function companySenders(): HasMany

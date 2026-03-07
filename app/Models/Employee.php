@@ -27,6 +27,7 @@ class Employee extends Model
         'supervisor_type',
         'is_structure',
         'is_ghost',
+        'numero_iscrizione_rui',
     ];
 
     protected $casts = [

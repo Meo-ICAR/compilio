@@ -40,6 +40,7 @@ class Principal extends Model
         'website',
         'portalsite',
         'contoCOGE',
+        'numero_iscrizione_rui',
     ];
 
     protected $casts = [
