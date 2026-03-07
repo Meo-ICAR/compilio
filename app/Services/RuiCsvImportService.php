@@ -7,7 +7,6 @@ use App\Models\RuiAccessoris;
 use App\Models\RuiAgentis;
 use App\Models\RuiCariche;
 use App\Models\RuiCollaboratori;
-use App\Models\RuiIntermediaris;
 use App\Models\RuiMandati;
 use App\Models\RuiSedi;
 use App\Models\RuiSezds;
@@ -219,7 +218,6 @@ class RuiCsvImportService
             'rui_agentis' => 'App\Models\RuiAgentis',
             'rui_sezds' => 'App\Models\RuiSezds',
             'rui_websites' => 'App\Models\RuiWebsite',
-            'rui_intermediaris' => 'App\Models\RuiIntermediaris',
         ];
 
         return $modelMap[$tableName] ?? null;
@@ -396,7 +394,6 @@ class RuiCsvImportService
             'rui_accessoris' => RuiAccessoris::count(),
             'rui_agentis' => RuiAgentis::count(),
             'rui_sezds' => RuiSezds::count(),
-            'rui_intermediaris' => RuiIntermediaris::count(),
             'rui_websites' => RuiWebsite::count(),
         ];
     }
@@ -417,7 +414,6 @@ class RuiCsvImportService
             RuiCariche::truncate();
             RuiMandati::truncate();
             RuiSedi::truncate();
-            RuiIntermediaris::truncate();
             Rui::truncate();
 
             return ['success' => true, 'message' => 'All RUI data cleared successfully'];

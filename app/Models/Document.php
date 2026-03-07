@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Document extends Model implements HasMedia
 {
-    use BelongsToCompany, HasUuids, InteractsWithMedia;
+    use BelongsToCompany, HasUuids, InteractsWithMedia, SoftDeletes;
 
     protected $fillable = [
         'company_id',
@@ -24,6 +25,7 @@ class Document extends Model implements HasMedia
         'annotation',
         'description',
         'status',
+        'url_document',
         'rejection_note',
         'verified_at',
         'verified_by',

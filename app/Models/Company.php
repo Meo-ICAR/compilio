@@ -24,6 +24,7 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         'oam',
         'oam_at',
         'oam_name',
+        'numero_iscrizione_rui',
         'company_type_id',
         'page_header',
         'page_footer',

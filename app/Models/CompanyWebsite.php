@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CompanyWebsite extends Model
 {
-    use BelongsToCompany;
+    use BelongsToCompany, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -22,6 +23,7 @@ class CompanyWebsite extends Model
         'transparency_prior_date',
         'url_privacy',
         'url_cookies',
+        'url_transparency',
         'is_footercompilant',
     ];
 

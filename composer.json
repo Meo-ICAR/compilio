@@ -30,7 +30,8 @@
         "spatie/laravel-medialibrary": "^11.20",
         "spatie/laravel-model-states": "^2.13",
         "spatie/laravel-permission": "*",
-        "spatie/pdf-to-text": "^1.55"
+        "spatie/pdf-to-text": "^1.55",
+        "symfony/dom-crawler": "^8.0"
     },
     "require-dev": {
         "brainmaestro/composer-git-hooks": "^3.0",

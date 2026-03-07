@@ -12,24 +12,35 @@ return new class extends Migration {
     {
         Schema::create('rui', function (Blueprint $table) {
             $table->comment('Tabella dati RUI (Registro Unico degli Intermediari)');
-            $table->id()->comment('ID autoincrementante');
-            $table->string('oss')->comment('Codice OSS')->nullable();
-            $table->boolean('inoperativo')->default(false)->comment('Stato inoperativo')->nullable();
-            $table->date('data_inizio_inoperativita')->comment('Data inizio inoperatività')->nullable();
-            $table->string('numero_iscrizione_rui', 50)->comment('Numero iscrizione RUI')->nullable();
-            $table->date('data_iscrizione')->comment('Data iscrizione RUI')->nullable();
-            $table->string('cognome_nome', 255)->comment('Cognome e Nome')->nullable();
-            $table->string('stato')->comment('Stato')->nullable();
-            $table->string('comune_nascita', 100)->comment('Comune di nascita')->nullable();
-            $table->date('data_nascita')->comment('Data di nascita')->nullable();
-            $table->string('ragione_sociale', 255)->comment('Ragione sociale')->nullable();
-            $table->string('provincia_nascita', 50)->comment('Provincia di nascita')->nullable();
-            $table->string('titolo_individuale_sez_a', 100)->comment('Titolo individuale Sezione A')->nullable();
-            $table->string('attivita_esercitata_sez_a', 100)->comment('Attività esercitata Sezione A')->nullable();
-            $table->string('titolo_individuale_sez_b', 100)->comment('Titolo individuale Sezione B')->nullable();
-            $table->string('attivita_esercitata_sez_b', 100)->comment('Attività esercitata Sezione B')->nullable();
+            $table->bigIncrements('id')->comment('ID autoincrementante');
+            $table->string('oss')->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Codice OSS');
+            $table->tinyInteger('inoperativo')->default(0)->comment('Stato inoperativo');
+            $table->date('data_inizio_inoperativita')->nullable()->comment('Data inizio inoperatività');
+            $table->string('numero_iscrizione_rui', 50)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->comment('Numero iscrizione RUI');
+            $table->date('data_iscrizione')->nullable()->comment('Data iscrizione RUI');
+            $table->string('cognome_nome', 255)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Cognome e Nome');
+            $table->string('stato', 255)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Stato');
+            $table->string('comune_nascita', 100)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Comune di nascita');
+            $table->date('data_nascita')->nullable()->comment('Data di nascita');
+            $table->string('ragione_sociale', 255)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Ragione sociale');
+            $table->string('provincia_nascita', 50)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Provincia di nascita');
+            $table->string('titolo_individuale_sez_a', 100)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Titolo individuale Sezione A');
+            $table->string('attivita_esercitata_sez_a', 100)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Attività esercitata Sezione A');
+            $table->string('titolo_individuale_sez_b', 100)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Titolo individuale Sezione B');
+            $table->string('attivita_esercitata_sez_b', 100)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Attività esercitata Sezione B');
             $table->timestamps();
-            $table->unsignedBigInteger('rui_section_id')->comment('ID sezione RUI')->nullable();
+            $table->unsignedBigInteger('rui_section_id')->nullable()->comment('ID sezione RUI');
+
+            // Set primary key to numero_iscrizione_rui as specified
+            $table->primary('numero_iscrizione_rui');
+
+            // Add unique key for id
+            $table->unique('id');
+
+            // Add composite index for fast lookups
+            $table->index(['numero_iscrizione_rui', 'cognome_nome', 'ragione_sociale'], 'idx_rui_fast_lookup');
+
+            // Foreign key constraint
             $table->foreign('rui_section_id')->references('id')->on('rui_sections')->onDelete('set null');
         });
     }

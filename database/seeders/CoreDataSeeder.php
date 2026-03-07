@@ -19,6 +19,12 @@ class CoreDataSeeder extends Seeder
         if (!$company)
             return;
 
+        // Update company with numero_iscrizione_rui default value
+        $company->update([
+            'numero_iscrizione_rui' => 'E000689226',
+            'oam' => 'M510'
+        ]);
+
         // Mappa di lookup: Parola chiave -> Codice ABI/Identificativo
         $lookup = [
             'FINDOMESTIC' => '03110', 'IBL' => '03263', 'SANTANDER' => '03191', 'SSNTANDER' => '03191',
