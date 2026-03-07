@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::table('documents', function (Blueprint $table) {
             $table->text('annotation')->nullable()->comment('Annotazioni documento');
+            $table->string('url_document')->nullable()->comment('Url pubblicazione documento');
             $table->text('description')->nullable()->comment('Descrizione documento');
             $table->unsignedInteger('document_status_id')->nullable()->comment('ID stato documento');
             $table->boolean('is_signed')->default(false)->comment('Indica se il documento è firmato');

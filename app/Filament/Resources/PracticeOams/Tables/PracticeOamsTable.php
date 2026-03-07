@@ -282,11 +282,14 @@ class PracticeOamsTable
                     ->color('success')
                     ->icon('heroicon-o-document-arrow-down')
                     ->action(function () {
+                        // Get current company from authenticated user or session
+                        $currentCompanyId = auth()->user()?->company_id ?? session('current_company_id');
+
                         // 1. Svuota la tabella di appoggio
                         PracticeOamBase::truncate();
 
-                        // 2. Query raggruppata con gli alias che hai definito
-                        $totals = DB::table('practice_oams')
+                        // 2. Query raggruppata con gli alias che hai definiti
+                        $query = DB::table('practice_oams')
                             ->select([
                                 'oam_name as B_OAM',
                                 DB::raw('SUM(is_conventioned) as C_Convenzionata'),
@@ -300,25 +303,52 @@ class PracticeOamsTable
                                 DB::raw('SUM(compenso_lavorazione) as K_Provvigione_Istituto_Lavorazione'),
                                 DB::raw('SUM(provvigione) as O_Provvigione_Rete'),
                             ])
-                            ->groupBy('oam_name')
-                            ->get();
+                            ->groupBy('oam_name');
+
+                        // Filter by company if company_id is available
+                        if ($currentCompanyId) {
+                            $query->where('company_id', $currentCompanyId);
+                        }
+
+                        $totals = $query->get();
 
                         // 3. Inserimento massivo (molto veloce)
                         foreach ($totals as $row) {
-                            PracticeOamBase::create((array) $row);
+                            PracticeOamBase::create([
+                                'company_id' => $currentCompanyId,
+                                'B_OAM' => $row->B_OAM,
+                                'C_Convenzionata' => $row->C_Convenzionata,
+                                'D_Non_Convenzionata' => $row->D_Non_Convenzionata,
+                                'E_Intermediate' => $row->E_Intermediate,
+                                'F_Lavorazione' => $row->F_Lavorazione,
+                                'G_Erogato' => $row->G_Erogato,
+                                'H_Erogato_Lavorazione' => $row->H_Erogato_Lavorazione,
+                                'I_Provvigione_Cliente' => $row->I_Provvigione_Cliente,
+                                'J_Provvigione_Istituto' => $row->J_Provvigione_Istituto,
+                                'K_Provvigione_Istituto_Lavorazione' => $row->K_Provvigione_Istituto_Lavorazione,
+                                'O_Provvigione_Rete' => $row->O_Provvigione_Rete,
+                            ]);
                         }
                         // 4. Download immediato dalla tabella piatta
                         return Excel::download(
                             new class implements FromQuery, WithHeadings, WithMapping {
                                 public function query()
                                 {
-                                    return PracticeOamBase::query()->select([
+                                    $currentCompanyId = auth()->user()?->company_id ?? session('current_company_id');
+                                    $query = PracticeOamBase::query()->select([
                                         'B_OAM', 'C_Convenzionata', 'D_Non_Convenzionata', 'E_Intermediate',
                                         'F_Lavorazione', 'G_Erogato', 'H_Erogato_Lavorazione',
                                         'I_Provvigione_Cliente', 'J_Provvigione_Istituto',
                                         'K_Provvigione_Istituto_Lavorazione',
                                         'O_Provvigione_Rete'
                                     ]);
+
+                                    // Filter by company if company_id is available
+                                    if ($currentCompanyId) {
+                                        $query->where('company_id', $currentCompanyId);
+                                    }
+
+                                    return $query;
                                 }
 
                                 public function map($row): array

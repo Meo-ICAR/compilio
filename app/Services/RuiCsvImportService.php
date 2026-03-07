@@ -85,7 +85,7 @@ class RuiCsvImportService
                 return;
             }
 
-            $import = new $importClass();
+            $import = new $importClass($limit, true, $fileName);
 
             // Create a limited import by reading only first few rows
             $this->importLimitedRows($import, $filePath, $limit);
@@ -329,6 +329,166 @@ class RuiCsvImportService
     }
 
     /**
+     * Import a single specific RUI table
+     *
+     * @param string $tableName The name of the table to import (e.g., 'ELENCO_INTERMEDIARI')
+     * @return array Import results
+     */
+    public function importSingleRuiTable(string $tableName): array
+    {
+        try {
+            $results = [
+                'files_processed' => 0,
+                'records_imported' => 0,
+                'errors' => [],
+                'table_name' => $tableName
+            ];
+
+            // Map table names to file names
+            $tableToFileMap = [
+                'rui' => 'ELENCO_INTERMEDIARI',
+                'rui_sedi' => 'ELENCO_SEDI',
+                'rui_mandati' => 'ELENCO_MANDATI',
+                'rui_cariche' => 'ELENCO_CARICHE',
+                'rui_collaboratori' => 'ELENCO_COLLABORATORI',
+                'rui_accessoris' => 'ELENCO_COLLABACCESSORI',
+                'rui_agentis' => 'ELENCO_AG_VEN_PROD_NONST_ISCR_S',
+                'rui_sezds' => 'ELENCO_RESP_DISTRIB_SEZ_D',
+                'rui_websites' => 'ELENCO_SITO_INTERNET',
+            ];
+
+            // Allow direct file name as well
+            $fileName = $tableToFileMap[$tableName] ?? $tableName;
+
+            $filePath = public_path("RUI/{$fileName}.csv");
+
+            if (!file_exists($filePath)) {
+                $results['errors'][] = "CSV file not found: {$filePath}";
+                return $results;
+            }
+
+            Log::info("Importing single RUI table: {$tableName} from file: {$fileName}");
+
+            $this->processCsvFile($filePath, $fileName, $results);
+            $results['files_processed']++;
+
+            Log::info("Single RUI table import completed: {$tableName} - {$results['records_imported']} records");
+
+            return $results;
+        } catch (\Exception $e) {
+            Log::error("Single RUI table import failed for {$tableName}: " . $e->getMessage());
+            return [
+                'files_processed' => 0,
+                'records_imported' => 0,
+                'errors' => [$e->getMessage()],
+                'table_name' => $tableName
+            ];
+        }
+    }
+
+    /**
+     * Get list of available RUI tables for import
+     *
+     * @return array Available tables with their descriptions
+     */
+    public function getAvailableRuiTables(): array
+    {
+        return [
+            'rui' => [
+                'file' => 'ELENCO_INTERMEDIARI',
+                'description' => 'Intermediari finanziari',
+                'model' => 'App\Models\Rui'
+            ],
+            'rui_sedi' => [
+                'file' => 'ELENCO_SEDI',
+                'description' => 'Sedi degli intermediari',
+                'model' => 'App\Models\RuiSedi'
+            ],
+            'rui_mandati' => [
+                'file' => 'ELENCO_MANDATI',
+                'description' => 'Mandati degli intermediari',
+                'model' => 'App\Models\RuiMandati'
+            ],
+            'rui_cariche' => [
+                'file' => 'ELENCO_CARICHE',
+                'description' => 'Cariche degli intermediari',
+                'model' => 'App\Models\RuiCariche'
+            ],
+            'rui_collaboratori' => [
+                'file' => 'ELENCO_COLLABORATORI',
+                'description' => 'Collaboratori degli intermediari',
+                'model' => 'App\Models\RuiCollaboratori'
+            ],
+            'rui_accessoris' => [
+                'file' => 'ELENCO_COLLABACCESSORI',
+                'description' => 'Collaboratori accessori',
+                'model' => 'App\Models\RuiAccessoris'
+            ],
+            'rui_agentis' => [
+                'file' => 'ELENCO_AG_VEN_PROD_NONST_ISCR_S',
+                'description' => 'Agenti venditori prodotti non strutturati',
+                'model' => 'App\Models\RuiAgentis'
+            ],
+            'rui_sezds' => [
+                'file' => 'ELENCO_RESP_DISTRIB_SEZ_D',
+                'description' => 'Responsabili distribuzione sezione D',
+                'model' => 'App\Models\RuiSezds'
+            ],
+            'rui_websites' => [
+                'file' => 'ELENCO_SITO_INTERNET',
+                'description' => 'Siti internet degli intermediari',
+                'model' => 'App\Models\RuiWebsite'
+            ],
+        ];
+    }
+
+    /**
+     * Clear data for a single specific RUI table
+     *
+     * @param string $tableName The name of the table to clear
+     * @return array Results of the clearing operation
+     */
+    public function clearSingleRuiTable(string $tableName): array
+    {
+        try {
+            $tableMap = [
+                'rui' => 'App\Models\Rui',
+                'rui_sedi' => 'App\Models\RuiSedi',
+                'rui_mandati' => 'App\Models\RuiMandati',
+                'rui_cariche' => 'App\Models\RuiCariche',
+                'rui_collaboratori' => 'App\Models\RuiCollaboratori',
+                'rui_accessoris' => 'App\Models\RuiAccessoris',
+                'rui_agentis' => 'App\Models\RuiAgentis',
+                'rui_sezds' => 'App\Models\RuiSezds',
+                'rui_websites' => 'App\Models\RuiWebsite',
+            ];
+
+            $modelClass = $tableMap[$tableName] ?? null;
+            if (!$modelClass) {
+                return [
+                    'success' => false,
+                    'message' => "Invalid table name: {$tableName}"
+                ];
+            }
+
+            $modelClass::truncate();
+
+            return [
+                'success' => true,
+                'message' => "Table {$tableName} cleared successfully",
+                'table_name' => $tableName
+            ];
+        } catch (\Exception $e) {
+            Log::error("Failed to clear RUI table {$tableName}: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'table_name' => $tableName
+            ];
+        }
+    }
+
+    /**
      * Process individual CSV file using Laravel Excel
      *
      * @param string $filePath
@@ -345,12 +505,18 @@ class RuiCsvImportService
                 return;
             }
 
-            $import = new $importClass();
+            // Clear memory before processing
+            gc_collect_cycles();
+
+            // Enable debug mode to show progress for large imports
+            $import = new $importClass(99999999, true, $fileName);
             Excel::import($import, $filePath);
 
             $results['records_imported'] += $import->getImportedCount();
 
-            Log::info("Processed {$fileName}: {$import->getImportedCount()} records");
+            // Clear memory after processing
+            unset($import);
+            gc_collect_cycles();
         } catch (\Exception $e) {
             $results['errors'][] = "Error processing {$fileName}: " . $e->getMessage();
         }
@@ -420,6 +586,95 @@ class RuiCsvImportService
         } catch (\Exception $e) {
             Log::error('Failed to clear RUI data: ' . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Import first 100 records of RUI with debug and optimization
+     *
+     * @return array Debug results
+     */
+    public function debugImportFirst100Rui(): array
+    {
+        try {
+            $startTime = microtime(true);
+            $memoryStart = memory_get_usage(true);
+
+            // Clear existing data
+            Rui::truncate();
+
+            $filePath = public_path('RUI/ELENCO_INTERMEDIARI.csv');
+
+            if (!file_exists($filePath)) {
+                return [
+                    'success' => false,
+                    'message' => 'RUI CSV file not found',
+                    'file_path' => $filePath
+                ];
+            }
+
+            echo "🔍 Starting debug import of first 100 RUI records...\n";
+            echo "📁 File: {$filePath}\n";
+            echo '📊 File size: ' . number_format(filesize($filePath) / 1024 / 1024, 2) . " MB\n\n";
+
+            // Optimized Excel import settings
+            $config = [
+                'memory_limit' => '512M',
+                'chunk_size' => 100,  // Process in small chunks for debug
+                'batch_size' => 50,  // Smaller batch size for better control
+            ];
+
+            // Use Laravel Excel with optimized settings
+            $import = new \App\Imports\RuiIntermediariImport(100, true);  // Limit to 100 records, enable debug
+            Excel::import($import, $filePath);
+
+            $endTime = microtime(true);
+            $memoryEnd = memory_get_usage(true);
+            $executionTime = round($endTime - $startTime, 2);
+            $memoryUsed = round(($memoryEnd - $memoryStart) / 1024 / 1024, 2);
+
+            $recordCount = Rui::count();
+
+            echo "✅ Import completed!\n";
+            echo "📊 Records imported: {$recordCount}\n";
+            echo "⏱️  Execution time: {$executionTime} seconds\n";
+            echo "💾 Memory used: {$memoryUsed} MB\n";
+            echo '🔍 Peak memory: ' . round(memory_get_peak_usage(true) / 1024 / 1024, 2) . " MB\n\n";
+
+            // Show first few records as sample
+            $sampleRecords = Rui::take(5)->get(['numero_iscrizione_rui', 'cognome_nome', 'ragione_sociale', 'stato']);
+            echo "📋 Sample records:\n";
+            foreach ($sampleRecords as $record) {
+                echo "   • {$record->numero_iscrizione_rui}: {$record->cognome_nome} / {$record->ragione_sociale} ({$record->stato})\n";
+            }
+
+            return [
+                'success' => true,
+                'records_imported' => $recordCount,
+                'execution_time' => $executionTime,
+                'memory_used' => $memoryUsed,
+                'peak_memory' => round(memory_get_peak_usage(true) / 1024 / 1024, 2),
+                'config' => $config
+            ];
+        } catch (\Exception $e) {
+            $endTime = microtime(true);
+            $executionTime = round($endTime - $startTime, 2);
+
+            echo "❌ Import failed!\n";
+            echo '🔥 Error: ' . $e->getMessage() . "\n";
+            echo '📍 Line: ' . $e->getLine() . "\n";
+            echo '📁 File: ' . $e->getFile() . "\n";
+            echo "⏱️  Time elapsed: {$executionTime} seconds\n";
+
+            Log::error('RUI debug import failed: ' . $e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'execution_time' => $executionTime
+            ];
         }
     }
 }

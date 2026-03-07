@@ -17,6 +17,8 @@ class RuiCariche extends Model
         'numero_iscrizione_rui_pg',
         'qualifica_intermediario',
         'responsabile',
+        'pf_name',
+        'pg_name',
     ];
 
     public function ruiPf()

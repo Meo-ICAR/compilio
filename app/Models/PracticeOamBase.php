@@ -9,6 +9,7 @@ class PracticeOamBase extends Model
     protected $table = 'practice_oam_base';
 
     protected $fillable = [
+        'company_id',
         'B_OAM',  // oam_name
         'C_Convenzionata',  // is_conventioned
         'D_Non_Convenzionata',  // is_notconventioned
@@ -23,6 +24,7 @@ class PracticeOamBase extends Model
     ];
 
     protected $casts = [
+        'company_id' => 'string',
         'C_Convenzionata' => 'integer',
         'D_Non_Convenzionata' => 'integer',
         'E_Intermediate' => 'integer',
@@ -34,4 +36,9 @@ class PracticeOamBase extends Model
         'K_Provvigione_Istituto_Lavorazione' => 'decimal:2',
         'O_Provvigione_Rete' => 'decimal:2',
     ];
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'id');
+    }
 }

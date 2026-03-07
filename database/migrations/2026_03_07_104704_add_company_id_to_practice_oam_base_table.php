@@ -10,9 +10,9 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('documents', function (Blueprint $table) {
-            $table->string('url_document')->nullable()->comment('URL del documento');
-            $table->softDeletes();
+        Schema::table('practice_oam_base', function (Blueprint $table) {
+            $table->char('company_id', 36)->nullable()->after('O_Provvigione_Rete');
+            $table->index('company_id');
         });
     }
 
@@ -21,9 +21,9 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('documents', function (Blueprint $table) {
-            $table->dropSoftDeletes();
-            $table->dropColumn('url_document');
+        Schema::table('practice_oam_base', function (Blueprint $table) {
+            $table->dropIndex(['company_id']);
+            $table->dropColumn('company_id');
         });
     }
 };

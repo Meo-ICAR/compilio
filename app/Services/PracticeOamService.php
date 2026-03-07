@@ -8,6 +8,7 @@ use App\Models\OamScope;
 use App\Models\Practice;
 use App\Models\PracticeCommission;
 use App\Models\PracticeOam;
+use App\Models\PracticeOamBase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
@@ -327,5 +328,101 @@ class PracticeOamService
         }
 
         return $results;
+    }
+
+    /**
+     * Populate practice_oam_base table for a company
+     * This table is used for export purposes and contains aggregated data by OAM
+     */
+    public function populatePracticeOamBaseForCompany(string $companyId): void
+    {
+        try {
+            DB::beginTransaction();
+
+            // Clear existing data for the company
+            PracticeOamBase::where('company_id', $companyId)->delete();
+
+            // Get aggregated data from practice_oams table
+            $totals = DB::table('practice_oams')
+                ->select([
+                    'oam_name as B_OAM',
+                    DB::raw('SUM(is_conventioned) as C_Convenzionata'),
+                    DB::raw('SUM(is_notconventioned) as D_Non_Convenzionata'),
+                    DB::raw('SUM(is_perfected) as E_Intermediate'),
+                    DB::raw('SUM(is_working) as F_Lavorazione'),
+                    DB::raw('SUM(erogato) as G_Erogato'),
+                    DB::raw('SUM(erogato_lavorazione) as H_Erogato_Lavorazione'),
+                    DB::raw('SUM(compenso_cliente) as I_Provvigione_Cliente'),
+                    DB::raw('SUM(compenso) as J_Provvigione_Istituto'),
+                    DB::raw('SUM(compenso_lavorazione) as K_Provvigione_Istituto_Lavorazione'),
+                    DB::raw('SUM(provvigione) as O_Provvigione_Rete'),
+                ])
+                ->where('company_id', $companyId)
+                ->where('is_active', true)
+                ->groupBy('oam_name')
+                ->get();
+
+            // Insert aggregated data into practice_oam_base table
+            foreach ($totals as $row) {
+                PracticeOamBase::create([
+                    'company_id' => $companyId,
+                    'B_OAM' => $row->B_OAM,
+                    'C_Convenzionata' => $row->C_Convenzionata,
+                    'D_Non_Convenzionata' => $row->D_Non_Convenzionata,
+                    'E_Intermediate' => $row->E_Intermediate,
+                    'F_Lavorazione' => $row->F_Lavorazione,
+                    'G_Erogato' => $row->G_Erogato,
+                    'H_Erogato_Lavorazione' => $row->H_Erogato_Lavorazione,
+                    'I_Provvigione_Cliente' => $row->I_Provvigione_Cliente,
+                    'J_Provvigione_Istituto' => $row->J_Provvigione_Istituto,
+                    'K_Provvigione_Istituto_Lavorazione' => $row->K_Provvigione_Istituto_Lavorazione,
+                    'O_Provvigione_Rete' => $row->O_Provvigione_Rete,
+                ]);
+            }
+
+            DB::commit();
+
+            Log::info("Practice OAM base table populated for company {$companyId}: {$totals->count()} OAM records");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Error populating practice_oam_base for company {$companyId}: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Get practice OAM base statistics for a company
+     */
+    public function getPracticeOamBaseStats(string $companyId): array
+    {
+        $stats = PracticeOamBase::where('company_id', $companyId)
+            ->select([
+                DB::raw('COUNT(*) as total_oams'),
+                DB::raw('SUM(C_Convenzionata) as total_convenzionate'),
+                DB::raw('SUM(D_Non_Convenzionata) as total_non_convenzionate'),
+                DB::raw('SUM(E_Intermediate) as total_intermediate'),
+                DB::raw('SUM(F_Lavorazione) as total_lavorazione'),
+                DB::raw('SUM(G_Erogato) as total_erogato'),
+                DB::raw('SUM(H_Erogato_Lavorazione) as total_erogato_lavorazione'),
+                DB::raw('SUM(I_Provvigione_Cliente) as total_provvigione_cliente'),
+                DB::raw('SUM(J_Provvigione_Istituto) as total_provvigione_istituto'),
+                DB::raw('SUM(K_Provvigione_Istituto_Lavorazione) as total_provvigione_istituto_lavorazione'),
+                DB::raw('SUM(O_Provvigione_Rete) as total_provvigione_rete'),
+            ])
+            ->first();
+
+        return [
+            'total_oams' => (int) $stats->total_oams,
+            'total_convenzionate' => (int) $stats->total_convenzionate,
+            'total_non_convenzionate' => (int) $stats->total_non_convenzionate,
+            'total_intermediate' => (int) $stats->total_intermediate,
+            'total_lavorazione' => (int) $stats->total_lavorazione,
+            'total_erogato' => (float) $stats->total_erogato,
+            'total_erogato_lavorazione' => (float) $stats->total_erogato_lavorazione,
+            'total_provvigione_cliente' => (float) $stats->total_provvigione_cliente,
+            'total_provvigione_istituto' => (float) $stats->total_provvigione_istituto,
+            'total_provvigione_istituto_lavorazione' => (float) $stats->total_provvigione_istituto_lavorazione,
+            'total_provvigione_rete' => (float) $stats->total_provvigione_rete,
+        ];
     }
 }

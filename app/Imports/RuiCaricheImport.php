@@ -12,6 +12,16 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 class RuiCaricheImport implements ToModel, WithHeadingRow, WithBatchInserts, WithChunkReading, WithCustomCsvSettings
 {
     protected $importedCount = 0;
+    protected $limit = 99999999;
+    protected $debug = false;
+    protected $fileName = '';
+
+    public function __construct($limit = 99999999, $debug = false, $fileName = '')
+    {
+        $this->limit = $limit;
+        $this->debug = $debug;
+        $this->fileName = $fileName;
+    }
 
     public function getCsvSettings(): array
     {
@@ -25,6 +35,16 @@ class RuiCaricheImport implements ToModel, WithHeadingRow, WithBatchInserts, Wit
 
     public function model(array $row)
     {
+        // Stop if we've reached the limit
+        if ($this->importedCount >= $this->limit) {
+            return null;
+        }
+
+        if ($this->debug && $this->importedCount % 1000 === 0) {
+            $fileNameDisplay = $this->fileName ? " ({$this->fileName})" : '';
+            echo "📊 Processed {$this->importedCount} records{$fileNameDisplay}...\n";
+        }
+
         $this->importedCount++;
 
         return new RuiCariche([
@@ -33,6 +53,10 @@ class RuiCaricheImport implements ToModel, WithHeadingRow, WithBatchInserts, Wit
             'numero_iscrizione_rui_pg' => $row['numero_iscrizione_rui_pg'] ?? '',
             'qualifica_intermediario' => $row['qualifica_intermediario'] ?? '',
             'responsabile' => $row['responsabile'] ?? '',
+            'pf_name' => $row['pf_name'] ?? '',
+            'pg_name' => $row['pg_name'] ?? '',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

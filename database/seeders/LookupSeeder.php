@@ -288,6 +288,73 @@ class LookupSeeder extends Seeder
             }
         }
 
+        $now = '2026-03-07 09:20:00';
+
+        $types = [
+            // --- IDENTIFICAZIONE ---
+            ['id' => 1, 'name' => "Carta d'Identità (Fronte/Retro)", 'code' => 'CI', 'codegroup' => 'IDENTIFICAZIONE', 'is_person' => 1, 'is_monitored' => 1, 'duration' => 3650],
+            ['id' => 2, 'name' => 'Patente', 'code' => 'PATENTE', 'codegroup' => 'IDENTIFICAZIONE', 'is_person' => 1, 'is_monitored' => 1, 'duration' => 3650],
+            ['id' => 3, 'name' => 'Passaporto', 'code' => 'PASSAPORTO', 'codegroup' => 'IDENTIFICAZIONE', 'is_person' => 1, 'is_monitored' => 1, 'duration' => 3650],
+            ['id' => 4, 'name' => 'Codice Fiscale / Tessera Sanitaria', 'code' => 'CF', 'codegroup' => 'IDENTIFICAZIONE', 'is_person' => 1],
+            // --- PRIVACY ---
+            ['id' => 5, 'name' => 'Informativa Privacy e Consenso Trattamento Dati', 'code' => 'PRIVACY_BASE', 'codegroup' => 'PRIVACY', 'is_signed' => 1, 'is_template' => 1],
+            ['id' => 6, 'name' => 'Consenso al Trattamento Dati Particolari (Sanitari)', 'code' => 'PRIVACY_HEALTH', 'codegroup' => 'PRIVACY', 'is_signed' => 1, 'is_sensible' => 1],
+            ['id' => 7, 'name' => 'Nomina incaricato del trattamento', 'code' => 'GDPR_INC', 'codegroup' => 'PRIVACY', 'is_signed' => 1],
+            ['id' => 8, 'name' => 'Nomina responsabile del trattamento', 'code' => 'GDPR_RESP', 'codegroup' => 'PRIVACY', 'is_signed' => 1],
+            ['id' => 9, 'name' => 'Nomina amministratore di sistema', 'code' => 'GDPR_ADMIN', 'codegroup' => 'PRIVACY', 'is_signed' => 1],
+            // --- AML (Antiriciclaggio) ---
+            ['id' => 10, 'name' => 'Questionario Adeguata Verifica AML', 'code' => 'AML_QUEST', 'codegroup' => 'AML', 'is_signed' => 1, 'is_template' => 1],
+            ['id' => 11, 'name' => 'Dichiarazione Titolare Effettivo', 'code' => 'AML_UBO', 'codegroup' => 'AML', 'is_signed' => 1],
+            ['id' => 12, 'name' => 'Dichiarazione PEP (Persona Esposta Politicamente)', 'code' => 'AML_PEP', 'codegroup' => 'AML', 'is_signed' => 1],
+            // --- TRASPARENZA E OAM ---
+            ['id' => 13, 'name' => 'Lettera di Incarico di Mediazione', 'code' => 'OAM_INCARICO', 'codegroup' => 'OAM', 'is_signed' => 1, 'is_template' => 1],
+            ['id' => 14, 'name' => 'Avviso sulla Trasparenza (Presa Visione)', 'code' => 'OAM_TRASPARENZA', 'codegroup' => 'OAM', 'is_signed' => 1],
+            ['id' => 15, 'name' => 'Trasparenza sito web', 'code' => 'WEB_TRANSPARENCY', 'codegroup' => 'OAM'],
+            ['id' => 16, 'name' => 'Privacy sito web', 'code' => 'WEB_PRIVACY', 'codegroup' => 'OAM'],
+            ['id' => 17, 'name' => 'Relazione sui requisiti organizzativi ex. art 6', 'code' => 'OAM_REL_ART6', 'codegroup' => 'OAM'],
+            ['id' => 37, 'name' => 'Modulo Segnalazione OAM', 'code' => 'OAM_SEGNALAZIONE', 'codegroup' => 'OAM'],
+            // --- PROCEDURE ORGANIZZATIVE (Dettaglio granulare dello snippet) ---
+            ['id' => 18, 'name' => 'Proc. Org. - Manuale Operativo e Organizzativo', 'code' => 'PROC_MANUALE', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 19, 'name' => 'Proc. Org. - Sistema di Deleghe', 'code' => 'PROC_DELEGHE', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 20, 'name' => 'Proc. Org. - Compliance e Risk Management', 'code' => 'PROC_COMPLIANCE', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 21, 'name' => 'Proc. Org. - Internal Audit', 'code' => 'PROC_AUDIT', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 22, 'name' => 'Proc. Org. - AML - Adeguata Verifica', 'code' => 'PROC_AML_AV', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 23, 'name' => 'Proc. Org. - AML - Profilatura Rischio', 'code' => 'PROC_AML_RISK', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 24, 'name' => 'Proc. Org. - AML - Segnalazione SOS', 'code' => 'PROC_AML_SOS', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 26, 'name' => 'Proc. Org. - Informativa Precontrattuale', 'code' => 'PROC_PRECONTR', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 28, 'name' => 'Proc. Org. - Gestione Reclami', 'code' => 'PROC_RECLAMI', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 30, 'name' => 'Proc. Org. - Selezione e Inserimento Rete', 'code' => 'PROC_RETE_SEL', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 31, 'name' => 'Proc. Org. - Formazione Continua Rete', 'code' => 'PROC_RETE_FORM', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 33, 'name' => 'Proc. Org. - GDPR e Data Protection', 'code' => 'PROC_GDPR', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            ['id' => 35, 'name' => 'Proc. Org. - Modello 231 e Codice Etico', 'code' => 'PROC_231', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
+            // --- ISTRUTTORIA REDDITUALE E PRATICA ---
+            ['id' => 36, 'name' => 'Modulo SECCI (Informazioni Europee)', 'code' => 'SECCI', 'codegroup' => 'ISTRUTTORIA', 'is_practice' => 1, 'is_template' => 1],
+            ['id' => 38, 'name' => 'Ultime 3 Buste Paga', 'code' => 'BUSTE_PAGA', 'codegroup' => 'REDDITO', 'is_practice' => 1],
+            ['id' => 39, 'name' => 'Certificazione Unica (CU)', 'code' => 'CU', 'codegroup' => 'REDDITO', 'is_monitored' => 1, 'duration' => 365],
+            ['id' => 40, 'name' => 'Certificato di Stipendio', 'code' => 'CERT_STIPENDIO', 'codegroup' => 'REDDITO', 'is_practice' => 1],
+            ['id' => 42, 'name' => 'Cedolino Pensione', 'code' => 'CEDOLINO_PENS', 'codegroup' => 'REDDITO', 'is_practice' => 1],
+            ['id' => 45, 'name' => 'Conteggio Estintivo (per Rinnovi)', 'code' => 'CONTEGGIO_EST', 'codegroup' => 'ISTRUTTORIA', 'is_practice' => 1],
+            ['id' => 46, 'name' => 'Rapporto di Visita Medica', 'code' => 'VISITA_MEDICA', 'codegroup' => 'ISTRUTTORIA', 'is_practice' => 1, 'is_sensible' => 1],
+            ['id' => 47, 'name' => 'Transparency Document', 'code' => 'TRANSPARENCY', 'codegroup' => 'OAM', 'is_monitored' => 1, 'duration' => 365],
+        ];
+
+        foreach ($types as $type) {
+            DB::table('document_types')->updateOrInsert(
+                ['id' => $type['id']],
+                array_merge([
+                    'is_person' => 1,
+                    'is_signed' => 0,
+                    'is_monitored' => 0,
+                    'is_sensible' => 0,
+                    'is_template' => 0,
+                    'is_stored' => 1,  // Impostato a 1 per default per conservazione
+                    'is_practice' => 0,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ], $type)
+            );
+        }
+
         $ruoliPrivacy = [
             'Operatore Front-Office' => [
                 'privacy_role' => 'Soggetto Autorizzato (Incaricato)',
