@@ -36,26 +36,22 @@ class RuiCollaboratorisTable
     {
         return $table
             ->columns([
+                TextColumn::make('intermediario')
+                    ->searchable(),
+                TextColumn::make('collaboratore')
+                    ->searchable(),
+                TextColumn::make('dipendente')
+                    ->searchable(),
+                TextColumn::make('qualifica_rapporto')
+                    ->searchable(),
                 TextColumn::make('oss')
                     ->searchable(),
                 TextColumn::make('livello')
                     ->searchable(),
-                TextColumn::make('intermediario.cognome_nome')
+                TextColumn::make('num_iscr_collaboratori_i_liv')
                     ->searchable(),
-                TextColumn::make('collaboratoreILiv.cognome_nome')
+                TextColumn::make('num_iscr_collaboratori_ii_liv')
                     ->searchable(),
-                TextColumn::make('collaboratoreIILiv.cognome_nome')
-                    ->searchable(),
-                TextColumn::make('qualifica_rapporto')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

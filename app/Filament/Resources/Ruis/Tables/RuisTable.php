@@ -15,6 +15,15 @@ class RuisTable
     {
         return $table
             ->columns([
+                TextColumn::make('ragione_sociale')
+                    ->searchable(),
+                TextColumn::make('cognome_nome')
+                    ->searchable(),
+                TextColumn::make('numero_iscrizione_rui')
+                    ->searchable(),
+                TextColumn::make('data_iscrizione')
+                    ->date()
+                    ->sortable(),
                 TextColumn::make('oss')
                     ->searchable(),
                 IconColumn::make('inoperativo')
@@ -22,13 +31,6 @@ class RuisTable
                 TextColumn::make('data_inizio_inoperativita')
                     ->date()
                     ->sortable(),
-                TextColumn::make('numero_iscrizione_rui')
-                    ->searchable(),
-                TextColumn::make('data_iscrizione')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('cognome_nome')
-                    ->searchable(),
                 TextColumn::make('stato')
                     ->searchable(),
                 TextColumn::make('comune_nascita')
@@ -36,8 +38,6 @@ class RuisTable
                 TextColumn::make('data_nascita')
                     ->date()
                     ->sortable(),
-                TextColumn::make('ragione_sociale')
-                    ->searchable(),
                 TextColumn::make('provincia_nascita')
                     ->searchable(),
                 TextColumn::make('titolo_individuale_sez_a')
@@ -48,14 +48,6 @@ class RuisTable
                     ->searchable(),
                 TextColumn::make('attivita_esercitata_sez_b')
                     ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('rui_section_id')
                     ->numeric()
                     ->sortable(),

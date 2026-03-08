@@ -13,12 +13,17 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use BackedEnum;
+use UnitEnum;
 
 class RuiAccessorisResource extends Resource
 {
     protected static ?string $model = RuiAccessoris::class;
     protected static bool $isScopedToTenant = false;
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+    protected static ?string $navigationLabel = 'Accessori';
+    protected static ?string $modelLabel = 'Accessorio';
+    protected static ?string $pluralModelLabel = 'Accessori';
+    protected static string|UnitEnum|null $navigationGroup = 'OAM-RUI';
 
     public static function form(Schema $schema): Schema
     {

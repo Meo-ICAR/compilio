@@ -30,6 +30,7 @@ class CompanyUpdateAddressesCommand extends Command
     public function handle()
     {
         $dryRun = $this->option('dry-run');
+        $dryInsert = $this->option('dry-insert');
 
         $this->info('🔄 Updating company addresses from RUI sede data...');
 
@@ -56,19 +57,31 @@ class CompanyUpdateAddressesCommand extends Command
                 $this->line("   Province: {$company->ruiSedi->provincia_sede}");
                 $this->line("   Postal Code: {$company->ruiSedi->cap_sede}");
             } else {
-                // Create new address record using polymorphic relationship
-                Address::create([
-                    'name' => 'Sede legale',
-                    'street' => $company->ruiSedi->indirizzo_sede,
-                    'city' => $company->ruiSedi->comune_sede,
-                    'zip_code' => $company->ruiSedi->cap_sede,
-                    'address_type_id' => 1,
-                    'addressable_type' => Company::class,
-                    'addressable_id' => $company->id,
-                ]);
+                // Check if address with name 'Sede legale' already exists
+                $existingAddress = Address::where('addressable_type', Company::class)
+                    ->where('addressable_id', $company->id)
+                    ->where('name', 'Sede legale')
+                    ->first();
 
-                $this->line("✅ Created address for '{$company->name}'");
-                $updatedCount++;
+                if ($existingAddress) {
+                    $this->line("ℹ️  Address 'Sede legale' already exists for '{$company->name}'");
+                    continue;
+                }
+                if ($dryInsert) {
+                    // Create new address record using polymorphic relationship
+                    Address::create([
+                        'name' => 'Sede legale',
+                        'street' => $company->ruiSedi->indirizzo_sede,
+                        'city' => $company->ruiSedi->comune_sede,
+                        'zip_code' => $company->ruiSedi->cap_sede,
+                        'address_type_id' => 1,
+                        'addressable_type' => Company::class,
+                        'addressable_id' => $company->id,
+                    ]);
+
+                    $this->line("✅ Created address for '{$company->name}'");
+                    $updatedCount++;
+                }
             }
         }
 

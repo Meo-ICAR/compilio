@@ -12,6 +12,7 @@ use App\Filament\Resources\Companies\RelationManagers\SendersRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\SoftwareApplicationsRelationManager;
 use App\Filament\Resources\Companies\RelationManagers\WebsitesRelationManager;
 use App\Filament\Resources\Companies\Schemas\CompanyForm;
+use App\Filament\Resources\Companies\Tables\CompaniesTable;
 use App\Filament\Resources\RelationManagers\DocumentsRelationManager;
 use App\Models\Company;
 use Filament\Resources\Resource;
