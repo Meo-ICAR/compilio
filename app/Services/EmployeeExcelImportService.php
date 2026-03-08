@@ -73,8 +73,8 @@ class EmployeeExcelImportService
 
             // Try to find actual employee data by looking for non-empty, non-formula cells
             $employeeRows = [];
-            foreach ($sheetData as $rowIndex => $row) {
-                // Skip header rows and look for actual employee names
+            foreach ($sheetData as $index => $row) {
+                // Skip if row looks like a header (contains empty name or formula-based content)
                 if (isset($row[0]) && !empty($row[0]) && !$this->isFormula($row[0])) {
                     $employeeRows[] = $row;
                 }

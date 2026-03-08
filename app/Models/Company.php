@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Rui;
 use App\Models\RuiCollaboratori;
 use Filament\Models\Contracts\HasCurrentTenantLabel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -47,6 +48,11 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         'smtp_verify_ssl' => 'boolean',
         'smtp_port' => 'integer',
     ];
+
+    public function rui()
+    {
+        return $this->belongsTo(Rui::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
+    }
 
     public function getCurrentTenantLabel(): string
     {
@@ -160,15 +166,18 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
             RuiCollaboratori::class,
             'num_iscr_collaboratori_i_liv',
             'numero_iscrizione_rui'
-        )->where('num_iscr_collaboratori_i_liv', '=', $this->numero_iscrizione_rui);
+        );
     }
 
     public function ruiCollaboratoriPrincipal()
     {
         return $this
             ->ruiCollaboratori()
-            ->whereNull('num_iscr_collaboratori_ii_liv')
-            ->orWhere('num_iscr_collaboratori_ii_liv', '');
+            ->where(function ($query) {
+                $query
+                    ->whereNull('num_iscr_collaboratori_ii_liv')
+                    ->orWhere('num_iscr_collaboratori_ii_liv', '');
+            });
     }
 
     public function ruiCollaboratoriEmployee()

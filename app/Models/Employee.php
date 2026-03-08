@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Rui;
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +28,9 @@ class Employee extends Model
         'supervisor_type',
         'is_structure',
         'is_ghost',
+        'oam',
+        'oam_at',
+        'oam_name',
         'numero_iscrizione_rui',
     ];
 
@@ -34,6 +38,7 @@ class Employee extends Model
         'is_structure' => 'boolean',
         'is_ghost' => 'boolean',
         'hire_date' => 'date',
+        'oam_at' => 'date',
         'employee_types' => 'string',
         'supervisor_type' => 'string',
     ];
@@ -77,6 +82,11 @@ class Employee extends Model
     public function employmentType()
     {
         return $this->belongsTo(EmploymentType::class);
+    }
+
+    public function rui()
+    {
+        return $this->belongsTo(Rui::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
     }
 
     public function scopeSameBranchCoordinators($query)

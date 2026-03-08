@@ -23,6 +23,7 @@ return new class extends Migration {
             $table->string('oam', 30)->nullable()->comment('Oam');
             $table->date('oam_at')->nullable()->comment('Data iscrizione OAM');
             $table->string('oam_name')->nullable()->comment('Denominazione sociale registrata in OAM');
+            $table->string('numero_iscrizione_rui', 50)->nullable()->comment('Numero iscrizione OAM');
             $table->string('ivass', 30)->nullable()->comment('Codice di iscrizione IVASS');
             $table->date('ivass_at')->nullable()->comment('Data iscrizione IVASS');
             $table->string('ivass_name')->nullable()->comment('Denominazione  IVASS');

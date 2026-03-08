@@ -111,4 +111,9 @@ class Agent extends Model implements HasMedia
     {
         return $this->morphMany(Contact::class, 'contactable');
     }
+
+    public function rui()
+    {
+        return $this->belongsTo(Rui::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
+    }
 }

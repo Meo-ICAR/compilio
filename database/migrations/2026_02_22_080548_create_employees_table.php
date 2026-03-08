@@ -28,7 +28,9 @@ return new class extends Migration {
             $table->string('phone', 16)->nullable()->comment('Telefono o interno dipendente');
             $table->string('department', 100)->nullable()->comment('Dipartimento (es. Amministrazione, Compliance)');
             $table->string('oam', 100)->nullable()->comment('Codice OAM individuale dipendente');
-            $table->date('oam_dal')->nullable()->comment('Data iscrizione OAM');
+            $table->date('oam_at')->nullable()->comment('Data iscrizione OAM');
+            $table->string('oam_name', 100)->nullable()->comment('Nome OAM');
+            $table->string('numero_iscrizione_rui', 50)->nullable()->comment('Numero iscrizione OAM');
             $table->string('ivass', 100)->nullable()->comment('Codice IVASS individuale dipendente');
             $table->date('hiring_date')->nullable()->comment('Data di assunzione');
             $table->date('termination_date')->nullable()->comment('Data di fine rapporto');

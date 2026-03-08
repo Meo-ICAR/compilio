@@ -12,11 +12,15 @@ class PrincipalEmployee extends Model
 
     protected $fillable = [
         'principal_id',
+        'employee_id',
+        'agent_id',
         'usercode',
         'description',
         'start_date',
         'end_date',
         'is_active',
+        'num_iscr_intermediario',
+        'num_iscr_collaboratori_ii_liv',
     ];
 
     protected $casts = [
@@ -28,6 +32,16 @@ class PrincipalEmployee extends Model
     public function principal(): BelongsTo
     {
         return $this->belongsTo(Principal::class);
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function agent(): BelongsTo
+    {
+        return $this->belongsTo(Agent::class);
     }
 
     public function scopeActive($query)

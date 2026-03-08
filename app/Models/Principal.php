@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Rui;
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -20,9 +21,6 @@ class Principal extends Model
         'vat_number',
         'vat_name',
         'type',
-        'oam',
-        'oam_name',
-        'oam_at',
         'ivass',
         'ivass_at',
         'ivass_name',
@@ -40,6 +38,9 @@ class Principal extends Model
         'website',
         'portalsite',
         'contoCOGE',
+        'oam',
+        'oam_name',
+        'oam_at',
         'numero_iscrizione_rui',
     ];
 
@@ -55,6 +56,11 @@ class Principal extends Model
         'is_dummy' => 'boolean',
         'principal_type' => 'string',
     ];
+
+    public function rui()
+    {
+        return $this->belongsTo(Rui::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
+    }
 
     public function checklists()
     {
