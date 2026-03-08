@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Company;
 use App\Models\CompanyWebsite;
 use App\Models\Document;
 use App\Models\DocumentType;
@@ -19,7 +20,7 @@ class TransparencyScanService
      * @param int $limit Maximum number of websites to scan
      * @return array Scan results
      */
-    public function scanForCompany(?string $companyId = null, int $limit = 10): array
+    public function scanForCompany(?string $companyId = null, int $limit = 100): array
     {
         $results = [
             'total_websites' => 0,
@@ -32,44 +33,33 @@ class TransparencyScanService
 
         try {
             // Get websites that have transparency_date but no url_trasparency
-            $query = CompanyWebsite::whereNotNull('transparency_date')
-                ->where(function ($q) {
-                    $q->whereNull('url_transparency')
-                      ->orWhere('url_transparency', '');
-                });
-
-            // Filter by company if specified
-            if ($companyId) {
-                $query->where('company_id', $companyId);
-            }
+            $query = CompanyWebsite::where('company_id', $companyId)->whereNotNull('url_transparency');
 
             $websites = $query->limit($limit)->get();
             $results['total_websites'] = $websites->count();
 
-            Log::info("Starting transparency scan for {$results['total_websites']} websites" . 
-                     ($companyId ? " for company {$companyId}" : ""));
+            Log::info("Starting transparency scan for {$results['total_websites']} websites");
 
             foreach ($websites as $website) {
                 $websiteResult = $this->processWebsite($website);
                 $results['processed_websites']++;
-                
+
                 if ($websiteResult['found_transparency_page']) {
                     $results['found_transparency_pages']++;
                 }
-                
+
                 $results['extracted_documents'] += $websiteResult['documents_created'];
                 $results['details'][] = $websiteResult;
-                
+
                 if (!empty($websiteResult['errors'])) {
                     $results['errors'] = array_merge($results['errors'], $websiteResult['errors']);
                 }
             }
 
-            Log::info("Transparency scan completed: {$results['found_transparency_pages']} transparency pages found, " .
-                     "{$results['extracted_documents']} documents extracted");
-
+            Log::info("Transparency scan completed: {$results['found_transparency_pages']} transparency pages found, "
+                . "{$results['extracted_documents']} documents extracted");
         } catch (\Exception $e) {
-            Log::error("Transparency scan failed: " . $e->getMessage());
+            Log::error('Transparency scan failed: ' . $e->getMessage());
             $results['errors'][] = $e->getMessage();
         }
 
@@ -126,15 +116,19 @@ class TransparencyScanService
                     continue;
                 }
 
-                $result['details'][] = "Found " . count($links) . ' links on transparency page';
+                $result['details'][] = 'Found ' . count($links) . ' links on transparency page';
 
                 // Create document records for each link
                 foreach ($links as $link) {
                     $documentResult = $this->createDocumentFromLink($link, $website, $transparencyUrl);
-                    
+
                     if ($documentResult['success']) {
-                        $result['documents_created']++;
-                        $result['details'][] = "✓ Created document: {$documentResult['document_name']} (ID: {$documentResult['document_id']})";
+                        if (isset($documentResult['details']) && str_contains($documentResult['details'][0] ?? '', 'already exists')) {
+                            $result['details'][] = "✓ Document already exists: {$documentResult['document_name']}";
+                        } else {
+                            $result['documents_created']++;
+                            $result['details'][] = "✓ Created document: {$documentResult['document_name']} (ID: {$documentResult['document_id']})";
+                        }
                     } else {
                         $result['errors'][] = "Failed to create document for {$link}: {$documentResult['error']}";
                     }
@@ -146,7 +140,6 @@ class TransparencyScanService
                     $result['details'][] = 'Updated website with transparency URL';
                 }
             }
-
         } catch (\Exception $e) {
             $result['errors'][] = "Error processing website {$website->domain}: " . $e->getMessage();
             Log::error("Error processing website {$website->domain}: " . $e->getMessage());
@@ -179,10 +172,23 @@ class TransparencyScanService
             $emittedAt = $this->extractDateFromUrl($link) ?? $website->transparency_date;
 
             // Create document record
+            // Only create if url_document is not present for this company
+            $existingDocument = Document::where('company_id', $website->company_id)
+                ->where('url_document', $link)
+                ->first();
+
+            if ($existingDocument) {
+                $result['success'] = true;
+                $result['document_id'] = $existingDocument->id;
+                $result['document_name'] = $existingDocument->name;
+                $result['details'][] = "Document already exists for {$link}";
+                return $result;
+            }
+
             $document = Document::create([
                 'company_id' => $website->company_id,
-                'documentable_id' => $website->id,
-                'documentable_type' => CompanyWebsite::class,
+                'documentable_id' => $website->company_id,
+                'documentable_type' => Company::class,
                 'document_type_id' => $documentType->id,
                 'name' => $name,
                 'description' => "Document found on transparency page: {$transparencyUrl}",
@@ -195,7 +201,6 @@ class TransparencyScanService
             $result['success'] = true;
             $result['document_id'] = $document->id;
             $result['document_name'] = $document->name;
-
         } catch (\Exception $e) {
             $result['error'] = $e->getMessage();
             Log::error("Failed to create document for {$link}: " . $e->getMessage());

@@ -11,11 +11,11 @@ class CompanyClientsRelationManager extends RelationManager
 {
     protected static string $relationship = 'companyClients';
 
-    protected static ?string $modelLabel = 'Cliente Aziendale';
+    protected static ?string $modelLabel = 'Consulente';
 
-    protected static ?string $pluralModelLabel = 'Clienti Aziendali';
+    protected static ?string $pluralModelLabel = 'Consulenti';
 
-    protected static ?string $title = 'Clienti Aziendali';
+    protected static ?string $title = 'Consulenti';
 
     public function table(Table $table): Table
     {

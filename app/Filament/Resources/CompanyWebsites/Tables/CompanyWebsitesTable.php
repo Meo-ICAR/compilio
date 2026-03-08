@@ -27,16 +27,14 @@ class CompanyWebsitesTable
                 TextColumn::make('domain')
                     ->label('Dominio')
                     ->searchable(),
-                TextColumn::make('type')
-                    ->label('Tipologia')
-                    ->searchable(),
-                TextColumn::make('principal.name')
-                    ->label('Mandante')
-                    ->searchable()
-                    ->placeholder('Nessuno'),
-                IconColumn::make('is_active')
-                    ->label('Attivo')
-                    ->boolean(),
+                TextColumn::make('url_transparency')
+                    ->label('Trasparenza URL')
+                    ->placeholder('Non impostato')
+                    ->toggleable(),
+                TextColumn::make('transparency_date')
+                    ->label('Data Trasparenza')
+                    ->placeholder('Non impostato')
+                    ->toggleable(),
                 TextColumn::make('url_privacy')
                     ->label('Privacy URL')
                     ->placeholder('Non impostato')
@@ -45,14 +43,20 @@ class CompanyWebsitesTable
                     ->label('Cookies URL')
                     ->placeholder('Non impostato')
                     ->toggleable(),
+                TextColumn::make('type')
+                    ->label('Tipologia')
+                    ->searchable(),
+                TextColumn::make('principal.name')
+                    ->label('Mandante')
+                    ->searchable()
+                    ->placeholder('Nessuno'),
                 IconColumn::make('is_footercompilant')
                     ->label('GDPR Footer')
                     ->boolean()
                     ->toggleable(),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('is_active')
+                    ->label('Attivo')
+                    ->boolean(),
             ])
             ->filters([
                 //
@@ -64,12 +68,12 @@ class CompanyWebsitesTable
                     ->color('primary')
                     ->requiresConfirmation()
                     ->modalHeading('Scansione Trasparenza Aziendale')
-                    ->modalDescription('Scansionerà tutti i siti web dell\'azienda corrente con data trasparenza impostata. Continuare?')
+                    ->modalDescription("Scansionerà tutti i siti web dell'azienda corrente con data trasparenza impostata. Continuare?")
                     ->modalSubmitActionLabel('Scansiona Tutti')
                     ->action(function () {
                         try {
                             $companyId = auth()->user()?->company_id ?? session('current_company_id');
-                            
+
                             if (!$companyId) {
                                 Notification::make()
                                     ->title('Errore')
@@ -78,23 +82,22 @@ class CompanyWebsitesTable
                                     ->send();
                                 return;
                             }
-                            
+
                             $scanService = app(TransparencyScanService::class);
-                            $result = $scanService->scanForCompany($companyId, 50); // Limit to 50 for performance
-                            
-                            $message = "Scansione completata! Processati {$result['processed_websites']} siti, " .
-                                      "trovate {$result['found_transparency_pages']} pagine trasparenza, " .
-                                      "estratti {$result['extracted_documents']} documenti.";
-                            
+                            $result = $scanService->scanForCompany($companyId, 50);  // Limit to 50 for performance
+
+                            $message = "Scansione completata! Processati {$result['processed_websites']} siti, "
+                                . "trovate {$result['found_transparency_pages']} pagine trasparenza, "
+                                . "estratti {$result['extracted_documents']} documenti.";
+
                             Notification::make()
                                 ->title('Scansione Aziendale Completata')
                                 ->body($message)
                                 ->success()
                                 ->send();
-                                
                         } catch (\Exception $e) {
                             Log::error('Company transparency scan failed: ' . $e->getMessage());
-                            
+
                             Notification::make()
                                 ->title('Errore Scansione')
                                 ->body('Si è verificato un errore durante la scansione aziendale: ' . $e->getMessage())
@@ -104,14 +107,15 @@ class CompanyWebsitesTable
                     })
                     ->visible(function () {
                         $companyId = auth()->user()?->company_id ?? session('current_company_id');
-                        return $companyId && 
-                               CompanyWebsite::where('company_id', $companyId)
-                                   ->whereNotNull('transparency_date')
-                                   ->where(function ($q) {
-                                       $q->whereNull('url_transparency')
-                                         ->orWhere('url_transparency', '');
-                                   })
-                                   ->exists();
+                        return $companyId &&
+                            CompanyWebsite::where('company_id', $companyId)
+                                ->whereNotNull('transparency_date')
+                                ->where(function ($q) {
+                                    $q
+                                        ->whereNull('url_transparency')
+                                        ->orWhere('url_transparency', '');
+                                })
+                                ->exists();
                     }),
             ])
             ->recordActions([
@@ -128,21 +132,20 @@ class CompanyWebsitesTable
                         try {
                             $scanService = app(TransparencyScanService::class);
                             $result = $scanService->scanSingleWebsite($record);
-                            
-                            $message = $result['found_transparency_page'] 
+
+                            $message = $result['found_transparency_page']
                                 ? "Scansione completata! Trovata pagina trasparenza e creati {$result['documents_created']} documenti."
-                                : "Nessuna pagina di trasparenza trovata per questo sito.";
-                            
+                                : 'Nessuna pagina di trasparenza trovata per questo sito.';
+
                             Notification::make()
                                 ->title($result['found_transparency_page'] ? 'Scansione Completata' : 'Nessun Risultato')
                                 ->body($message)
                                 ->success($result['found_transparency_page'])
                                 ->warning(!$result['found_transparency_page'])
                                 ->send();
-                                
                         } catch (\Exception $e) {
                             Log::error('Transparency scan failed: ' . $e->getMessage());
-                            
+
                             Notification::make()
                                 ->title('Errore Scansione')
                                 ->body('Si è verificato un errore durante la scansione: ' . $e->getMessage())

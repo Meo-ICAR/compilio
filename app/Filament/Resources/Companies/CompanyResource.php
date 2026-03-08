@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Companies;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Companies\Pages\CreateCompany;
 use App\Filament\Resources\Companies\Pages\EditCompany;
 use App\Filament\Resources\Companies\Pages\ListCompanies;
@@ -13,7 +14,6 @@ use App\Filament\Resources\Companies\RelationManagers\SoftwareApplicationsRelati
 use App\Filament\Resources\Companies\RelationManagers\WebsitesRelationManager;
 use App\Filament\Resources\Companies\Schemas\CompanyForm;
 use App\Filament\Resources\Companies\Tables\CompaniesTable;
-use App\Filament\Resources\RelationManagers\DocumentsRelationManager;
 use App\Models\Company;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -53,13 +53,13 @@ class CompanyResource extends Resource
     public static function getRelations(): array
     {
         return [
-            BranchesRelationManager::class,
+            DocumentsRelationManager::class,
             CompanyClientsRelationManager::class,
             CompanyFunctionsRelationManager::class,
             SendersRelationManager::class,
-            SoftwareApplicationsRelationManager::class,
             WebsitesRelationManager::class,
-            DocumentsRelationManager::class,
+            BranchesRelationManager::class,
+            SoftwareApplicationsRelationManager::class,
         ];
     }
 

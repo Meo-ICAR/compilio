@@ -12,6 +12,7 @@ use Filament\Actions;
 class WebsitesRelationManager extends RelationManager
 {
     protected static string $relationship = 'websites';
+    protected static ?string $title = 'Siti Web';
 
     public function form(Schema $schema): Schema
     {

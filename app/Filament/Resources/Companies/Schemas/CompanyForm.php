@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Companies\Schemas;
 
-use App\Filament\Resources\RelationManagers\DocumentsRelationManager;
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;

@@ -35,32 +35,21 @@ class DocumentsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                /*
-                 * TextColumn::make('name')
-                 *     ->label('Nome File')
-                 *     ->searchable()
-                 *     ->sortable(),
-                 * TextColumn::make('mime_type')
-                 *     ->label('Tipo')
-                 *     ->badge()
-                 *     ->formatStateUsing(fn(string $state): string => $this->getMimeTypeLabel($state)),
-                 * TextColumn::make('size')
-                 *     ->label('Dimensione')
-                 *     ->formatStateUsing(fn(int $state): string => $this->formatBytes($state)),
-                 * TextColumn::make('created_at')
-                 *     ->label('Caricato il')
-                 *     ->dateTime('d/m/Y H:i')
-                 *     ->sortable(),
-                 */
+                TextColumn::make('name')
+                    ->label('Nome Documento')
+                    ->searchable(),
                 TextColumn::make('document_type_id')
                     ->label('Tipo Documento')
-                    ->formatStateUsing(fn($state) => $state ? \App\Models\DocumentType::find($state)?->name : '-')
+                    ->formatStateUsing(fn($state) => $state ? DocumentType::find($state)?->name : '-')
                     ->badge(),
+                TextColumn::make('emitted_at')
+                    ->label('Del')
+                    ->dateTime('d/m/Y')
+                    ->sortable(),
                 TextColumn::make('expires_at')
                     ->label('Scadenza')
                     ->dateTime('d/m/Y')
                     ->sortable(),
-                TextColumn::make('name'),
             ])
             ->filters([])  // headerFilters
             ->headerActions([

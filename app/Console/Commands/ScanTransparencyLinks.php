@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Company;
 use App\Services\TransparencyScanService;
 use Illuminate\Console\Command;
 
@@ -53,17 +54,80 @@ class ScanTransparencyLinks extends Command
 
         if ($companyId) {
             $this->info("📋 Scanning for company ID: {$companyId}");
+
+            // Perform the scan using the service
+            $results = $this->scanService->scanForCompany($companyId, $limit);
+
+            $this->displayResults($results);
+        } else {
+            $this->info('🔄 Scanning all companies...');
+
+            // Get all companies and scan each
+            $companies = Company::all(['id', 'name']);
+            $totalProcessed = 0;
+            $totalWebsites = 0;
+            $totalPages = 0;
+            $totalDocuments = 0;
+            $allErrors = [];
+
+            foreach ($companies as $company) {
+                $this->line("📋 Scanning company: {$company->name} (ID: {$company->id})");
+
+                // Perform the scan using the service
+                $results = $this->scanService->scanForCompany($company->id, $limit);
+
+                // Accumulate totals
+                $totalProcessed += $results['processed_websites'] ?? 0;
+                $totalWebsites += $results['total_websites'] ?? 0;
+                $totalPages += $results['found_transparency_pages'] ?? 0;
+                $totalDocuments += $results['extracted_documents'] ?? 0;
+
+                // Display company results
+                if (!empty($results['details'])) {
+                    foreach ($results['details'] as $detail) {
+                        $this->line("   • {$detail['domain']}: "
+                            . ($detail['found_transparency_page']
+                                ? "✓ Found transparency page, {$detail['documents_created']} documents created"
+                                : '✗ No transparency page found'));
+
+                        if (!empty($detail['errors'])) {
+                            foreach ($detail['errors'] as $error) {
+                                $this->line("     ✗ {$error}");
+                            }
+                        }
+                    }
+                }
+
+                // Collect errors
+                if (!empty($results['errors'])) {
+                    $allErrors = array_merge($allErrors, $results['errors']);
+                }
+            }
+
+            // Display final results
+            $this->newLine();
+            $this->info('📊 Overall Scan Results:');
+            $this->line("   Total companies scanned: {$companies->count()}");
+            $this->line("   Total websites processed: {$totalWebsites}");
+            $this->line("   Total transparency pages found: {$totalPages}");
+            $this->line("   Total documents extracted: {$totalDocuments}");
+
+            if (!empty($allErrors)) {
+                $this->newLine();
+                $this->error('❌ Errors encountered:');
+                foreach ($allErrors as $error) {
+                    $this->line("   • {$error}");
+                }
+            } else {
+                $this->newLine();
+                $this->info('✅ No errors encountered during scan.');
+            }
         }
-
-        // Perform the scan using the service
-        $results = $this->scanService->scanForCompany($companyId ?: null, $limit);
-
-        $this->displayResults($results);
 
         $this->newLine();
         $this->info('✅ Transparency links scan completed!');
 
-        return empty($results['errors']) ? 0 : 1;
+        return empty($allErrors) ? 0 : 1;
     }
 
     /**

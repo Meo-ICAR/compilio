@@ -15,6 +15,8 @@ class SendersRelationManager extends RelationManager
 
     protected static ?string $relatedResource = CompanySenderResource::class;
 
+    protected static ?string $title = 'Mittenti';
+
     public function table(Table $table): Table
     {
         return $table

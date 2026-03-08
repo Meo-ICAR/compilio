@@ -12,6 +12,7 @@ use Filament\Actions;
 class BranchesRelationManager extends RelationManager
 {
     protected static string $relationship = 'branches';
+    protected static ?string $title = 'Sedi';
 
     public function form(Schema $schema): Schema
     {
