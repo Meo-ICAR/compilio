@@ -124,15 +124,25 @@ class SyncPrincipalsFromRuiCollaboratori extends Command
             $this->line('  📊 Found ' . $employeeCollaboratori->count() . ' principal  collaboratori');
 
             foreach ($employeeCollaboratori as $employeeCollaboratore) {
-                if (empty($employeeCollaboratore->um_iscr_collaboratori_ii_liv)) {
+                if (empty($employeeCollaboratore->num_iscr_collaboratori_ii_liv)) {
                     continue;
                 }
                 $ruiIntermediario = $employeeCollaboratore->num_iscr_intermediario ?? '';
                 $ruiNumber = $employeeCollaboratore->num_iscr_collaboratori_ii_liv ?? '';
                 $dipendenteName = $employeeCollaboratore->dipendente ?? '';
-                $principal = $company->principals->where('numero_iscrizione_rui', '=', $ruiIntermediario)->first();
+                $principal = Principal::where('company_id', $company->id)
+                    ->where('numero_iscrizione_rui', '=', $ruiIntermediario)
+                    ->first();
+
+                $this->line("  🔍 Looking for principal with RUI: {$ruiIntermediario} -> Found: " . ($principal ? $principal->name : 'NULL'));
+
                 if (!empty($principal)) {
-                    $employee = $company->employees->where('numero_iscrizione_rui', '=', $ruiNumber)->first();
+                    $employee = Employee::where('company_id', $company->id)
+                        ->where('numero_iscrizione_rui', '=', $ruiNumber)
+                        ->first();
+
+                    $this->line("  🔍 Looking for employee with RUI: {$ruiNumber} -> Found: " . ($employee ? $employee->name : 'NULL'));
+
                     if ($employee) {
                         if (!$dryRun) {
                             PrincipalEmployee::updateOrCreate(
@@ -148,7 +158,12 @@ class SyncPrincipalsFromRuiCollaboratori extends Command
                         }
                         $this->line("  🔍 Processing employee collaboratore: '{$dipendenteName}' -> RUI: {$ruiNumber} -> Principal ID: {$principal->id}");
                     } else {
-                        $agent = $company->agents->where('numero_iscrizione_rui', '=', $ruiNumber)->first();
+                        $agent = Agent::where('company_id', $company->id)
+                            ->where('numero_iscrizione_rui', '=', $ruiNumber)
+                            ->first();
+
+                        $this->line("  🔍 Looking for agent with RUI: {$ruiNumber} -> Found: " . ($agent ? $agent->name : 'NULL'));
+
                         if ($agent) {
                             if (!$dryRun) {
                                 PrincipalEmployee::updateOrCreate(
@@ -227,11 +242,6 @@ class SyncPrincipalsFromRuiCollaboratori extends Command
             return ['processed' => false, 'updated' => false];
         }
 
-        // check exists rui_number in employee or agent
-        if (Employee::where('numero_iscrizione_rui', $ruiNumber)->exists() || Agent::where('numero_iscrizione_rui', $ruiNumber)->exists()) {
-            return ['processed' => false, 'updated' => false];
-        }
-
         // Find employee to update by checking if employee name is contained in dipendente
         $employee = Employee::where(function ($query) use ($dipendenteName) {
             $query
@@ -255,6 +265,7 @@ class SyncPrincipalsFromRuiCollaboratori extends Command
                 $this->line("    🔄 Inserted administrator '{$dipendenteName}' -> RUI: {$ruiNumber}");
                 if (!empty($type)) {
                     $employee = Employee::create([
+                        'company_id' => $company->id,
                         'name' => $dipendenteName,
                         'employee_types' => $type,
                         'numero_iscrizione_rui' => $ruiNumber,
@@ -277,8 +288,6 @@ class SyncPrincipalsFromRuiCollaboratori extends Command
             } else {
                 $this->line("    🔄 DRY RUN: Update employee '{$dipendenteName}' -> RUI: {$ruiNumber}");
             }
-
-            return ['processed' => true, 'updated' => true];
         } else {
             if (!$isQualificaResponsabile) {
                 return $this->processAgent($employeeCollaboratore, $company, $dryRun, $force);
@@ -293,6 +302,7 @@ class SyncPrincipalsFromRuiCollaboratori extends Command
             }
             $this->line("    🔄 Updated employee AT '{$dipendenteName}' -> RUI: {$ruiNumber}");
         }
+        return ['processed' => true, 'updated' => true];
     }
 
     private function processAgent($agentCollaboratore, $company, bool $dryRun, bool $force): array
@@ -339,8 +349,6 @@ class SyncPrincipalsFromRuiCollaboratori extends Command
             } else {
                 $this->line("    🔄 DRY RUN: Update agent '{$dipendenteName}' -> RUI: {$ruiNumber}");
             }
-
-            return ['processed' => true, 'updated' => true];
         } else {
             $this->line('  🔍 Agent not found, skipping');
             if (!$dryRun) {
@@ -371,5 +379,6 @@ class SyncPrincipalsFromRuiCollaboratori extends Command
             }
             $this->line("    🔄 Updated employee AT '{$dipendenteName}' -> RUI: {$ruiNumber}");
         }
+        return ['processed' => true, 'updated' => true];
     }
 }

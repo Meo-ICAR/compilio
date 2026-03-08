@@ -54,6 +54,33 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         return $this->belongsTo(Rui::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
     }
 
+    public function ruiSedi()
+    {
+        return $this->belongsTo(RuiSedi::class, 'numero_iscrizione_rui', 'numero_iscrizione_int');
+    }
+
+    /**
+     * Update company address from RUI sede data
+     */
+    public function updateAddressFromRuiSedi(): void
+    {
+        if (!$this->ruiSedi) {
+            return;
+        }
+
+        $this->update([
+            'address' => $this->ruiSedi->indirizzo_sede,
+            'city' => $this->ruiSedi->comune_sede,
+            'province' => $this->ruiSedi->provincia_sede,
+            'postal_code' => $this->ruiSedi->cap_sede,
+        ]);
+    }
+
+    public function addresses()
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
+
     public function getCurrentTenantLabel(): string
     {
         return 'Company';
