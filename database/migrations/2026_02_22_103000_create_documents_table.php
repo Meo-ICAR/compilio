@@ -54,6 +54,7 @@ return new class extends Migration {
                 ->constrained('users')  // Indica esplicitamente la tabella users
                 ->onDelete('set null');
             $table->timestamps();
+            $table->softDeletes();
 
             // Indici
             $table->index(['documentable_type', 'documentable_id']);

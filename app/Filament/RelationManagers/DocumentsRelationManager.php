@@ -37,10 +37,20 @@ class DocumentsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('name')
                     ->label('Nome Documento')
-                    ->searchable(),
-                TextColumn::make('document_type_id')
+                    ->sortable()
+                    ->searchable()
+                    // Rende il testo blu e sottolineato come un link
+                    ->color('primary')
+                    ->weight('bold')
+                    // Genera il link dinamico dall'URL nel database
+                    ->url(fn($record): ?string => $record->url_document)
+                    // Apre il documento in una nuova scheda del browser
+                    ->openUrlInNewTab(),
+                TextColumn::make('documentType.name')
                     ->label('Tipo Documento')
-                    ->formatStateUsing(fn($state) => $state ? DocumentType::find($state)?->name : '-')
+                    ->sortable()
+                    ->searchable()
+                    // Opzionale: anche qui puoi mettere un badge per renderlo più leggibile
                     ->badge(),
                 TextColumn::make('emitted_at')
                     ->label('Del')

@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Checklist extends Model
+class Checklist extends Model implements HasMedia
 {
-    use HasFactory, BelongsToCompany;
+    use HasFactory, BelongsToCompany, InteractsWithMedia, LogsActivity;
 
     protected $fillable = [
         'company_id',
@@ -34,6 +38,12 @@ class Checklist extends Model
         'is_template' => 'boolean',
         'status' => 'string',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
+    }
 
     public function target()
     {

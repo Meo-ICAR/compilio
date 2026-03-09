@@ -25,6 +25,12 @@ class AuiRecordResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
+    protected static ?string $navigationLabel = 'Registro Antiriciclaggio';
+
+    protected static ?string $modelLabel = 'Antiriciclaggio';
+
+    protected static ?string $pluralModelLabel = 'Antiriciclaggio';
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema

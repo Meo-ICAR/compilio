@@ -3,18 +3,30 @@
 namespace App\Filament\Resources\Checklists\RelationManagers;
 
 use App\Models\ChecklistItem;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\Filter;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SelectFilter;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Repeater;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Grid;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Filament\Utilities\Get;
 use Filament\Forms;
@@ -119,75 +131,16 @@ class ChecklistItemsRelationManager extends RelationManager
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('question')
-                    ->label('Domanda')
-                    ->limit(50)
-                    ->searchable(),
-                IconColumn::make('is_required')
-                    ->label('Obbligatorio')
-                    ->boolean()
+                    ->label('Attivita')
+                    ->searchable()
                     ->sortable(),
-                IconColumn::make('is_document_required')
-                    ->label('Richiede Doc')
-                    ->boolean()
+                TextColumn::make('phase')
+                    ->label('Fase')
+                    ->searchable()
                     ->sortable(),
-                BadgeColumn::make('attach_model')
-                    ->label('Allegato a')
-                    ->colors([
-                        'primary' => 'principal',
-                        'success' => 'agent',
-                        'warning' => 'company',
-                    ])
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'principal' => 'Principal',
-                        'agent' => 'Agent',
-                        'company' => 'Company',
-                        default => 'Nessuno',
-                    }),
-                TextColumn::make('repeatable_code')
-                    ->label('Codice Ripetibile')
-                    ->searchable()
-                    ->placeholder('No'),
-                TextColumn::make('item_code')
-                    ->label('Codice Univoco')
-                    ->searchable()
-                    ->placeholder('No'),
-                Tables\Columns\BadgeColumn::make('dependency_type')
-                    ->label('Tipo Dipendenza')
-                    ->colors([
-                        'success' => 'show_if',
-                        'danger' => 'hide_if',
-                    ])
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'show_if' => 'Mostra se',
-                        'hide_if' => 'Nascondi se',
-                        default => 'Nessuna',
-                    }),
-                TextColumn::make('depends_on_code')
-                    ->label('Dipende da')
-                    ->searchable()
-                    ->placeholder('Nessuna'),
-            ])
-            ->filters([
-                Filter::make('is_required')
-                    ->label('Obbligatorio'),
-                Filter::make('is_document_required')
-                    ->label('Richiede Documento'),
-                SelectFilter::make('attach_model')
-                    ->label('Modello Allegato')
-                    ->options([
-                        'principal' => 'Principal',
-                        'agent' => 'Agent',
-                        'company' => 'Company',
-                    ]),
-                SelectFilter::make('dependency_type')
-                    ->label('Tipo Dipendenza')
-                    ->options([
-                        'show_if' => 'Mostra se',
-                        'hide_if' => 'Nascondi se',
-                    ]),
-                TernaryFilter::make('has_dependency')
-                    ->label('Ha Dipendenze')
-                    ->query(fn($query) => $query->whereNotNull('depends_on_code')),
+                TextColumn::make('ordine')
+                    ->label('Ordine')
+                    ->sortable(),
             ])
             ->headerActions([
                 CreateAction::make(),
@@ -196,11 +149,6 @@ class ChecklistItemsRelationManager extends RelationManager
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
-            ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 }

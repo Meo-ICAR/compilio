@@ -16,7 +16,10 @@ return new class extends Migration {
             $table->string('name')->nullable()->comment('Descrizione');
             $table->string('code')->nullable()->comment('Codice univoco documento menomico es CI = Carta Identita VISURA = Visura aziendale CCIA');
             $table->string('codegroup')->nullable()->comment('Raggruppa documenti simili es. Documento di riconoscimento');
-            $table->string('phase')->nullable()->comment('Fase di processo');
+            $table->string('slug')->unique();  // es: "foglio-informativo"
+            $table->string('regex_pattern')->nullable();  // La regex per il match automatico
+            $table->integer('priority')->default(0);  // Per l'ordine di esecuzione delle regex
+            $table->string('phase')->nullable()->comment('Fase di processo - es: "Pre-contrattuale", "Post-contrattuale"');
             $table->boolean('is_person')->default(true)->comment('Documento inerente Persona o azienda');
             $table->boolean('is_signed')->default(false)->comment('Indica se il documento deve essere firmato');
             $table->boolean('is_monitored')->default(false)->comment('Indica se la scadenza documento deve essere monitorata nel tempo');

@@ -25,7 +25,7 @@ class AuditResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
-    protected static ?string $navigationLabel = 'Audit';
+    protected static ?string $navigationLabel = 'Registro Audit';
 
     protected static ?string $modelLabel = 'Audit';
 

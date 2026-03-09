@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Agents\Schemas;
 
 use App\Model\Oam;
+use App\Services\ChecklistService;
 use App\Services\GeminiVisionService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -135,7 +136,7 @@ class AgentForm
                     ->icon('heroicon-o-shield-check')
                     ->schema([
                         Grid::make(2)->schema([
-                            TextInput::make('oam')
+                            TextInput::make('numero_iscrizione_rui')
                                 ->label('Numero Iscrizione OAM')
                                 ->maxLength(30)
                                 ->live(onBlur: true)
@@ -146,7 +147,7 @@ class AgentForm
                                         return;
                                     }
 
-                                    $oam = \App\Models\Oam::where('numero_iscrizione', $state)->first();
+                                    $oam = \App\Models\Oam::where('numero_iscrizione_rui', $state)->first();
 
                                     if ($oam) {
                                         $set('oam_name', $oam->name);
@@ -156,6 +157,9 @@ class AgentForm
                                         $set('oam_at', null);
                                     }
                                 }),
+                            TextInput::make('oam')
+                                ->label('Codice OAM')
+                                ->maxLength(255),
                             TextInput::make('oam_name')
                                 ->label('Denominazione registrata in OAM')
                                 ->maxLength(255),
@@ -253,7 +257,7 @@ class AgentForm
                                 ->maxValue(99999999.99)
                                 ->columnSpan(3),
                         ]),
-                    ]),
+                    ])
             ]);
     }
 }

@@ -198,161 +198,110 @@ class LookupSeeder extends Seeder
             ['name' => 'Privacy', 'description' => 'GDPR Privacy Consent', 'color_code' => '#10B981'],
             ['name' => 'AML', 'description' => 'Anti-Money Laundering', 'color_code' => '#EF4444'],
             ['name' => 'OAM', 'description' => 'OAM Forms', 'color_code' => '#3B82F6'],
+            ['name' => 'UIF', 'description' => 'UIF SOS', 'color_code' => '#3B82F6'],
             ['name' => 'Istruttoria', 'description' => 'Pratica docs', 'color_code' => '#F59E0B'],
+            ['name' => 'Onboarding', 'description' => 'Onboarding', 'color_code' => '#F59E0B'],
+            ['name' => 'Amministrativo', 'description' => 'Amministrativo', 'color_code' => '#F59E0B'],
         ];
         foreach ($docScopes as $scope) {
             \App\Models\DocumentScope::firstOrCreate(['name' => $scope['name']], $scope);
         }
 
-        // Document Types & Scope Linking
-        $privacyScope = \App\Models\DocumentScope::where('name', 'Privacy')->first();
-        $amlScope = \App\Models\DocumentScope::where('name', 'AML')->first();
-        $oamScope = \App\Models\DocumentScope::where('name', 'OAM')->first();
-        $istruttoriaScope = \App\Models\DocumentScope::where('name', 'Istruttoria')->first();
-        $identificazioneScope = 'Identificazione';
-        $privacyCode = 'Privacy';
-        $amlCode = 'AML';
-        $oamCode = 'OAM';
-        $istruttoriaCode = 'Istruttoria';
-        $types = [
-            // --- IDENTITÀ E ANAGRAFICA ---
-            ['name' => "Carta d'Identità (Fronte/Retro)", 'code' => $identificazioneScope, 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
-            ['name' => 'Patente', 'code' => $identificazioneScope, 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
-            ['name' => 'Passaporto', 'code' => $identificazioneScope, 'scopes' => [$privacyScope->id, $amlScope->id, $istruttoriaScope->id]],
-            ['name' => 'Codice Fiscale / Tessera Sanitaria', 'code' => $identificazioneScope, 'scopes' => [$privacyScope->id, $istruttoriaScope->id]],
-            // --- PRIVACY E ANTIRICICLAGGIO (Compliance) ---
-            ['name' => 'Informativa Privacy e Consenso Trattamento Dati', 'code' => $privacyCode, 'scopes' => [$privacyScope->id]],
-            ['name' => 'Consenso al Trattamento Dati Particolari (Sanitari)', 'code' => $privacyCode, 'scopes' => [$privacyScope->id]],
-            ['name' => 'Nomina incaricato del trattamento)', 'code' => $privacyCode, 'scopes' => [$privacyScope->id]],
-            ['name' => 'Nomina responsabile del trattamento)', 'code' => $privacyCode, 'scopes' => [$privacyScope->id]],
-            ['name' => 'Nomina amministratore di sistema', 'code' => $privacyCode, 'scopes' => [$privacyScope->id]],
-            ['name' => 'Questionario Adeguata Verifica AML', 'code' => $amlCode, 'scopes' => [$amlScope->id]],
-            ['name' => 'Dichiarazione Titolare Effettivo', 'code' => $amlScope, 'scopes' => [$amlScope->id]],
-            ['name' => 'Dichiarazione PEP (Persona Esposta Politicamente)', 'code' => $amlCode, 'scopes' => [$amlScope->id]],
-            // --- TRASPARENZA E OAM ---
-            ['name' => 'Lettera di Incarico di Mediazione', 'scopes' => [$oamScope->id]],
-            ['name' => 'Avviso sulla Trasparenza (Presa Visione)', 'scopes' => [$oamScope->id]],
-            ['name' => 'Trasparenza sito web', 'scopes' => [$oamScope->id]],
-            ['name' => 'Privacy sito web', 'scopes' => [$oamScope->id]],
-            ['name' => 'Relazione sui requisiti organizzativi ex. art 6', 'scopes' => [$oamScope->id]],
-            // 1. Assetto Organizzativo
-            ['name' => 'Procedura organizzativa - Assetto Organizzativo - Manuale Operativo e Organizzativo', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Assetto Organizzativo - Sistema di Deleghe', 'scopes' => [$oamScope->id]],
-            // 2. Sistema di Controllo Interno
-            ['name' => 'Procedura organizzativa - Sistema di Controllo Interno - Compliance e Risk Management', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Sistema di Controllo Interno - Internal Audit', 'scopes' => [$oamScope->id]],
-            // 3. Normativa Antiriciclaggio (AML)
-            ['name' => 'Procedura organizzativa - Normativa Antiriciclaggio (AML) - Adeguata Verifica della Clientela', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Normativa Antiriciclaggio (AML) - Profilatura del Rischio', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Normativa Antiriciclaggio (AML) - Segnalazione Operazioni Sospette (SOS)', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Normativa Antiriciclaggio (AML) - Conservazione dei Dati', 'scopes' => [$oamScope->id]],
-            // 4. Trasparenza e Tutela del Consumatore
-            ['name' => 'Procedura organizzativa - Trasparenza e Tutela del Consumatore - Informativa Precontrattuale', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Trasparenza e Tutela del Consumatore - Controllo della Pubblicità', 'scopes' => [$oamScope->id]],
-            // 5. Gestione dei Reclami
-            ['name' => 'Procedura organizzativa - Gestione dei Reclami - Ricezione e Trattazione', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Gestione dei Reclami - Informativa sui Sistemi di Risoluzione', 'scopes' => [$oamScope->id]],
-            // 6. Gestione e Monitoraggio della Rete
-            ['name' => 'Procedura organizzativa - Gestione e Monitoraggio della Rete - Selezione e Inserimento', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Gestione e Monitoraggio della Rete - Formazione Continua', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Gestione e Monitoraggio della Rete - Controlli di Rete', 'scopes' => [$oamScope->id]],
-            // 7. Sicurezza Informatica e Privacy
-            ['name' => 'Procedura organizzativa - Sicurezza Informatica e Privacy - GDPR e Data Protection', 'scopes' => [$oamScope->id]],
-            ['name' => 'Procedura organizzativa - Sicurezza Informatica e Privacy - Business Continuity e Disaster Recovery', 'scopes' => [$oamScope->id]],
-            // 8. Modello 231 e Codice Etico
-            ['name' => 'Procedura organizzativa - Modello 231 e Codice Etico - Prevenzione dei Reati', 'scopes' => [$oamScope->id]],
-            ['name' => 'Modulo SECCI (Informazioni Europee di Base)', 'scopes' => [$oamScope->id, $istruttoriaScope->id]],
-            ['name' => 'Modulo Segnalazione OAM', 'scopes' => [$oamScope->id]],
-            // --- ISTRUTTORIA REDDITUALE (Dipendenti) ---
-            ['name' => 'Ultime 3 Buste Paga', 'scopes' => [$istruttoriaScope->id]],
-            ['name' => 'Certificazione Unica (CU)', 'scopes' => [$istruttoriaScope->id]],
-            ['name' => 'Certificato di Stipendio / Attestato di Servizio', 'scopes' => [$istruttoriaScope->id]],
-            ['name' => 'Estratto Conto Contributivo INPS', 'scopes' => [$istruttoriaScope->id]],
-            // --- ISTRUTTORIA REDDITUALE (Pensionati) ---
-            ['name' => 'Cedolino Pensione', 'scopes' => [$istruttoriaScope->id]],
-            ['name' => 'Comunicazione di Quota Cedibile', 'scopes' => [$istruttoriaScope->id]],
-            ['name' => 'Modello Obis/M', 'scopes' => [$istruttoriaScope->id]],
-            // --- DOCUMENTAZIONE AGGIUNTIVA ---
-            ['name' => 'Conteggio Estintivo (per Rinnovi)', 'scopes' => [$istruttoriaScope->id]],
-            ['name' => 'Rapporto di Visita Medica', 'scopes' => [$istruttoriaScope->id]],
+        // 1. Recupero degli Scope
+        $privacy = DocumentScope::where('name', 'Privacy')->first()?->id;
+        $aml = DocumentScope::where('name', 'AML')->first()?->id;
+        $oam = DocumentScope::where('name', 'OAM')->first()?->id;
+        $istruttoria = DocumentScope::where('name', 'Istruttoria')->first()?->id;
+        $onboarding = DocumentScope::where('name', 'Onboarding')->first()?->id;
+        $amministrativo = DocumentScope::where('name', 'Amministrativo')->first()?->id;
+        // 2. Definizione di tutti i 47 documenti con metadati tecnici
+        $data = [
+            // IDENTIFICAZIONE
+            1 => ['slug' => 'carta-identita', 'regex' => '/carta.*identit|c\.i\.|identit/i', 'scopes' => [$privacy, $aml, $istruttoria]],
+            2 => ['slug' => 'patente', 'regex' => '/patente/i', 'scopes' => [$privacy, $aml, $istruttoria]],
+            3 => ['slug' => 'passaporto', 'regex' => '/passaporto/i', 'scopes' => [$privacy, $aml, $istruttoria]],
+            4 => ['slug' => 'codice-fiscale', 'regex' => '/codice.*fiscale|tessera.*sanitaria|c\.f\./i', 'scopes' => [$privacy, $istruttoria]],
+            // PRIVACY
+            5 => ['slug' => 'privacy-informativa', 'regex' => '/informativa.*privacy|consenso.*dati/i', 'scopes' => [$privacy]],
+            6 => ['slug' => 'consenso-sanitario', 'regex' => '/dati.*particolari|sanitari/i', 'scopes' => [$privacy]],
+            7 => ['slug' => 'nomina-incaricato', 'regex' => '/nomina.*incaricato/i', 'scopes' => [$privacy]],
+            8 => ['slug' => 'nomina-responsabile', 'regex' => '/nomina.*responsabile/i', 'scopes' => [$privacy]],
+            9 => ['slug' => 'nomina-amministratore', 'regex' => '/amministratore.*sistema/i', 'scopes' => [$privacy]],
+            // AML
+            10 => ['slug' => 'questionario-aml', 'regex' => '/adeguata.*verifica|questionario.*aml/i', 'scopes' => [$aml]],
+            11 => ['slug' => 'titolare-effettivo', 'regex' => '/titolare.*effettivo/i', 'scopes' => [$aml]],
+            12 => ['slug' => 'dichiarazione-pep', 'regex' => '/persona.*esposta.*politicamente|pep/i', 'scopes' => [$aml]],
+            // MEDIAZIONE / TRASPARENZA
+            13 => ['slug' => 'incarico-mediazione', 'regex' => '/lettera.*incarico|contratto.*mediazione/i', 'scopes' => [$oam]],
+            14 => ['slug' => 'trasparenza-avviso', 'regex' => '/avviso.*trasparenza|principali.*diritti/i', 'scopes' => [$oam]],
+            15 => ['slug' => 'trasparenza-web', 'regex' => '/trasparenza.*sito|foglio.*informativo/i', 'scopes' => [$oam]],
+            16 => ['slug' => 'privacy-web', 'regex' => '/privacy.*sito|privacy.*policy/i', 'scopes' => [$oam]],
+            17 => ['slug' => 'requisiti-art6', 'regex' => '/requisiti.*organizzativi|art.*6/i', 'scopes' => [$oam]],
+            // PROCEDURE OAM (18-35)
+            18 => ['slug' => 'proc-manuale-operativo', 'regex' => '/manuale.*operativo/i', 'scopes' => [$oam]],
+            19 => ['slug' => 'proc-sistema-deleghe', 'regex' => '/sistema.*deleghe/i', 'scopes' => [$oam]],
+            20 => ['slug' => 'proc-compliance-risk', 'regex' => '/compliance.*risk/i', 'scopes' => [$oam]],
+            21 => ['slug' => 'proc-internal-audit', 'regex' => '/internal.*audit/i', 'scopes' => [$oam]],
+            22 => ['slug' => 'proc-aml-verifica', 'regex' => '/verifica.*clientela/i', 'scopes' => [$oam, $aml]],
+            23 => ['slug' => 'proc-aml-profilatura', 'regex' => '/profilatura.*rischio/i', 'scopes' => [$oam, $aml]],
+            24 => ['slug' => 'proc-aml-sos', 'regex' => '/segnalazione.*sospette|sos/i', 'scopes' => [$oam, $aml]],
+            25 => ['slug' => 'proc-aml-conservazione', 'regex' => '/conservazione.*dati/i', 'scopes' => [$oam, $aml]],
+            26 => ['slug' => 'proc-trasparenza-precontrattuale', 'regex' => '/informativa.*precontrattuale/i', 'scopes' => [$oam]],
+            27 => ['slug' => 'proc-controllo-pubblicita', 'regex' => '/controllo.*pubblicit/i', 'scopes' => [$oam]],
+            28 => ['slug' => 'proc-reclami-ricezione', 'regex' => '/ricezione.*trattazione.*reclami/i', 'scopes' => [$oam]],
+            29 => ['slug' => 'proc-reclami-info', 'regex' => '/informativa.*risoluzione.*reclami/i', 'scopes' => [$oam]],
+            30 => ['slug' => 'proc-rete-selezione', 'regex' => '/selezione.*inserimento.*rete/i', 'scopes' => [$oam]],
+            31 => ['slug' => 'proc-rete-formazione', 'regex' => '/formazione.*continua/i', 'scopes' => [$oam]],
+            32 => ['slug' => 'proc-rete-controlli', 'regex' => '/controlli.*rete/i', 'scopes' => [$oam]],
+            33 => ['slug' => 'proc-privacy-gdpr', 'regex' => '/gdpr.*data.*protection/i', 'scopes' => [$oam, $privacy]],
+            34 => ['slug' => 'proc-business-continuity', 'regex' => '/business.*continuity|disaster.*recovery/i', 'scopes' => [$oam]],
+            35 => ['slug' => 'proc-231-etica', 'regex' => '/modello.*231|codice.*etico/i', 'scopes' => [$oam]],
+            // MODULISTICA E REDDITO
+            36 => ['slug' => 'modulo-secci', 'regex' => '/secci|informazioni.*europee/i', 'scopes' => [$oam, $istruttoria]],
+            37 => ['slug' => 'segnalazione-oam', 'regex' => '/segnalazione.*oam/i', 'scopes' => [$oam]],
+            38 => ['slug' => 'buste-paga', 'regex' => '/busta.*paga/i', 'scopes' => [$istruttoria]],
+            39 => ['slug' => 'cu', 'regex' => '/certificazione.*unica|modello.*cu/i', 'scopes' => [$istruttoria]],
+            40 => ['slug' => 'certificato-stipendio', 'regex' => '/attestato.*servizio|certificato.*stipendio/i', 'scopes' => [$istruttoria]],
+            41 => ['slug' => 'estratto-inps', 'regex' => '/estratto.*inps|contributivo/i', 'scopes' => [$istruttoria]],
+            42 => ['slug' => 'cedolino-pensione', 'regex' => '/cedolino.*pensione/i', 'scopes' => [$istruttoria]],
+            43 => ['slug' => 'quota-cedibile', 'regex' => '/quota.*cedibile/i', 'scopes' => [$istruttoria]],
+            44 => ['slug' => 'modello-obism', 'regex' => '/obis/i', 'scopes' => [$istruttoria]],
+            45 => ['slug' => 'conteggio-estintivo', 'regex' => '/conteggio.*estintivo/i', 'scopes' => [$istruttoria]],
+            46 => ['slug' => 'visita-medica', 'regex' => '/visita.*medica/i', 'scopes' => [$istruttoria]],
+            47 => ['slug' => 'transparency-doc', 'regex' => '/rilevazione.*tassi|tassi.*usura|tegm/i', 'scopes' => [$oam]],
+            // --- INTEGRAZIONI AREA COLLABORATORI (Onboarding) ---
+            46 => ['slug' => 'visita-medica', 'regex' => '/visita.*medica/i', 'scopes' => [$istruttoria]],
+            47 => ['slug' => 'transparency-doc', 'regex' => '/rilevazione.*tassi|tassi.*usura|tegm/i', 'scopes' => [$oam]],
+            // --- INTEGRAZIONI AREA COLLABORATORI (Onboarding & Admin) ---
+            48 => ['name' => 'Visura Camerale', 'slug' => 'visura-camerale', 'regex' => '/visura.*camerale|camera.*commercio|registro.*imprese/i', 'scopes' => [$onboarding]],
+            49 => ['name' => 'Casellario Giudiziale', 'slug' => 'casellario-giudiziale', 'regex' => '/casellario.*giudiziale|procura.*repubblica/i', 'scopes' => [$onboarding]],
+            50 => ['name' => 'Carichi Pendenti', 'slug' => 'carichi-pendenti', 'regex' => '/carichi.*pendenti/i', 'scopes' => [$onboarding]],
+            51 => ['name' => 'Attestato OAM / IVASS', 'slug' => 'attestato-professionale', 'regex' => '/attestato.*(oam|ivass)|prova.*valutativa|formazione.*professionale/i', 'scopes' => [$onboarding]],
+            52 => ['name' => 'Polizza RC Professionale', 'slug' => 'polizza-rc', 'regex' => '/polizza.*rc|responsabilita.*civile|assicurativa/i', 'scopes' => [$onboarding]],
+            53 => ['name' => 'Documento Identità e CF', 'slug' => 'identita-codice-fiscale', 'regex' => '/carta.*identita|passaporto|codice.*fiscale|tessera.*sanitaria/i', 'scopes' => [$onboarding]],
+            54 => ['name' => 'Modulo IBAN', 'slug' => 'iban-coordinate', 'regex' => '/iban|coordinate.*bancarie|appoggio.*conto/i', 'scopes' => [$amministrativo]],
+            55 => ['name' => 'Contratto Collaborazione Firmato', 'slug' => 'contratto-firmato', 'regex' => '/contratto.*collaborazione|scrittura.*privata|accordo.*firmato/i', 'scopes' => [$amministrativo]],
+            56 => ['name' => 'Autocertificazione Antimafia', 'slug' => 'antimafia', 'regex' => '/antimafia|dichiarazione.*sostitutiva/i', 'scopes' => [$onboarding]],
         ];
 
-        foreach ($types as $t) {
-            $type = \App\Models\DocumentType::firstOrCreate(['name' => $t['name']]);
-            if (isset($t['code'])) {
-                $type->code = $t['code'];
-                $type->save();
+        // 3. Esecuzione: Aggiornamento record esistenti
+        foreach ($data as $id => $attr) {
+            $type = DocumentType::find($id);
+
+            if ($type) {
+                // Aggiorniamo solo i campi tecnici necessari all'automazione
+                $type->update([
+                    'slug' => $attr['slug'],
+                    'regex' => $attr['regex'],
+                    'priority' => $attr['priority'] ?? 1,
+                ]);
+
+                // Sincronizzazione Scopes (Rimuove null e sincronizza)
+                $scopes = array_filter($attr['scopes']);
+                if (!empty($scopes)) {
+                    $type->scopes()->syncWithoutDetaching($scopes);
+                }
             }
-            if (isset($t['scopes'])) {
-                $type->scopes()->syncWithoutDetaching($t['scopes']);
-            }
-        }
-
-        $now = '2026-03-07 09:20:00';
-
-        $types = [
-            // --- IDENTIFICAZIONE ---
-            ['id' => 1, 'name' => "Carta d'Identità (Fronte/Retro)", 'code' => 'CI', 'codegroup' => 'IDENTIFICAZIONE', 'is_person' => 1, 'is_monitored' => 1, 'duration' => 3650],
-            ['id' => 2, 'name' => 'Patente', 'code' => 'PATENTE', 'codegroup' => 'IDENTIFICAZIONE', 'is_person' => 1, 'is_monitored' => 1, 'duration' => 3650],
-            ['id' => 3, 'name' => 'Passaporto', 'code' => 'PASSAPORTO', 'codegroup' => 'IDENTIFICAZIONE', 'is_person' => 1, 'is_monitored' => 1, 'duration' => 3650],
-            ['id' => 4, 'name' => 'Codice Fiscale / Tessera Sanitaria', 'code' => 'CF', 'codegroup' => 'IDENTIFICAZIONE', 'is_person' => 1],
-            // --- PRIVACY ---
-            ['id' => 5, 'name' => 'Informativa Privacy e Consenso Trattamento Dati', 'code' => 'PRIVACY_BASE', 'codegroup' => 'PRIVACY', 'is_signed' => 1, 'is_template' => 1],
-            ['id' => 6, 'name' => 'Consenso al Trattamento Dati Particolari (Sanitari)', 'code' => 'PRIVACY_HEALTH', 'codegroup' => 'PRIVACY', 'is_signed' => 1, 'is_sensible' => 1],
-            ['id' => 7, 'name' => 'Nomina incaricato del trattamento', 'code' => 'GDPR_INC', 'codegroup' => 'PRIVACY', 'is_signed' => 1],
-            ['id' => 8, 'name' => 'Nomina responsabile del trattamento', 'code' => 'GDPR_RESP', 'codegroup' => 'PRIVACY', 'is_signed' => 1],
-            ['id' => 9, 'name' => 'Nomina amministratore di sistema', 'code' => 'GDPR_ADMIN', 'codegroup' => 'PRIVACY', 'is_signed' => 1],
-            // --- AML (Antiriciclaggio) ---
-            ['id' => 10, 'name' => 'Questionario Adeguata Verifica AML', 'code' => 'AML_QUEST', 'codegroup' => 'AML', 'is_signed' => 1, 'is_template' => 1],
-            ['id' => 11, 'name' => 'Dichiarazione Titolare Effettivo', 'code' => 'AML_UBO', 'codegroup' => 'AML', 'is_signed' => 1],
-            ['id' => 12, 'name' => 'Dichiarazione PEP (Persona Esposta Politicamente)', 'code' => 'AML_PEP', 'codegroup' => 'AML', 'is_signed' => 1],
-            // --- TRASPARENZA E OAM ---
-            ['id' => 13, 'name' => 'Lettera di Incarico di Mediazione', 'code' => 'OAM_INCARICO', 'codegroup' => 'OAM', 'is_signed' => 1, 'is_template' => 1],
-            ['id' => 14, 'name' => 'Avviso sulla Trasparenza (Presa Visione)', 'code' => 'OAM_TRASPARENZA', 'codegroup' => 'OAM', 'is_signed' => 1],
-            ['id' => 15, 'name' => 'Trasparenza sito web', 'code' => 'WEB_TRANSPARENCY', 'codegroup' => 'OAM'],
-            ['id' => 16, 'name' => 'Privacy sito web', 'code' => 'WEB_PRIVACY', 'codegroup' => 'OAM'],
-            ['id' => 17, 'name' => 'Relazione sui requisiti organizzativi ex. art 6', 'code' => 'OAM_REL_ART6', 'codegroup' => 'OAM'],
-            ['id' => 37, 'name' => 'Modulo Segnalazione OAM', 'code' => 'OAM_SEGNALAZIONE', 'codegroup' => 'OAM'],
-            // --- PROCEDURE ORGANIZZATIVE (Dettaglio granulare dello snippet) ---
-            ['id' => 18, 'name' => 'Proc. Org. - Manuale Operativo e Organizzativo', 'code' => 'PROC_MANUALE', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 19, 'name' => 'Proc. Org. - Sistema di Deleghe', 'code' => 'PROC_DELEGHE', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 20, 'name' => 'Proc. Org. - Compliance e Risk Management', 'code' => 'PROC_COMPLIANCE', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 21, 'name' => 'Proc. Org. - Internal Audit', 'code' => 'PROC_AUDIT', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 22, 'name' => 'Proc. Org. - AML - Adeguata Verifica', 'code' => 'PROC_AML_AV', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 23, 'name' => 'Proc. Org. - AML - Profilatura Rischio', 'code' => 'PROC_AML_RISK', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 24, 'name' => 'Proc. Org. - AML - Segnalazione SOS', 'code' => 'PROC_AML_SOS', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 26, 'name' => 'Proc. Org. - Informativa Precontrattuale', 'code' => 'PROC_PRECONTR', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 28, 'name' => 'Proc. Org. - Gestione Reclami', 'code' => 'PROC_RECLAMI', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 30, 'name' => 'Proc. Org. - Selezione e Inserimento Rete', 'code' => 'PROC_RETE_SEL', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 31, 'name' => 'Proc. Org. - Formazione Continua Rete', 'code' => 'PROC_RETE_FORM', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 33, 'name' => 'Proc. Org. - GDPR e Data Protection', 'code' => 'PROC_GDPR', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            ['id' => 35, 'name' => 'Proc. Org. - Modello 231 e Codice Etico', 'code' => 'PROC_231', 'codegroup' => 'PROCEDURE_ORG', 'is_person' => 0],
-            // --- ISTRUTTORIA REDDITUALE E PRATICA ---
-            ['id' => 36, 'name' => 'Modulo SECCI (Informazioni Europee)', 'code' => 'SECCI', 'codegroup' => 'ISTRUTTORIA', 'is_practice' => 1, 'is_template' => 1],
-            ['id' => 38, 'name' => 'Ultime 3 Buste Paga', 'code' => 'BUSTE_PAGA', 'codegroup' => 'REDDITO', 'is_practice' => 1],
-            ['id' => 39, 'name' => 'Certificazione Unica (CU)', 'code' => 'CU', 'codegroup' => 'REDDITO', 'is_monitored' => 1, 'duration' => 365],
-            ['id' => 40, 'name' => 'Certificato di Stipendio', 'code' => 'CERT_STIPENDIO', 'codegroup' => 'REDDITO', 'is_practice' => 1],
-            ['id' => 42, 'name' => 'Cedolino Pensione', 'code' => 'CEDOLINO_PENS', 'codegroup' => 'REDDITO', 'is_practice' => 1],
-            ['id' => 45, 'name' => 'Conteggio Estintivo (per Rinnovi)', 'code' => 'CONTEGGIO_EST', 'codegroup' => 'ISTRUTTORIA', 'is_practice' => 1],
-            ['id' => 46, 'name' => 'Rapporto di Visita Medica', 'code' => 'VISITA_MEDICA', 'codegroup' => 'ISTRUTTORIA', 'is_practice' => 1, 'is_sensible' => 1],
-            ['id' => 47, 'name' => 'Transparency Document', 'code' => 'TRANSPARENCY', 'codegroup' => 'OAM', 'is_monitored' => 1, 'duration' => 365],
-        ];
-
-        foreach ($types as $type) {
-            DB::table('document_types')->updateOrInsert(
-                ['id' => $type['id']],
-                array_merge([
-                    'is_person' => 1,
-                    'is_signed' => 0,
-                    'is_monitored' => 0,
-                    'is_sensible' => 0,
-                    'is_template' => 0,
-                    'is_stored' => 1,  // Impostato a 1 per default per conservazione
-                    'is_practice' => 0,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ], $type)
-            );
         }
 
         $ruoliPrivacy = [

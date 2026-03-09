@@ -8,17 +8,19 @@ use App\Filament\Resources\CompanySenders\Pages\ListCompanySenders;
 use App\Filament\Resources\CompanySenders\Schemas\CompanySenderForm;
 use App\Filament\Resources\CompanySenders\Tables\CompanySendersTable;
 use App\Models\CompanySender;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 
 class CompanySenderResource extends Resource
 {
     protected static ?string $model = CompanySender::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Schema $schema): Schema
     {

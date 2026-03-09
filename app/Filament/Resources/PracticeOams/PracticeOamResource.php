@@ -13,12 +13,21 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use BackedEnum;
+use UnitEnum;
 
 class PracticeOamResource extends Resource
 {
     protected static ?string $model = PracticeOam::class;
 
+    protected static string|UnitEnum|null $navigationGroup = 'Compliance';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+
+    protected static ?string $navigationLabel = 'OAM Vigilanza';
+
+    protected static ?string $modelLabel = 'OAM Vigilanza';
+
+    protected static ?string $pluralModelLabel = 'OAM Vigilanza';
 
     public static function form(Schema $schema): Schema
     {

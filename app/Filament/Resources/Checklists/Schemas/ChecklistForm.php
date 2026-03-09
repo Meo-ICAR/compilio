@@ -95,10 +95,16 @@ class ChecklistForm
                             ->label('Descrizione generale')
                             ->columnSpanFull(),
                     ])
-                    ->columns(2),
+                    ->collapsible()
+                    ->collapsed()
+                    ->columnSpanFull(),
+                //   ->columns(2),
                 // SEZIONE 2: Domande / Items (Repeater)
                 Section::make('Domande ed Elementi della Checklist')
                     ->description("Trascina gli elementi per riordinarli. L'ordine verrà salvato automaticamente.")
+                    ->collapsible()
+                    ->collapsed()
+                    ->columnSpanFull()
                     ->schema([
                         Repeater::make('items')
                             ->relationship('checklistItems')  // Punta alla relazione HasMany nel modello Checklist

@@ -30,6 +30,9 @@ class ChecklistsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->query(function () {
+                return $this->getOwnerRecord()->checklists();
+            })
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')

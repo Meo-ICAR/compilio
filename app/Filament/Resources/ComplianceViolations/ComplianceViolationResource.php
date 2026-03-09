@@ -23,7 +23,7 @@ class ComplianceViolationResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
-    protected static ?string $navigationLabel = 'Violazioni Compliance';
+    protected static ?string $navigationLabel = 'Registro Violazioni';
 
     protected static ?string $modelLabel = 'Violazione';
 

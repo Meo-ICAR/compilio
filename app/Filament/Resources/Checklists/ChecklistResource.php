@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Checklists;
 use App\Filament\Resources\Checklists\Pages\CreateChecklist;
 use App\Filament\Resources\Checklists\Pages\EditChecklist;
 use App\Filament\Resources\Checklists\Pages\ListChecklists;
+use App\Filament\Resources\Checklists\RelationManagers\ChecklistItemsRelationManager;
 use App\Filament\Resources\Checklists\Schemas\ChecklistForm;
 use App\Filament\Resources\Checklists\Tables\ChecklistsTable;
 use App\Models\Checklist;
@@ -44,7 +45,7 @@ class ChecklistResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\Checklists\RelationManagers\ChecklistItemsRelationManager::class,
+            ChecklistItemsRelationManager::class,
         ];
     }
 

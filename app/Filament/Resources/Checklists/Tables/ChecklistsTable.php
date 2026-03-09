@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Checklists\Tables;
 
+use App\Models\Checklist;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -20,6 +21,9 @@ class ChecklistsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->query(function () {
+                return Checklist::whereNull('target_id')->where('company_id', auth()->user()->company_id);
+            })
             ->columns([
                 TextColumn::make('name')
                     ->label('Nome')

@@ -24,7 +24,7 @@ class TrainingRecordResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
 
-    protected static ?string $navigationLabel = 'Formazione';
+    protected static ?string $navigationLabel = 'Registro Formazione';
 
     protected static ?string $modelLabel = 'Formazione';
 

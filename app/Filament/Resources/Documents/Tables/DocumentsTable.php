@@ -17,10 +17,21 @@ class DocumentsTable
             ->columns([
                 TextColumn::make('name')
                     ->label('Nome Documento')
-                    ->searchable(),
+                    ->sortable()
+                    ->searchable()
+                    // Rende il testo blu e sottolineato come un link
+                    ->color('primary')
+                    ->weight('bold')
+                    // Genera il link dinamico dall'URL nel database
+                    ->url(fn($record): ?string => $record->url_document)
+                    // Apre il documento in una nuova scheda del browser
+                    ->openUrlInNewTab(),
                 TextColumn::make('documentType.name')
                     ->label('Tipo Documento')
-                    ->searchable(),
+                    ->sortable()
+                    ->searchable()
+                    // Opzionale: anche qui puoi mettere un badge per renderlo più leggibile
+                    ->badge(),
                 IconColumn::make('is_signed')
                     ->label('Deve essere firmato')
                     ->boolean(),
