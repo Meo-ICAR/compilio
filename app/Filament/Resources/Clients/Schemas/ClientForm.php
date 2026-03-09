@@ -22,61 +22,58 @@ class ClientForm
     {
         return $schema
             ->components([
-                Tabs::make('Client Details')
+                Tabs::make('Informazioni Cliente')
                     ->tabs([
                         // --- TAB 1: ANAGRAFICA ---
                         Tab::make('Anagrafica')
                             ->icon('heroicon-o-user')
                             ->schema([
-                                Grid::make(3)->schema([
-                                    Toggle::make('is_person')
-                                        ->label('Persona Fisica')
-                                        ->default(true)
-                                        ->live()  // Ricarica la form al cambio
-                                        ->columnSpan(1),
-                                    Select::make('status')
-                                        ->options([
-                                            'raccolta_dati' => 'Raccolta Dati',
-                                            'valutazione_aml' => 'Valutazione AML',
-                                            'approvata' => 'Approvata',
-                                            'sos_inviata' => 'SOS Inviata',
-                                            'chiusa' => 'Chiusa',
-                                        ])
-                                        ->required()
-                                        ->columnSpan(2),
-                                ]),
                                 Section::make('Dati Identificativi')
                                     ->schema([
                                         TextInput::make('name')
-                                            ->label(fn(Get $get) => $get('is_person') ? 'Cognome' : 'Ragione Sociale')
+                                            ->label(fn(Get $get) => $get('is_person') ? 'Cognome / Ragione Sociale' : 'Ragione Sociale')
                                             ->required()
                                             ->maxLength(255),
+                                        Toggle::make('is_person')
+                                            ->label('Persona Fisica')
+                                            ->default(true)
+                                            ->live(),  // Ricarica la form al cambio
                                         TextInput::make('first_name')
                                             ->label('Nome')
                                             ->visible(fn(Get $get) => $get('is_person'))  // Scompare se azienda
                                             ->maxLength(255),
                                         TextInput::make('tax_code')
-                                            ->label('Codice Fiscale / P.IVA')
+                                            ->label(fn(Get $get) => $get('is_person') ? 'Codice Fiscale' : 'P.IVA')
                                             ->unique(ignoreRecord: true)
                                             ->maxLength(16),
                                     ])
-                                    ->columns(2),
+                                    ->columns(4),
                                 Section::make('Contatti & Origine')
                                     ->schema([
                                         TextInput::make('email')->email(),
-                                        TextInput::make('phone')->tel(),
+                                        TextInput::make('phone')->label('Telefono')->tel(),
                                         Select::make('client_type_id')
+                                            ->label('Tipologia')
                                             ->relationship('clientType', 'name')
                                             ->searchable(),
-                                        Select::make('leadsource_id')
-                                            ->relationship('leadSource', 'name')
-                                            ->label('Sorgente Lead')
-                                            ->searchable(),
                                     ])
-                                    ->columns(2),
+                                    ->columns(3),
+                            ]),
+                        // --- TAB 4: AMMINISTRAZIONE ---
+                        Tab::make('Admin / Stato')
+                            ->icon('heroicon-o-cog')
+                            ->schema([
+                                Grid::make(3)->schema([
+                                    Toggle::make('is_anonymous')->label('Anagrafica di comodo non reale'),
+                                    Toggle::make('is_lead')->label('È un Lead'),
+                                    Select::make('leadsource_id')
+                                        ->relationship('leadSource', 'name')
+                                        ->label('Sorgente Lead')
+                                        ->searchable(),
+                                ]),
                             ]),
                         // --- TAB 2: COMPLIANCE & PRIVACY ---
-                        Tab::make('Compliance & Privacy')
+                        Tab::make('Compliance AML')
                             ->icon('heroicon-o-shield-check')
                             ->schema([
                                 Section::make('Valutazione Rischio (AML)')
@@ -88,6 +85,19 @@ class ClientForm
                                             ->label('Esente art. 108 - ex art. 128-novies TUB')
                                             ->helperText("Seleziona se il cliente è esente ai sensi dell'art. 108 del Testo Unico Bancario"),
                                         Toggle::make('is_remote_interaction')->label('Interazione a Distanza'),
+                                        Select::make('status')
+                                            ->label('Stato verifica cliente')
+                                            ->options([
+                                                'raccolta_dati' => 'Raccolta Dati',
+                                                'valutazione_aml' => 'Valutazione AML',
+                                                'approvata' => 'Approvata',
+                                                'sos_inviata' => 'SOS Inviata',
+                                                'chiusa' => 'Chiusa',
+                                            ]),
+                                        Toggle::make('is_approved')->label('Approvato'),
+                                        DateTimePicker::make('blacklist_at')
+                                            ->label('Data Blacklist')
+                                            ->readOnly(),
                                     ])
                                     ->columns(3),
                                 Section::make('Consensi Privacy')
@@ -96,48 +106,12 @@ class ClientForm
                                         DateTimePicker::make('consent_marketing_at')->label('Marketing'),
                                         DateTimePicker::make('consent_profiling_at')->label('Profilazione'),
                                         DateTimePicker::make('consent_sic_at')->label('Consenso SIC (CRIF)'),
+                                        Textarea::make('subfornitori')
+                                            ->label('Subfornitori che trattano dati personali per conto del cliente')
+                                            ->rows(3)
+                                            ->columnSpanFull(),
                                     ])
                                     ->columns(2),
-                            ]),
-                        // --- TAB 3: DATI ECONOMICI E DOCUMENTI ---
-                        Tab::make('Dati Finanziari & Doc')
-                            ->icon('heroicon-o-banknotes')
-                            ->schema([
-                                Grid::make(2)->schema([
-                                    TextInput::make('salary')
-                                        ->numeric()
-                                        ->prefix('€')
-                                        ->label('Retribuzione Annuale (RAL)'),
-                                    TextInput::make('salary_quote')
-                                        ->numeric()
-                                        ->step(0.01)
-                                        ->label('Quota Cedibile/Calcolata'),
-                                ]),
-                                Section::make('Documentazione')
-                                    ->schema([
-                                        SpatieMediaLibraryFileUpload::make('documents')
-                                            ->collection('client_documents')
-                                            ->multiple()
-                                            ->reorderable()
-                                            ->label('Documenti Identità / Reddito')
-                                            ->columnSpanFull(),
-                                    ]),
-                            ]),
-                        // --- TAB 4: AMMINISTRAZIONE ---
-                        Tab::make('Admin / Stato')
-                            ->icon('heroicon-o-cog')
-                            ->schema([
-                                Textarea::make('subfornitori')
-                                    ->rows(3)
-                                    ->columnSpanFull(),
-                                Grid::make(3)->schema([
-                                    Toggle::make('is_approved')->label('Approvato'),
-                                    Toggle::make('is_anonymous')->label('Anonimizza'),
-                                    Toggle::make('is_lead')->label('È un Lead'),
-                                ]),
-                                DateTimePicker::make('blacklist_at')
-                                    ->label('Data Blacklist')
-                                    ->readOnly(),
                             ]),
                     ])
                     ->columnSpanFull(),

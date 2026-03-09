@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\SosReports\Schemas;
 
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class SosReportForm
@@ -25,14 +25,28 @@ class SosReportForm
                                 ->label('Protocollo Interno')
                                 ->required()
                                 ->helperText('Es: SOS-2026-001')
-                                ->unique(ignoreRecord: true),
-                            Select::make('company_id')
-                                ->label('Azienda')
-                                ->relationship('company', 'name')
-                                ->searchable()
-                                ->preload()
-                                ->required()
-                                ->helperText('Azienda associata al report'),
+                                ->unique(ignoreRecord: true)
+                                ->default(function () {
+                                    // Genera automaticamente: SOS-ANNO-MESE-PROGRESSIVO
+                                    $year = date('Y');
+                                    $month = date('m');
+
+                                    // Trova l'ultimo progressivo per questo mese
+                                    $lastProgressive = \App\Models\SosReport::whereYear('created_at', '=', $year)
+                                        ->whereMonth('created_at', '=', $month)
+                                        ->orderBy('codice_protocollo_interno', 'desc')
+                                        ->first();
+
+                                    if ($lastProgressive) {
+                                        // Estrai il numero progressivo (es: SOS-2026-001 -> 001)
+                                        preg_match('/SOS-\d{4}-(\d+)/', $lastProgressive->codice_protocollo_interno, $matches);
+                                        $progressive = $matches[1] ?? '001';
+                                    } else {
+                                        $progressive = '001';
+                                    }
+
+                                    return "SOS-{$year}-{$month}-{$progressive}";
+                                }),
                             Select::make('responsabile_id')
                                 ->label('Responsabile')
                                 ->relationship('responsabile', 'name')

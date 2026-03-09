@@ -106,6 +106,8 @@ class DocumentTypeSeeder extends Seeder
             61 => ['name' => 'Regolamento Privacy', 'slug' => 'regolamento-privacy', 'regex' => '/privacy|gdpr|regolamento.*privacy/i', 'scopes' => [$privacy], 'is_company' => true],
             62 => ['name' => 'Polizza RC Professionale', 'slug' => 'polizza-rc', 'regex' => '/polizza.*rc|responsabilita.*civile/i', 'scopes' => [$onboarding], 'is_agent' => true, 'is_principal' => true],
             63 => ['name' => 'Attestato OAM / IVASS', 'slug' => 'attestato-professionale', 'regex' => '/attestato.*(oam|ivass)/i', 'scopes' => [$onboarding], 'is_agent' => true, 'is_principal' => true],
+            64 => ['name' => 'Modulo Richiesta Accesso Dati', 'slug' => 'richiesta-accesso-gdpr', 'regex' => '/richiesta.*accesso.*dati|esercizio.*diritti.*privacy/i', 'scopes' => [$audit]],
+            65 => ['name' => 'Riscontro al Cliente (GDPR)', 'slug' => 'riscontro-accesso-gdpr', 'regex' => '/riscontro.*accesso|invio.*dati.*personali/i', 'scopes' => [$audit]],
         ];
 
         // 3. Esecuzione: Aggiornamento record esistenti

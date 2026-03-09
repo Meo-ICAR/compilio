@@ -25,13 +25,13 @@ class SosReportResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
-    protected static ?string $navigationLabel = 'SOS Reports';
+    protected static ?string $navigationLabel = 'Registro SOS';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 10;
 
-    protected static ?string $modelLabel = 'SOS Report';
+    protected static ?string $modelLabel = 'Segnalazione Operazione Sospetta';
 
-    protected static ?string $pluralModelLabel = 'SOS Reports';
+    protected static ?string $pluralModelLabel = 'Segnalazioni Operazioni Sospette';
 
     public static function form(Schema $schema): Schema
     {

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Model;
 
 class SosReport extends Model
@@ -30,6 +31,11 @@ class SosReport extends Model
         'updated_at' => 'datetime',
     ];
 
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'client_id');
+    }
+
     /**
      * Relazione con AUI Record
      */
@@ -52,6 +58,12 @@ class SosReport extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'company_id');
+    }
+
+    public function checklist()
+    {
+        // Un client privacy ha una sola checklist
+        return $this->morphOne(Checklist::class, 'target');
     }
 
     /**

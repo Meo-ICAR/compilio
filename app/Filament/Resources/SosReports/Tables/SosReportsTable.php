@@ -2,14 +2,27 @@
 
 namespace App\Filament\Resources\SosReports\Tables;
 
+use App\Filament\Resources\Checklists\ChecklistResource;
+use App\Models\SosReport;
+use App\Services\ChecklistService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Model;
 
 class SosReportsTable
 {
@@ -17,15 +30,10 @@ class SosReportsTable
     {
         return $table
             ->columns([
-                TextColumn::make('codice_protocollo_interno')
-                    ->label('Protocollo')
+                TextColumn::make('client.name')
+                    ->label('Cliente')
                     ->searchable()
-                    ->weight('bold')
-                    ->sortable(),
-                TextColumn::make('company.name')
-                    ->label('Azienda')
-                    ->searchable()
-                    ->placeholder('Nessuna azienda'),
+                    ->placeholder('Non assegnato'),
                 TextColumn::make('stato')
                     ->label('Stato')
                     ->badge()
@@ -38,21 +46,30 @@ class SosReportsTable
                     ->formatStateUsing(fn($record): string => $record->grado_sospetto_label),
                 TextColumn::make('motivo_sospetto')
                     ->label('Motivo')
-                    ->limitWords(10)
+                    //  ->limitWords(10)
                     ->searchable(),
                 TextColumn::make('data_segnalazione_uif')
                     ->label('Data Segnalazione UIF')
                     ->date('d/m/Y')
                     ->sortable()
                     ->placeholder('Non segnalata'),
-                TextColumn::make('protocollo_uif')
-                    ->label('Protocollo UIF')
-                    ->searchable()
-                    ->placeholder('Nessuno'),
                 TextColumn::make('responsabile.name')
                     ->label('Responsabile')
                     ->searchable()
                     ->placeholder('Non assegnato'),
+                IconColumn::make('has_checklist')
+                    ->label('Checklist')
+                    ->boolean()
+                    ->getStateUsing(function (SosReport $record): bool {
+                        return $record
+                            ->checklist()
+                            ->where('code', 'SOS_WORKFLOW')
+                            ->exists();
+                    })
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
                 TextColumn::make('created_at')
                     ->label('Creato il')
                     ->dateTime('d/m/Y H:i')
@@ -81,6 +98,46 @@ class SosReportsTable
                     ]),
             ])
             ->recordActions([
+                Action::make('apriSOS')
+                    ->label('Segnalazione SOS')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('warning')
+                    ->action(function (SosReport $record, ChecklistService $checklistService) {
+                        try {
+                            // Verifichiamo se esiste già una checklist per questo client privacy
+                            $existingChecklist = $record
+                                ->checklist()
+                                ->where('code', 'SOS_WORKFLOW')
+                                ->first();
+
+                            if ($existingChecklist) {
+                                // Se esiste, mostriamo una notifica e reindirizziamo
+                                Notification::make()
+                                    ->info()
+                                    ->title('Checklist Già Presente')
+                                    ->body('La checklist esiste già. Puoi compilarla o modificarla.')
+                                    ->send();
+
+                                // Reindirizziamo alla pagina di modifica della checklist
+                                return redirect()->to(ChecklistResource::getUrl('edit', ['record' => $existingChecklist]));
+                            } else {
+                                // Se non esiste, la creiamo
+                                $checklistService->assignTemplate($record, 'SOS_WORKFLOW');
+
+                                Notification::make()
+                                    ->success()
+                                    ->title('Checklist Assegnata!')
+                                    ->body('La Checklist è pronta per essere compilata')
+                                    ->send();
+                            }
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Errore')
+                                ->body("Errore durante l'assegnazione della checklist: " . $e->getMessage())
+                                ->send();
+                        }
+                    }),
                 ViewAction::make(),
                 EditAction::make(),
             ])

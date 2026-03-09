@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\ChecklistDocument;
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Model;
 // Rimuovi eventuali "use App\Models\BelongsTo;" se presenti
 use Illuminate\Database\Eloquent\Relations\BelongsTo;  // <--- Import corretto
@@ -74,6 +75,12 @@ class Practice extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
+    }
+
+    public function checklist()
+    {
+        // Un client privacy ha una sola checklist
+        return $this->morphOne(Checklist::class, 'target');
     }
 
     public function clients()

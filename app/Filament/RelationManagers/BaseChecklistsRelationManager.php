@@ -8,13 +8,13 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -173,6 +173,12 @@ abstract class BaseChecklistsRelationManager extends RelationManager
                             ->title($this->getSuccessMessage())
                             ->send();
                     }),
+                Action::make('gestisci_privacy')
+                    ->label('Privacy')
+                    ->icon('heroicon-o-shield-check')
+                    ->color('info')
+                    ->url(fn() => route('filament.admin.resources.client-privacies.index'))
+                    ->openUrlInNewTab(),
             ]);
     }
 }

@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\ClientMandates;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\ClientMandates\Pages\CreateClientMandate;
 use App\Filament\Resources\ClientMandates\Pages\EditClientMandate;
 use App\Filament\Resources\ClientMandates\Pages\ListClientMandates;
+use App\Filament\Resources\ClientMandates\RelationManagers\ChecklistsRelationManager;
 use App\Filament\Resources\ClientMandates\Schemas\ClientMandateForm;
 use App\Filament\Resources\ClientMandates\Tables\ClientMandatesTable;
 use App\Models\ClientMandate;
@@ -43,6 +45,8 @@ class ClientMandateResource extends Resource
     {
         return [
             RelationManagers\PracticesRelationManager::class,
+            DocumentsRelationManager::class,
+            ChecklistsRelationManager::class,
         ];
     }
 

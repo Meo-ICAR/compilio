@@ -3,8 +3,9 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Model;
 
 class ClientPrivacy extends Model
 {
@@ -26,6 +27,20 @@ class ClientPrivacy extends Model
 
     public function client(): BelongsTo
     {
-        return $this->belongsTo(Client::class);
+        return $this->belongsTo(Client::class, 'client_id');
+    }
+
+    /**
+     * Relazione con la Company
+     */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class, 'company_id');
+    }
+
+    public function checklist()
+    {
+        // Un client privacy ha una sola checklist
+        return $this->morphOne(Checklist::class, 'target');
     }
 }
