@@ -45,9 +45,9 @@ class AgentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            TrainingRecordsRelationManager::class,
             DocumentsRelationManager::class,
             ChecklistsRelationManager::class,
+            TrainingRecordsRelationManager::class,
         ];
     }
 

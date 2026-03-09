@@ -99,8 +99,13 @@ class DocumentTypeSeeder extends Seeder
             54 => ['name' => 'Modulo IBAN', 'slug' => 'iban-coordinate', 'regex' => '/iban|coordinate.*bancarie|appoggio.*conto/i', 'scopes' => [$amministrativo]],
             55 => ['name' => 'Contratto Collaborazione Firmato', 'slug' => 'contratto-firmato', 'regex' => '/contratto.*collaborazione|scrittura.*privata|accordo.*firmato/i', 'scopes' => [$amministrativo]],
             56 => ['name' => 'Autocertificazione Antimafia', 'slug' => 'antimafia', 'regex' => '/antimafia|dichiarazione.*sostitutiva/i', 'scopes' => [$onboarding]],
-            57 => ['name' => 'Relazione Interna SOS', 'slug' => 'relazione-sos', 'regex' => '/relazione.*sos|analisi.*sospetta/i', 'scopes' => [$uif]],
-            58 => ['name' => 'Ricevuta Portale UIF', 'slug' => 'ricevuta-sos-uif', 'regex' => '/ricevuta.*uif|infostat.*sos/i', 'scopes' => [$uif]],
+            57 => ['name' => 'Relazione Interna SOS', 'slug' => 'relazione-sos', 'regex' => '/relazione.*sos|analisi.*sospetta/i', 'scopes' => [$uif], 'is_agent' => true, 'is_principal' => true, 'is_company' => true],
+            58 => ['name' => 'Ricevuta Portale UIF', 'slug' => 'ricevuta-sos-uif', 'regex' => '/ricevuta.*uif|infostat.*sos/i', 'scopes' => [$uif], 'is_agent' => true, 'is_principal' => true, 'is_company' => true],
+            59 => ['name' => 'Documento Identità e CF', 'slug' => 'identita-codice-fiscale', 'regex' => '/carta.*identita|passaporto|codice.*fiscale|tessera.*sanitaria/i', 'scopes' => [$onboarding], 'is_agent' => true, 'is_client' => true, 'is_principal' => true],
+            60 => ['name' => 'Contratto Collaborazione', 'slug' => 'contratto-agent', 'regex' => '/contratto.*collaborazione|scrittura.*privata/i', 'scopes' => [$amministrativo], 'is_agent' => true, 'is_company' => true],
+            61 => ['name' => 'Regolamento Privacy', 'slug' => 'regolamento-privacy', 'regex' => '/privacy|gdpr|regolamento.*privacy/i', 'scopes' => [$privacy], 'is_company' => true],
+            62 => ['name' => 'Polizza RC Professionale', 'slug' => 'polizza-rc', 'regex' => '/polizza.*rc|responsabilita.*civile/i', 'scopes' => [$onboarding], 'is_agent' => true, 'is_principal' => true],
+            63 => ['name' => 'Attestato OAM / IVASS', 'slug' => 'attestato-professionale', 'regex' => '/attestato.*(oam|ivass)/i', 'scopes' => [$onboarding], 'is_agent' => true, 'is_principal' => true],
         ];
 
         // 3. Esecuzione: Aggiornamento record esistenti
@@ -113,14 +118,33 @@ class DocumentTypeSeeder extends Seeder
                     'slug' => $attr['slug'],
                     'regex' => $attr['regex'],
                     'priority' => $attr['priority'] ?? 1,
+                    'is_agent' => $attr['is_agent'] ?? false,
+                    'is_principal' => $attr['is_principal'] ?? false,
+                    'is_client' => $attr['is_client'] ?? false,
+                    'is_practice_target' => $attr['is_practice_target'] ?? false,
+                    'is_company' => $attr['is_company'] ?? false,
                 ]);
             } else {
                 // Aggiorniamo solo i campi tecnici necessari all'automazione
-                $type->update([
+                $updateData = [
                     'slug' => $attr['slug'],
                     'regex' => $attr['regex'],
                     'priority' => $attr['priority'] ?? 1,
-                ]);
+                ];
+
+                // Aggiungi i campi target se presenti
+                if (isset($attr['is_agent']))
+                    $updateData['is_agent'] = $attr['is_agent'];
+                if (isset($attr['is_principal']))
+                    $updateData['is_principal'] = $attr['is_principal'];
+                if (isset($attr['is_client']))
+                    $updateData['is_client'] = $attr['is_client'];
+                if (isset($attr['is_practice_target']))
+                    $updateData['is_practice_target'] = $attr['is_practice_target'];
+                if (isset($attr['is_company']))
+                    $updateData['is_company'] = $attr['is_company'];
+
+                $type->update($updateData);
 
                 // Sincronizzazione Scopes (Rimuove null e sincronizza)
                 $scopes = array_filter($attr['scopes']);

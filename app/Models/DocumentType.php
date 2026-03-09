@@ -17,7 +17,12 @@ class DocumentType extends Model
         'is_template',
         'duration',
         'emitted_by',
-        'is_sensible'
+        'is_sensible',
+        'is_agent',
+        'is_principal',
+        'is_client',
+        'is_practice_target',
+        'is_company',
     ];
 
     protected $casts = [
@@ -29,6 +34,11 @@ class DocumentType extends Model
         'is_template' => 'boolean',
         'duration' => 'integer',
         'is_sensible' => 'boolean',
+        'is_agent' => 'boolean',
+        'is_principal' => 'boolean',
+        'is_client' => 'boolean',
+        'is_practice_target' => 'boolean',
+        'is_company' => 'boolean',
     ];
 
     public function scopes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
@@ -50,6 +60,56 @@ class DocumentType extends Model
     public function scopeGeneral($query)
     {
         return $query->where('is_practice', false);
+    }
+
+    /**
+     * Scope per documenti per target specifico
+     */
+    public function scopeForTarget($query, string $target)
+    {
+        return $query
+            ->where("is_{$target}", true)
+            ->orWhere('is_company', true);
+    }
+
+    /**
+     * Scope per agenti
+     */
+    public function scopeForAgents($query)
+    {
+        return $query
+            ->where('is_agent', true)
+            ->orWhere('is_company', true);
+    }
+
+    /**
+     * Scope per principal
+     */
+    public function scopeForPrincipals($query)
+    {
+        return $query
+            ->where('is_principal', true)
+            ->orWhere('is_company', true);
+    }
+
+    /**
+     * Scope per client
+     */
+    public function scopeForClients($query)
+    {
+        return $query
+            ->where('is_client', true)
+            ->orWhere('is_company', true);
+    }
+
+    /**
+     * Scope per practice
+     */
+    public function scopeForPractices($query)
+    {
+        return $query
+            ->where('is_practice_target', true)
+            ->orWhere('is_company', true);
     }
 
     /**

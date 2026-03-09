@@ -147,6 +147,29 @@ class AgentsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('assegnaChecklistAudit')
+                    ->label('Audit')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('warning')
+                    ->visible(fn(Agent $record): bool => $record->is_active)
+                    ->action(function (Agent $record, ChecklistService $checklistService) {
+                        try {
+                            // Chiamiamo il nostro Service pulitissimo
+                            $checklistService->assignTemplate($record, 'AUDIT_RETE_AGENTI');
+
+                            Notification::make()
+                                ->success()
+                                ->title('Checklist Assegnata!')
+                                ->body("La procedura Audit è pronta per essere compilata nel fascicolo dell'agente.")
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Errore')
+                                ->body('Template checklist non trovato.')
+                                ->send();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

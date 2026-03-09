@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
 
 class Address extends Model
 {
     protected $fillable = [
         'name',
-        'address',
         'n_civico',
         'numero',
         'street',
@@ -24,13 +25,14 @@ class Address extends Model
         return $this->morphTo();
     }
 
+    public function addressType()
+    {
+        return $this->belongsTo(AddressType::class);
+    }
+
     public function getFullAddressAttribute(): string
     {
         $parts = [];
-
-        if ($this->address) {
-            $parts[] = $this->address;
-        }
 
         if ($this->n_civico) {
             $parts[] = $this->n_civico;

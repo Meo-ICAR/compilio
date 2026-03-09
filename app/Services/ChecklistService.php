@@ -118,7 +118,20 @@ class ChecklistService
                 ->where('is_template', true)
                 ->firstOrFail();
 
-            // 2. Fotocopiamo la testata
+            // 2. VALIDAZIONE: Se il template è unico, verifichiamo che non esista già per questo target
+            if ($template->is_unique) {
+                $existingChecklist = Checklist::where('target_type', get_class($target))
+                    ->where('target_id', $target->id)
+                    ->where('name', $template->name)
+                    ->where('is_unique', true)
+                    ->first();
+
+                if ($existingChecklist) {
+                    throw new \Exception("La checklist '{$template->name}' è già stata assegnata a questo target e non può essere duplicata.");
+                }
+            }
+
+            // 3. Fotocopiamo la testata
             $nuovaChecklist = $template->replicate();
             $nuovaChecklist->is_template = false;  // Questa è un'istanza operativa
 
@@ -129,7 +142,7 @@ class ChecklistService
             $nuovaChecklist->status = 'da_compilare';
             $nuovaChecklist->save();
 
-            // 3. Fotocopiamo tutte le domande (Items)
+            // 4. Fotocopiamo tutte le domande (Items)
             foreach ($template->items as $item) {
                 $nuovoItem = $item->replicate();
                 $nuovoItem->checklist_id = $nuovaChecklist->id;

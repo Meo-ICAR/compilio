@@ -7,6 +7,7 @@ use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Clients\Pages\CreateClient;
 use App\Filament\Resources\Clients\Pages\EditClient;
 use App\Filament\Resources\Clients\Pages\ListClients;
+use App\Filament\Resources\Clients\RelationManagers\ChecklistsRelationManager;
 use App\Filament\Resources\Clients\RelationManagers\ClientMandatesRelationManager;
 use App\Filament\Resources\Clients\RelationManagers\ClientRelationsRelationManager;
 use App\Filament\Resources\Clients\Schemas\ClientForm;
@@ -53,6 +54,7 @@ class ClientResource extends Resource
             DocumentsRelationManager::class,
             ClientRelationsRelationManager::class,
             ClientMandatesRelationManager::class,
+            ChecklistsRelationManager::class,
         ];
     }
 

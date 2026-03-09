@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Addresses\Schemas;
 
+use App\Models\AddressType;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -14,6 +15,11 @@ class AddressForm
     {
         return $schema
             ->components([
+                Select::make('address_type_id')
+                    ->label('Tipo Indirizzo')
+                    ->options(AddressType::pluck('name', 'id'))
+                    ->searchable()
+                    ->required(),
                 TextInput::make('street')
                     ->label('Via')
                     ->required()
@@ -25,11 +31,6 @@ class AddressForm
                 TextInput::make('zip_code')
                     ->label('CAP')
                     ->maxLength(5),
-                Select::make('address.address_type_id')
-                    ->label('Tipo Indirizzo')
-                    ->options(\App\Models\AddressType::pluck('name', 'id'))
-                    ->searchable()
-                    ->required(),
             ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Agents\Schemas;
 use App\Model\Oam;
 use App\Services\ChecklistService;
 use App\Services\GeminiVisionService;
+use App\Traits\HasDocumentTypeFiltering;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -39,12 +40,16 @@ use Illuminate\Support\Str;
 
 class AgentForm
 {
+    use HasDocumentTypeFiltering;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
                 // 1. SEZIONE ANAGRAFICA E STATUS
                 Section::make('Anagrafica e Inquadramento')
+                    ->collapsible()
+                    ->collapsed()
                     ->description('Dati principali e collegamento utente del collaboratore.')
                     ->icon('heroicon-o-user')
                     ->schema([
@@ -132,6 +137,8 @@ class AgentForm
                     ]),
                 // 2. SEZIONE NORMATIVA E OAM
                 Section::make('Dati OAM e Mandato')
+                    ->collapsible()
+                    ->collapsed()
                     ->description("Estremi di iscrizione all'elenco e date di validità del contratto.")
                     ->icon('heroicon-o-shield-check')
                     ->schema([
@@ -205,6 +212,8 @@ class AgentForm
                     ]),
                 // 3. SEZIONE FISCALE ED ENASARCO
                 Section::make('Fiscale ed Enasarco')
+                    ->collapsible()
+                    ->collapsed()
                     ->description('Dati per la fatturazione e inquadramento previdenziale.')
                     ->icon('heroicon-o-banknotes')
                     ->schema([
@@ -232,6 +241,8 @@ class AgentForm
                     ]),
                 // 4. SEZIONE CONTRIBUTI E RIMBORSI
                 Section::make('Condizioni Economiche Fisse')
+                    ->collapsible()
+                    ->collapsed()
                     ->description('Fee fisse mensili, rimborsi e addebiti ricorrenti (Desk, CRM, ecc.).')
                     ->icon('heroicon-o-currency-euro')
                     ->schema([
@@ -257,7 +268,7 @@ class AgentForm
                                 ->maxValue(99999999.99)
                                 ->columnSpan(3),
                         ]),
-                    ])
+                    ]),
             ]);
     }
 }

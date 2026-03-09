@@ -2,7 +2,12 @@
 
 namespace App\Filament\RelationManagers;
 
+use App\Models\Agent;
+use App\Models\Client;
 use App\Models\DocumentType;
+use App\Models\Practice;
+use App\Models\Principal;
+use App\Traits\HasDocumentTypeFiltering;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -19,6 +24,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -26,6 +33,8 @@ use Filament\Tables\Table;
 
 class DocumentsRelationManager extends RelationManager
 {
+    use HasDocumentTypeFiltering;
+
     protected static string $relationship = 'documents';
 
     protected static ?string $title = 'Documenti';
@@ -70,47 +79,61 @@ class DocumentsRelationManager extends RelationManager
                             ->schema([
                                 Select::make('document_type_id')
                                     ->label('Tipo Documento')
-                                    ->options(\App\Models\DocumentType::pluck('name', 'id'))
+                                    ->options(function () {
+                                        $ownerRecord = $this->getOwnerRecord();
+                                        return $this->getFilteredDocumentTypes($ownerRecord);
+                                    })
                                     ->searchable()
                                     ->preload()
                                     ->required()
                                     ->reactive()
-                                    ->afterStateUpdated(fn($state, callable $set) => $set('document_type_preview', DocumentType::find($state)))
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                        $documentType = DocumentType::find($state);
+                                        $set('document_type_preview', $documentType);
+                                        if ($documentType && empty($get('name'))) {
+                                            $set('name', $documentType->name);
+                                        }
+                                    })
                             ]),
                         Step::make('Description')
                             ->description('Compila informazioni documento')
                             ->schema([
-                                TextInput::make('name')
-                                    //    ->default($documentType?->name)
-                                    ->label('Nome Documento'),
-                                DatePicker::make('emitted_at')
-                                    ->label('Data Emissione')
-                                    ->default(now()),
-                                DatePicker::make('expires_at')
-                                    ->label('Data Scadenza'),
-                                TextInput::make('emitted_by')
-                                    // ->default($documentType->emitted_by)
-                                    ->label('Ente Rilascio'),
-                                TextInput::make('docnumber')
-                                    ->label('Numero Documento'),
-                                SpatieMediaLibraryFileUpload::make('document')
-                                    ->label('File')
-                                    ->collection('documents')
-                                    ->disk('public')
-                                    ->preserveFilenames()
-                                    ->downloadable()
-                                    ->previewable(true)
-                                    ->imageEditor()
-                                    ->maxSize(10240)  // 10MB
-                                    ->acceptedFileTypes([
-                                        'application/pdf',
-                                        'image/jpeg',
-                                        'image/png',
-                                        'image/jpg',
-                                        'application/msword',
-                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                Grid::make(2)->schema([
+                                    TextInput::make('name')
+                                        ->label('Nome Documento')
+                                        ->columnSpan(2),
+                                    DatePicker::make('emitted_at')
+                                        ->label('Data Emissione')
+                                        ->default(now()),
+                                    DatePicker::make('expires_at')
+                                        ->label('Data Scadenza'),
+                                    TextInput::make('emitted_by')
+                                        ->label('Ente Rilascio'),
+                                    TextInput::make('docnumber')
+                                        ->label('Numero Documento'),
+                                ]),
+                                Section::make('Carica File')
+                                    ->description('Carica il documento in formato PDF, immagine o Word')
+                                    ->schema([
+                                        SpatieMediaLibraryFileUpload::make('document')
+                                            ->label('File Documento')
+                                            ->collection('documents')
+                                            ->disk('public')
+                                            ->preserveFilenames()
+                                            ->downloadable()
+                                            ->previewable(true)
+                                            ->imageEditor()
+                                            ->maxSize(10240)  // 10MB
+                                            ->acceptedFileTypes([
+                                                'application/pdf',
+                                                'image/jpeg',
+                                                'image/png',
+                                                'image/jpg',
+                                                'application/msword',
+                                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                            ])
+                                            ->required(),
                                     ])
-                                    ->required(),
                             ])
                     ])
             ])  // Action::make('create_document')
@@ -145,33 +168,54 @@ class DocumentsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Select::make('document_type_id')
-                    ->label('Tipo Documento')
-                    ->options(\App\Models\DocumentType::pluck('name', 'id'))
-                    ->searchable()
-                    ->preload()
-                    ->required(),
-                DatePicker::make('expires_at')
-                    ->label('Scade il'),
-                TextInput::make('name'),
-                SpatieMediaLibraryFileUpload::make('document')
-                    ->label('File')
-                    ->collection('documents')
-                    ->disk('public')
-                    ->preserveFilenames()
-                    ->downloadable()
-                    ->previewable(true)
-                    ->imageEditor()
-                    ->maxSize(10240)  // 10MB
-                    ->acceptedFileTypes([
-                        'application/pdf',
-                        'image/jpeg',
-                        'image/png',
-                        'image/jpg',
-                        'application/msword',
-                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                Section::make('Informazioni Documento')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            Select::make('document_type_id')
+                                ->label('Tipo Documento')
+                                ->options(function () {
+                                    $ownerRecord = $this->getOwnerRecord();
+                                    return $this->getFilteredDocumentTypes($ownerRecord);
+                                })
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    $documentType = DocumentType::find($state);
+                                    if ($documentType && empty($get('name'))) {
+                                        $set('name', $documentType->name);
+                                    }
+                                })
+                                ->columnSpan(2),
+                            DatePicker::make('expires_at')
+                                ->label('Scade il'),
+                            TextInput::make('name')
+                                ->label('Nome Documento'),
+                        ]),
+                    ]),
+                Section::make('File Documento')
+                    ->description('Carica il documento in formato PDF, immagine o Word')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('document')
+                            ->label('File Documento')
+                            ->collection('documents')
+                            ->disk('public')
+                            ->preserveFilenames()
+                            ->downloadable()
+                            ->previewable(true)
+                            ->imageEditor()
+                            ->maxSize(10240)  // 10MB
+                            ->acceptedFileTypes([
+                                'application/pdf',
+                                'image/jpeg',
+                                'image/png',
+                                'image/jpg',
+                                'application/msword',
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            ])
+                            ->required(),
                     ])
-                    ->required(),
             ]);
     }
 

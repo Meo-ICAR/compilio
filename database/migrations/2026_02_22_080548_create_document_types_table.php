@@ -13,7 +13,8 @@ return new class extends Migration {
         Schema::create('document_types', function (Blueprint $table) {
             $table->comment("Tabella di lookup globale (Senza Tenant): Tipologie di documenti riconosciuti per l'Adeguata Verifica.");
             $table->increments('id')->comment('ID intero autoincrementante');
-            $table->string('name')->nullable()->comment('Descrizione');
+            $table->string('name')->nullable()->comment('Nome documento');
+            $table->string('description')->nullable()->comment('Descrizione aggiuntiva');
             $table->string('code')->nullable()->comment('Codice univoco documento menomico es CI = Carta Identita VISURA = Visura aziendale CCIA');
             $table->string('codegroup')->nullable()->comment('Raggruppa documenti simili es. Documento di riconoscimento');
             $table->string('slug')->unique();  // es: "foglio-informativo"
@@ -23,6 +24,13 @@ return new class extends Migration {
             $table->boolean('is_person')->default(true)->comment('Documento inerente Persona o azienda');
             $table->boolean('is_signed')->default(false)->comment('Indica se il documento deve essere firmato');
             $table->boolean('is_monitored')->default(false)->comment('Indica se la scadenza documento deve essere monitorata nel tempo');
+            $table->boolean('is_company')->default(false)->nullable();
+            $table->boolean('is_employee')->default(false)->nullable();
+            $table->boolean('is_agent')->default(false)->nullable();
+            $table->boolean('is_principal')->default(false)->nullable();
+            $table->boolean('is_client')->default(false)->nullable();
+            $table->boolean('is_practice')->default(false)->nullable();
+
             $table->integer('duration')->nullable()->comment('Validità dal rilascio in giorni');
             $table->string('emitted_by')->nullable()->comment('Ente di rilascio');
             $table->boolean('is_sensible')->default(false)->comment('Indica se contiene dati sensibili');

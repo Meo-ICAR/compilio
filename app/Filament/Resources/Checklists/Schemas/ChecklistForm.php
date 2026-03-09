@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Checklists\Schemas;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -22,12 +23,16 @@ class ChecklistForm
         return $schema
             ->schema([
                 // SEZIONE 1: Dettagli del Template
-                Section::make('Dettagli del Template Checklist')
+                Section::make(function ($get) {
+                    return 'CHECKLIST : ' . $get('name');
+                })
                     ->schema([
                         TextInput::make('name')
                             ->label('Nome della Checklist')
                             ->required()
                             ->maxLength(255),
+                        Textarea::make('description')
+                            ->label('Descrizione generale'),
                         Select::make('type')
                             ->label('Tipo di utilizzo')
                             ->options([
@@ -46,54 +51,50 @@ class ChecklistForm
                                 ->inline(false)
                                 ->default(false),
                         ]),
+                        Toggle::make('is_unique')
+                            ->label('Checklist Unica per Target')
+                            ->helperText('Se attivato, questa checklist non può essere creata più volte per lo stesso target (agente, pratica, ecc.)')
+                            ->default(false)
+                            ->inline(false)
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                if ($state && $get('name')) {
+                                    $set('unique_warning', '⚠️ Attenzione: questa checklist potrà essere assegnata solo una volta per ogni target (agente, pratica, ecc.)');
+                                } else {
+                                    $set('unique_warning', null);
+                                }
+                            }),
+                        Placeholder::make('unique_warning')
+                            ->content(fn($get) => $get('unique_warning'))
+                            ->visible(fn($get) => filled($get('unique_warning')))
+                            ->columnSpanFull(),
                         Grid::make(2)->schema([
-                            Toggle::make('is_template')
-                                ->label('Template Riutilizzabile')
-                                ->inline(false)
-                                ->default(true)
-                                ->helperText('Se è un template che può essere riutilizzato'),
-                            Select::make('status')
-                                ->label('Stato Checklist')
-                                ->options([
-                                    'da_compilare' => 'Da Compilare',
-                                    'in_corso' => 'In Corso',
-                                    'completata' => 'Completata',
-                                ])
-                                ->default('da_compilare')
-                                ->native(false),
-                        ]),
-                        Grid::make(2)->schema([
-                            Select::make('principal_id')
-                                ->label('Principal Specifico (Opzionale)')
-                                ->relationship('principal', 'name')
-                                ->searchable()
-                                ->preload()
-                                ->nullable()
-                                ->helperText('Se la checklist è specifica per un mandante'),
                             Select::make('document_type_id')
-                                ->label('Tipo Documento (Opzionale)')
+                                ->label('Riferimento della checklist nel  Documento regolamentorio (Opzionale)')
                                 ->relationship('documentType', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->nullable()
                                 ->helperText('Template documento es. manuale operativo'),
-                        ]),
-                        Grid::make(2)->schema([
                             Select::make('document_id')
-                                ->label('Documento Operativo (Opzionale)')
+                                ->label('Riferimento specifico al regolamento (Opzionale)')
                                 ->relationship('document', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->nullable()
-                                ->helperText('Documento operativo di company'),
+                                ->helperText('Documento operativo'),
                             TextInput::make('code')
                                 ->label('Codice Checklist (Opzionale)')
                                 ->maxLength(255)
                                 ->helperText('Codice identificativo interno'),
+                            Select::make('principal_id')
+                                ->label('Mandante Specifico (Opzionale)')
+                                ->relationship('principal', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->nullable()
+                                ->helperText('Se la checklist è specifica per un mandante es. loro audit'),
                         ]),
-                        Textarea::make('description')
-                            ->label('Descrizione generale')
-                            ->columnSpanFull(),
                     ])
                     ->collapsible()
                     ->collapsed()

@@ -28,6 +28,7 @@ class Checklist extends Model implements HasMedia
         'is_practice',
         'is_audit',
         'is_template',
+        'is_unique',
         'status',
     ];
 
@@ -36,6 +37,7 @@ class Checklist extends Model implements HasMedia
         'is_practice' => 'boolean',
         'is_audit' => 'boolean',
         'is_template' => 'boolean',
+        'is_unique' => 'boolean',
         'status' => 'string',
     ];
 
@@ -43,6 +45,62 @@ class Checklist extends Model implements HasMedia
     {
         return LogOptions::defaults()
             ->logAll();
+    }
+
+    /**
+     * Verifica se questa checklist è unica per un target specifico
+     */
+    public static function isUniqueForTarget($targetType, $targetId, $checklistId = null): bool
+    {
+        $query = static::where('target_type', $targetType)
+            ->where('target_id', $targetId)
+            ->where('is_unique', true);
+
+        if ($checklistId) {
+            $query->where('id', '!=', $checklistId);
+        }
+
+        return $query->exists();
+    }
+
+    /**
+     * Verifica se una checklist template può essere creata per questo target
+     */
+    public static function canCreateForTarget($templateId, $targetType, $targetId): bool
+    {
+        $template = static::find($templateId);
+
+        if (!$template || !$template->is_unique) {
+            return true;  // Non è unica, può essere creata
+        }
+
+        // Se è unica, verifica se ne esiste già una per questo target
+        return !static::where('target_type', $targetType)
+            ->where('target_id', $targetId)
+            ->where('name', $template->name)
+            ->where('is_unique', true)
+            ->exists();
+    }
+
+    /**
+     * Verifica se una checklist template può essere assegnata a un target usando il codice
+     */
+    public static function canAssignTemplate($templateCode, Model $target): bool
+    {
+        $template = static::where('code', $templateCode)
+            ->where('is_template', true)
+            ->first();
+
+        if (!$template || !$template->is_unique) {
+            return true;  // Non è unica o non esiste, può essere creata
+        }
+
+        // Se è unica, verifica se ne esiste già una per questo target
+        return !static::where('target_type', get_class($target))
+            ->where('target_id', $target->id)
+            ->where('name', $template->name)
+            ->where('is_unique', true)
+            ->exists();
     }
 
     public function target()

@@ -4,11 +4,14 @@ namespace App\Filament\Resources\Principals\Tables;
 
 use App\Models\Abi;  // Assicurati che il modello Abi esista
 use App\Models\Principal;  // Assicurati che il modello Abi esista
+use App\Services\ChecklistService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -102,6 +105,29 @@ class PrincipalsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('assegnaChecklistAudit')
+                    ->label('Audit')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('warning')
+                    ->visible(fn(Principal $record): bool => $record->is_active)
+                    ->action(function (Principal $record, ChecklistService $checklistService) {
+                        try {
+                            // Chiamiamo il nostro Service pulitissimo
+                            $checklistService->assignTemplate($record, 'BANK_AUDIT');
+
+                            Notification::make()
+                                ->success()
+                                ->title('Checklist Assegnata!')
+                                ->body('La procedura Audit è pronta per essere compilata nel fascicolo della mandante.')
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Errore')
+                                ->body('Template checklist non trovato.')
+                                ->send();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

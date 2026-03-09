@@ -8,11 +8,11 @@ use App\Filament\Resources\DocumentTypes\Pages\ListDocumentTypes;
 use App\Filament\Resources\DocumentTypes\Schemas\DocumentTypeForm;
 use App\Filament\Resources\DocumentTypes\Tables\DocumentTypesTable;
 use App\Models\DocumentType;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BackedEnum;
 use UnitEnum;
 
 class DocumentTypeResource extends Resource
@@ -25,6 +25,13 @@ class DocumentTypeResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
 
+    protected static ?string $navigationLabel = 'Tipi Documento';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $modelLabel = 'Tipo Documento';
+
+    protected static ?string $pluralModelLabel = 'Tipi Documento';
 
     public static function form(Schema $schema): Schema
     {

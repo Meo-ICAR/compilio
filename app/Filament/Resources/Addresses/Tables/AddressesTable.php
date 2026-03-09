@@ -15,8 +15,8 @@ class AddressesTable
         return $table
             ->modifyQueryUsing(fn($query) => $query->orderBy('created_at', 'desc'))
             ->columns([
-                TextColumn::make('name')
-                    ->label('Nome Indirizzo')
+                TextColumn::make('addressType.name')
+                    ->label('Tipo')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('street')
@@ -30,10 +30,6 @@ class AddressesTable
                 TextColumn::make('zip_code')
                     ->label('CAP')
                     ->searchable()
-                    ->sortable(),
-                TextColumn::make('address_type_id')
-                    ->label('Tipo')
-                    ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Data Creazione')

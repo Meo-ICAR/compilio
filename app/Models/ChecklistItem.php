@@ -27,6 +27,7 @@ class ChecklistItem extends Model
         'is_required',
         'attach_model',
         'attach_model_id',
+        'document_id',
         'n_documents',
         'repeatable_code',
         'depends_on_code',
@@ -57,6 +58,52 @@ class ChecklistItem extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(ChecklistDocument::class);
+    }
+
+    public function document(): BelongsTo
+    {
+        return $this->belongsTo(Document::class);
+    }
+
+    /**
+     * Verifica se questo item ha un documento allegato esistente
+     */
+    public function hasAttachedDocument(): bool
+    {
+        return !is_null($this->document_id);
+    }
+
+    /**
+     * Ottiene il documento allegato se presente
+     */
+    public function getAttachedDocument(): ?Document
+    {
+        return $this->document;
+    }
+
+    /**
+     * Ottiene i documento disponibili per il target della checklist
+     */
+    public function getAvailableDocumentsForTarget(): \Illuminate\Database\Eloquent\Collection
+    {
+        if (!$this->checklist || !$this->checklist->target) {
+            return new \Illuminate\Database\Eloquent\Collection();
+        }
+
+        $target = $this->checklist->target;
+
+        return Document::where('documentable_type', get_class($target))
+            ->where('documentable_id', $target->id)
+            ->with(['documentType'])
+            ->get();
+    }
+
+    /**
+     * Verifica se può allegare un documento esistente
+     */
+    public function canAttachExistingDocument(): bool
+    {
+        return $this->n_documents > 0 && $this->hasAttachedDocument() === false;
     }
 
     public function isRequired(): bool

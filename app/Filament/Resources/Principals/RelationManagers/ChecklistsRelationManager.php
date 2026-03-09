@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Filament\Resources\Agents\RelationManagers;
+namespace App\Filament\Resources\Principals\RelationManagers;
 
 use App\Filament\RelationManagers\BaseChecklistsRelationManager;
 
 class ChecklistsRelationManager extends BaseChecklistsRelationManager
 {
-    protected static ?string $title = 'Checklist Agente';
+    protected static ?string $title = 'Checklist Mandante';
 
     /**
-     * Personalizzazione specifica per Agent
+     * Personalizzazione specifica per Principal
      */
     protected function getTargetTypeLabel(): string
     {
-        return 'Agente';
+        return 'Mandante';
     }
 }
