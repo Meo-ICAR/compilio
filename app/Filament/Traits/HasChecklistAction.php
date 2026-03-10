@@ -27,7 +27,7 @@ trait HasChecklistAction
 
         // --- 1. AZIONE: GENERA (Appare solo se NON esiste) ---
         $actionGenera = Action::make("genera_{$codeName}")
-            ->label("Genera {$label}")
+            ->label(" {$label}")
             ->icon('heroicon-o-sparkles')
             ->color('success')
             ->visible(fn($record) => !DB::table('checklists')
