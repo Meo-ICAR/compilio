@@ -276,18 +276,15 @@ class MediafacileImportService
      */
     protected function mapApiToModel(array $apiData): array
     {
-        $dataInserimentoValue = $apiData['Data Inserimento Pratica'] ?? null;
+        $dataInserimento = $this->parseDate($apiData['Data Inserimento Pratica'] ?? null);
+        //  $this->info($apiData['Data Inserimento Pratica'] . ' Data inserimento: ' . $dataInserimento);
+        $sendedAt = $this->parseDate2($apiData['Data_invio_istruttoria'] ?? null);
+        //   $this->info($apiData['Data_invio_istruttoria'] . ' Sended at: ' . $sendedAt);
+        $approvedAt = $this->parseDate2($apiData['Data_delibera_banca'] ?? null);
+        $erogatedAt = $this->parseDate2($apiData['Data_erogazione'] ?? null);
 
-        if (!empty($dataInserimentoValue)) {
-            try {
-                $dateParts = explode('/', $dataInserimentoValue);
-                if (count($dateParts) === 3) {
-                    $dataInserimento = Carbon::createFromFormat('d/m/Y', $dataInserimentoValue);
-                }
-            } catch (Exception $e) {
-                Log::warning('Failed to parse date: ' . $dataInserimentoValue);
-            }
-        }
+        $amount = $this->parseDecimal($apiData['Montante'] ?? null);
+        $net = $this->parseDecimal($apiData['Importo_Erogazione'] ?? null);
 
         return [
             'id' => $apiData['ID Pratica'] ?? (string) Str::uuid(),
@@ -302,7 +299,81 @@ class MediafacileImportService
             'denominazione_prodotto' => $apiData['Descrizione Prodotto'] ?? null,
             'inserted_at' => $dataInserimento ?? now(),
             'stato_pratica' => $apiData['Stato Pratica'] ?? null,
+            'sended_at' => $sendedAt,
+            'approved_at' => $approvedAt,
+            'erogated_at' => $erogatedAt,
+            'amount' => $amount,
+            'net' => $net,
+            'is_notowned' => ($apiData['Pratica_terzi'] ?? '') == 'SI' ? true : false,
         ];
+    }
+
+    private function parseDecimal($decimalValue)
+    {
+        if (empty($decimalValue) || trim($decimalValue) === '') {
+            return null;
+        }
+
+        // Remove dots and commas, then handle decimal separator
+        $cleaned = str_replace(['.', ','], ['', '.'], trim($decimalValue));
+
+        if (is_numeric($cleaned)) {
+            return (float) $cleaned;
+        }
+
+        return null;
+    }
+
+    private function parseDate($dateValue)
+    {
+        if (empty($dateValue) || trim($dateValue) === '') {
+            return null;
+        }
+
+        try {
+            // Try different date formats
+            $formats = ['d/m/Y', 'Y-m-d', 'd/m/Y H:i:s', 'Y-m-d H:i:s'];
+
+            foreach ($formats as $format) {
+                try {
+                    return Carbon::createFromFormat($format, trim($dateValue));
+                } catch (\Exception $e) {
+                    // Continue to next format
+                }
+            }
+
+            // If no format works, try Carbon's flexible parsing
+            return new Carbon($dateValue);
+        } catch (\Exception $e) {
+            $this->warn('Failed to parse date: ' . $dateValue);
+            return null;
+        }
+    }
+
+    private function parseDate2($dateValue)
+    {
+        if (empty($dateValue) || trim($dateValue) === '') {
+            return null;
+        }
+
+        try {
+            // Try different date formats
+            $formats = ['m/d/Y', 'Y-m-d', 'd/m/Y H:i:s', 'Y-m-d H:i:s'];
+
+            foreach ($formats as $format) {
+                try {
+                    return Carbon::createFromFormat($format, trim($dateValue));
+                } catch (\Exception $e) {
+                    // Continue to next format
+                }
+            }
+
+            // If no format works, try Carbon's flexible parsing
+            return new Carbon($dateValue);
+        } catch (\Exception $e) {
+            $this->warn('Failed to parse date: ' . $dateValue);
+            return null;
+        }
     }
 
     private function parseDescription($description)
