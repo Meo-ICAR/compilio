@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SosReports\Tables;
 
 use App\Filament\Resources\Checklists\ChecklistResource;
+use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\SosReport;
 use App\Services\ChecklistService;
 use Filament\Actions\Action;
@@ -19,6 +20,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -26,6 +28,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SosReportsTable
 {
+    use HasChecklistAction;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -98,49 +102,12 @@ class SosReportsTable
                     ]),
             ])
             ->recordActions([
-                Action::make('apriSOS')
-                    ->label('Segnalazione SOS')
-                    ->icon('heroicon-o-clipboard-document-check')
-                    ->color('warning')
-                    ->action(function (SosReport $record, ChecklistService $checklistService) {
-                        try {
-                            // Verifichiamo se esiste già una checklist per questo client privacy
-                            $existingChecklist = $record
-                                ->checklist()
-                                ->where('code', 'SOS_WORKFLOW')
-                                ->first();
-
-                            if ($existingChecklist) {
-                                // Se esiste, mostriamo una notifica e reindirizziamo
-                                Notification::make()
-                                    ->info()
-                                    ->title('Checklist Già Presente')
-                                    ->body('La checklist esiste già. Puoi compilarla o modificarla.')
-                                    ->send();
-
-                                // Reindirizziamo alla pagina di modifica della checklist
-                                return redirect()->to(ChecklistResource::getUrl('edit', ['record' => $existingChecklist]));
-                            } else {
-                                // Se non esiste, la creiamo
-                                $checklistService->assignTemplate($record, 'SOS_WORKFLOW');
-
-                                Notification::make()
-                                    ->success()
-                                    ->title('Checklist Assegnata!')
-                                    ->body('La Checklist è pronta per essere compilata')
-                                    ->send();
-                            }
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->danger()
-                                ->title('Errore')
-                                ->body("Errore durante l'assegnazione della checklist: " . $e->getMessage())
-                                ->send();
-                        }
-                    }),
-                ViewAction::make(),
-                EditAction::make(),
-            ])
+                ...self::getChecklistActions(
+                    code: 'SOS_WORKFLOW',  // <-- Il 'code' esatto presente nel tuo DB
+                    label: 'Op. Sospetta'
+                    // icon: 'heroicon-o-clipboard-document-check'
+                ),
+            ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

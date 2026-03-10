@@ -31,6 +31,8 @@ class AuiRecordResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Antiriciclaggio';
 
+    protected static ?int $navigationSort = 6;
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema

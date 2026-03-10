@@ -41,16 +41,12 @@ class ClientPrivacyResource extends Resource
         return $record->client();
     }
 
+    protected static ?int $navigationSort = 6;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
-
     protected static string|UnitEnum|null $navigationGroup = 'Compliance';
-
     protected static ?string $navigationLabel = 'Privacy Clienti';
-
     protected static ?string $modelLabel = 'Privacy Cliente';
-
     protected static ?string $pluralModelLabel = 'Privacy Clienti';
-
     protected static ?string $recordTitleAttribute = 'request_type';
 
     public static function form(Schema $schema): Schema

@@ -25,13 +25,13 @@ class PracticeCommissionResource extends Resource
 
     protected static ?string $navigationLabel = 'Provvigioni';
 
+    protected static ?int $navigationSort = 10;
+
     protected static ?string $modelLabel = 'Provvigione';
 
     protected static ?string $pluralModelLabel = 'Provvigioni';
 
     protected static string|UnitEnum|null $navigationGroup = 'Pratiche';
-
-    protected static ?int $navigationSort = 8;
 
     public static function form(Schema $schema): Schema
     {

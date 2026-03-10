@@ -32,6 +32,8 @@ class TrainingRecordResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Compliance';
 
+    protected static ?int $navigationSort = 5;
+
     public static function form(Schema $schema): Schema
     {
         return TrainingRecordForm::configure($schema);

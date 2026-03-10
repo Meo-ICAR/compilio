@@ -33,8 +33,6 @@ class PracticeResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Pratiche';
 
-    protected static ?int $navigationSort = 5;
-
     public static function form(Schema $schema): Schema
     {
         return PracticeForm::configure($schema);

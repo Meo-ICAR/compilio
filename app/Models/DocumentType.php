@@ -23,9 +23,11 @@ class DocumentType extends Model
         'is_client',
         'is_practice_target',
         'is_company',
+        'is_endmonth'
     ];
 
     protected $casts = [
+        'is_endmonth' => 'boolean',
         'is_person' => 'boolean',
         'is_signed' => 'boolean',
         'is_stored' => 'boolean',

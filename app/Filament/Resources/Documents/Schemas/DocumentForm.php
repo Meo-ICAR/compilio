@@ -11,6 +11,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -39,33 +40,92 @@ class DocumentForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                Select::make('document_type_id')
-                    ->relationship('documentType', 'name')
-                    ->label('Tipo Documento')
-                    ->required(),
-                TextInput::make('name')
-                    ->label('Nome Documento')
-                    ->required(),
-                Toggle::make('is_template')
-                    ->label('Template Fornito')
-                    ->default(false)
-                    ->helperText('Indica se forniamo noi il documento'),
-                TextInput::make('status')
-                    ->label('Stato')
-                    ->required()
-                    ->default('uploaded'),
-                DatePicker::make('expires_at')
-                    ->label('Data scadenza'),
-                DatePicker::make('emitted_at')
-                    ->label('Data emissione'),
-                TextInput::make('docnumber')
-                    ->label('Numero documento'),
-                TextInput::make('emitted_by')
-                    ->label('Ente rilascio'),
-                Toggle::make('is_signed')
-                    ->label('Firmato')
-                    ->default(false),
+            ->schema([
+                Section::make('Informazioni Generali')
+                    ->schema([
+                        Select::make('document_type_id')
+                            ->relationship('documentType', 'name')
+                            ->label('Tipo Documento')
+                            ->required(),
+                        Select::make('document_status_id')
+                            ->relationship('documentStatus', 'name')
+                            ->label('Stato Documento')
+                            ->nullable()
+                            ->helperText('Stato di validità del documento'),
+                        TextInput::make('name')
+                            ->label('Nome Documento')
+                            ->required()
+                            ->maxLength(255),
+                        Textarea::make('description')
+                            ->label('Descrizione')
+                            ->rows(3)
+                            ->nullable(),
+                    ])
+                    ->columns(2),
+                Section::make('Dettagli Documento')
+                    ->schema([
+                        TextInput::make('docnumber')
+                            ->label('Numero Documento')
+                            ->nullable(),
+                        TextInput::make('emitted_by')
+                            ->label('Ente Rilascio')
+                            ->nullable(),
+                        DatePicker::make('emitted_at')
+                            ->label('Data Emissione')
+                            ->nullable(),
+                        DatePicker::make('expires_at')
+                            ->label('Data Scadenza')
+                            ->nullable(),
+                    ])
+                    ->columns(2),
+                Section::make('Stato e Validazione')
+                    ->schema([
+                        Toggle::make('is_signed')
+                            ->label('Firmato')
+                            ->default(false),
+                        Toggle::make('is_template')
+                            ->label('Template Fornito')
+                            ->default(false)
+                            ->helperText('Indica se forniamo noi il documento'),
+                        TextInput::make('status')
+                            ->label('Stato Interno')
+                            ->default('uploaded')
+                            ->helperText('Stato di caricamento del documento'),
+                        DateTimePicker::make('verified_at')
+                            ->label('Data Verifica')
+                            ->nullable()
+                            ->disabled(),
+                        Select::make('verified_by')
+                            ->relationship('verifiedBy', 'name')
+                            ->label('Verificato Da')
+                            ->nullable()
+                            ->disabled(),
+                    ])
+                    ->columns(2),
+                Section::make('Note e Annotazioni')
+                    ->schema([
+                        Textarea::make('annotation')
+                            ->label('Annotazioni Interne')
+                            ->rows(3)
+                            ->nullable(),
+                        Textarea::make('rejection_note')
+                            ->label('Note Rifiuto')
+                            ->rows(3)
+                            ->nullable()
+                            ->helperText('Motivazioni del rifiuto del documento'),
+                    ])
+                    ->columns(1),
+                Section::make('Upload Documento')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('document_file')
+                            ->label('Carica Documento')
+                            ->collection('documents')
+                            ->multiple(false)
+                            ->maxSize(10240)  // 10MB
+                            ->acceptedFileTypes(['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])
+                            ->helperText('Formati accettati: PDF, DOC, DOCX, JPG, JPEG, PNG (max 10MB)'),
+                    ])
+                    ->columns(1),
             ]);
     }
 }

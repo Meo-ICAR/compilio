@@ -2,55 +2,70 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Document;
-use App\Models\DocumentType;
+use App\Services\DocumentClassificationService;
 use Illuminate\Console\Command;
 
 class CleanupDocumentsCommand extends Command
 {
     // Questa è la stringa che scrivi nel terminale
-    protected $signature = 'documents:classify-existing';
+    protected $signature = 'documents:classify-existing {--limit= : Limite di documenti da processare} {--verbose : Mostra risultati dettagliati}';
 
     protected $description = 'Classifica i documenti esistenti usando le regex della tabella document_types';
 
     public function handle()
     {
-        // 1. Recuperiamo tutti i tipi di documento con una regex definita
-        $types = DocumentType::whereNotNull('regex')->orderBy('priority', 'desc')->get();
+        $limit = $this->option('limit') ? (int) $this->option('limit') : null;
+        $verbose = $this->option('verbose');
 
-        if ($types->isEmpty()) {
-            $this->error('Nessuna regex trovata nella tabella document_types. Hai lanciato il seeder?');
-            return;
-        }
+        $this->info('Inizio classificazione documenti...');
 
-        // 2. Prendiamo i documenti da classificare (quelli con ID 47 o null)
-        $documents = Document::whereIn('document_type_id', [47])
-            ->orWhereNull('document_type_id')
-            ->get();
+        $classificationService = new DocumentClassificationService();
+        $results = $classificationService->classifyDocuments($limit, $verbose);
 
-        $this->info("Analisi di {$documents->count()} documenti in corso...");
+        // Mostra statistiche iniziali
+        $stats = $classificationService->getClassificationStats();
+        $this->info('Statistiche attuali:');
+        $this->line("  - Documenti totali: {$stats['total_documents']}");
+        $this->line("  - Documenti classificati: {$stats['classified_documents']}");
+        $this->line("  - Documenti non classificati: {$stats['unclassified_documents']}");
+        $this->line("  - Percentuale classificazione: {$stats['classification_percentage']}%");
+        $this->line("  - Tipi con regex: {$stats['types_with_regex']}");
+        $this->newLine();
 
-        $bar = $this->output->createProgressBar($documents->count());
-        $bar->start();
-
-        foreach ($documents as $doc) {
-            $matched = false;
-
-            foreach ($types as $type) {
-                // Controllo Regex sul nome del file
-                if (preg_match($type->regex, $doc->name)) {
-                    $doc->document_type_id = $type->id;
-                    $doc->save();
-                    $matched = true;
-                    break;  // Trovato il match, passiamo al prossimo documento
-                }
+        // Mostra errori se presenti
+        if (!empty($results['errors'])) {
+            $this->error('Errori durante la classificazione:');
+            foreach ($results['errors'] as $error) {
+                $this->error("  - {$error}");
             }
-
-            $bar->advance();
+            return 1;
         }
 
-        $bar->finish();
-        $this->newLine(2);
+        // Mostra risultati
+        $this->info('Risultati classificazione:');
+        $this->line("  - Documenti processati: {$results['processed_documents']}");
+        $this->line("  - Documenti classificati: {$results['classified_documents']}");
+        $this->line("  - Documenti non classificati: {$results['unclassified_documents']}");
+
+        // Mostra dettagli se verbose
+        if ($verbose && !empty($results['details'])) {
+            $this->newLine();
+            $this->info('Dettagli elaborazione:');
+
+            foreach ($results['details'] as $detail) {
+                $status = $detail['classified'] ? '✓' : '✗';
+                $typeInfo = $detail['matched_type']
+                    ? " ({$detail['matched_type']['name']})"
+                    : '';
+                $errorInfo = $detail['error'] ? " - ERRORE: {$detail['error']}" : '';
+
+                $this->line("  {$status} ID:{$detail['document_id']} - {$detail['document_name']}{$typeInfo}{$errorInfo}");
+            }
+        }
+
+        $this->newLine();
         $this->info('Classificazione completata!');
+
+        return 0;
     }
 }
