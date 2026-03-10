@@ -5,11 +5,13 @@ namespace App\Filament\Traits;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
+use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -19,13 +21,11 @@ use Spatie\MediaLibrary\HasMedia;
 trait HasChecklistAction
 {
     public static function getChecklistActions(
-        $code = null,
-        $label = 'Checklist',
+        ?string $code = null,
+        string $label = 'Checklist',
         string $icon = 'heroicon-o-clipboard-document-check'
     ): array {
-        // Se code è una callable, valutala dinamicamente
-        $codeValue = is_callable($code) ? 'dynamic' : ($code ?? 'generale');
-        $labelValue = is_callable($label) ? 'Checklist' : $label;
+        $codeName = $code ?? 'generale';
 
         // --- 1. AZIONE: GENERA (Appare solo se NON esiste) ---
         $actionGenera = Action::make("genera_{$codeName}")
