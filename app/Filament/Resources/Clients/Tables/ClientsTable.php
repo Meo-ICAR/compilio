@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Clients\Tables;
 
 use App\Filament\Imports\ClientsImporter;
+use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -14,6 +15,7 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -23,6 +25,8 @@ use Maatwebsite\Excel\Excel;
 
 class ClientsTable
 {
+    use HasChecklistAction;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -110,14 +114,17 @@ class ClientsTable
                         ->orWhere('is_sanctioned', true)
                         ->orWhere('is_remote_interaction', true)),
             ])
-            ->actions([
-                EditAction::make(),
-                ViewAction::make(),
-            ])
+            ->recordActions([
+                ...self::getChecklistActions(
+                    code: 'AML',  // <-- Il 'code' esatto presente nel tuo DB
+                    label: 'AML',
+                    // icon: 'heroicon-o-clipboard-document-check'
+                ),
+            ], position: RecordActionsPosition::BeforeColumns)
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                //  BulkActionGroup::make([
+                //      DeleteBulkAction::make(),
+                //  ]),
             ]);
     }
 }

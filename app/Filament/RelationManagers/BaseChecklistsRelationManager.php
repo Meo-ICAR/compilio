@@ -173,12 +173,6 @@ abstract class BaseChecklistsRelationManager extends RelationManager
                             ->title($this->getSuccessMessage())
                             ->send();
                     }),
-                Action::make('gestisci_privacy')
-                    ->label('Privacy')
-                    ->icon('heroicon-o-shield-check')
-                    ->color('info')
-                    ->url(fn() => route('filament.admin.resources.client-privacies.index'))
-                    ->openUrlInNewTab(),
             ]);
     }
 }

@@ -6,10 +6,13 @@ use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 class ClientPrivacy extends Model
 {
     use BelongsToCompany;
+    use InteractsWithMedia;  // <--- Usa il trait di Spatie
 
     protected $table = 'client_privacies';
 

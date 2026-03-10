@@ -155,51 +155,8 @@ class AgentsTable
                 ...self::getChecklistActions(
                     code: 'AUDIT_RETE_AGENTI',  // <-- Il 'code' esatto presente nel tuo DB
                     label: 'Audit',
-                    icon: 'heroicon-o-clipboard-document-check'
+                    // icon: 'heroicon-o-clipboard-document-check'
                 ),
-                //   EditAction::make(),
-
-                /*
-                 * Action::make('assegnaChecklistAudit')
-                 *     ->label('Audit')
-                 *     ->icon('heroicon-o-clipboard-document-check')
-                 *     ->color('warning')
-                 *     ->visible(fn(Agent $record): bool => $record->is_active)
-                 *     ->action(function (Agent $record, ChecklistService $checklistService) {
-                 *         try {
-                 *             // Chiamiamo il nostro Service pulitissimo
-                 *             $checklistService->assignTemplate($record, 'AUDIT_RETE_AGENTI');
-                 *
-                 *             Notification::make()
-                 *                 ->success()
-                 *                 ->title('Checklist Assegnata!')
-                 *                 ->body("La procedura Audit è pronta per essere compilata nel fascicolo dell'agente.")
-                 *                 ->send();
-                 *         } catch (\Exception $e) {
-                 *             Notification::make()
-                 *                 ->danger()
-                 *                 ->title('Errore')
-                 *                 ->body('Template checklist non trovato.')
-                 *                 ->send();
-                 *         }
-                 *     }),
-                 */
-
-                /*
-                 * // Bottone 1: Checklist Documenti Iniziali
-                 * self::getManageChecklistAction(
-                 *     group: 'documenti_iniziali',
-                 *     label: 'Doc. Iniziali',
-                 *     icon: 'heroicon-o-folder-open'
-                 * ),
-                 *
-                 * // Bottone 2: Checklist Istruttoria Banca
-                 * self::getManageChecklistAction(
-                 *     group: 'istruttoria_banca',
-                 *     label: 'Istruttoria',
-                 *     icon: 'heroicon-o-building-library'
-                 * ),
-                 */
             ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([

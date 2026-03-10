@@ -7,10 +7,13 @@ use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;  // <--- Aggiungi questa
+use Spatie\MediaLibrary\InteractsWithMedia;  // <--- Assicurati che ci sia questa
 
 class Principal extends Model
 {
     use BelongsToCompany;
+    use InteractsWithMedia;  // <--- Usa il trait di Spatie
 
     protected $fillable = [
         'company_id',

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Principals\Tables;
 
+use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\Abi;  // Assicurati che il modello Abi esista
 use App\Models\Principal;  // Assicurati che il modello Abi esista
 use App\Services\ChecklistService;
@@ -14,6 +15,7 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -23,6 +25,8 @@ use Maatwebsite\Excel\Excel;
 
 class PrincipalsTable
 {
+    use HasChecklistAction;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -104,31 +108,13 @@ class PrincipalsTable
                     ->indicator('ABI Mancante')  // Mostra un badge sopra la tabella quando è attivo
             ])
             ->recordActions([
-                EditAction::make(),
-                Action::make('assegnaChecklistAudit')
-                    ->label('Audit')
-                    ->icon('heroicon-o-clipboard-document-check')
-                    ->color('warning')
-                    ->visible(fn(Principal $record): bool => $record->is_active)
-                    ->action(function (Principal $record, ChecklistService $checklistService) {
-                        try {
-                            // Chiamiamo il nostro Service pulitissimo
-                            $checklistService->assignTemplate($record, 'BANK_AUDIT');
-
-                            Notification::make()
-                                ->success()
-                                ->title('Checklist Assegnata!')
-                                ->body('La procedura Audit è pronta per essere compilata nel fascicolo della mandante.')
-                                ->send();
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->danger()
-                                ->title('Errore')
-                                ->body('Template checklist non trovato.')
-                                ->send();
-                        }
-                    }),
-            ])
+                // EditAction::make(),
+                ...self::getChecklistActions(
+                    code: 'BANK_AUDIT',  // <-- Il 'code' esatto presente nel tuo DB
+                    label: 'Audit',
+                    // icon: 'heroicon-o-clipboard-document-check'
+                ),
+            ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     //    DeleteBulkAction::make(),

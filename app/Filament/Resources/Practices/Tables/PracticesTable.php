@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Practices\Tables;
 
 use App\Filament\Imports\PracticesImporter;
+use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\Practice;
 use App\Models\PracticeStatus;
 use Filament\Actions\BulkActionGroup;
@@ -12,6 +13,7 @@ use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -22,6 +24,8 @@ use Maatwebsite\Excel\Excel;
 
 class PracticesTable
 {
+    use HasChecklistAction;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -279,8 +283,12 @@ class PracticesTable
                     ->searchable()  // Opzionale: aggiunge una barra di ricerca nel dropdown
             ])
             ->recordActions([
-                EditAction::make(),
-            ])
+                ...self::getChecklistActions(
+                    code: 'Cessione',  // <-- Il 'code' esatto presente nel tuo DB
+                    label: 'Cessione'
+                    // icon: 'heroicon-o-clipboard-document-check'
+                ),
+            ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([]),
             ]);

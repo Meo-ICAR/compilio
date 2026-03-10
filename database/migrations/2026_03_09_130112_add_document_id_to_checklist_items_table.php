@@ -11,7 +11,6 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('checklist_items', function (Blueprint $table) {
-            $table->foreignId('document_id')->nullable()->after('attach_model_id')->comment('Riferimento a un documento esistente già allegato al target');
             $table->boolean('is_completed')->default(false)->comment('Step completato');
             // 4. SINCRONIZZAZIONE BIDIREZIONALE (Dal Model alla Checklist)
             $table->string('target_model')->nullable()->comment('Modello del parent da ascoltare (es. Agent, Company)');

@@ -68,6 +68,7 @@ class EditAgent extends EditRecord
             Action::make('assegnaChecklistOnBoarding')
                 ->label('Candidatura')
                 ->icon('heroicon-o-clipboard-document-check')
+                ->disabled(fn() => empty($record->oam))
                 ->action(function (Agent $record, ChecklistService $checklistService) {
                     try {
                         // Chiamiamo il nostro Service pulitissimo
@@ -87,6 +88,7 @@ class EditAgent extends EditRecord
                     }
                 }),
             Action::make('assegnaChecklistOam')
+                ->disabled(fn() => !empty($record->oam) && !empty($record->dismissed_at))
                 ->label('Comunicazione OAM Avvio / Cessazione')
                 ->icon('heroicon-o-clipboard-document-check')
                 ->action(function (Agent $record, ChecklistService $checklistService) {
@@ -98,27 +100,6 @@ class EditAgent extends EditRecord
                             ->success()
                             ->title('Checklist Assegnata!')
                             ->body("La procedura OAM è pronta per essere compilata nel fascicolo dell'agente.")
-                            ->send();
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->danger()
-                            ->title('Errore')
-                            ->body('Template checklist non trovato.')
-                            ->send();
-                    }
-                }),
-            Action::make('assegnaChecklistAudit')
-                ->label('Audit')
-                ->icon('heroicon-o-clipboard-document-check')
-                ->action(function (Agent $record, ChecklistService $checklistService) {
-                    try {
-                        // Chiamiamo il nostro Service pulitissimo
-                        $checklistService->assignTemplate($record, 'AUDIT_RETE_AGENTI');
-
-                        Notification::make()
-                            ->success()
-                            ->title('Checklist Assegnata!')
-                            ->body("La procedura Audit è pronta per essere compilata nel fascicolo dell'agente.")
                             ->send();
                     } catch (\Exception $e) {
                         Notification::make()

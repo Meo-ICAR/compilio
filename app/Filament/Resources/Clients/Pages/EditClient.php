@@ -66,27 +66,6 @@ class EditClient extends EditRecord
                         ->success()
                         ->send();
                 }),
-            Action::make('assegnaChecklistAML')
-                ->label('AML')
-                ->icon('heroicon-o-clipboard-document-check')
-                ->action(function (Client $record, ChecklistService $checklistService) {
-                    try {
-                        // Chiamiamo il nostro Service pulitissimo
-                        $checklistService->assignTemplate($record, 'AML');
-
-                        Notification::make()
-                            ->success()
-                            ->title('Checklist Assegnata!')
-                            ->body('La procedura AML è pronta per essere compilata nel fascicolo del cliente.')
-                            ->send();
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->danger()
-                            ->title('Errore')
-                            ->body('Template checklist non trovato.')
-                            ->send();
-                    }
-                }),
             DeleteAction::make(),
         ];
     }

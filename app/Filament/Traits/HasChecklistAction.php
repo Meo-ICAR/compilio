@@ -2,8 +2,7 @@
 
 namespace App\Filament\Traits;
 
-use App\Models\Checklist;
-use Filament\Actions\Action;  // Assicurati che sia questo per le tabelle
+use Filament\Actions\Action;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -11,135 +10,147 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
+use Spatie\MediaLibrary\HasMedia;
 
 trait HasChecklistAction
 {
     public static function getChecklistActions(
-        ?string $code = null,
-        string $label = 'Checklist',
+        $code = null,
+        $label = 'Checklist',
         string $icon = 'heroicon-o-clipboard-document-check'
     ): array {
-        $codeName = $code ?? 'generale';
+        // Se code è una callable, valutala dinamicamente
+        $codeValue = is_callable($code) ? 'dynamic' : ($code ?? 'generale');
+        $labelValue = is_callable($label) ? 'Checklist' : $label;
 
-        // 1. AZIONE GENERA
-        $actionGenera = Action::make("genera_checklist_{$codeName}")
+        // --- 1. AZIONE: GENERA (Appare solo se NON esiste) ---
+        $actionGenera = Action::make("genera_{$codeName}")
             ->label("Genera {$label}")
             ->icon('heroicon-o-sparkles')
             ->color('success')
-            ->hidden(fn($record) => $record->checklists()->where('code', $code)->exists())
+            ->visible(fn($record) => !DB::table('checklists')
+                ->where('target_id', $record->id)
+                ->where('target_type', get_class($record))
+                ->where('code', $code)
+                ->exists())
             ->requiresConfirmation()
+            ->modalHeading("Genera Nuova {$label}")
+            ->modalDescription('Non è presente una checklist per questo record. Vuoi crearla ora partendo dal template?')
             ->action(function ($record) use ($code, $label) {
-                $template = Checklist::where('code', $code)->whereNull('checklistable_id')->first();
+                // Cerchiamo il template (dove target_id è null)
+                $template = DB::table('checklists')
+                    ->where('code', $code)
+                    ->whereNull('target_id')
+                    ->first();
 
                 if (!$template) {
-                    Notification::make()->title('Template non trovato')->danger()->send();
+                    Notification::make()->title("Errore: Template '{$code}' non trovato.")->danger()->send();
                     return;
                 }
 
-                $nuova = $record->checklists()->create([
+                // Inseriamo la testata
+                $newId = DB::table('checklists')->insertGetId([
+                    'target_id' => $record->id,
+                    'target_type' => get_class($record),
                     'code' => $code,
                     'name' => $template->name ?? $label,
+                    'company_id' => $record->company_id ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
 
-                foreach ($template->items as $item) {
-                    $nuova->items()->create([
+                // Copiamo gli items dal template
+                $templateItems = DB::table('checklist_items')->where('checklist_id', $template->id)->get();
+                foreach ($templateItems as $item) {
+                    DB::table('checklist_items')->insert([
+                        'checklist_id' => $newId,
                         'name' => $item->name,
                         'description' => $item->description,
                         'question' => $item->question,
                         'url_step' => $item->url_step,
-                        'document_type' => $item->document_type,
+                        'document_type_code' => $item->document_type_code,
                         'is_completed' => false,
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ]);
                 }
-                Notification::make()->title('Generata!')->success()->send();
+
+                Notification::make()->title('Checklist generata correttamente')->success()->send();
             });
 
-        // 2. AZIONE GESTISCI
-        $actionGestisci = Action::make("gestisci_checklist_{$codeName}")
+        // --- 2. AZIONE: GESTISCI (Appare solo se ESISTE) ---
+        $actionGestisci = Action::make("gestisci_{$codeName}")
             ->label($label)
-            ->icon($icon)
-            ->color('warning')
+            ->icon('heroicon-o-clipboard-document-check')
             ->slideOver()
-            ->visible(fn($record) => $record->checklists()->where('code', $code)->exists())
-            ->fillForm(function ($record) {
-                dd($record->checklists()->toSql());  // Se arrivi qui, scrivi questo per vedere la query
-                return [];
+            ->visible(fn($record) => DB::table('checklists')->where('target_id', $record->id)->where('code', $code)->exists())
+            ->fillForm(function ($record) use ($code): array {
+                // USIAMO DB PURO PER EVITARE IL LOOP DEI MODELLI
+                $checklist = DB::table('checklists')
+                    ->where('target_id', $record->id)
+                    ->where('target_type', get_class($record))
+                    ->where('code', $code)
+                    ->first();
+
+                if (!$checklist)
+                    return [];
+
+                $items = DB::table('checklist_items')
+                    ->where('checklist_id', $checklist->id)
+                    ->get(['id', 'question', 'description', 'url_step', 'answer'])
+                    ->map(fn($item) => (array) $item)  // Convertiamo oggetti stdClass in array
+                    ->toArray();
+
+                return [
+                    'items' => $items,
+                ];
             })
-            /*
-             * ->fillForm(function ($record) use ($code): array {
-             *     $checklist = $record->checklists()->where('code', $code)->first();
-             *     if (!$checklist)
-             *         return [];
-             *
-             *     // Carichiamo i dati in modo esplicito
-             *     return [
-             *         'testata_nome' => $checklist->name,
-             *         'items' => $checklist->items->map(fn($item) => [
-             *             'id' => $item->id,
-             *             'question' => $item->question,
-             *             'description' => $item->description,
-             *             'url_step' => $item->url_step,
-             *             'answer' => $item->answer,
-             *             'document_type' => $item->document_type,
-             *         ])->toArray(),
-             *     ];
-             *
-             * })
-             */
             ->form([
-                Section::make('Dettagli')
-                    ->schema([
-                        Placeholder::make('testata_nome')->label('Checklist')->content(fn($get) => $get('testata_nome')),
-                    ]),
                 Repeater::make('items')
-                    ->dehydrated(false)  // FONDAMENTALE: Evita il loop di stato di Filament
+                    ->label('Passaggi')
                     ->schema([
                         TextInput::make('id')->hidden(),
-                        TextInput::make('url_step')->hidden(),
-                        TextInput::make('document_type')->hidden(),
-                        TextInput::make('question')->label('Domanda')->disabled()->columnSpan(3),
+                        TextInput::make('question')
+                            ->label('Domanda')
+                            ->disabled()
+                            ->columnSpan(3),
                         Placeholder::make('link')
                             ->label('Link')
                             ->content(fn($get) => $get('url_step')
-                                ? new HtmlString("<a href='{$get('url_step')}' target='_blank' style='color:blue;text-decoration:underline'>Apri link</a>")
+                                ? new HtmlString("<a href='{$get('url_step')}' target='_blank' style='color:blue; font-weight:bold;'>Apri</a>")
                                 : '-')
                             ->columnSpan(1),
-                        Textarea::make('description')->label('Istruzioni')->disabled()->rows(2)->columnSpan(4),
-                        Textarea::make('answer')->label('Risposta')->rows(3)->columnSpan(4),
-                        SpatieMediaLibraryFileUpload::make('file_upload')
-                            ->label('Allegato')
-                            ->collection(fn($get) => $get('document_type') ?? 'default')
-                            ->visible(fn($get) => filled($get('document_type')))
+                        Textarea::make('description')
+                            ->label('Istruzioni')
+                            ->disabled()
+                            ->rows(1)
+                            ->columnSpan(4),
+                        Textarea::make('answer')
+                            ->label('Tua Risposta')
+                            ->rows(2)
                             ->columnSpan(4),
                     ])
                     ->columns(4)
                     ->addable(false)
                     ->deletable(false)
             ])
-            ->action(function ($record, array $data) use ($code) {
-                $checklist = $record->checklists()->where('code', $code)->first();
-
-                // Nota: poiché abbiamo usato dehydrated(false), dobbiamo recuperare
-                // i dati del repeater direttamente dall'input grezzo della richiesta
-                $rawItems = request()->input('components.0.calls.0.params.0.data.items')
-                    ?? data_get($data, 'items', []);
-
-                foreach ($rawItems as $itemData) {
-                    $item = $checklist->items()->find($itemData['id']);
-                    if ($item) {
-                        $item->update([
+            ->action(function ($record, array $data) {
+                // Salvataggio tramite DB puro
+                foreach ($data['items'] as $itemData) {
+                    DB::table('checklist_items')
+                        ->where('id', $itemData['id'])
+                        ->update([
                             'answer' => $itemData['answer'] ?? null,
-                            'is_completed' => filled($itemData['answer'])
+                            'is_completed' => !empty($itemData['answer']),
+                            'updated_at' => now(),
                         ]);
-
-                        // Gestione file (Spatie se presente nel form)
-                        // Il componente Spatie gestisce il caricamento sul record ($record)
-                        // se configurato correttamente nel form.
-                    }
                 }
-                Notification::make()->title('Salvato')->success()->send();
+
+                Notification::make()->title('Dati salvati con successo')->success()->send();
             });
 
         return [$actionGenera, $actionGestisci];

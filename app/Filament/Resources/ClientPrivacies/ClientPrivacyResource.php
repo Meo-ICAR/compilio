@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ClientPrivacies;
 
 use App\Filament\Resources\Checklists\ChecklistResource;
 use App\Filament\Resources\ClientPrivacies\Pages\ManageClientPrivacies;
+use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\Client;
 use App\Models\ClientPrivacy;
 use App\Services\ChecklistService;
@@ -20,6 +21,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +30,8 @@ use UnitEnum;
 
 class ClientPrivacyResource extends Resource
 {
+    use HasChecklistAction;
+
     protected static ?string $model = ClientPrivacy::class;
 
     protected static bool $isScopedToTenant = false;
@@ -130,48 +134,12 @@ class ClientPrivacyResource extends Resource
                 //
             ])
             ->recordActions([
-                Action::make('assegnaChecklistPrivacy')
-                    ->label('Checklist Privacy')
-                    ->icon('heroicon-o-clipboard-document-check')
-                    ->color('warning')
-                    ->action(function (ClientPrivacy $record, ChecklistService $checklistService) {
-                        try {
-                            // Verifichiamo se esiste già una checklist per questo client privacy
-                            $existingChecklist = $record
-                                ->checklist()
-                                ->where('code', 'GDPR_ACCESS_REQ')
-                                ->first();
-
-                            if ($existingChecklist) {
-                                // Se esiste, mostriamo una notifica e reindirizziamo
-                                Notification::make()
-                                    ->info()
-                                    ->title('Checklist Già Presente')
-                                    ->body('La checklist privacy esiste già. Puoi compilarla o modificarla.')
-                                    ->send();
-
-                                // Reindirizziamo alla pagina di modifica della checklist
-                                return redirect()->to(ChecklistResource::getUrl('edit', ['record' => $existingChecklist]));
-                            } else {
-                                // Se non esiste, la creiamo
-                                $checklistService->assignTemplate($record, 'GDPR_ACCESS_REQ');
-
-                                Notification::make()
-                                    ->success()
-                                    ->title('Checklist Assegnata!')
-                                    ->body('La procedura Checklist Privacy è pronta per essere compilata')
-                                    ->send();
-                            }
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->danger()
-                                ->title('Errore')
-                                ->body("Errore durante l'assegnazione della checklist: " . $e->getMessage())
-                                ->send();
-                        }
-                    }),
-                EditAction::make(),
-            ])
+                ...self::getChecklistActions(
+                    code: 'GDPR_ACCESS_REQ',  // <-- Il 'code' esatto presente nel tuo DB
+                    label: 'Checklist Privacy',
+                    // icon: 'heroicon-o-clipboard-document-check'
+                ),
+            ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

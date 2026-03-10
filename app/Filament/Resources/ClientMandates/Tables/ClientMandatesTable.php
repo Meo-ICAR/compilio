@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ClientMandates\Tables;
 
+use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -23,12 +24,15 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
 class ClientMandatesTable
 {
+    use HasChecklistAction;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -68,9 +72,6 @@ class ClientMandatesTable
             ])
             ->filters([
                 TrashedFilter::make(),
-            ])
-            ->recordActions([
-                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
