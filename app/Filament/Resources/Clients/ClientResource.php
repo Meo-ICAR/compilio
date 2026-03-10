@@ -12,6 +12,7 @@ use App\Filament\Resources\Clients\RelationManagers\ClientMandatesRelationManage
 use App\Filament\Resources\Clients\RelationManagers\ClientRelationsRelationManager;
 use App\Filament\Resources\Clients\Schemas\ClientForm;
 use App\Filament\Resources\Clients\Tables\ClientsTable;
+use App\Filament\Traits\HasChecklistAction;
 use App\Models\Client;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -24,6 +25,9 @@ use UnitEnum;
 class ClientResource extends Resource
 {
     protected static ?string $model = Client::class;
+
+    // 2. Usa il Trait nella classe della Risorsa
+    use HasChecklistAction;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 

@@ -9,6 +9,7 @@ use App\Filament\Resources\SosReports\Pages\ViewSosReport;
 use App\Filament\Resources\SosReports\Schemas\SosReportForm;
 use App\Filament\Resources\SosReports\Schemas\SosReportInfolist;
 use App\Filament\Resources\SosReports\Tables\SosReportsTable;
+use App\Filament\Traits\HasChecklistAction;
 use App\Models\SosReport;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -20,6 +21,10 @@ use UnitEnum;
 class SosReportResource extends Resource
 {
     protected static ?string $model = SosReport::class;
+
+    // 2. Usa il Trait nella classe della Risorsa
+
+    use HasChecklistAction;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedExclamationTriangle;
 

@@ -8,6 +8,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 
 class ChecklistAuditsTable
@@ -17,6 +19,7 @@ class ChecklistAuditsTable
         return $table
             ->query(fn() => Checklist::query()
                 ->where('type', 'audit')
+                ->where('is_audit', '=', true)
                 ->whereNotNull('target_id'))
             ->columns([
                 TextColumn::make('target.name')
@@ -57,11 +60,11 @@ class ChecklistAuditsTable
             ])
             ->recordActions([
                 EditAction::make(),
-            ])
+            ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                //  BulkActionGroup::make([
+                //     DeleteBulkAction::make(),
+                //  ]),
             ])
             ->defaultSort('created_at', 'desc');
     }

@@ -9,6 +9,7 @@ use App\Filament\Resources\ClientMandates\Pages\ListClientMandates;
 use App\Filament\Resources\ClientMandates\RelationManagers\ChecklistsRelationManager;
 use App\Filament\Resources\ClientMandates\Schemas\ClientMandateForm;
 use App\Filament\Resources\ClientMandates\Tables\ClientMandatesTable;
+use App\Filament\Traits\HasChecklistAction;
 use App\Models\ClientMandate;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -22,6 +23,10 @@ use UnitEnum;
 class ClientMandateResource extends Resource
 {
     protected static ?string $model = ClientMandate::class;
+
+    // 2. Usa il Trait nella classe della Risorsa
+
+    use HasChecklistAction;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 

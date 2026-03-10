@@ -14,6 +14,7 @@ use App\Filament\Resources\Principals\RelationManagers\PrincipalMandatesRelation
 use App\Filament\Resources\Principals\RelationManagers\PrincipalScopesRelationManager;
 use App\Filament\Resources\Principals\Schemas\PrincipalForm;
 use App\Filament\Resources\Principals\Tables\PrincipalsTable;
+use App\Filament\Traits\HasChecklistAction;
 use App\Models\Principal;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -25,6 +26,10 @@ use UnitEnum;
 class PrincipalResource extends Resource
 {
     protected static ?string $model = Principal::class;
+
+    // 2. Usa il Trait nella classe della Risorsa
+
+    use HasChecklistAction;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 

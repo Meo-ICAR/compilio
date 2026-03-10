@@ -12,6 +12,12 @@ return new class extends Migration {
     {
         Schema::table('checklist_items', function (Blueprint $table) {
             $table->foreignId('document_id')->nullable()->after('attach_model_id')->comment('Riferimento a un documento esistente già allegato al target');
+            $table->boolean('is_completed')->default(false)->comment('Step completato');
+            // 4. SINCRONIZZAZIONE BIDIREZIONALE (Dal Model alla Checklist)
+            $table->string('target_model')->nullable()->comment('Modello del parent da ascoltare (es. Agent, Company)');
+            $table->string('target_field')->nullable()->comment('Colonna del parent da ascoltare (es. status, privacy_signed_at)');
+            $table->string('target_value')->nullable()->comment('Valore esatto che fa scattare la spunta (es. deliberata)');
+            $table->boolean('is_timestamp_update')->default(false)->comment('Se true, basta che il target_field non sia null per spuntare');
             $table->foreign('document_id')->references('id')->on('documents')->onDelete('set null');
         });
     }

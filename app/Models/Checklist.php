@@ -16,6 +16,8 @@ class Checklist extends Model implements HasMedia
 {
     use HasFactory, BelongsToCompany, InteractsWithMedia, LogsActivity;
 
+    protected $guarded = [];
+
     protected $fillable = [
         'company_id',
         'name',
