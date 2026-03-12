@@ -51,7 +51,7 @@ class MediafacileImportService
 
         try {
             $data = $this->fetchData($startDate, $endDate);
-
+            //  Log::warning('Skipping not owned item: ' . json_encode($data));
             if (empty($data)) {
                 $result['message'] = 'Nessun record trovato nel range di date specificato.';
                 return $result;
@@ -139,6 +139,7 @@ class MediafacileImportService
             return [];
 
         $headers = $this->parseLine($lines[0]);
+
         $data = [];
 
         for ($i = 1; $i < count($lines); $i++) {
@@ -286,6 +287,10 @@ class MediafacileImportService
         //   $this->info($apiData['Data_invio_istruttoria'] . ' Sended at: ' . $sendedAt);
         $approvedAt = $this->parseDate($apiData['Data_delibera_banca'] ?? null);
         $erogatedAt = $this->parseDate($apiData['Data_erogazione'] ?? null);
+        if (!empty($erogatedAt)) {
+            // $erogatedAt = $approvedAt;
+            // Log::warning('Erogated item: ' . json_encode($apiData));
+        }
 
         $amount = $this->parseDecimal($apiData['Montante'] ?? null);
         $net = $this->parseDecimal($apiData['Importo_Erogazione'] ?? null);

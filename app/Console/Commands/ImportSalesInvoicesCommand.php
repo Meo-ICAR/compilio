@@ -14,7 +14,7 @@ class ImportSalesInvoicesCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'sales-invoices:import {--company= : Company ID} {--file= : Custom file path} {--force : Force reimport}';
+    protected $signature = ' {--company= : Company ID} {--file= : Custom file path} {--force : Force reimport}';
 
     /**
      * The console command description.

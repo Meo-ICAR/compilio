@@ -32,13 +32,16 @@ class OamScopeSeeder extends Seeder
             ['code' => 'A.14', 'name' => 'Anticipi e sconti commerciali'],
             ['code' => 'A.15', 'name' => 'Credito revolving'],
             ['code' => 'A.16', 'name' => 'Ristrutturazione dei crediti (art. 128-quater decies, del TUB)'],
+            ['code' => 'Consulenza', 'name' => ' '],
+            ['code' => 'Segnalazione mutuo', 'name' => ' '],
         ];
 
         foreach ($oamScopes as $scope) {
             \App\Models\OamScope::firstOrCreate([
                 'code' => $scope['code']
             ], [
-                'name' => $scope['name']
+                'name' => $scope['name'],
+                'description' => $scope['code'] . ' ' . $scope['name'] ?? null,
             ]);
         }
 
@@ -67,6 +70,8 @@ class OamScopeSeeder extends Seeder
             // --- ALTRI (Mappati su categorie logiche o lasciati null se non rientrano) ---
             ['id' => 5, 'name' => 'Factoring crediti', 'code' => 'FACT', 'oam_code' => 'A.1', 'tipo_prodotto' => 'Aziendale', 'is_oneclient' => 1],
             ['id' => 11, 'name' => 'Aperture di credito in conto corrente', 'code' => 'APERT_CCC', 'oam_code' => 'A.1', 'tipo_prodotto' => 'Aziendale', 'is_oneclient' => 1],
+            ['id' => 12, 'name' => 'Consulenza', 'code' => 'CONSULENZA', 'oam_code' => '', 'tipo_prodotto' => 'consulenza', 'is_oneclient' => 1],
+            ['id' => 13, 'name' => 'Segnalazione mutuo', 'code' => 'MUTUOSEG', 'oam_code' => '', 'tipo_prodotto' => 'Mutux', 'is_oneclient' => 1],
         ];
         foreach ($practices as $practice) {
             DB::table('practice_scopes')->updateOrInsert(

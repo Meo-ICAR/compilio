@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 class SalesInvoiceImportService
 {
     protected $companyId;
+
     protected $importResults = [
         'imported' => 0,
         'updated' => 0,
@@ -33,7 +34,7 @@ class SalesInvoiceImportService
         }
 
         DB::beginTransaction();
-        
+
         try {
             $handle = fopen($filePath, 'r');
             if (!$handle) {
@@ -52,7 +53,7 @@ class SalesInvoiceImportService
             foreach ($headers as $header) {
                 $cleanHeader = trim($header);
                 // Remove BOM if present
-                $cleanHeader = str_replace("\xEF\xBB\xBF", '', $cleanHeader);
+                $cleanHeader = str_replace("\u{FEFF}", '', $cleanHeader);
                 $cleanHeader = str_replace(['.', ' ', '-', '(', ')', '/', '°'], ['_', '_', '_', '_', '_', '_', '_'], $cleanHeader);
                 $cleanHeader = strtolower($cleanHeader);
                 $cleanHeaders[] = $cleanHeader;
@@ -61,24 +62,56 @@ class SalesInvoiceImportService
             Log::info('Sales Invoice CSV Headers', ['original' => $headers, 'cleaned' => $cleanHeaders]);
 
             $rowNumber = 2;  // Start from 2 since we already read header
-            
+
             while (($row = fgetcsv($handle, 0, ';')) !== false) {
                 $this->processRow($row, $cleanHeaders, $rowNumber);
                 $rowNumber++;
             }
 
             fclose($handle);
-            
+
             DB::commit();
-            
+
             Log::info('Sales invoices import completed', [
                 'file' => $filePath,
                 'company_id' => $this->companyId,
                 'results' => $this->importResults
             ]);
-
+            DB::UPDATE("
+            UPDATE principals b
+JOIN (
+    -- This subquery identifies the specific principals and the new VAT values
+    SELECT p.principal_id, s.vat_number
+    FROM practice_commissions p
+    INNER JOIN sales_invoices s ON s.registration_date = p.invoice_at
+    WHERE YEAR(p.invoice_at) > 2024
+      AND p.tipo = 'Istituto'
+    GROUP BY p.principal_id, p.invoice_at, p.invoice_number, s.amount, s.vat_number
+    HAVING s.amount = SUM(p.amount)
+) src ON b.id = src.principal_id
+SET b.vat_number = src.vat_number;
+");
+            DB::UPDATE("
+UPDATE practice_commissions p
+INNER JOIN (
+    -- Subquery to find the valid matches based on your totals
+    SELECT
+        p_inner.principal_id,
+        p_inner.invoice_at,
+        s.number AS invoice_ref_number
+    FROM practice_commissions p_inner
+    INNER JOIN principals b ON b.id = p_inner.principal_id
+    INNER JOIN sales_invoices s ON s.vat_number = b.vat_number
+    WHERE p_inner.tipo = 'Istituto'
+      AND YEAR(p_inner.invoice_at) = 2025
+and p_inner.alternative_number_invoice is null
+    GROUP BY b.id, b.name, b.vat_number, p_inner.invoice_at, s.registration_date, s.number
+    HAVING ABS(SUM(p_inner.amount) - SUM(s.amount)) < 100
+) AS matched_data ON p.principal_id = matched_data.principal_id
+                 AND p.invoice_at = matched_data.invoice_at
+SET p.alternative_number_invoice = matched_data.invoice_ref_number
+WHERE p.tipo = 'Istituto'; ");
             return $this->importResults;
-            
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -93,7 +126,7 @@ class SalesInvoiceImportService
             foreach ($headers as $index => $header) {
                 $rowData[$header] = $row[$index] ?? '';
             }
-            
+
             // Skip empty rows
             if (empty($rowData['nr_']) || empty($rowData['ragione_sociale'])) {
                 $this->importResults['skipped']++;
@@ -101,10 +134,10 @@ class SalesInvoiceImportService
             }
 
             $invoiceData = $this->mapRowToInvoiceData($rowData);
-            
+
             // Add company_id
             $invoiceData['company_id'] = $this->companyId;
-            
+
             // Check if invoice already exists
             $existingInvoice = SalesInvoice::where('company_id', $this->companyId)
                 ->where('number', $invoiceData['number'])
@@ -191,11 +224,11 @@ class SalesInvoiceImportService
         if (empty($value)) {
             return 0;
         }
-        
+
         // Handle Italian format: 15.000,00 -> 15000.00
         $value = str_replace('.', '', $value);
         $value = str_replace(',', '.', $value);
-        
+
         return (float) $value;
     }
 
@@ -204,7 +237,7 @@ class SalesInvoiceImportService
         if (empty($value)) {
             return 0;
         }
-        
+
         return (int) $value;
     }
 
@@ -213,12 +246,12 @@ class SalesInvoiceImportService
         if (empty($value)) {
             return null;
         }
-        
+
         // Handle Italian format: 30/12/2025 -> 2025-12-30
         if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})$/', $value, $matches)) {
             return "{$matches[3]}-{$matches[2]}-{$matches[1]}";
         }
-        
+
         return null;
     }
 
@@ -227,7 +260,7 @@ class SalesInvoiceImportService
         if (empty($value)) {
             return null;
         }
-        
+
         // Try to parse various datetime formats
         try {
             return \Carbon\Carbon::parse($value);
@@ -241,7 +274,7 @@ class SalesInvoiceImportService
         if (empty($value)) {
             return false;
         }
-        
+
         return in_array(strtolower($value), ['vero', 'true', '1', 'si', 'yes']);
     }
 }

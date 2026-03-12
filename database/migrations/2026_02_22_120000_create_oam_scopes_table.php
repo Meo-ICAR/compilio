@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,8 +13,9 @@ return new class extends Migration
         Schema::create('oam_scopes', function (Blueprint $table) {
             $table->comment('Tabella di lookup globale (Senza Tenant): Ambiti operativi OAM.');
             $table->id()->comment('ID autoincrementante');
-            $table->string('code')->unique()->comment('Codice ambito OAM');
-            $table->string('name')->comment('Descrizione ambito operativo');
+            $table->string('code')->unique()->comment('Codice ambito OAM')->nullable();
+            $table->string('name')->comment('Descrizione ambito operativo')->nullable();
+            $table->string('description')->comment('Codice e Descrizione ambito operativo')->nullable();
             $table->timestamps();
         });
     }

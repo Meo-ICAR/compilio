@@ -113,6 +113,17 @@ GROUP BY x.principal_id, x.tipo_prodotto
 ORDER BY x.principal_id, x.tipo_prodotto;
             ", [$this->companyId]);
 
+            DB::statement('UPDATE principals p set p.is_dummy = true;
+UPDATE principals p
+JOIN (
+    SELECT principal_id
+    FROM practice_commissions
+    GROUP BY principal_id
+    HAVING SUM(amount) > 0
+) c_sum ON p.id = c_sum.principal_id
+SET p.is_dummy = false;
+delete from principals  WHERE is_dummy; ');
+
             // Step 1: Delete all existing practice_oam records for the company
         } catch (Exception $e) {
             Log::error("Errore critico durante l'importazione Pratiche: " . $e->getMessage());

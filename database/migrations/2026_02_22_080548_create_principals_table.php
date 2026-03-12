@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->date('stipulated_at')->nullable()->comment('Data stipula contratto convenzione');
             $table->date('dismissed_at')->nullable()->comment('Data cessazione rapporto convenzione');
             $table->string('vat_number', 13)->nullable()->comment("Partita IVA dell'istituto");
-            $table->string('vat_name', 13)->nullable()->comment('Ragione sociale fiscale');
+            $table->string('vat_name')->nullable()->comment('Ragione sociale fiscale');
             $table->string('type', 30)->nullable()->comment('Banca / Assicurazione / Utility');
             $table->string('oam', 30)->nullable()->comment('Codice di iscrizione OAM');
             $table->string('oam_name')->nullable()->comment('Denominazione  OAM');

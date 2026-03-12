@@ -8,10 +8,13 @@ use App\Filament\Exports\PracticeOamExporter;
 use App\Models\PracticeOam;
 use App\Models\PracticeOamBase;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
@@ -21,6 +24,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -35,7 +39,7 @@ class PracticeOamsTable
             ->reorderableColumns()
             ->selectable()
             ->groups([
-                Group::make('oam_code')
+                Group::make('oam_name')
                     ->label('OAM')
                     ->collapsible(),  // SOSTITUISCE le vecchie impostazioni di groupingSettings
                 Group::make('tipo_prodotto')
@@ -44,8 +48,8 @@ class PracticeOamsTable
             ])
             ->collapsedGroupsByDefault()
             ->columns([
-                TextColumn::make('practice.scopeOAM.oam_code')
-                    ->label('B-OAM Code')
+                TextColumn::make('oam_name')
+                    ->label('B-OAM')
                     ->sortable(),
                 TextColumn::make('tipo_prodotto')
                     ->label('Prodotto')
@@ -222,13 +226,14 @@ class PracticeOamsTable
                 Filter::make('is_perfected')
                     ->label('Erogata')
                     ->query(fn($query) => $query->where('is_perfected', true)),
-                SelectFilter::make('oam_code')
-                    ->label('Filtra per Codice OAM')
+                SelectFilter::make('oam_name')
+                    ->label('Filtra per OAM')
                     ->multiple()  // Abilita la selezione multipla
                     ->options(
                         // Recupera i valori unici della colonna 'type' dal database
                         fn() => PracticeOam::query()
-                            ->pluck('oam_code', 'oam_code')  // 'valore' => 'etichetta'
+                            ->whereNotNull('oam_name')
+                            ->pluck('oam_name', 'oam_name')  // 'valore' => 'etichetta'
                             ->sort()
                             ->toArray()
                     )
@@ -239,6 +244,7 @@ class PracticeOamsTable
                     ->options(
                         // Recupera i valori unici della colonna 'type' dal database
                         fn() => PracticeOam::query()
+                            ->whereNotNull('tipo_prodotto')
                             ->pluck('tipo_prodotto', 'tipo_prodotto')  // 'valore' => 'etichetta'
                             ->sort()
                             ->toArray()
@@ -250,6 +256,7 @@ class PracticeOamsTable
                     ->options(
                         // Recupera i valori unici della colonna 'type' dal database
                         fn() => PracticeOam::query()
+                            ->whereNotNull('name')
                             ->pluck('name', 'name')  // 'valore' => 'etichetta'
                             ->sort()
                             ->toArray()
@@ -340,7 +347,9 @@ class PracticeOamsTable
                                         'F_Lavorazione', 'G_Erogato', 'H_Erogato_Lavorazione',
                                         'I_Provvigione_Cliente', 'J_Provvigione_Istituto',
                                         'K_Provvigione_Istituto_Lavorazione',
-                                        'O_Provvigione_Rete'
+                                        'O_Provvigione_Rete',
+                                        'liquidato',
+                                        'liquidato_lavorazione'
                                     ]);
 
                                     // Filter by company if company_id is available
@@ -369,6 +378,11 @@ class PracticeOamsTable
                                         0,
                                         0,
                                         (float) $row->O_Provvigione_Rete,
+                                        0,
+                                        0,
+                                        0,
+                                        (float) $row->liquidato,
+                                        (float) $row->liquidato_lavorazione,
                                     ];
                                 }
 
@@ -376,14 +390,25 @@ class PracticeOamsTable
                                 {
                                     return [
                                         '-',  // Colonna A vuota '',  // Colonna A vuota
-                                        'B-OAM', 'C-Convenzionata', 'D-Non_Convenzionata', 'E-Intermediate',
-                                        'F-Lavorazione', 'G-Erogato', 'H-Lavorazione',
-                                        'I-Provv_Cliente', 'J-Provv_Istituto',
+                                        'B-OAM',
+                                        'C-Convenzionata',
+                                        'D-Non_Convenzionata',
+                                        'E-Intermediate',
+                                        'F-Lavorazione',
+                                        'G-Erogato',
+                                        'H-Lavorazione',
+                                        'I-Provv_Cliente',
+                                        'J-Provv_Istituto',
                                         'K-Provv_Istituto_Lavorazione',
                                         '-',  //  L
                                         '-',  //  M
                                         '-',  //  N
-                                        'O-Provv_Rete'
+                                        'O-Provv_Rete',
+                                        '-',  //  L
+                                        '-',  //  M
+                                        '-',  //  N
+                                        'Liquidato',
+                                        'Liquidato_Lavorazione',
                                     ];
                                 }
                             },
@@ -400,6 +425,80 @@ class PracticeOamsTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    BulkAction::make('update_oam_name')
+                        ->label('Aggiorna OAM')
+                        ->icon('heroicon-o-pencil')
+                        ->form([
+                            Select::make('oam_name')
+                                ->label('Nuovo OAM')
+                                ->required()
+                                ->options(
+                                    fn() => PracticeOam::query()
+                                        ->whereNotNull('oam_name')
+                                        ->pluck('oam_name', 'oam_name')
+                                        ->sort()
+                                        ->toArray()
+                                )
+                                ->searchable(),
+                        ])
+                        ->action(function (array $data, Collection $records) {
+                            $records->each(function ($record) use ($data) {
+                                $record->update(['oam_name' => $data['oam_name']]);
+                            });
+
+                            Notification::make()
+                                ->title('OAM aggiornato con successo')
+                                ->success()
+                                ->send();
+                        }),
+                    BulkAction::make('toggle_conventioned')
+                        ->label('Forza Convenzionato/Non Convenzionato')
+                        ->icon('heroicon-o-arrow-path')
+                        ->form([
+                            Toggle::make('is_conventioned')
+                                ->label('Convenzionato')
+                                ->default(false),
+                            Toggle::make('is_notconventioned')
+                                ->label('Non Convenzionato')
+                                ->default(false),
+                        ])
+                        ->action(function (array $data, Collection $records) {
+                            $records->each(function ($record) use ($data) {
+                                $record->update([
+                                    'is_conventioned' => $data['is_conventioned'] ?? false,
+                                    'is_notconventioned' => $data['is_notconventioned'] ?? false
+                                ]);
+                            });
+
+                            Notification::make()
+                                ->title('Stati convenzionamento aggiornati')
+                                ->success()
+                                ->send();
+                        }),
+                    BulkAction::make('toggle_status')
+                        ->label('Forza Erogata/Lavorazione')
+                        ->icon('heroicon-o-check-circle')
+                        ->form([
+                            Toggle::make('is_perfected')
+                                ->label('Erogata')
+                                ->default(false),
+                            Toggle::make('is_working')
+                                ->label('Lavorazione')
+                                ->default(false),
+                        ])
+                        ->action(function (array $data, Collection $records) {
+                            $records->each(function ($record) use ($data) {
+                                $record->update([
+                                    'is_perfected' => $data['is_perfected'] ?? false,
+                                    'is_working' => $data['is_working'] ?? false
+                                ]);
+                            });
+
+                            Notification::make()
+                                ->title('Stati pratica aggiornati')
+                                ->success()
+                                ->send();
+                        }),
                 ]),
             ]);
     }

@@ -29,7 +29,7 @@ class PracticeOamService
         }
         if (empty($startDate)) {
             $startDate = Carbon::now()->startOfYear()->format('Y-m-d');
-            if (now()->month() < 5) {
+            if (now()->month < 5) {
                 $startDate = Carbon::parse($startDate)->subMonths(6)->format('Y-m-d');
             }
         }
@@ -65,24 +65,32 @@ class PracticeOamService
                 ->whereNull('rejected_at')
                 ->get();
 
+            Log::info("Found {$practices->count()} practices to process");
+
             // Step 3: Insert new practice_oam records
             $insertedCount = 0;
 
             foreach ($practices as $practice) {
+                $tipoProdotto = $practice->tipo_prodotto;
+                if (($tipoProdotto == 'Polizza') || ($tipoProdotto == 'Utenza')) {
+                    continue;
+                }
                 $erogato = $practice->amount;
+                $liquidato = $practice->net;
                 $erogato_lavorazione = 0;
+                $liquidato_lavorazione = 0;
                 $commissionSums = $this->getPracticeCommissionSums($practice);
                 $somma = $commissionSums['somma'];
                 if ($somma > 0) {
                     // Assicuriamoci che entrambi siano oggetti Carbon per un confronto granulare
 
-                    $is_perfected = $practice->erogated_at >= $practice->inserted_at;
-                    $is_perfected = $is_perfected && ($practice->erogated_at < $endDateCarbon);
+                    $is_perfected = $practice->erogated_at && $practice->inserted_at && $practice->erogated_at >= $practice->inserted_at;
+                    $is_perfected = $is_perfected && $practice->erogated_at < $endDateCarbon;
                     $mese = 0;
-                    if ($is_perfected) {
-                        $mese = (int) $practice->erogated_at->month;
+                    if ($is_perfected && $practice->erogated_at) {
+                        $mese = (int) $practice->erogated_at->format('n');
                     }
-                    $tipoProdotto = $practice->tipo_prodotto;
+
                     $compenso = $commissionSums['compenso'];
                     $premio = $commissionSums['premio'];
                     $assicurazione = $commissionSums['assicurazione'];
@@ -96,12 +104,15 @@ class PracticeOamService
                         $commissionSums['compenso_lavorazione'] = $commissionSums['compenso'];
                         $commissionSums['provvigione_lavorazione'] = $commissionSums['provvigione'];
                         $erogato_lavorazione = $erogato;
+                        $liquidato_lavorazione = $liquidato;
 
                         $commissionSums['compenso'] = 0;
                         $erogato = 0;
+                        $liquidato = 0;
                         $commissionSums['provvigione'] = 0;
                     }
                     $oam_code = $practice?->practiceScope?->oam_code;
+                    $comCliente = $commissionSums['cliente'] ?? 0;
                     if (!empty($oam_code)) {
                         $oam_name = OamScope::where('code', $oam_code)->first()?->name;
 
@@ -109,6 +120,12 @@ class PracticeOamService
                     } else {
                         $oam_name = '--';
                     }
+                    if (($tipoProdotto == 'Mutuo') && ($somma == $comCliente)) {
+                        $oam_name = 'Segnalazione ' . $tipoProdotto;
+                        $oam_code = $oam_name;
+                        Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
+                    }
+
                     PracticeOam::create([
                         'company_id' => $companyId,
                         'practice_id' => $practice->id,
@@ -122,7 +139,7 @@ class PracticeOamService
                         'is_working' => !$is_perfected ? 1 : 0,
                         'is_conventioned' => ($compenso > 0) ? 1 : 0,
                         'is_notconventioned' => !($compenso > 0) ? 1 : 0,
-                        'mese' => 0,  // Temporarily hardcoded
+                        'mese' => $mese,
                         'tipo_prodotto' => $tipoProdotto,
                         'name' => $practice->principal->name,
                         // Commission sums based on tipo grouping
@@ -133,7 +150,7 @@ class PracticeOamService
                         'compenso_premio' => $premio ?? 0,  // premio assicurativo
                         'compenso_rimborso' => $commissionSums['rimborso'] ?? 0,
                         'compenso_assicurazione' => $assicurazione ?? 0,
-                        'compenso_cliente' => $commissionSums['cliente'] ?? 0,
+                        'compenso_cliente' => $comCliente,
                         'storno' => $commissionSums['storno'] ?? 0,
                         'provvigione' => $commissionSums['provvigione'] ?? 0,
                         'provvigione_lavorazione' => $commissionSums['provvigione_lavorazione'] ?? 0,
@@ -255,7 +272,7 @@ class PracticeOamService
         // Use default values if null
         if (empty($startDate)) {
             $startDate = Carbon::now()->startOfYear()->format('Y-m-d');
-            if (now()->month() < 5) {
+            if (now()->month < 5) {
                 $startDate = Carbon::parse($startDate)->subMonths(6)->format('Y-m-d');
             }
         }
@@ -279,7 +296,10 @@ class PracticeOamService
                             ->whereNull('erogated_at');
                     })
                     ->orWhere(function ($subQuery) use ($startDateCarbon, $endDateCarbon) {
-                        $subQuery->whereBetween('erogated_at', [$startDateCarbon, $endDateCarbon]);
+                        $subQuery
+                            ->whereNotNull('erogated_at')
+                            ->where('erogated_at', '>=', $startDateCarbon)
+                            ->where('erogated_at', '<=', $endDateCarbon);
                     });
             })
             ->count();
@@ -287,10 +307,10 @@ class PracticeOamService
         $currentPracticeOams = PracticeOam::where('company_id', $companyId)->count();
 
         return [
-            'total_practices' => $totalPractices,
-            'eligible_practices' => $eligiblePractices,
-            'current_practice_oams' => $currentPracticeOams,
-            'needs_sync' => $currentPracticeOams !== $eligiblePractices,
+            'total_practices' => (int) $totalPractices,
+            'eligible_practices' => (int) $eligiblePractices,
+            'current_practice_oams' => (int) $currentPracticeOams,
+            'needs_sync' => (int) $currentPracticeOams !== (int) $eligiblePractices,
         ];
     }
 

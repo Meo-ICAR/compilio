@@ -21,6 +21,10 @@ class PracticeOamBase extends Model
         'J_Provvigione_Istituto',  // compenso
         'K_Provvigione_Istituto_Lavorazione',  // compenso_lavorazione
         'O_Provvigione_Rete',  // provvigione
+        'erogato',
+        'erogato_lavorazione',
+        'liquidato',
+        'liquidato_lavorazione',
     ];
 
     protected $casts = [
@@ -35,6 +39,10 @@ class PracticeOamBase extends Model
         'J_Provvigione_Istituto' => 'decimal:2',
         'K_Provvigione_Istituto_Lavorazione' => 'decimal:2',
         'O_Provvigione_Rete' => 'decimal:2',
+        'erogato' => 'decimal:2',
+        'liquidato' => 'decimal:2',
+        'erogato_lavorazione' => 'decimal:2',
+        'liquidato_lavorazione' => 'decimal:2',
     ];
 
     public function company()

@@ -71,24 +71,36 @@ class SyncPracticeOamsCommand extends Command
     {
         $this->info('Showing statistics...');
 
-        $stats = $service->getSyncStats($companyId, $startDate, $endDate);
+        try {
+            $stats = $service->getSyncStats($companyId, $startDate, $endDate);
 
-        $this->table(
-            ['Metric', 'Count'],
-            [
-                ['Total Practices', $stats['total_practices']],
-                ['Eligible Practices', $stats['eligible_practices']],
-                ['Current Practice OAMs', $stats['current_practice_oams']],
-                ['Needs Sync', $stats['needs_sync'] ? 'Yes' : 'No'],
-            ]
-        );
+            $this->info('Stats retrieved successfully');
+            $this->info('Total Practices: ' . $stats['total_practices']);
+            $this->info('Eligible Practices: ' . $stats['eligible_practices']);
+            $this->info('Current Practice OAMs: ' . $stats['current_practice_oams']);
+            $this->info('Needs Sync: ' . ($stats['needs_sync'] ? 'Yes' : 'No'));
 
-        if ($stats['needs_sync']) {
-            $this->newLine();
-            $this->warn('Sync is needed. Run without --stats to perform the sync.');
-        } else {
-            $this->newLine();
-            $this->info('Data is already in sync.');
+            $this->table(
+                ['Metric', 'Count'],
+                [
+                    ['Total Practices', $stats['total_practices']],
+                    ['Eligible Practices', $stats['eligible_practices']],
+                    ['Current Practice OAMs', $stats['current_practice_oams']],
+                    ['Needs Sync', $stats['needs_sync'] ? 'Yes' : 'No'],
+                ]
+            );
+
+            if ($stats['needs_sync']) {
+                $this->newLine();
+                $this->warn('Sync is needed. Run without --stats to perform the sync.');
+            } else {
+                $this->newLine();
+                $this->info('Data is already in sync.');
+            }
+        } catch (\Exception $e) {
+            $this->error('Error getting stats: ' . $e->getMessage());
+            $this->error('File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+            throw $e;
         }
     }
 

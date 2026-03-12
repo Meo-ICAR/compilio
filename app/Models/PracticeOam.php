@@ -14,6 +14,8 @@ class PracticeOam extends Model
         'oam_name',
         'erogato',
         'erogato_lavorazione',
+        'liquidato',
+        'liquidato_lavorazione',
         'compenso',
         'compenso_lavorazione',
         'compenso_premio',
@@ -44,7 +46,8 @@ class PracticeOam extends Model
         'is_working',
         'accepted_at',
         'is_cancel',
-        'canceled_at'
+        'canceled_at',
+        'oam_name'
     ];
 
     protected $casts = [
@@ -61,6 +64,10 @@ class PracticeOam extends Model
         'provvigione_rimborso' => 'decimal:2',
         'provvigione_assicurazione' => 'decimal:2',
         'provvigione_storno' => 'decimal:2',
+        'erogato' => 'decimal:2',
+        'liquidato' => 'decimal:2',
+        'erogato_lavorazione' => 'decimal:2',
+        'liquidato_lavorazione' => 'decimal:2',
         'is_active' => 'boolean',
         'is_perfected' => 'boolean',
         'is_conventioned' => 'boolean',
@@ -78,7 +85,6 @@ class PracticeOam extends Model
         'oam_name' => 'string',
         'tipo_prodotto' => 'string',
         'mese' => 'integer',
-        'erogato' => 'decimal:2',
         'is_cancel' => 'boolean',
         'canceled_at' => 'date',
     ];

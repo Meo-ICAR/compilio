@@ -106,16 +106,18 @@ class CoreDataSeeder extends Seeder
                 }
             }
 
-            DB::table('principals')->insert([
-                'name' => $name,
-                'abi' => $abi,
-                'company_id' => $company->id,
-                'principal_type' => (str_contains($upperName, 'ASSICURA') || str_contains($upperName, 'VITANUOVA') || str_contains($upperName, 'ISIDE')) ? 'agente_assicurativo' : 'banca',
-                'is_active' => 1,
-                'status' => 'ATTIVO',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            /*
+             * DB::table('principals')->insert([
+             *     'name' => $name,
+             *     'abi' => $abi,
+             *     'company_id' => $company->id,
+             *     'principal_type' => (str_contains($upperName, 'ASSICURA') || str_contains($upperName, 'VITANUOVA') || str_contains($upperName, 'ISIDE')) ? 'agente_assicurativo' : 'banca',
+             *     'is_active' => 1,
+             *     'status' => 'ATTIVO',
+             *     'created_at' => now(),
+             *     'updated_at' => now(),
+             * ]);
+             */
         }
 
         // Agents (Rete Commerciale Esterna)
@@ -146,16 +148,18 @@ class CoreDataSeeder extends Seeder
             ],
         ];
 
-        foreach ($agents as $agentData) {
-            Agent::firstOrCreate(
-                ['name' => $agentData['name'], 'company_id' => $company->id],
-                [
-                    'description' => $agentData['description'],
-                    'oam' => $agentData['oam'],
-                    'type' => $agentData['type'],
-                    'is_active' => 1
-                ]
-            );
-        }
+        /*
+         * foreach ($agents as $agentData) {
+         *     Agent::firstOrCreate(
+         *         ['name' => $agentData['name'], 'company_id' => $company->id],
+         *         [
+         *             'description' => $agentData['description'],
+         *             'oam' => $agentData['oam'],
+         *             'type' => $agentData['type'],
+         *             'is_active' => 1
+         *         ]
+         *     );
+         * }
+         */
     }
 }
