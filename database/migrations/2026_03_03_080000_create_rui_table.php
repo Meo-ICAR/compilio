@@ -12,11 +12,13 @@ return new class extends Migration {
     {
         Schema::create('rui', function (Blueprint $table) {
             $table->comment('Tabella dati RUI (Registro Unico degli Intermediari)');
-            $table->bigIncrements('id')->comment('ID autoincrementante');
+
+            // Use numero_iscrizione_rui as primary key (not auto-increment)
+            $table->string('numero_iscrizione_rui', 50)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->comment('Numero iscrizione RUI');
+
             $table->string('oss')->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Codice OSS');
             $table->tinyInteger('inoperativo')->default(0)->comment('Stato inoperativo');
             $table->date('data_inizio_inoperativita')->nullable()->comment('Data inizio inoperatività');
-            $table->string('numero_iscrizione_rui', 50)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->comment('Numero iscrizione RUI');
             $table->date('data_iscrizione')->nullable()->comment('Data iscrizione RUI');
             $table->string('cognome_nome', 255)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Cognome e Nome');
             $table->string('stato', 255)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->nullable()->comment('Stato');
@@ -34,11 +36,8 @@ return new class extends Migration {
             // Set primary key to numero_iscrizione_rui as specified
             $table->primary('numero_iscrizione_rui');
 
-            // Add unique key for id
-            $table->unique('id');
-
             // Add composite index for fast lookups
-            $table->index(['numero_iscrizione_rui', 'cognome_nome', 'ragione_sociale'], 'idx_rui_fast_lookup');
+            $table->index(['cognome_nome', 'ragione_sociale'], 'idx_rui_names');
 
             // Foreign key constraint
             $table->foreign('rui_section_id')->references('id')->on('rui_sections')->onDelete('set null');

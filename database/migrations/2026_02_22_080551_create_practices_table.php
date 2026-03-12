@@ -71,6 +71,8 @@ return new class extends Migration {
 
             $table->boolean('is_convenctioned')->default(true)->comment('Pratica convenzionata');
 
+            $table->boolean('is_notowned')->default(false)->comment('Pratica non di proprietà');
+
             $table->timestamps();
         });
     }

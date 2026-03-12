@@ -13,7 +13,8 @@ class PracticeScope extends Model
         'code',
         'description',
         'oam_code',
-        'is_oneclient'
+        'is_oneclient',
+        'tipo_prodotto'
     ];
 
     public function tasks(): HasMany

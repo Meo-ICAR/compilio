@@ -11,23 +11,41 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('documents', function (Blueprint $table) {
-            // Campi per verifica documento
-            $table->timestamp('verified_at')->nullable()->comment('Data e ora verifica documento');
-            $table->foreignId('verified_by')->nullable()->comment('ID utente che ha verificato')->constrained('users')->onDelete('set null');
+            // Campi per verifica documento - aggiungi solo se non esistono
+            if (!Schema::hasColumn('documents', 'verified_at')) {
+                $table->timestamp('verified_at')->nullable()->comment('Data e ora verifica documento');
+            }
+            if (!Schema::hasColumn('documents', 'verified_by')) {
+                $table->foreignId('verified_by')->nullable()->comment('ID utente che ha verificato')->constrained('users')->onDelete('set null');
+            }
 
-            // Campi aggiuntivi per gestione completa
-            $table->string('docnumber')->nullable()->comment('Numero protocollo documento');
-            $table->string('emitted_by')->nullable()->comment('Ente o autorità che ha rilasciato il documento');
-            $table->date('emitted_at')->nullable()->comment('Data di rilascio/emissione documento');
-            $table->date('expires_at')->nullable()->comment('Data di scadenza documento');
+            // Campi aggiuntivi per gestione completa - aggiungi solo se non esistono
+            if (!Schema::hasColumn('documents', 'docnumber')) {
+                $table->string('docnumber')->nullable()->comment('Numero protocollo documento');
+            }
+            if (!Schema::hasColumn('documents', 'emitted_by')) {
+                $table->string('emitted_by')->nullable()->comment('Ente o autorità che ha rilasciato il documento');
+            }
+            if (!Schema::hasColumn('documents', 'emitted_at')) {
+                $table->timestamp('emitted_at')->nullable()->comment('Data e ora di emissione documento');
+            }
+            if (!Schema::hasColumn('documents', 'expires_at')) {
+                $table->timestamp('expires_at')->nullable()->comment('Data e ora di scadenza documento');
+            }
+            if (!Schema::hasColumn('documents', 'rejection_note')) {
+                $table->text('rejection_note')->nullable()->comment('Note motivazione rifiuto documento');
+            }
 
-            // Note di rifiuto
-            $table->text('rejection_note')->nullable()->comment('Note motivazione rifiuto documento');
-
-            // Index per performance
-            $table->index(['verified_at', 'verified_by']);
-            $table->index(['expires_at']);
-            $table->index(['emitted_at']);
+            // Index per performance - aggiungi solo se non esistono
+            if (!Schema::hasIndex('documents', 'documents_verified_at_verified_by_index')) {
+                $table->index(['verified_at', 'verified_by']);
+            }
+            if (!Schema::hasIndex('documents', 'documents_expires_at_index')) {
+                $table->index(['expires_at']);
+            }
+            if (!Schema::hasIndex('documents', 'documents_emitted_at_index')) {
+                $table->index(['emitted_at']);
+            }
         });
     }
 

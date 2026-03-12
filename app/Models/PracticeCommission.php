@@ -39,6 +39,7 @@ class PracticeCommission extends Model
         'is_storno',
         'storned_at',
         'storno_amount',
+        'alternative_number_invoice',
     ];
 
     protected $casts = [

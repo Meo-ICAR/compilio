@@ -17,7 +17,6 @@ return new class extends Migration {
             $table->string('target_field')->nullable()->comment('Colonna del parent da ascoltare (es. status, privacy_signed_at)');
             $table->string('target_value')->nullable()->comment('Valore esatto che fa scattare la spunta (es. deliberata)');
             $table->boolean('is_timestamp_update')->default(false)->comment('Se true, basta che il target_field non sia null per spuntare');
-            $table->foreign('document_id')->references('id')->on('documents')->onDelete('set null');
         });
     }
 

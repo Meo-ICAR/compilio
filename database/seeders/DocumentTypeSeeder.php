@@ -106,26 +106,28 @@ class DocumentTypeSeeder extends Seeder
             61 => ['name' => 'Regolamento Privacy', 'slug' => 'regolamento-privacy', 'regex' => '/privacy|gdpr|regolamento.*privacy/i', 'scopes' => [$privacy], 'is_company' => true],
             62 => ['name' => 'Polizza RC Professionale', 'slug' => 'polizza-rc', 'regex' => '/polizza.*rc|responsabilita.*civile/i', 'scopes' => [$onboarding], 'is_agent' => true, 'is_principal' => true],
             63 => ['name' => 'Attestato OAM / IVASS', 'slug' => 'attestato-professionale', 'regex' => '/attestato.*(oam|ivass)/i', 'scopes' => [$onboarding], 'is_agent' => true, 'is_principal' => true],
-            64 => ['name' => 'Modulo Richiesta Accesso Dati', 'slug' => 'richiesta-accesso-gdpr', 'regex' => '/richiesta.*accesso.*dati|esercizio.*diritti.*privacy/i', 'scopes' => [$audit]],
-            65 => ['name' => 'Riscontro al Cliente (GDPR)', 'slug' => 'riscontro-accesso-gdpr', 'regex' => '/riscontro.*accesso|invio.*dati.*personali/i', 'scopes' => [$audit]],
+            64 => ['name' => 'Modulo Richiesta Accesso Dati', 'slug' => 'richiesta-accesso-gdpr', 'regex' => '/richiesta.*accesso.*dati|esercizio.*diritti.*privacy/i', 'scopes' => [$privacy]],
+            65 => ['name' => 'Riscontro al Cliente (GDPR)', 'slug' => 'riscontro-accesso-gdpr', 'regex' => '/riscontro.*accesso|invio.*dati.*personali/i', 'scopes' => [$privacy]],
         ];
 
         // 3. Esecuzione: Aggiornamento record esistenti
         foreach ($data as $id => $attr) {
             $type = DocumentType::find($id);
             if (!$type) {
-                DocumentType::insert([
-                    'id' => $id,
-                    'name' => $attr['name'],
-                    'slug' => $attr['slug'],
-                    'regex' => $attr['regex'],
-                    'priority' => $attr['priority'] ?? 1,
-                    'is_agent' => $attr['is_agent'] ?? false,
-                    'is_principal' => $attr['is_principal'] ?? false,
-                    'is_client' => $attr['is_client'] ?? false,
-                    'is_practice_target' => $attr['is_practice_target'] ?? false,
-                    'is_company' => $attr['is_company'] ?? false,
-                ]);
+                DocumentType::firstOrCreate(
+                    ['slug' => $attr['slug']],
+                    [
+                        'id' => $id,
+                        'name' => $attr['name'] ?? "Document Type {$id}",
+                        'regex' => $attr['regex'],
+                        'priority' => $attr['priority'] ?? 1,
+                        'is_agent' => $attr['is_agent'] ?? false,
+                        'is_principal' => $attr['is_principal'] ?? false,
+                        'is_client' => $attr['is_client'] ?? false,
+                        'is_practice' => $attr['is_practice_target'] ?? false,
+                        'is_company' => $attr['is_company'] ?? false,
+                    ]
+                );
             } else {
                 // Aggiorniamo solo i campi tecnici necessari all'automazione
                 $updateData = [

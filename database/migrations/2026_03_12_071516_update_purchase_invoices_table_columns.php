@@ -10,9 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('document_types', function (Blueprint $table) {
-            $table->boolean('is_practice')->default(false)->after('is_stored')->comment('True se il documento è relativo alla pratica');
-        });
+        //
     }
 
     /**
@@ -20,8 +18,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('document_types', function (Blueprint $table) {
-            $table->dropColumn('is_practice');
-        });
+        //
     }
 };

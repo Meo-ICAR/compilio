@@ -60,6 +60,10 @@ class MediafacileImportService
             foreach ($data as $item) {
                 try {
                     $praticaData = $this->mapApiToModel($item);
+                    if ($praticaData['is_notowned']) {
+                        //   Log::warning('Skipping not owned item: ' . json_encode($item));
+                        continue;
+                    }
 
                     if (empty($praticaData['id'])) {
                         Log::warning('Skipping item without id: ' . json_encode($item));
@@ -278,10 +282,10 @@ class MediafacileImportService
     {
         $dataInserimento = $this->parseDate($apiData['Data Inserimento Pratica'] ?? null);
         //  $this->info($apiData['Data Inserimento Pratica'] . ' Data inserimento: ' . $dataInserimento);
-        $sendedAt = $this->parseDate2($apiData['Data_invio_istruttoria'] ?? null);
+        $sendedAt = $this->parseDate($apiData['Data_invio_istruttoria'] ?? null);
         //   $this->info($apiData['Data_invio_istruttoria'] . ' Sended at: ' . $sendedAt);
-        $approvedAt = $this->parseDate2($apiData['Data_delibera_banca'] ?? null);
-        $erogatedAt = $this->parseDate2($apiData['Data_erogazione'] ?? null);
+        $approvedAt = $this->parseDate($apiData['Data_delibera_banca'] ?? null);
+        $erogatedAt = $this->parseDate($apiData['Data_erogazione'] ?? null);
 
         $amount = $this->parseDecimal($apiData['Montante'] ?? null);
         $net = $this->parseDecimal($apiData['Importo_Erogazione'] ?? null);

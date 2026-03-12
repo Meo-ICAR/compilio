@@ -11,9 +11,6 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('document_types', function (Blueprint $table) {
-            // Rinomina regex_pattern in regex per coerenza con il codice
-            $table->renameColumn('regex_pattern', 'regex');
-
             // Assicura che i campi esistano e siano configurati correttamente
             if (!Schema::hasColumn('document_types', 'regex')) {
                 $table->string('regex')->nullable()->comment('Pattern regex per classificazione automatica documenti');
