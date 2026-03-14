@@ -127,7 +127,19 @@ ORDER BY x.principal_id, x.tipo_prodotto;
                 ) c_sum ON p.id = c_sum.principal_id
                 SET p.is_dummy = false
             ');
-            DB::statement("update practices p inner join practice_commissions c on c.practice_id = p.id  set p.invoice_at = c.invoice_at where c.invoice_at>'2024-01-01'");
+            DB::statement('
+                UPDATE practices p
+                INNER JOIN (
+                    SELECT
+                        c.practice_id,
+                        MAX(c.invoice_at) as max_invoice_at,
+                        SUM(c.amount) as total_amount
+                    FROM practice_commissions c
+
+                    GROUP BY c.practice_id
+                ) c ON p.id = c.practice_id
+                SET p.invoice_at = c.max_invoice_at, p.brokerage_fee = c.total_amount
+            ');
             // Delete dummy principals
             DB::statement('DELETE FROM principals WHERE is_dummy = true');
 

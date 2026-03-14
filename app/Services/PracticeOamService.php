@@ -80,7 +80,7 @@ class PracticeOamService
             $practicesQuery = Practice::where(function ($query) use ($startDateCarbon, $endDateCarbon) {
                 // Practices sent before end date AND (perfected after start date OR not perfected yet)
                 $query
-                    ->where('sended_at', '<', $endDateCarbon)
+                    ->where('sended_at', '<', '2026-01-01')
                     ->where(function ($q) use ($startDateCarbon) {
                         $q
                             ->where('erogated_at', '>=', $startDateCarbon)
@@ -90,11 +90,17 @@ class PracticeOamService
                 ->orWhere(function ($query) use ($startDateCarbon, $endDateCarbon) {
                     // Practices that received invoices between start and end dates
                     $query
-                        ->where('invoice_at', '>=', $startDateCarbon);
+                        ->where('invoice_at', '>=', $startDateCarbon)
+                        ->where('erogated_at', '<=', $startDateCarbon);
                 })
-                ->whereNull('rejected_at');
+                ->whereNull('rejected_at')
+                ->whereNotNull('brokerage_fee');
 
             // Debug: Log the SQL query
+            Log::info('SQL Query: ' . $practicesQuery->toSql());
+            Log::info('Query Bindings: ' . json_encode($practicesQuery->getBindings()));
+
+            $practicesQuery = $practicesQuery->where('tipo_prodotto', '!=', 'Polizza')->where('tipo_prodotto', '!=', 'Utenza')->where('brokerage_fee', '>', 0);
             Log::info('SQL Query: ' . $practicesQuery->toSql());
             Log::info('Query Bindings: ' . json_encode($practicesQuery->getBindings()));
 
@@ -107,28 +113,33 @@ class PracticeOamService
             $skippedCount = 0;
 
             foreach ($practices as $practice) {
+                $brokerageFee = $practice->brokerage_fee;
+                if ($brokerageFee <= 0 || $brokerageFee === null) {
+                    $skippedCount++;
+                    continue;
+                }
                 $tipoProdotto = $practice->tipo_prodotto;
                 if (($tipoProdotto == 'Polizza') || ($tipoProdotto == 'Utenza')) {
                     $skippedCount++;
                     continue;
                 }
-                $insertedAt = $practice->inserted_at;
-                if ($insertedAt && $insertedAt < $startDateCarbon) {
-                    $skippedCount++;
-                    continue;
-                }
+
                 $erogato = $practice->amount;
                 $liquidato = $practice->net;
                 $erogato_lavorazione = 0;
                 $liquidato_lavorazione = 0;
+                $CRMcode = $practice->CRM_code;
+                $parcticeName = $practice->name;
                 $commissionSums = $this->getPracticeCommissionSums($practice);
                 $somma = $commissionSums['somma'];
+
                 if ($somma > 0) {
                     // Assicuriamoci che entrambi siano oggetti Carbon per un confronto granulare
-
-                    $invoiceAt = $practice->invoice_at;
+                    $insertedAt = $practice->sended_at;
                     $erogatedAt = $practice->erogated_at;
-                    $perfectedAt = $practice->perfected_at;
+                    $invoiceAt = $practice->invoice_at;
+
+                    $perfectedAt = $erogatedAt;  // $practice->perfected_at;
                     $is_perfected = $erogatedAt && $erogatedAt >= $insertedAt;
                     $is_perfected = $is_perfected && $erogatedAt < $endDateCarbon;
                     $mese = 0;
@@ -137,7 +148,7 @@ class PracticeOamService
                     if ($is_perfected) {
                         $mese = (int) $erogatedAt->format('n');
                         if ($isInvoice) {
-                            $isBefore = $invoiceAt < $startDateCarbon;
+                            $isBefore = $erogatedAt < $startDateCarbon;
                         }
                     }
                     $isAfter = false;
@@ -176,7 +187,7 @@ class PracticeOamService
                     }
                     if (($tipoProdotto == 'Mutuo') && ($somma == $comCliente)) {
                         $oam_code = $oam_name;
-                        Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
+                        //  Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
                     }
 
                     // Use effective perfected date (perfected_at or fallback to erogated_at)
@@ -236,12 +247,15 @@ class PracticeOamService
                         ]
                     );
                     $insertedCount++;
+                } else {
+                    Log::info("{$skippedCount} Practice { $CRMcode - $parcticeName} skipped - no commissions found");
+                    $skippedCount++;
                 }
             }
 
             DB::commit();
 
-            Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted, {$skippedCount} practices skipped");
+            //   Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted, {$skippedCount} practices skipped");
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Error syncing practice_oams for company {$companyId}: " . $e->getMessage());
@@ -479,7 +493,7 @@ class PracticeOamService
 
             DB::commit();
 
-            Log::info("Practice OAM base table populated for company {$companyId}: {$totals->count()} OAM records");
+            //   Log::info("Practice OAM base table populated for company {$companyId}: {$totals->count()} OAM records");
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Error populating practice_oam_base for company {$companyId}: " . $e->getMessage());
