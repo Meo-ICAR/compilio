@@ -56,7 +56,9 @@ class PracticeOam extends Model
         'oam_name',
         'principal_name',
         'is_notconvenctioned',
-        'is_previous'
+        'is_previous',
+        'is_before',
+        'is_after'
     ];
 
     protected $casts = [
@@ -82,6 +84,8 @@ class PracticeOam extends Model
         'is_conventioned' => 'boolean',
         'is_notconvenctioned' => 'boolean',
         'is_working' => 'boolean',
+        'is_before' => 'boolean',
+        'is_after' => 'boolean',
         'is_previous' => 'boolean',
         'is_cancel' => 'boolean',
         'is_invoice' => 'boolean',

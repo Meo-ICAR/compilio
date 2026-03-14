@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class PurchaseInvoiceImportService
 {
     protected $companyId;
+    protected $filename;
 
     protected $importResults = [
         'imported' => 0,
@@ -22,9 +23,10 @@ class PurchaseInvoiceImportService
         'details' => []
     ];
 
-    public function __construct($companyId = null)
+    public function __construct($companyId = null, $filename = null)
     {
         $this->companyId = $companyId;
+        $this->filename = $filename;
     }
 
     /**
@@ -37,12 +39,19 @@ class PurchaseInvoiceImportService
     public function import(string $filePath, string $companyId = null): array
     {
         $this->companyId = $companyId ?: $this->companyId;
+
+        // Extract filename from path if not provided
+        if (!$this->filename) {
+            $this->filename = basename($filePath);
+        }
+
         $this->importResults = [
             'imported' => 0,
             'updated' => 0,
             'errors' => 0,
             'skipped' => 0,
-            'details' => []
+            'details' => [],
+            'filename' => $this->filename,
         ];
 
         try {

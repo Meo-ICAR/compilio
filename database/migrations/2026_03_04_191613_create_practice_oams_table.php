@@ -76,6 +76,8 @@ return new class extends Migration {
 
             // Other fields
             $table->boolean('is_invoice')->default(0)->comment('Pratica fatturata');
+            $table->boolean('is_before')->default(0)->comment('Pratica fatturata');
+            $table->boolean('is_after')->default(0)->comment('Pratica fatturata');
             $table->string('name', 255)->nullable()->comment('Mandanti');
             $table->string('tipo_prodotto')->nullable()->comment('Prodotto');
             $table->integer('mese')->nullable()->comment('Mese');

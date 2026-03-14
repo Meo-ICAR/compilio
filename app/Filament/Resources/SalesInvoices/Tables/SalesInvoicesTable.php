@@ -3,15 +3,19 @@
 namespace App\Filament\Resources\SalesInvoices\Tables;
 
 use App\Models\SalesInvoice;
+use App\Services\SalesInvoiceImportService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class SalesInvoicesTable
 {
@@ -105,6 +109,45 @@ class SalesInvoicesTable
                 //   BulkActionGroup::make([
                 //   DeleteBulkAction::make(),
                 //   ]),
+            ])
+            ->headerActions([
+                \Filament\Actions\Action::make('import_sales_invoices')
+                    ->label('Import Sales Invoices')
+                    ->icon('heroicon-o-document-arrow-up')
+                    ->form([
+                        FileUpload::make('import_file')
+                            ->label('CSV/Excel File')
+                            ->helperText('Upload a CSV or Excel file containing sales invoice data')
+                            ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                            ->maxSize(10240)  // 10MB
+                            ->directory('sales-invoice-imports')
+                            ->visibility('private')
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $filePath = storage_path('app/public/' . $data['import_file']);
+                            $companyId = Auth::user()->company_id;
+                            $filename = basename($data['import_file']);
+
+                            $importService = new SalesInvoiceImportService($filename);
+                            $results = $importService->import($filePath, $companyId);
+
+                            // Show success notification
+                            Notification::make()
+                                ->title('Import Completed')
+                                ->body("Successfully processed import from {$filename}. Imported: {$results['imported']}, Updated: {$results['updated']}, Errors: {$results['errors']}")
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            // Show error notification
+                            Notification::make()
+                                ->title('Import Failed')
+                                ->body('Error during import: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
             ->emptyStateActions([
                 //  CreateAction::make(),

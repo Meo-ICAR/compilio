@@ -71,7 +71,8 @@ class ImportPurchaseInvoicesCommand extends Command
 
         // Perform import
         try {
-            $importService = new PurchaseInvoiceImportService();
+            $filename = basename($filePath);
+            $importService = new PurchaseInvoiceImportService($company->id, $filename);
             $results = $importService->import($filePath, $company->id);
 
             // Display results

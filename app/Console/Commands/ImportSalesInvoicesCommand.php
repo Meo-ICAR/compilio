@@ -83,7 +83,8 @@ class ImportSalesInvoicesCommand extends Command
             }
 
             // Perform import
-            $importService = new SalesInvoiceImportService();
+            $filename = basename($filePath);
+            $importService = new SalesInvoiceImportService($filename);
             $results = $importService->import($filePath, $company->id);
 
             // Display results

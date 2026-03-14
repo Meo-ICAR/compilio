@@ -4,6 +4,7 @@ namespace Database\Seeders;
 use App\Models\DocumentScope;
 use App\Models\DocumentType;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DocumentTypeSeeder extends Seeder
 {
@@ -20,7 +21,7 @@ class DocumentTypeSeeder extends Seeder
             ['name' => 'Amministrativo', 'description' => 'Amministrativo', 'color_code' => '#F59E0B'],
         ];
         foreach ($docScopes as $scope) {
-            \App\Models\DocumentScope::firstOrCreate(['name' => $scope['name']], $scope);
+            DocumentScope::firstOrCreate(['name' => $scope['name']], $scope);
         }
 
         // 1. Recupero degli Scope
@@ -167,8 +168,6 @@ class DocumentTypeSeeder extends Seeder
                 'is_person' => 1,
                 'is_client' => 1,
                 'is_practice' => 1,
-                'created_at' => $now,
-                'updated_at' => $now,
             ],
             [
                 'name' => 'Fattura Pratica Mediazione',
@@ -179,8 +178,6 @@ class DocumentTypeSeeder extends Seeder
                 'is_person' => 1,
                 'is_client' => 1,
                 'is_practice' => 1,
-                'created_at' => $now,
-                'updated_at' => $now,
             ],
             [
                 'name' => "Comunicazione Compenso all'Istituto",
@@ -191,8 +188,6 @@ class DocumentTypeSeeder extends Seeder
                 'is_person' => 0,
                 'is_company' => 1,
                 'is_practice' => 1,
-                'created_at' => $now,
-                'updated_at' => $now,
             ],
             [
                 'name' => 'Ricevuta Comunicazione Compenso',
@@ -203,8 +198,6 @@ class DocumentTypeSeeder extends Seeder
                 'is_person' => 0,
                 'is_company' => 1,
                 'is_practice' => 1,
-                'created_at' => $now,
-                'updated_at' => $now,
             ],
             [
                 'name' => 'Documentazione Servizi Congiunti (Consulenza)',
@@ -215,8 +208,6 @@ class DocumentTypeSeeder extends Seeder
                 'is_person' => 1,
                 'is_client' => 1,
                 'is_practice' => 1,
-                'created_at' => $now,
-                'updated_at' => $now,
             ],
             [
                 'name' => 'Modulo PIES',
@@ -227,8 +218,6 @@ class DocumentTypeSeeder extends Seeder
                 'is_person' => 1,
                 'is_client' => 1,
                 'is_practice' => 1,
-                'created_at' => $now,
-                'updated_at' => $now,
             ],
             [
                 'name' => 'Nota Descrittiva Intermediazione',
@@ -239,18 +228,14 @@ class DocumentTypeSeeder extends Seeder
                 'is_person' => 1,
                 'is_agent' => 1,  // Specifico per l'agente/collaboratore
                 'is_practice' => 1,
-                'created_at' => $now,
-                'updated_at' => $now,
             ]
         ];
 
         foreach ($documents as $doc) {
-            DB::table('document_types')->updateOrInsert(
+            DocumentType::firstOrCreate(
                 ['slug' => $doc['slug']],
                 $doc
             );
         }
-
-        // 3. Esecuzione: Aggiornamento record esistenti
     }
 }

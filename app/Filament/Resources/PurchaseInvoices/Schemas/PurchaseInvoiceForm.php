@@ -6,14 +6,18 @@ use App\Models\Agent;
 use App\Models\Client;
 use App\Models\Company;
 use App\Models\Principal;
+use App\Services\PurchaseInvoiceImportService;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 
 class PurchaseInvoiceForm
 {
@@ -223,6 +227,60 @@ class PurchaseInvoiceForm
                             ->numeric()
                             ->default(0),
                     ]),
+                Section::make('Import Purchase Invoices')
+                    ->description('Upload a CSV file to import purchase invoices. The file will be processed using the import service.')
+                    ->schema([
+                        FileUpload::make('import_file')
+                            ->label('CSV File')
+                            ->helperText('Upload a CSV file containing purchase invoice data')
+                            ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                            ->maxSize(10240)  // 10MB
+                            ->directory('purchase-invoice-imports')
+                            ->visibility('private')
+                            ->required(),
+                        Placeholder::make('import_info')
+                            ->label('Import Information')
+                            ->content(function ($get) {
+                                $file = $get('import_file');
+                                if (!$file) {
+                                    return 'Please select a file to import.';
+                                }
+                                return "Selected file: {$file}";
+                            }),
+                    ])
+                    ->afterStateUpdated(function ($state, $set, $livewire) {
+                        if ($state && $livewire instanceof \Livewire\Component) {
+                            // Process the import when file is uploaded
+                            try {
+                                $filePath = storage_path('app/public/' . $state);
+                                $companyId = Auth::user()->company_id ?? Company::first()->id;
+                                $filename = basename($state);
+
+                                $importService = new PurchaseInvoiceImportService($companyId, $filename);
+                                $results = $importService->import($filePath, $companyId);
+
+                                // Show success notification
+                                Notification::make()
+                                    ->title('Import Completed')
+                                    ->body("Successfully processed import from {$filename}. Imported: {$results['imported']}, Updated: {$results['updated']}, Errors: {$results['errors']}")
+                                    ->success()
+                                    ->send();
+
+                                // Clear the file input
+                                $set('import_file', null);
+
+                                // Refresh the page to show new data
+                                $livewire->dispatch('refresh');
+                            } catch (\Exception $e) {
+                                // Show error notification
+                                Notification::make()
+                                    ->title('Import Failed')
+                                    ->body('Error during import: ' . $e->getMessage())
+                                    ->danger()
+                                    ->send();
+                            }
+                        }
+                    }),
             ]);
     }
 }

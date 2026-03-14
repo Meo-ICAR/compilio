@@ -15,8 +15,8 @@ class AbiSeeder extends Seeder
     {
         $csvPath = public_path('abi.csv');
 
-        if (! file_exists($csvPath)) {
-            $this->command->error('CSV file not found: '.$csvPath);
+        if (false && !file_exists($csvPath)) {
+            $this->command->error('CSV file not found: ' . $csvPath);
 
             return;
         }
@@ -66,7 +66,7 @@ class AbiSeeder extends Seeder
                     $this->command->info("Imported {$rowCount} ABI records...");
                 }
             } catch (\Exception $e) {
-                $this->command->error("Error importing row {$rowCount}: ".$e->getMessage());
+                $this->command->error("Error importing row {$rowCount}: " . $e->getMessage());
 
                 continue;
             }

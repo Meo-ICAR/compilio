@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 class SalesInvoiceImportService
 {
     protected $companyId;
+    protected $filename;
 
     protected $importResults = [
         'imported' => 0,
@@ -21,15 +22,27 @@ class SalesInvoiceImportService
         'details' => []
     ];
 
+    public function __construct($filename = null)
+    {
+        $this->filename = $filename;
+    }
+
     public function import($filePath, $companyId)
     {
         $this->companyId = $companyId;
+
+        // Extract filename from path if not provided
+        if (!$this->filename) {
+            $this->filename = basename($filePath);
+        }
+
         $this->importResults = [
             'imported' => 0,
             'updated' => 0,
             'skipped' => 0,
             'errors' => 0,
-            'details' => []
+            'details' => [],
+            'filename' => $this->filename,
         ];
 
         if (!file_exists($filePath)) {
