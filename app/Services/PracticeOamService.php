@@ -45,14 +45,39 @@ class PracticeOamService
         try {
             DB::beginTransaction();
 
-            // Step 1: Delete all existing practice_oam records for the company
-            $deletedCount = PracticeOam::where('company_id', $companyId)
-                ->where('is_active', true)
-                ->delete();
-            Log::info("Deleted {$deletedCount} practice_oam records for company {$companyId}");
+            // Step 1: Delete existing practice_oam records for the date range
+            $deletedCount = PracticeOam::where('company_id', $companyId)->delete();
+
+            /*
+             * ->where('is_active', true)
+             * ->where(function ($query) use ($startDateCarbon, $endDateCarbon) {
+             *     // Delete records that would be recreated by this sync
+             *     $query
+             *         ->where(function ($subQuery) use ($startDateCarbon, $endDateCarbon) {
+             *             $subQuery
+             *                 ->whereNotNull('erogated_at')
+             *                 ->where('erogated_at', '>=', $startDateCarbon)
+             *                 ->where('erogated_at', '<=', $endDateCarbon);
+             *         })
+             *         ->orWhere(function ($subQuery) use ($startDateCarbon, $endDateCarbon) {
+             *             $subQuery
+             *                 ->whereNull('erogated_at')
+             *                 ->where('inserted_at', '>=', $startDateCarbon)
+             *                 ->where('inserted_at', '<=', $endDateCarbon);
+             *         })
+             *         ->orWhere(function ($subQuery) use ($startDateCarbon, $endDateCarbon) {
+             *             $subQuery
+             *                 ->whereNotNull('invoice_at')
+             *                 ->where('invoice_at', '>=', $startDateCarbon)
+             *                 ->where('invoice_at', '<=', $endDateCarbon);
+             *         });
+             * })
+             */
+
+            Log::info("Deleted {$deletedCount} practice_oam records for company {$companyId} in date range");
 
             // Step 2: Get practices that meet the criteria
-            $practices = Practice::where(function ($query) use ($startDateCarbon, $endDateCarbon) {
+            $practicesQuery = Practice::where(function ($query) use ($startDateCarbon, $endDateCarbon) {
                 // Practices sent before end date AND (perfected after start date OR not perfected yet)
                 $query
                     ->where('sended_at', '<', $endDateCarbon)
@@ -63,22 +88,33 @@ class PracticeOamService
                     });
             })
                 ->orWhere(function ($query) use ($startDateCarbon, $endDateCarbon) {
-                    // Practices perfected between start and end dates
+                    // Practices that received invoices between start and end dates
                     $query
-                        ->where('invoice_at', '>=', $startDateCarbon)
-                        ->where('invoice_at', '<', $endDateCarbon);
+                        ->where('invoice_at', '>=', $startDateCarbon);
                 })
-                ->whereNull('rejected_at')
-                ->get();
+                ->whereNull('rejected_at');
+
+            // Debug: Log the SQL query
+            Log::info('SQL Query: ' . $practicesQuery->toSql());
+            Log::info('Query Bindings: ' . json_encode($practicesQuery->getBindings()));
+
+            $practices = $practicesQuery->get();
 
             Log::info("Found {$practices->count()} practices to process");
 
             // Step 3: Insert new practice_oam records
             $insertedCount = 0;
+            $skippedCount = 0;
 
             foreach ($practices as $practice) {
                 $tipoProdotto = $practice->tipo_prodotto;
                 if (($tipoProdotto == 'Polizza') || ($tipoProdotto == 'Utenza')) {
+                    $skippedCount++;
+                    continue;
+                }
+                $insertedAt = $practice->inserted_at;
+                if ($insertedAt && $insertedAt < $startDateCarbon) {
+                    $skippedCount++;
                     continue;
                 }
                 $erogato = $practice->amount;
@@ -90,22 +126,23 @@ class PracticeOamService
                 if ($somma > 0) {
                     // Assicuriamoci che entrambi siano oggetti Carbon per un confronto granulare
 
-                    $is_perfected = $practice->erogated_at && $practice->inserted_at && $practice->erogated_at >= $practice->inserted_at;
-                    $is_perfected = $is_perfected && $practice->erogated_at < $endDateCarbon;
+                    $invoiceAt = $practice->invoice_at;
+                    $erogatedAt = $practice->erogated_at;
+                    $perfectedAt = $practice->perfected_at;
+                    $is_perfected = $erogatedAt && $erogatedAt >= $insertedAt;
+                    $is_perfected = $is_perfected && $erogatedAt < $endDateCarbon;
                     $mese = 0;
-                    // Use effective perfected date (perfected_at or fallback to erogated_at)
-                    $effective_perfected_at = $practice->perfected_at ?: $practice->erogated_at;
-                    $invoice_at_value = $effective_perfected_at ? $effective_perfected_at->format('Y-m-d') : null;
-                    $perfected_at_value = $effective_perfected_at ? $effective_perfected_at->format('Y-m-d H:i:s') : null;
-                    $isInvoice = $invoice_at_value ? 1 : 0;
+                    $isInvoice = $invoiceAt ? 1 : 0;
                     $isBefore = false;
-                    if ($is_perfected && $practice->erogated_at) {
-                        $mese = (int) $practice->erogated_at->format('n');
-                        $isBefore = $practice->invoice_at < $startDateCarbon;
+                    if ($is_perfected) {
+                        $mese = (int) $erogatedAt->format('n');
+                        if ($isInvoice) {
+                            $isBefore = $invoiceAt < $startDateCarbon;
+                        }
                     }
                     $isAfter = false;
                     if ($isInvoice) {
-                        $isAfter = $effective_perfected_at > $endDate;
+                        $isAfter = $invoiceAt > $endDate;
                     }
 
                     $compenso = $commissionSums['compenso'];
@@ -143,10 +180,6 @@ class PracticeOamService
                     }
 
                     // Use effective perfected date (perfected_at or fallback to erogated_at)
-                    $effective_perfected_at = $practice->perfected_at ?: $practice->erogated_at;
-                    $invoice_at_value = $effective_perfected_at ? $effective_perfected_at->format('Y-m-d') : null;
-                    $perfected_at_value = $effective_perfected_at ? $effective_perfected_at->format('Y-m-d H:i:s') : null;
-                    $isInvoice = $invoice_at_value ? 1 : 0;
 
                     PracticeOam::updateOrCreate(
                         ['practice_id' => $practice->id],
@@ -157,8 +190,8 @@ class PracticeOamService
                             'oam_name' => $oam_name,
                             'principal_name' => $practice->principal->name,
                             'CRM_code' => $practice->CRM_code ?? null,
-                            'practice_name' => $practice->numero_pratica ?? null,
-                            'type' => $tipoProdotto,
+                            'practice_name' => $practice->name ?? null,
+                            //    'type' => $tipoProdotto,
                             'start_date' => $startDate,
                             'end_date' => $endDate,
                             'is_conventioned' => ($compenso > 0) ? 1 : 0,
@@ -187,12 +220,12 @@ class PracticeOamService
                             'provvigione_assicurazione' => $commissionSums['provvigione_assicurazione'] ?? null,
                             'provvigione_storno' => $commissionSums['storno'] ?? null,
                             'is_active' => 1,  // Default to active
-                            'inserted_at' => $practice->inserted_at ? $practice->inserted_at->format('Y-m-d H:i:s') : null,
-                            'erogated_at' => $practice->erogated_at ? $practice->erogated_at->format('Y-m-d H:i:s') : null,
-                            'perfected_at' => $perfected_at_value,
+                            'inserted_at' => $insertedAt ? $insertedAt->format('Y-m-d') : null,
+                            'erogated_at' => $erogatedAt ? $erogatedAt->format('Y-m-d') : null,
+                            'perfected_at' => $perfectedAt ? $perfectedAt->format('Y-m-d') : null,
                             'is_perfected' => $is_perfected ? 1 : 0,
                             'is_working' => !$is_perfected ? 1 : 0,
-                            'invoice_at' => $invoice_at_value,
+                            'invoice_at' => $invoiceAt ? $invoiceAt->format('Y-m-d') : null,
                             'is_invoice' => $isInvoice,
                             'is_before' => $isBefore,
                             'is_after' => $isAfter,
@@ -208,7 +241,7 @@ class PracticeOamService
 
             DB::commit();
 
-            Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
+            Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted, {$skippedCount} practices skipped");
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Error syncing practice_oams for company {$companyId}: " . $e->getMessage());
@@ -301,9 +334,6 @@ class PracticeOamService
             'somma' => $compenso + $provvigione + $premio + $premioagente + $cliente + $storno + $assicurazione,
         ];
 
-        if ($practice->CRM_code == 'QT00919') {
-            Log::info("All commissiona data for practice {$practice->id}: " . json_encode($commissionsa));
-        }
         return $commissionsa;
     }
 
@@ -330,24 +360,28 @@ class PracticeOamService
         $totalPractices = Practice::where('company_id', $companyId)->count();
 
         $eligiblePractices = Practice::where('company_id', $companyId)
-            ->where('status', '!=', 'rejected')
+            ->whereNull('rejected_at')
             ->where(function ($query) use ($startDateCarbon, $endDateCarbon) {
+                // Practices sent before end date AND (perfected after start date OR not perfected yet)
                 $query
-                    ->where(function ($subQuery) use ($endDateCarbon) {
-                        $subQuery
-                            ->where('inserted_at', '<', $endDateCarbon)
-                            ->whereNull('erogated_at');
-                    })
-                    ->orWhere(function ($subQuery) use ($startDateCarbon, $endDateCarbon) {
-                        $subQuery
-                            ->whereNotNull('erogated_at')
+                    ->where('sended_at', '<', $endDateCarbon)
+                    ->where(function ($q) use ($startDateCarbon) {
+                        $q
                             ->where('erogated_at', '>=', $startDateCarbon)
-                            ->where('erogated_at', '<=', $endDateCarbon);
+                            ->orWhereNull('erogated_at');
                     });
+            })
+            ->orWhere(function ($query) use ($startDateCarbon, $endDateCarbon) {
+                // Practices perfected between start and end dates
+                $query
+                    ->where('invoice_at', '>=', $startDateCarbon)
+                    ->where('invoice_at', '<', $endDateCarbon);
             })
             ->count();
 
-        $currentPracticeOams = PracticeOam::where('company_id', $companyId)->count();
+        $currentPracticeOams = PracticeOam::where('company_id', $companyId)
+            ->where('is_active', true)
+            ->count();
 
         return [
             'total_practices' => (int) $totalPractices,
@@ -360,7 +394,7 @@ class PracticeOamService
     /**
      * Bulk sync for multiple companies
      */
-    public function syncPracticeOamsForMultipleCompanies(array $companyIds, string $startDate = '2025-07-01', string $endDate = '2026-01-01'): array
+    public function syncPracticeOamsForMultipleCompanies(array $companyIds, string $startDate, string $endDate): array
     {
         $results = [];
 

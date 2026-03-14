@@ -37,6 +37,13 @@ class SyncPracticeOamsCommand extends Command
             $companyId = Company::first()->id;
         }
 
+        if (empty($startDate)) {
+            $startDate = Carbon::now()->startOfYear()->format('Y-m-d');
+            if (now()->month < 5) {
+                $startDate = Carbon::parse($startDate)->subMonths(6)->format('Y-m-d');
+            }
+        }
+
         $this->info('Practice OAM Sync Command');
         $this->info('========================');
         $this->info('Company ID: ' . ($companyId ?: 'First available company'));
@@ -45,10 +52,10 @@ class SyncPracticeOamsCommand extends Command
         $this->info('Stats Only: ' . ($statsOnly ? 'Yes' : 'No'));
         $this->newLine();
 
-        // If endDate is null, show calculated value for info
+        // If endDate is null, calculate and set it
         if (empty($endDate)) {
-            $calculatedEndDate = Carbon::parse($startDate)->addMonths(6)->format('Y-m-d');
-            $this->info("Note: End Date will be calculated as: {$calculatedEndDate}");
+            $endDate = Carbon::parse($startDate)->addMonths(6)->format('Y-m-d');
+            $this->info("Note: End Date will be calculated as: {$endDate}");
             $this->newLine();
         }
 

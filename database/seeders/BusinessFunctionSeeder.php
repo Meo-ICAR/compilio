@@ -135,7 +135,7 @@ class BusinessFunctionSeeder extends Seeder
             ],
             [
                 'code' => 'SUP-LEG-AMM',
-                'name' => 'Legale, Affari Societari e Contabilità',
+                'name' => 'Amministrazione e Contabilità',
                 'managed_by_code' => 'GOV-CEO',  // Amministratore Delegato
                 'mission' => "Assistere l’Azienda su ogni problematica attinente la propria sfera di competenza.\nAssicurare gli adempimenti societari ed il supporto costante al Consiglio di Amministrazione per le attività di segreteria Societaria, garantendo correttezza e legittimità formale.\nRilevazione dei fatti gestionali, generazione del bilancio d’esercizio annuale.\nGarantire la tempestiva e corretta registrazione contabile dei movimenti ai fini della predisposizione del bilancio.",
                 'responsibility' => "• Fornisce supporto all’Azienda in materia di recupero dei crediti vantati.\n• Garantisce supporto legale fornendo pareri tecnici ed indicazioni operative.\n• Assicura ogni attività di natura giuridico-legale derivante da pignoramenti, vincoli, sequestri.\n• Gestisce le polizze assicurative e i relativi rapporti.\n• Difende l’operato e gli interessi dell’Azienda.\n• Predispone flussi informativi alle strutture interessate.\n• Supporto al legale incaricato all’avvio di azioni giudiziarie.\n• Gestione reclami e ricorsi ABF.\n• Gestione del precontenzioso e contenzioso.\n• Adempimenti contabili e fiscali, fatturazione attiva/passiva, chiusura contabile mensile e predisposizione bilancio.",
@@ -149,21 +149,21 @@ class BusinessFunctionSeeder extends Seeder
             ],
             [
                 'code' => 'SUP-ORG',
-                'name' => 'Organizzazione',
+                'name' => 'Risorse Umane (HR) e Formazione',
                 'managed_by_code' => 'GOV-CEO',  // Amministratore Delegato
                 'mission' => "Elaborare la composizione più conveniente delle forze personali, materiali e immateriali operanti in Azienda.\nPredisposizione e manutenzione dell’impianto documentale aziendale.\nEseguire una efficiente ed efficace gestione del personale.",
                 'responsibility' => "• Predisposizione e manutenzione delle policy, dei processi e delle attività aziendali.\n• Pianificazione e gestione interventi per adeguamento normativo.\n• Gestisce le attività inerenti la logistica.\n• Fornire pareri sull'organico da reclutare.\n• Assicurare l’adeguatezza quali-quantitativa delle risorse umane e rispetto CCNL.\n• Gestire il personale, le rilevazioni, relazioni sindacali e contrattazioni.\n• Fornire l’andamento periodico del costo del personale per il budget.\n• Individua referenti aziendali per attività in outsourcing e gestisce acquisti.",
             ],
             [
                 'code' => 'SUP-PLAN',
-                'name' => 'Pianificazione e Controllo',
+                'name' => 'Marketing e Comunicazione',
                 'managed_by_code' => 'GOV-CEO',  // Amministratore Delegato (CEO)
                 'mission' => "Garantire il processo di pianificazione strategica, di controllo della gestione e di valutazione economico reddituale delle opportunità di business.\nFornire un contributo all’Amministratore Delegato per la valutazione delle scelte strategiche aziendali.",
                 'responsibility' => "• Garantisce all’Amministratore Delegato i flussi informativi necessari sui fatti di gestione rilevanti.\n• Collabora nella formulazione e condivisione del Piano Strategico dell’Azienda.\n• Garantisce la predisposizione di report andamentali periodici.\n• Garantisce assistenza per la corretta predisposizione dei budget, revisioni e forecasting.\n• Svolge l'analisi degli scostamenti tra budget e dati consuntivi, evidenziando le criticità.\n• Predispone i prospetti di bilancio e assicura la corretta registrazione degli eventi contabili.",
             ],
             [
                 'code' => 'BUS-DIRCOM',
-                'name' => 'Responsabile Area Commerciale',
+                'name' => 'Direzione Commerciale',
                 'managed_by_code' => 'GOV-CEO',  // Amministratore Delegato [CEO]
                 'mission' => "Garantire, in coerenza con le strategie aziendali, il raggiungimento degli obiettivi di produzione, di redditività e di rischio nei confronti dei convenzionati.\nAssicurare la gestione, l’animazione e l’assistenza ai convenzionati.\nGarantire il coordinamento operativo delle risorse allocate sulla Rete Commerciale.\nGarantire un adeguato supporto analitico e quantitativo.",
                 'responsibility' => "• Supervisiona il raggiungimento degli obiettivi di produzione e redditività stabiliti a livello strategico.\n• Gestisce e anima le risorse della rete definendo le priorità di intervento.\n• Coordina l'operatività commerciale in conformità al modello di business dell'Azienda.",

@@ -17,29 +17,30 @@ class FilamentUserSeeder extends Seeder
     {
         $companyId = Company::where('vat_number', '05822361007')->first()->id;
         // Crea utente Filament admin
-        User::updateOrCreate(
+        User::firstOrCreate(
             ['email' => 'hassistosrl@gmail.com'],
             [
                 'name' => 'Hassisto Admin',
-                'email' => 'hassistosrl@gmail.com',
                 'password' => Hash::make('password'),
                 'company_id' => $companyId,  // NULL per Super Admin globali
             ]
         );
-        User::updateOrCreate(
+
+        // Crea utente Filament admin con email univoca
+        User::firstOrCreate(
             ['email' => 'mario@globadvisor.it'],
             [
                 'name' => 'Mario Gargiulo',
-                'email' => 'mario@globadvisor.it',
                 'password' => Hash::make('password'),
                 'company_id' => $companyId,  // NULL per Super Admin globali
             ]
         );
-        User::updateOrCreate(
-            ['email' => 'sergio@bracale.it'],
+
+        // Crea utente per Aces Finance
+        User::firstOrCreate(
+            ['email' => 'sergio.bracale@races.it'],
             [
                 'name' => 'Sergio Bracale',
-                'email' => 'sergio.bracale@races.it',
                 'password' => Hash::make('password'),
                 'company_id' => $companyId,  // NULL per Super Admin globali
             ]

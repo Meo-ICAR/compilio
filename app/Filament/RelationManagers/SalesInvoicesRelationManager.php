@@ -49,6 +49,25 @@ class SalesInvoicesRelationManager extends RelationManager
                             return null;
                         return $state->isPast() ? 'danger' : null;
                     }),
+                Tables\Columns\TextColumn::make('invoiceable_type')
+                    ->label('Attached To')
+                    ->formatStateUsing(function ($state) {
+                        if (!$state)
+                            return 'None';
+                        return match ($state) {
+                            'App\Models\Client' => 'Client',
+                            'App\Models\Agent' => 'Agent',
+                            'App\Models\Principal' => 'Principal',
+                            default => class_basename($state),
+                        };
+                    })
+                    ->badge()
+                    ->color(fn($state) => match ($state) {
+                        'App\Models\Client' => 'success',
+                        'App\Models\Agent' => 'warning',
+                        'App\Models\Principal' => 'info',
+                        default => 'gray',
+                    }),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('closed')
@@ -64,6 +83,13 @@ class SalesInvoicesRelationManager extends RelationManager
                             ->whereNotNull('due_date')
                             ->where('due_date', '<', now());
                     }),
+                Tables\Filters\SelectFilter::make('invoiceable_type')
+                    ->label('Attached To')
+                    ->options([
+                        'App\Models\Client' => 'Client',
+                        'App\Models\Agent' => 'Agent',
+                        'App\Models\Principal' => 'Principal',
+                    ]),
             ])
             ->headerActions([
                 CreateAction::make(),
