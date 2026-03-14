@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\Company;
-use App\Models\CompanyWebsite;
 use App\Models\Document;
 use App\Models\DocumentType;
+use App\Models\Website;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -33,7 +33,7 @@ class TransparencyScanService
 
         try {
             // Get websites that have transparency_date but no url_trasparency
-            $query = CompanyWebsite::where('company_id', $companyId)->whereNotNull('url_transparency');
+            $query = Website::where('company_id', $companyId)->whereNotNull('url_transparency');
 
             $websites = $query->limit($limit)->get();
             $results['total_websites'] = $websites->count();
@@ -69,10 +69,10 @@ class TransparencyScanService
     /**
      * Scan a single website
      *
-     * @param CompanyWebsite $website
+     * @param Website $website
      * @return array Processing results
      */
-    public function scanSingleWebsite(CompanyWebsite $website): array
+    public function scanSingleWebsite(Website $website): array
     {
         return $this->processWebsite($website);
     }
@@ -80,7 +80,7 @@ class TransparencyScanService
     /**
      * Process individual website and extract transparency links
      */
-    private function processWebsite(CompanyWebsite $website): array
+    private function processWebsite(Website $website): array
     {
         $result = [
             'website_id' => $website->id,
@@ -151,7 +151,7 @@ class TransparencyScanService
     /**
      * Create a Document record from a link
      */
-    private function createDocumentFromLink(string $link, CompanyWebsite $website, string $transparencyUrl): array
+    private function createDocumentFromLink(string $link, Website $website, string $transparencyUrl): array
     {
         $result = [
             'success' => false,
@@ -422,11 +422,11 @@ class TransparencyScanService
      */
     public function getCompanyScanStats(string $companyId): array
     {
-        $totalWebsites = CompanyWebsite::where('company_id', $companyId)
+        $totalWebsites = Website::where('company_id', $companyId)
             ->whereNotNull('transparency_date')
             ->count();
 
-        $scannedWebsites = CompanyWebsite::where('company_id', $companyId)
+        $scannedWebsites = Website::where('company_id', $companyId)
             ->whereNotNull('transparency_date')
             ->whereNotNull('url_transparency')
             ->where('url_transparency', '!=', '')

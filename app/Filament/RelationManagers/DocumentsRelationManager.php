@@ -4,10 +4,10 @@ namespace App\Filament\RelationManagers;
 
 use App\Filament\Actions\BulkClassifyDocumentsAction;
 use App\Filament\Actions\ClassifyDocumentAction;
-use App\Models\CompanyWebsite;
 use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\Principal;
+use App\Models\Website;
 use App\Services\DocumentClassificationService;
 use App\Traits\HasDocumentTypeFiltering;
 use Filament\Actions\Action;

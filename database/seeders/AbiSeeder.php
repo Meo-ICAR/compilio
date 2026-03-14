@@ -15,7 +15,7 @@ class AbiSeeder extends Seeder
     {
         $csvPath = public_path('abi.csv');
 
-        if (false && !file_exists($csvPath)) {
+        if (!file_exists($csvPath)) {
             $this->command->error('CSV file not found: ' . $csvPath);
 
             return;

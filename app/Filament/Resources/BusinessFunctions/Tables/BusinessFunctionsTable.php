@@ -68,6 +68,24 @@ class BusinessFunctionsTable
                         'parziale' => 'warning',
                         default => 'gray',
                     }),
+                TextColumn::make('managingFunction.name')
+                    ->label('Gestita da')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('N/D')
+                    ->toggleable()
+                    ->badge()
+                    ->color('info'),
+                TextColumn::make('mission')
+                    ->label('Missione')
+                    ->searchable()
+                    ->limit(50)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('responsibility')
+                    ->label('Responsabilità')
+                    ->searchable()
+                    ->limit(50)
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('macro_area')
@@ -95,6 +113,13 @@ class BusinessFunctionsTable
                         'si' => 'Esternalizzabile',
                         'parziale' => 'Parzialmente Esternalizzabile',
                     ]),
+                SelectFilter::make('managed_by_code')
+                    ->label('Gestita da Funzione')
+                    ->options(function () {
+                        return \App\Models\BusinessFunction::pluck('name', 'code')->toArray();
+                    })
+                    ->searchable()
+                    ->placeholder('Tutte'),
             ])
             ->recordActions([
                 EditAction::make(),

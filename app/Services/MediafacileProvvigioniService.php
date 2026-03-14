@@ -127,7 +127,7 @@ ORDER BY x.principal_id, x.tipo_prodotto;
                 ) c_sum ON p.id = c_sum.principal_id
                 SET p.is_dummy = false
             ');
-            DB::statement("update practices p inner join practice_commissions c on c.practice_id = p.id  set p.perfected_at = c.invoice_at where c.invoice_at>'2024-01-01'");
+            DB::statement("update practices p inner join practice_commissions c on c.practice_id = p.id  set p.invoice_at = c.invoice_at where c.invoice_at>'2024-01-01'");
             // Delete dummy principals
             DB::statement('DELETE FROM principals WHERE is_dummy = true');
 

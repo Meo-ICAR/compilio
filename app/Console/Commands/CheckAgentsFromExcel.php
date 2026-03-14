@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Address;
 use App\Models\Agent;
-use App\Models\CompanyWebsite;
+use App\Models\Website;
 use Illuminate\Console\Command;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Reader;
@@ -423,13 +423,13 @@ class CheckAgentsFromExcel extends Command
                         $domain = $value;
 
                         // Check if website already exists
-                        $existingWebsite = \App\Models\CompanyWebsite::where('company_id', $company->id)
+                        $existingWebsite = \App\Models\Website::where('company_id', $company->id)
                             ->where('domain', $domain)
                             ->first();
 
                         if (!$existingWebsite) {
                             // Create new company website record
-                            $website = \App\Models\CompanyWebsite::create([
+                            $website = \App\Models\Website::create([
                                 'company_id' => $company->id,
                                 'name' => 'Website from Excel - ' . $colLetter . '4',
                                 'domain' => $domain,

@@ -125,6 +125,10 @@ class PracticeForm
                 DatePicker::make('perfected_at')
                     ->label('Data Perfezionamento')
                     ->required(),
+                DatePicker::make('invoice_at')
+                    ->label('Data Fatturazione')
+                    ->nullable()
+                    ->helperText('Data fatturazione della pratica'),
                 TextInput::make('brokerage_fee')
                     ->label('Provvigione')
                     ->numeric()

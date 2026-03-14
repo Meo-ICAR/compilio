@@ -100,6 +100,33 @@ class BusinessFunctionForm
                                 ->helperText('Possibilità di esternalizzare la funzione'),
                         ]),
                     ]),
+                // SEZIONE GESTIONE E RESPONSABILITÀ
+                Section::make('Gestione e Responsabilità')
+                    ->description('Informazioni sulla gestione e responsabilità della funzione')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            Select::make('managed_by_code')
+                                ->label('Gestita da Funzione')
+                                ->options(function () {
+                                    return \App\Models\BusinessFunction::pluck('name', 'code')->toArray();
+                                })
+                                ->searchable()
+                                ->placeholder('Nessuna funzione gestore')
+                                ->helperText('Codice della funzione che gestisce questa funzione'),
+                        ]),
+                        Grid::make(1)->schema([
+                            Textarea::make('mission')
+                                ->label('Missione della Funzione')
+                                ->rows(3)
+                                ->helperText('Cosa fa la funzione e quale è il suo scopo principale'),
+                        ]),
+                        Grid::make(1)->schema([
+                            Textarea::make('responsibility')
+                                ->label('Responsabilità e Attività')
+                                ->rows(4)
+                                ->helperText('Elenco delle attività e responsabilità specifiche della funzione'),
+                        ]),
+                    ]),
             ]);
     }
 }

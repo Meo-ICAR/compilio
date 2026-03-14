@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Agents;
 
 use App\Filament\RelationManagers\DocumentsRelationManager;
+use App\Filament\RelationManagers\WebsitesRelationManager;
 use App\Filament\Resources\Agents\Pages\CreateAgent;
 use App\Filament\Resources\Agents\Pages\EditAgent;
 use App\Filament\Resources\Agents\Pages\ListAgents;
@@ -47,6 +48,7 @@ class AgentResource extends Resource
     {
         return [
             DocumentsRelationManager::class,
+            WebsitesRelationManager::class,
             ChecklistsRelationManager::class,
             TrainingRecordsRelationManager::class,
             PurchaseInvoicesRelationManager::class,

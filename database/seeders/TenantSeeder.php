@@ -4,9 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Company;
 use App\Models\CompanyBranch;
-use App\Models\CompanyWebsite;
 use App\Models\Employee;
 use App\Models\User;
+use App\Models\Website;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -83,7 +83,7 @@ class TenantSeeder extends Seeder
 
         // --- Siti per Races Finance ---
         if ($races) {
-            CompanyWebsite::firstOrCreate(
+            Website::firstOrCreate(
                 ['domain' => 'www.races.it'],
                 [
                     'company_id' => $races->id,
@@ -96,7 +96,7 @@ class TenantSeeder extends Seeder
 
         // --- Siti per Credifacile ---
         if ($credifacile) {
-            CompanyWebsite::firstOrCreate(
+            Website::firstOrCreate(
                 ['domain' => 'www.credifacile.it'],
                 [
                     'company_id' => $credifacile->id,

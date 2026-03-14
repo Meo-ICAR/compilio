@@ -526,6 +526,7 @@ class PurchaseInvoiceImportService
                     Log::info('Matched invoice to client by VAT number', [
                         'invoice_number' => $invoice->number,
                         'invoice_vat' => $invoice->vat_number,
+                        'is_person' => length($invoice->vat_number) > 13,
                         'client_id' => $client->id,
                         'client_name' => $client->name,
                         'client_tax_code' => $client->tax_code,

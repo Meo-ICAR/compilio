@@ -67,6 +67,11 @@ class PracticesTable
                     ->date()
                     ->sortable()
                     ->placeholder('Non definita'),
+                TextColumn::make('invoice_at')
+                    ->label('Fatturazione')
+                    ->date()
+                    ->sortable()
+                    ->placeholder('Non definita'),
                 IconColumn::make('is_invoiced')
                     ->label('Fatturata')
                     ->boolean()

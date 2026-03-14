@@ -46,15 +46,22 @@ class Practice extends Model
         'description',
         'annotation',
         'perfected_at',
+        'invoice_at',
         'is_active',
         'is_convenctioned'
     ];
 
-    protected $appends = ['clients_names'];
+    protected $appends = ['clients_names', 'is_invoiced'];
+
+    public function getIsInvoicedAttribute()
+    {
+        return !is_null($this->invoice_at);
+    }
 
     protected $casts = [
         'status' => \App\Enums\PracticeStatus::class,
         'perfected_at' => 'date',
+        'invoice_at' => 'date',
         'inserted_at' => 'date',
         'approved_at' => 'date',
         'sended_at' => 'date',

@@ -19,6 +19,9 @@ class BusinessFunction extends Model
         'type',
         'description',
         'outsourcable_status',
+        'managed_by_code',
+        'mission',
+        'responsibility',
     ];
 
     protected $casts = [
@@ -39,6 +42,16 @@ class BusinessFunction extends Model
     public function ropaEntries(): HasMany
     {
         return $this->hasMany(RopaEntry::class, 'function_id');
+    }
+
+    public function managingFunction()
+    {
+        return $this->belongsTo(BusinessFunction::class, 'managed_by_code', 'code');
+    }
+
+    public function managedFunctions()
+    {
+        return $this->hasMany(BusinessFunction::class, 'managed_by_code', 'code');
     }
 
     // Helper methods

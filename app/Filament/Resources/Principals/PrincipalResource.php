@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Principals;
 
 use App\Filament\RelationManagers\DocumentsRelationManager;
+use App\Filament\RelationManagers\WebsitesRelationManager;
 use App\Filament\Resources\Principals\Imports\PrincipalsImport;
 use App\Filament\Resources\Principals\Pages\CreatePrincipal;
 use App\Filament\Resources\Principals\Pages\EditPrincipal;
@@ -59,6 +60,7 @@ class PrincipalResource extends Resource
             PrincipalMandatesRelationManager::class,
             PrincipalScopesRelationManager::class,
             DocumentsRelationManager::class,
+            WebsitesRelationManager::class,
             EmployeesRelationManager::class,
             SalesInvoicesRelationManager::class,
         ];

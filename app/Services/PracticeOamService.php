@@ -65,8 +65,8 @@ class PracticeOamService
                 ->orWhere(function ($query) use ($startDateCarbon, $endDateCarbon) {
                     // Practices perfected between start and end dates
                     $query
-                        ->where('perfected_at', '>=', $startDateCarbon)
-                        ->where('perfected_at', '<', $endDateCarbon);
+                        ->where('invoice_at', '>=', $startDateCarbon)
+                        ->where('invoice_at', '<', $endDateCarbon);
                 })
                 ->whereNull('rejected_at')
                 ->get();
@@ -93,15 +93,19 @@ class PracticeOamService
                     $is_perfected = $practice->erogated_at && $practice->inserted_at && $practice->erogated_at >= $practice->inserted_at;
                     $is_perfected = $is_perfected && $practice->erogated_at < $endDateCarbon;
                     $mese = 0;
-                    $isInvoice = $practice->perfected_at ? 1 : 0;
+                    // Use effective perfected date (perfected_at or fallback to erogated_at)
+                    $effective_perfected_at = $practice->perfected_at ?: $practice->erogated_at;
+                    $invoice_at_value = $effective_perfected_at ? $effective_perfected_at->format('Y-m-d') : null;
+                    $perfected_at_value = $effective_perfected_at ? $effective_perfected_at->format('Y-m-d H:i:s') : null;
+                    $isInvoice = $invoice_at_value ? 1 : 0;
                     $isBefore = false;
                     if ($is_perfected && $practice->erogated_at) {
                         $mese = (int) $practice->erogated_at->format('n');
-                        $isBefore = $practice->erogated_at < $startDate;
+                        $isBefore = $practice->invoice_at < $startDateCarbon;
                     }
                     $isAfter = false;
                     if ($isInvoice) {
-                        $isAfter = $practice->perfected_at > $endDate;
+                        $isAfter = $effective_perfected_at > $endDate;
                     }
 
                     $compenso = $commissionSums['compenso'];
@@ -134,63 +138,70 @@ class PracticeOamService
                         $oam_name = '--';
                     }
                     if (($tipoProdotto == 'Mutuo') && ($somma == $comCliente)) {
-                        $oam_name = 'Segnalazione ' . $tipoProdotto;
                         $oam_code = $oam_name;
                         Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
                     }
 
-                    PracticeOam::create([
-                        'company_id' => $companyId,
-                        'practice_id' => $practice->id,
-                        'oam_code_id' => $practice->practiceScope?->oam_code_id ?? null,
-                        'oam_code' => $oam_code,
-                        'oam_name' => $oam_name,
-                        'principal_name' => $practice->principal->name,
-                        'CRM_code' => $practice->CRM_code ?? null,
-                        'practice_name' => $practice->numero_pratica ?? null,
-                        'type' => $tipoProdotto,
-                        'start_date' => $startDate,
-                        'end_date' => $endDate,
-                        'is_conventioned' => ($compenso > 0) ? 1 : 0,
-                        'is_notconventioned' => !($compenso > 0) ? 1 : 0,
-                        'is_notconvenctioned' => !($compenso > 0) ? 1 : 0,
-                        'is_previous' => 0,  // Default value
-                        'mese' => $mese,
-                        'tipo_prodotto' => $tipoProdotto,
-                        'name' => $practice->principal->name,
-                        // Commission sums based on tipo grouping
-                        'erogato' => $erogato ?? 0,
-                        'erogato_lavorazione' => $erogato_lavorazione ?? 0,
-                        'liquidato' => $liquidato ?? 0,
-                        'liquidato_lavorazione' => $liquidato_lavorazione ?? 0,
-                        'compenso' => $compenso ?? 0,
-                        'compenso_lavorazione' => $commissionSums['compenso_lavorazione'] ?? 0,
-                        'compenso_premio' => $premio ?? 0,  // premio assicurativo
-                        'compenso_rimborso' => $commissionSums['rimborso'] ?? 0,
-                        'compenso_assicurazione' => $assicurazione ?? 0,
-                        'compenso_cliente' => $comCliente,
-                        'storno' => $commissionSums['storno'] ?? 0,
-                        'provvigione' => $commissionSums['provvigione'] ?? 0,
-                        'provvigione_lavorazione' => $commissionSums['provvigione_lavorazione'] ?? 0,
-                        'provvigione_premio' => $commissionSums['premioagente'] ?? 0,
-                        'provvigione_rimborso' => $commissionSums['rimborso'] ?? 0,
-                        'provvigione_assicurazione' => $commissionSums['provvigione_assicurazione'] ?? null,
-                        'provvigione_storno' => $commissionSums['storno'] ?? null,
-                        'is_active' => 1,  // Default to active
-                        'inserted_at' => $practice->inserted_at ? $practice->inserted_at->format('Y-m-d H:i:s') : null,
-                        'erogated_at' => $practice->erogated_at ? $practice->erogated_at->format('Y-m-d H:i:s') : null,
-                        'perfected_at' => $practice->erogated_at ? $practice->erogated_at->format('Y-m-d H:i:s') : null,
-                        'is_perfected' => $is_perfected ? 1 : 0,
-                        'is_working' => !$is_perfected ? 1 : 0,
-                        'invoice_at' => $isInvoice ? $practice->perfected_at->format('Y-m-d') : null,
-                        'is_invoice' => $isInvoice,
-                        'is_before' => $isBefore,
-                        'is_after' => $isAfter,
-                        'accepted_at' => $practice->approved_at ? $practice->approved_at->format('Y-m-d') : null,
-                        //   'approved_at' => $practice->approved_at ? $practice->approved_at->format('Y-m-d') : null,
-                        'is_cancel' => $practice->canceled_at ? 1 : 0,
-                        'canceled_at' => $practice->canceled_at ? $practice->canceled_at->format('Y-m-d') : null,
-                    ]);
+                    // Use effective perfected date (perfected_at or fallback to erogated_at)
+                    $effective_perfected_at = $practice->perfected_at ?: $practice->erogated_at;
+                    $invoice_at_value = $effective_perfected_at ? $effective_perfected_at->format('Y-m-d') : null;
+                    $perfected_at_value = $effective_perfected_at ? $effective_perfected_at->format('Y-m-d H:i:s') : null;
+                    $isInvoice = $invoice_at_value ? 1 : 0;
+
+                    PracticeOam::updateOrCreate(
+                        ['practice_id' => $practice->id],
+                        [
+                            'company_id' => $companyId,
+                            'oam_code_id' => $practice->practiceScope?->oam_code_id ?? null,
+                            'oam_code' => $oam_code,
+                            'oam_name' => $oam_name,
+                            'principal_name' => $practice->principal->name,
+                            'CRM_code' => $practice->CRM_code ?? null,
+                            'practice_name' => $practice->numero_pratica ?? null,
+                            'type' => $tipoProdotto,
+                            'start_date' => $startDate,
+                            'end_date' => $endDate,
+                            'is_conventioned' => ($compenso > 0) ? 1 : 0,
+                            'is_notconventioned' => !($compenso > 0) ? 1 : 0,
+                            'is_notconvenctioned' => !($compenso > 0) ? 1 : 0,
+                            'is_previous' => 0,  // Default value
+                            'mese' => $mese,
+                            'tipo_prodotto' => $tipoProdotto,
+                            'name' => $practice->principal->name,
+                            // Commission sums based on tipo grouping
+                            'erogato' => $erogato ?? 0,
+                            'erogato_lavorazione' => $erogato_lavorazione ?? 0,
+                            'liquidato' => $liquidato ?? 0,
+                            'liquidato_lavorazione' => $liquidato_lavorazione ?? 0,
+                            'compenso' => $compenso ?? 0,
+                            'compenso_lavorazione' => $commissionSums['compenso_lavorazione'] ?? 0,
+                            'compenso_premio' => $premio ?? 0,  // premio assicurativo
+                            'compenso_rimborso' => $commissionSums['rimborso'] ?? 0,
+                            'compenso_assicurazione' => $assicurazione ?? 0,
+                            'compenso_cliente' => $comCliente,
+                            'storno' => $commissionSums['storno'] ?? 0,
+                            'provvigione' => $commissionSums['provvigione'] ?? 0,
+                            'provvigione_lavorazione' => $commissionSums['provvigione_lavorazione'] ?? 0,
+                            'provvigione_premio' => $commissionSums['premioagente'] ?? 0,
+                            'provvigione_rimborso' => $commissionSums['rimborso'] ?? 0,
+                            'provvigione_assicurazione' => $commissionSums['provvigione_assicurazione'] ?? null,
+                            'provvigione_storno' => $commissionSums['storno'] ?? null,
+                            'is_active' => 1,  // Default to active
+                            'inserted_at' => $practice->inserted_at ? $practice->inserted_at->format('Y-m-d H:i:s') : null,
+                            'erogated_at' => $practice->erogated_at ? $practice->erogated_at->format('Y-m-d H:i:s') : null,
+                            'perfected_at' => $perfected_at_value,
+                            'is_perfected' => $is_perfected ? 1 : 0,
+                            'is_working' => !$is_perfected ? 1 : 0,
+                            'invoice_at' => $invoice_at_value,
+                            'is_invoice' => $isInvoice,
+                            'is_before' => $isBefore,
+                            'is_after' => $isAfter,
+                            'accepted_at' => $practice->approved_at ? $practice->approved_at->format('Y-m-d') : null,
+                            //   'approved_at' => $practice->approved_at ? $practice->approved_at->format('Y-m-d') : null,
+                            'is_cancel' => $practice->canceled_at ? 1 : 0,
+                            'canceled_at' => $practice->canceled_at ? $practice->canceled_at->format('Y-m-d') : null,
+                        ]
+                    );
                     $insertedCount++;
                 }
             }
