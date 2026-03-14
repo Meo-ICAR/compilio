@@ -124,6 +124,25 @@ class DocumentTypeForm
                                 ->helperText('Validità dal rilascio in giorni'),
                         ]),
                     ]),
+                // SEZIONE 5: Configurazione AI
+                Section::make('Configurazione AI')
+                    ->description('Impostazioni per elaborazione con intelligenza artificiale')
+                    ->schema([
+                        Grid::make(1)->schema([
+                            Toggle::make('is_AiAbstract')
+                                ->label('Genera Abstract con AI')
+                                ->helperText("Chiedi all'AI di creare un abstract del documento"),
+                            Toggle::make('is_AiCheck')
+                                ->label('Verifica Conformità AI')
+                                ->helperText('Richiede verifica di conformità tramite AI')
+                                ->default(false),
+                            Textarea::make('AiPattern')
+                                ->label('Pattern di Riconoscimento AI')
+                                ->helperText("Descrivi come l'AI può riconoscere questo tipo di documento")
+                                ->rows(3)
+                                ->nullable(),
+                        ]),
+                    ]),
             ]);
     }
 }

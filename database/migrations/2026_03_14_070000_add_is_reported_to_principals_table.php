@@ -10,9 +10,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('practice_oams', function (Blueprint $table) {
-            $table->string('oam_name')->nullable()->comment('Codice OAM prodotto');
-            $table->string('principal_name')->nullable()->comment('Nome intermediario');
+        Schema::table('principals', function (Blueprint $table) {
+            $table->boolean('is_reported')->default(false)->comment('Accordi di segnalazione');
         });
     }
 
@@ -21,8 +20,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('practice_oams', function (Blueprint $table) {
-            $table->dropColumn('oam_name');
+        Schema::table('principals', function (Blueprint $table) {
+            $table->dropColumn('is_reported');
         });
     }
 };

@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Agent;
+use App\Models\Client;
+use App\Models\Principal;
 use App\Models\SalesInvoice;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

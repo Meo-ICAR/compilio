@@ -10,6 +10,8 @@ use App\Filament\Resources\Clients\Pages\ListClients;
 use App\Filament\Resources\Clients\RelationManagers\ChecklistsRelationManager;
 use App\Filament\Resources\Clients\RelationManagers\ClientMandatesRelationManager;
 use App\Filament\Resources\Clients\RelationManagers\ClientRelationsRelationManager;
+use App\Filament\Resources\Clients\RelationManagers\PurchaseInvoicesRelationManager;
+use App\Filament\Resources\Clients\RelationManagers\SalesInvoicesRelationManager;
 use App\Filament\Resources\Clients\Schemas\ClientForm;
 use App\Filament\Resources\Clients\Tables\ClientsTable;
 use App\Filament\Traits\HasChecklistAction;
@@ -59,6 +61,8 @@ class ClientResource extends Resource
             ClientRelationsRelationManager::class,
             ClientMandatesRelationManager::class,
             ChecklistsRelationManager::class,
+            SalesInvoicesRelationManager::class,
+            PurchaseInvoicesRelationManager::class,
         ];
     }
 

@@ -30,6 +30,7 @@ class Employee extends Model
         'is_ghost',
         'oam',
         'oam_at',
+        'oam_dismissed_at',
         'oam_name',
         'numero_iscrizione_rui',
     ];
@@ -39,6 +40,7 @@ class Employee extends Model
         'is_ghost' => 'boolean',
         'hire_date' => 'date',
         'oam_at' => 'date',
+        'oam_dismissed_at' => 'date',
         'employee_types' => 'string',
         'supervisor_type' => 'string',
     ];

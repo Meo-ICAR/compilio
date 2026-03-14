@@ -37,6 +37,13 @@ class Document extends Model implements HasMedia
         'emitted_by',
         'is_signed',
         'user_id',
+        'abstract',
+        'ai_abstract',
+        'ai_confidence_score',
+        'extracted_text',
+        'metadata',
+        'sharepoint_id',
+        'file_hash',
     ];
 
     protected $casts = [
@@ -45,6 +52,8 @@ class Document extends Model implements HasMedia
         'verified_at' => 'datetime',
         'is_signed' => 'boolean',
         'is_template' => 'boolean',
+        'ai_confidence_score' => 'integer',
+        'metadata' => 'array',
     ];
 
     public function documentType(): BelongsTo

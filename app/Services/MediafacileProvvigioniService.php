@@ -113,16 +113,23 @@ GROUP BY x.principal_id, x.tipo_prodotto
 ORDER BY x.principal_id, x.tipo_prodotto;
             ", [$this->companyId]);
 
-            DB::statement('UPDATE principals p set p.is_dummy = true;
-UPDATE principals p
-JOIN (
-    SELECT principal_id
-    FROM practice_commissions
-    GROUP BY principal_id
-    HAVING SUM(amount) > 0
-) c_sum ON p.id = c_sum.principal_id
-SET p.is_dummy = false;
-delete from principals  WHERE is_dummy; ');
+            // Mark all principals as dummy first
+            DB::statement('UPDATE principals p set p.is_dummy = true');
+
+            // Update principals that have commissions to not dummy
+            DB::statement('
+                UPDATE principals p
+                JOIN (
+                    SELECT principal_id
+                    FROM practice_commissions
+                    GROUP BY principal_id
+                    HAVING SUM(amount) > 0
+                ) c_sum ON p.id = c_sum.principal_id
+                SET p.is_dummy = false
+            ');
+            DB::statement("update practices p inner join practice_commissions c on c.practice_id = p.id  set p.perfected_at = c.invoice_at where c.invoice_at>'2024-01-01'");
+            // Delete dummy principals
+            DB::statement('DELETE FROM principals WHERE is_dummy = true');
 
             // Step 1: Delete all existing practice_oam records for the company
         } catch (Exception $e) {

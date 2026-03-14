@@ -45,6 +45,7 @@ class Principal extends Model
         'oam_name',
         'oam_at',
         'numero_iscrizione_rui',
+        'is_reported',
     ];
 
     protected $casts = [
@@ -57,6 +58,7 @@ class Principal extends Model
         'is_active' => 'boolean',
         'is_exclusive' => 'boolean',
         'is_dummy' => 'boolean',
+        'is_reported' => 'boolean',
         'principal_type' => 'string',
     ];
 
@@ -99,6 +101,16 @@ class Principal extends Model
     public function audits(): MorphMany
     {
         return $this->morphMany(Audit::class, 'auditable');
+    }
+
+    public function purchaseInvoices()
+    {
+        return $this->morphMany(PurchaseInvoice::class, 'invoiceable');
+    }
+
+    public function salesInvoices()
+    {
+        return $this->morphMany(SalesInvoice::class, 'invoiceable');
     }
 
     public function principalContacts(): HasMany

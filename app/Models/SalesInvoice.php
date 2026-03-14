@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\BelongsToCompany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
 
 class SalesInvoice extends Model
@@ -52,6 +53,8 @@ class SalesInvoice extends Model
         'supplier_description',
         'purchase_invoice_origin',
         'sent_to_sdi',
+        'invoiceable_type',
+        'invoiceable_id',
     ];
 
     protected $casts = [
@@ -135,5 +138,22 @@ class SalesInvoice extends Model
     public function getFormattedResidualAmountAttribute()
     {
         return '€' . number_format($this->residual_amount, 2, ',', '.');
+    }
+
+    public function invoiceable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function scopeForInvoiceable($query, $model)
+    {
+        return $query
+            ->where('invoiceable_type', get_class($model))
+            ->where('invoiceable_id', $model->getKey());
+    }
+
+    public function scopeForInvoiceableType($query, string $type)
+    {
+        return $query->where('invoiceable_type', $type);
     }
 }

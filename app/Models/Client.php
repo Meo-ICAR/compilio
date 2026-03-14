@@ -135,6 +135,16 @@ class Client extends Model implements HasMedia
         return $this->morphMany(Checklist::class, 'target');
     }
 
+    public function purchaseInvoices()
+    {
+        return $this->morphMany(PurchaseInvoice::class, 'invoiceable');
+    }
+
+    public function salesInvoices()
+    {
+        return $this->morphMany(SalesInvoice::class, 'invoiceable');
+    }
+
     public function members()
     {
         return $this

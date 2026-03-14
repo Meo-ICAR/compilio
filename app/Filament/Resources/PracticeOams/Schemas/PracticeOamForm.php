@@ -53,6 +53,18 @@ class PracticeOamForm
                             )
                             ->searchable()
                             ->nullable(),
+                        TextInput::make('principal_name')
+                            ->label('Nome Intermediario')
+                            ->nullable(),
+                        TextInput::make('CRM_code')
+                            ->label('Codice CRM')
+                            ->nullable(),
+                        TextInput::make('practice_name')
+                            ->label('Nome Pratica')
+                            ->nullable(),
+                        TextInput::make('type')
+                            ->label('Tipo')
+                            ->nullable(),
                     ])
                     ->columns(2),
                 Section::make('Commissioni')

@@ -26,6 +26,7 @@ class Agent extends Model implements HasMedia
         'supervisor_type',
         'oam',
         'oam_at',
+        'oam_dismissed_at',
         'oam_name',
         'ivass',
         'ivass_at',
@@ -50,6 +51,7 @@ class Agent extends Model implements HasMedia
 
     protected $casts = [
         'oam_at' => 'date',
+        'oam_dismissed_at' => 'date',
         'ivass_at' => 'date',
         'stipulated_at' => 'date',
         'dismissed_at' => 'date',
@@ -110,6 +112,11 @@ class Agent extends Model implements HasMedia
     public function contacts(): MorphMany
     {
         return $this->morphMany(Contact::class, 'contactable');
+    }
+
+    public function purchaseInvoices()
+    {
+        return $this->morphMany(PurchaseInvoice::class, 'invoiceable');
     }
 
     public function rui()

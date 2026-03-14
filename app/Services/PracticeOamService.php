@@ -62,6 +62,12 @@ class PracticeOamService
                             ->orWhereNull('erogated_at');
                     });
             })
+                ->orWhere(function ($query) use ($startDateCarbon, $endDateCarbon) {
+                    // Practices perfected between start and end dates
+                    $query
+                        ->where('perfected_at', '>=', $startDateCarbon)
+                        ->where('perfected_at', '<', $endDateCarbon);
+                })
                 ->whereNull('rejected_at')
                 ->get();
 
@@ -129,22 +135,32 @@ class PracticeOamService
                     PracticeOam::create([
                         'company_id' => $companyId,
                         'practice_id' => $practice->id,
+                        'oam_code_id' => $practice->practiceScope?->oam_code_id ?? null,
                         'oam_code' => $oam_code,
                         'oam_name' => $oam_name,
+                        'principal_name' => $practice->principal->name,
+                        'CRM_code' => $practice->CRM_code ?? null,
+                        'practice_name' => $practice->numero_pratica ?? null,
+                        'type' => $tipoProdotto,
                         'start_date' => $startDate,
                         'end_date' => $endDate,
-                        'perfected_at' => $practice->erogated_at ? $practice->erogated_at->format('Y-m-d H:i:s') : null,
                         'inserted_at' => $practice->inserted_at ? $practice->inserted_at->format('Y-m-d H:i:s') : null,
+                        'erogated_at' => $practice->erogated_at ? $practice->erogated_at->format('Y-m-d H:i:s') : null,
+                        'perfected_at' => $practice->erogated_at ? $practice->erogated_at->format('Y-m-d H:i:s') : null,
                         'is_perfected' => $is_perfected ? 1 : 0,
                         'is_working' => !$is_perfected ? 1 : 0,
                         'is_conventioned' => ($compenso > 0) ? 1 : 0,
                         'is_notconventioned' => !($compenso > 0) ? 1 : 0,
+                        'is_notconvenctioned' => !($compenso > 0) ? 1 : 0,
+                        'is_previous' => 0,  // Default value
                         'mese' => $mese,
                         'tipo_prodotto' => $tipoProdotto,
                         'name' => $practice->principal->name,
                         // Commission sums based on tipo grouping
                         'erogato' => $erogato ?? 0,
                         'erogato_lavorazione' => $erogato_lavorazione ?? 0,
+                        'liquidato' => $liquidato ?? 0,
+                        'liquidato_lavorazione' => $liquidato_lavorazione ?? 0,
                         'compenso' => $compenso ?? 0,
                         'compenso_lavorazione' => $commissionSums['compenso_lavorazione'] ?? 0,
                         'compenso_premio' => $premio ?? 0,  // premio assicurativo
@@ -158,6 +174,12 @@ class PracticeOamService
                         'provvigione_rimborso' => $commissionSums['rimborso'] ?? 0,
                         'provvigione_assicurazione' => $commissionSums['provvigione_assicurazione'] ?? null,
                         'provvigione_storno' => $commissionSums['storno'] ?? null,
+                        'is_active' => 1,  // Default to active
+                        'invoice_at' => $practice->invoice_at ? $practice->invoice_at->format('Y-m-d') : null,
+                        'is_invoice' => $practice->invoice_at ? 1 : 0,
+                        'accepted_at' => $practice->accepted_at ? $practice->accepted_at->format('Y-m-d') : null,
+                        'is_cancel' => $practice->canceled_at ? 1 : 0,
+                        'canceled_at' => $practice->canceled_at ? $practice->canceled_at->format('Y-m-d') : null,
                     ]);
                     $insertedCount++;
                 }

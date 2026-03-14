@@ -226,6 +226,12 @@ class PracticeOamsTable
                 Filter::make('is_perfected')
                     ->label('Erogata')
                     ->query(fn($query) => $query->where('is_perfected', true)),
+                Filter::make('is_before')
+                    ->label('Perfezionata prima')
+                    ->query(fn($query) => $query->where('is_before', true)),
+                Filter::make('is_after')
+                    ->label('Perfezionata dopo')
+                    ->query(fn($query) => $query->where('is_after', true)),
                 SelectFilter::make('oam_name')
                     ->label('Filtra per OAM')
                     ->multiple()  // Abilita la selezione multipla

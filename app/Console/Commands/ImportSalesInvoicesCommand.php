@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Client;
 use App\Models\Company;
+use App\Models\Principal;
+use App\Models\SalesInvoice;
 use App\Services\SalesInvoiceImportService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -14,7 +17,7 @@ class ImportSalesInvoicesCommand extends Command
      *
      * @var string
      */
-    protected $signature = ' {--company= : Company ID} {--file= : Custom file path} {--force : Force reimport}';
+    protected $signature = 'sales-invoices:import {--company= : Company ID} {--file= : Custom file path} {--force : Force reimport}';
 
     /**
      * The console command description.
@@ -33,6 +36,8 @@ class ImportSalesInvoicesCommand extends Command
         $force = $this->option('force');
 
         $this->info('Starting sales invoices import...');
+        // Get company
+        $companyId = $this->option('company') ?: Company::first()->id;
 
         try {
             // Get company
@@ -68,7 +73,7 @@ class ImportSalesInvoicesCommand extends Command
             $this->info("Importing from: {$filePath}");
 
             // Check for existing invoices
-            $existingCount = \App\Models\SalesInvoice::where('company_id', $company->id)->count();
+            $existingCount = SalesInvoice::where('company_id', $company->id)->count();
             if ($existingCount > 0 && !$force) {
                 $this->warn("Found {$existingCount} existing invoices for this company.");
                 if (!$this->confirm('Continue import? (Duplicates will be updated)')) {
@@ -119,7 +124,7 @@ class ImportSalesInvoicesCommand extends Command
         }
 
         // Verification
-        $totalInvoices = \App\Models\SalesInvoice::where('company_id', $companyId)->count();
+        $totalInvoices = SalesInvoice::where('company_id', $companyId)->count();
         $this->newLine();
         $this->info('Verification:');
         $this->line("Total invoices in database: {$totalInvoices}");

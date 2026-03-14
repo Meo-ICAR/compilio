@@ -17,6 +17,7 @@ class AuditItem extends Model
         'description',
         'audit_phase',
         'code',
+        'business_function_id',
     ];
 
     protected $casts = [
@@ -26,6 +27,11 @@ class AuditItem extends Model
     public function audit(): BelongsTo
     {
         return $this->belongsTo(Audit::class);
+    }
+
+    public function businessFunction(): BelongsTo
+    {
+        return $this->belongsTo(BusinessFunction::class);
     }
 
     // Helper methods

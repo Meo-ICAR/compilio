@@ -7,6 +7,7 @@ use App\Filament\Resources\Agents\Pages\CreateAgent;
 use App\Filament\Resources\Agents\Pages\EditAgent;
 use App\Filament\Resources\Agents\Pages\ListAgents;
 use App\Filament\Resources\Agents\RelationManagers\ChecklistsRelationManager;
+use App\Filament\Resources\Agents\RelationManagers\PurchaseInvoicesRelationManager;
 use App\Filament\Resources\Agents\RelationManagers\TrainingRecordsRelationManager;
 use App\Filament\Resources\Agents\Schemas\AgentForm;
 use App\Filament\Resources\Agents\Tables\AgentsTable;
@@ -48,6 +49,7 @@ class AgentResource extends Resource
             DocumentsRelationManager::class,
             ChecklistsRelationManager::class,
             TrainingRecordsRelationManager::class,
+            PurchaseInvoicesRelationManager::class,
         ];
     }
 

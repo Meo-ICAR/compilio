@@ -88,6 +88,13 @@ class PrincipalsTable
                     ->sortable(),
                 IconColumn::make('is_exclusive')
                     ->boolean(),
+                IconColumn::make('is_reported')
+                    ->label('Segnalazione')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-hand-raised')
+                    ->falseIcon('heroicon-o-hand-raised')
+                    ->color(fn($state) => $state ? 'success' : 'gray')
+                    ->tooltip(fn($record) => $record->is_reported ? 'Accordi di segnalazione attivi' : 'Nessun accordo di segnalazione'),
                 TextColumn::make('status')
                     ->badge(),
                 TextColumn::make('website')
@@ -105,7 +112,11 @@ class PrincipalsTable
                 Filter::make('senza_abi')
                     ->label('Senza ABI')
                     ->query(fn(Builder $query): Builder => $query->whereNull('principals.abi'))
-                    ->indicator('ABI Mancante')  // Mostra un badge sopra la tabella quando è attivo
+                    ->indicator('ABI Mancante'),  // Mostra un badge sopra la tabella quando è attivo
+                Filter::make('con_segnalazione')
+                    ->label('Con Accordi di Segnalazione')
+                    ->query(fn(Builder $query): Builder => $query->where('is_reported', true))
+                    ->indicator('Segnalazione'),
             ])
             ->recordActions([
                 // EditAction::make(),

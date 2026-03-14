@@ -24,12 +24,18 @@ class RemediationSeeder extends Seeder
         $auditItem = AuditItem::first();
 
         if (!$auditItem) {
+            // Get a valid business function or use null
+            $businessFunction = BusinessFunction::first();
+
             // Se non esiste, ne creo uno
             $auditItem = AuditItem::create([
                 'audit_id' => $audit->id,
-                'business_function_id' => 1,  // Default
-                'title' => 'Audit Item di esempio',
-                'description' => 'Audit item per remediation',
+                'auditable_type' => 'App\Models\Practice',
+                'auditable_id' => '1',
+                'business_function_id' => $businessFunction?->id,  // Use valid ID or null
+                'name' => 'Audit Item di esempio',
+                'finding_description' => 'Audit item per remediation',
+                'result' => 'OK',
             ]);
         }
 

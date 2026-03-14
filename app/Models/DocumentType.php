@@ -23,7 +23,10 @@ class DocumentType extends Model
         'is_client',
         'is_practice_target',
         'is_company',
-        'is_endmonth'
+        'is_endmonth',
+        'is_AiAbstract',
+        'is_AiCheck',
+        'AiPattern'
     ];
 
     protected $casts = [
@@ -41,6 +44,8 @@ class DocumentType extends Model
         'is_client' => 'boolean',
         'is_practice_target' => 'boolean',
         'is_company' => 'boolean',
+        'is_AiAbstract' => 'boolean',
+        'is_AiCheck' => 'boolean',
     ];
 
     public function scopes(): \Illuminate\Database\Eloquent\Relations\BelongsToMany

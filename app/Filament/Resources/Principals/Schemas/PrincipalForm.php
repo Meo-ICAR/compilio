@@ -186,16 +186,23 @@ class PrincipalForm
                                 ->displayFormat('d/m/Y')
                                 ->helperText('Lascia vuoto se a tempo indeterminato.'),
                         ]),
-                        Toggle::make('is_exclusive')
-                            ->label('Mandato in Esclusiva')
-                            ->default(false)
-                            ->inline(false)
-                            ->helperText("Attiva se c'è un patto di non concorrenza per questa categoria di prodotti."),
                     ]),
                 // 4. SEZIONE NOTE E ACCORDI
                 Section::make('Accordi Commerciali')
                     ->icon('heroicon-o-pencil-square')
                     ->schema([
+                        Grid::make(2)->schema([
+                            Toggle::make('is_reported')
+                                ->label('Accordi di Segnalazione')
+                                ->default(false)
+                                ->inline(false)
+                                ->helperText('Attiva se esistono accordi di segnalazione con questo istituto.'),
+                            Toggle::make('is_exclusive')
+                                ->label('Mandato in Esclusiva')
+                                ->default(false)
+                                ->inline(false)
+                                ->helperText("Attiva se c'è un patto di non concorrenza per questa categoria di prodotti."),
+                        ]),
                         Textarea::make('notes')
                             ->label('Note su provvigioni, premi di produzione o patti specifici')
                             ->rows(4)

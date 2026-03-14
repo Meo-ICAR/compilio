@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
 
 class PurchaseInvoice extends Model
@@ -38,6 +39,8 @@ class PurchaseInvoice extends Model
         'fiscal_code',
         'document_type',
         'company_id',
+        'invoiceable_type',
+        'invoiceable_id',
     ];
 
     protected $casts = [
@@ -59,6 +62,11 @@ class PurchaseInvoice extends Model
         return $this->belongsTo(Company::class);
     }
 
+    public function invoiceable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
     public function scopeByCompany($query, $companyId)
     {
         return $query->where('company_id', $companyId);
@@ -72,5 +80,17 @@ class PurchaseInvoice extends Model
     public function scopePaid($query)
     {
         return $query->where('closed', true);
+    }
+
+    public function scopeForInvoiceable($query, $model)
+    {
+        return $query
+            ->where('invoiceable_type', get_class($model))
+            ->where('invoiceable_id', $model->getKey());
+    }
+
+    public function scopeForInvoiceableType($query, string $type)
+    {
+        return $query->where('invoiceable_type', $type);
     }
 }

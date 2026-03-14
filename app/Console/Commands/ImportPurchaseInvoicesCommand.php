@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Agent;
+use App\Models\Client;
 use App\Models\Company;
 use App\Models\PurchaseInvoice;
 use App\Services\PurchaseInvoiceImportService;
@@ -31,21 +33,19 @@ class ImportPurchaseInvoicesCommand extends Command
         $this->info('Starting purchase invoices import...');
 
         // Get company
-        $companyId = $this->option('company');
-        if (!$companyId) {
-            $companies = Company::pluck('name', 'id')->toArray();
-            if (empty($companies)) {
-                $this->error('No companies found in database.');
+        $companyId = $this->option('company') ?: Company::first()->id;
+
+        if ($companyId) {
+            $company = Company::findOrFail($companyId);
+        } else {
+            $companies = Company::all();
+            if ($companies->isEmpty()) {
+                $this->error('No companies found');
                 return 1;
             }
 
-            $companyId = $this->choice('Select company:', array_keys($companies));
-        }
-
-        $company = Company::find($companyId);
-        if (!$company) {
-            $this->error("Company with ID {$companyId} not found.");
-            return 1;
+            $companyId = $this->choice('Select company', $companies->pluck('name', 'id')->toArray());
+            $company = Company::findOrFail($companyId);
         }
 
         $this->info("Using company: {$company->name} (ID: {$company->id})");

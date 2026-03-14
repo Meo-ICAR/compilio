@@ -110,7 +110,6 @@ class DocumentTypeSeeder extends Seeder
             65 => ['name' => 'Riscontro al Cliente (GDPR)', 'slug' => 'riscontro-accesso-gdpr', 'regex' => '/riscontro.*accesso|invio.*dati.*personali/i', 'scopes' => [$privacy]],
         ];
 
-        // 3. Esecuzione: Aggiornamento record esistenti
         foreach ($data as $id => $attr) {
             $type = DocumentType::find($id);
             if (!$type) {
@@ -157,5 +156,101 @@ class DocumentTypeSeeder extends Seeder
                 }
             }
         }
+
+        $documents = [
+            [
+                'name' => 'Attestazione Ricevimento Documentazione Informativa',
+                'description' => 'Attestazione di ricevimento del foglio informativo e altra documentazione di trasparenza',
+                'slug' => 'attestazione-ricevimento-informativa',
+                'regex' => '/attestazione.*ricevimento.*(informativa|documentazione)|ricevuta.*informativa/i',
+                'priority' => 1,
+                'is_person' => 1,
+                'is_client' => 1,
+                'is_practice' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Fattura Pratica Mediazione',
+                'description' => 'Fatture relative alla pratica di mediazione',
+                'slug' => 'fattura-pratica-mediazione',
+                'regex' => '/fattura.*mediazione|fattura.*n\./i',
+                'priority' => 1,
+                'is_person' => 1,
+                'is_client' => 1,
+                'is_practice' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => "Comunicazione Compenso all'Istituto",
+                'description' => "Comunicazione del compenso di mediazione all'Istituto erogante",
+                'slug' => 'comunicazione-compenso-istituto',
+                'regex' => '/comunicazione.*compenso|compenso.*mediazione/i',
+                'priority' => 1,
+                'is_person' => 0,
+                'is_company' => 1,
+                'is_practice' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Ricevuta Comunicazione Compenso',
+                'description' => "Attestazione di ricezione della comunicazione del compenso da parte dell'Istituto",
+                'slug' => 'ricevuta-comunicazione-compenso',
+                'regex' => '/ricezione.*comunicazione.*compenso|attestazione.*compenso/i',
+                'priority' => 1,
+                'is_person' => 0,
+                'is_company' => 1,
+                'is_practice' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Documentazione Servizi Congiunti (Consulenza)',
+                'description' => 'Documentazione relativa ai servizi offerti al cliente congiuntamente a quello di mediazione',
+                'slug' => 'documentazione-servizi-congiunti',
+                'regex' => '/servizi.*congiunti|contratto.*consulenza/i',
+                'priority' => 1,
+                'is_person' => 1,
+                'is_client' => 1,
+                'is_practice' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Modulo PIES',
+                'description' => 'Prospetto Informativo Europeo Standardizzato',
+                'slug' => 'modulo-pies',
+                'regex' => '/pies|prospetto.*informativo.*europeo/i',
+                'priority' => 1,
+                'is_person' => 1,
+                'is_client' => 1,
+                'is_practice' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Nota Descrittiva Intermediazione',
+                'description' => "Nota descrittiva sull'attività di intermediazione svolta dal collaboratore",
+                'slug' => 'nota-descrittiva-intermediazione',
+                'regex' => '/nota.*descrittiva.*intermediazione|attività.*svolta/i',
+                'priority' => 1,
+                'is_person' => 1,
+                'is_agent' => 1,  // Specifico per l'agente/collaboratore
+                'is_practice' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]
+        ];
+
+        foreach ($documents as $doc) {
+            DB::table('document_types')->updateOrInsert(
+                ['slug' => $doc['slug']],
+                $doc
+            );
+        }
+
+        // 3. Esecuzione: Aggiornamento record esistenti
     }
 }
