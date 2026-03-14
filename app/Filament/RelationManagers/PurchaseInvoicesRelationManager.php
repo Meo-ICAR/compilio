@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\Clients\RelationManagers;
+namespace App\Filament\RelationManagers;
 
 use App\Filament\Resources\PurchaseInvoices\PurchaseInvoiceResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
 
 class PurchaseInvoicesRelationManager extends RelationManager
 {
     protected static string $relationship = 'purchaseInvoices';
 
-    protected static ?string $relatedResource = PurchaseInvoiceResource::class;
+    protected static ?string $relatedResource = purchaseInvoiceResource::class;
 
     public function table(Table $table): Table
     {
@@ -112,9 +113,6 @@ class PurchaseInvoicesRelationManager extends RelationManager
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
             ])
             ->defaultSort('document_date', 'desc');
     }

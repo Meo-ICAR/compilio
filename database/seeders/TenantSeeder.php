@@ -89,6 +89,8 @@ class TenantSeeder extends Seeder
                     'company_id' => $races->id,
                     'name' => 'Sito Istituzionale Races',
                     'type' => 'Vetrina',
+                    'websiteable_type' => 'App\Models\Company',
+                    'websiteable_id' => $races->id,
                     'is_active' => 1
                 ]
             );
@@ -102,6 +104,8 @@ class TenantSeeder extends Seeder
                     'company_id' => $credifacile->id,
                     'name' => 'Portale Credifacile',
                     'type' => 'Vetrina',
+                    'websiteable_type' => 'App\Models\Company',
+                    'websiteable_id' => $credifacile->id,
                     'is_active' => 1
                 ]
             );

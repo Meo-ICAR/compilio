@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Clients;
 
 use App\Filament\RelationManagers\AddressesRelationManager;
 use App\Filament\RelationManagers\DocumentsRelationManager;
+use App\Filament\RelationManagers\PurchaseInvoicesRelationManager;
+use App\Filament\RelationManagers\SalesInvoicesRelationManager;
 use App\Filament\RelationManagers\WebsitesRelationManager;
 use App\Filament\Resources\Clients\Pages\CreateClient;
 use App\Filament\Resources\Clients\Pages\EditClient;
@@ -11,8 +13,6 @@ use App\Filament\Resources\Clients\Pages\ListClients;
 use App\Filament\Resources\Clients\RelationManagers\ChecklistsRelationManager;
 use App\Filament\Resources\Clients\RelationManagers\ClientMandatesRelationManager;
 use App\Filament\Resources\Clients\RelationManagers\ClientRelationsRelationManager;
-use App\Filament\Resources\Clients\RelationManagers\PurchaseInvoicesRelationManager;
-use App\Filament\Resources\Clients\RelationManagers\SalesInvoicesRelationManager;
 use App\Filament\Resources\Clients\Schemas\ClientForm;
 use App\Filament\Resources\Clients\Tables\ClientsTable;
 use App\Filament\Traits\HasChecklistAction;

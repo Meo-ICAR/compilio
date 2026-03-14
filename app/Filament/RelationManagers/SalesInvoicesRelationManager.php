@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\Clients\RelationManagers;
+namespace App\Filament\RelationManagers;
 
 use App\Filament\Resources\SalesInvoices\SalesInvoiceResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
 
 class SalesInvoicesRelationManager extends RelationManager
 {
     protected static string $relationship = 'salesInvoices';
 
-    protected static ?string $relatedResource = SalesInvoiceResource::class;
+    protected static ?string $relatedResource = salesInvoiceResource::class;
 
     public function table(Table $table): Table
     {
@@ -22,10 +23,12 @@ class SalesInvoicesRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('number')
                     ->label('Invoice Number')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('customer_name')
                     ->label('Customer')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Amount')
                     ->money('EUR')
@@ -69,8 +72,6 @@ class SalesInvoicesRelationManager extends RelationManager
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ->defaultSort('document_date', 'desc');
     }
 }

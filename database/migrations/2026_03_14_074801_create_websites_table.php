@@ -12,8 +12,8 @@ return new class extends Migration {
     {
         Schema::create('websites', function (Blueprint $table) {
             $table->id()->comment('ID univoco del sito');
-            $table->string('websiteable_type')->comment('Tipo di modello associato (es. Company / Agent)');
-            $table->char('websiteable_id', 36);
+            $table->string('websiteable_type')->comment('Tipo di modello associato (es. Company / Agent)')->nullable();
+            $table->char('websiteable_id', 36)->nullable();
             $table->char('company_id', 36)->nullable();
             $table->string('name')->comment('Nome del sito (es. Portale Agenti Roma)');
             $table->string('domain')->comment('Dominio o sottodominio (es. agenzia-x.mediaconsulence.it)');
