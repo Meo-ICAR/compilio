@@ -4,61 +4,74 @@ namespace App\Filament\RelationManagers;
 
 use App\Models\Website;
 use App\Services\TransparencyScanService;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Tables;
 
 class WebsitesRelationManager extends RelationManager
 {
     protected static string $relationship = 'websites';
     protected static ?string $title = 'Siti Web';
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Nome Sito')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('url')
-                    ->label('URL Sito')
-                    ->required()
-                    ->url()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('url_transparency')
-                    ->label('URL Trasparenza')
-                    ->url()
-                    ->maxLength(255)
-                    ->helperText('URL della pagina trasparenza se diversa dal sito principale'),
-                Forms\Components\Textarea::make('description')
-                    ->label('Descrizione')
-                    ->maxLength(500)
-                    ->columnSpanFull(),
-                Forms\Components\Select::make('type')
-                    ->label('Tipo Sito')
-                    ->options([
-                        'corporate' => 'Sito Corporate',
-                        'institutional' => 'Sito Istituzionale',
-                        'portal' => 'Portale',
-                        'ecommerce' => 'E-commerce',
-                        'blog' => 'Blog',
-                        'other' => 'Altro',
-                    ])
-                    ->default('corporate'),
-                Forms\Components\Toggle::make('is_active')
-                    ->label('Attivo')
-                    ->default(true),
-                Forms\Components\Toggle::make('requires_transparency')
-                    ->label('Richiede Trasparenza')
-                    ->default(false)
-                    ->helperText('Se true, il sito verrà scansionato per documenti di trasparenza'),
-            ]);
-    }
-
+    /*
+     * public function (Schema $schema): Schema
+     * {
+     *     return $schema
+     *         ->components([
+     *             TextInput::make('name')
+     *                 ->label('Nome Sito')
+     *                 ->required()
+     *                 ->maxLength(255),
+     *             TextInput::make('url')
+     *                 ->label('URL Sito')
+     *                 ->required()
+     *                 ->url()
+     *                 ->maxLength(255),
+     *             TextInput::make('url_transparency')
+     *                 ->label('URL Trasparenza')
+     *                 ->url()
+     *                 ->maxLength(255)
+     *                 ->helperText('URL della pagina trasparenza se diversa dal sito principale'),
+     *             Textarea::make('description')
+     *                 ->label('Descrizione')
+     *                 ->maxLength(500)
+     *                 ->columnSpanFull(),
+     *             Select::make('type')
+     *                 ->label('Tipo Sito')
+     *                 ->options([
+     *                     'corporate' => 'Sito Corporate',
+     *                     'institutional' => 'Sito Istituzionale',
+     *                     'portal' => 'Portale',
+     *                     'ecommerce' => 'E-commerce',
+     *                     'blog' => 'Blog',
+     *                     'other' => 'Altro',
+     *                 ])
+     *                 ->default('corporate'),
+     *             Toggle::make('is_active')
+     *                 ->label('Attivo')
+     *                 ->default(true),
+     *             Toggle::make('requires_transparency')
+     *                 ->label('Richiede Trasparenza')
+     *                 ->default(false)
+     *                 ->helperText('Se true, il sito verrà scansionato per documenti di trasparenza'),
+     *         ]);
+     * }
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -86,7 +99,7 @@ class WebsitesRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('type')
                     ->label('Tipo')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'corporate' => 'primary',
                         'institutional' => 'success',
                         'portal' => 'info',
@@ -123,7 +136,7 @@ class WebsitesRelationManager extends RelationManager
                     ->label('Richiede Trasparenza'),
                 Tables\Filters\Filter::make('has_transparency_url')
                     ->label('Ha URL Trasparenza')
-                    ->query(fn ($query) => $query->whereNotNull('url_transparency')),
+                    ->query(fn($query) => $query->whereNotNull('url_transparency')),
             ])
             ->headerActions([
                 Tables\Actions\CreateAction::make(),
@@ -142,11 +155,11 @@ class WebsitesRelationManager extends RelationManager
                         try {
                             // Get company ID based on owner type
                             $companyId = $this->getCompanyIdFromOwner($ownerRecord);
-                            
+
                             if (!$companyId) {
                                 Notification::make()
                                     ->title('Errore Scansione')
-                                    ->body('Impossibile determinare l\'azienda associata')
+                                    ->body("Impossibile determinare l'azienda associata")
                                     ->danger()
                                     ->send();
                                 return;
@@ -184,7 +197,7 @@ class WebsitesRelationManager extends RelationManager
                     ->label('Test URL')
                     ->icon('heroicon-o-globe-alt')
                     ->color('info')
-                    ->url(fn (Website $record): string => $record->url)
+                    ->url(fn(Website $record): string => $record->url)
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([
@@ -202,11 +215,11 @@ class WebsitesRelationManager extends RelationManager
         if (method_exists($ownerRecord, 'company_id')) {
             return $ownerRecord->company_id;
         }
-        
+
         if (method_exists($ownerRecord, 'id') && get_class($ownerRecord) === 'App\Models\Company') {
             return $ownerRecord->id;
         }
-        
+
         // Add more owner type handling as needed
         return null;
     }
@@ -217,11 +230,11 @@ class WebsitesRelationManager extends RelationManager
     private function getWebsitesWithTransparency($ownerRecord)
     {
         $websites = $ownerRecord->websites();
-        
+
         if (method_exists($websites, 'whereNotNull')) {
             return $websites->whereNotNull('url_transparency')->get();
         }
-        
+
         return collect();
     }
 }

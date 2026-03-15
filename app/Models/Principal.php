@@ -177,6 +177,11 @@ class Principal extends Model
         return $query->where('principal_type', 'assicurazione');
     }
 
+    public function websites()
+    {
+        return $this->morphMany(Website::class, 'owner');
+    }
+
     public function scopeAgents($query)
     {
         return $query->whereIn('principal_type', ['agente', 'agente_captive']);

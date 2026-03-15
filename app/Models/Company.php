@@ -131,7 +131,7 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
 
     public function websites()
     {
-        return $this->hasMany(Website::class);
+        return $this->morphMany(Website::class, 'owner');
     }
 
     public function companyType()

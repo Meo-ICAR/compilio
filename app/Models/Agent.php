@@ -123,4 +123,9 @@ class Agent extends Model implements HasMedia
     {
         return $this->belongsTo(Rui::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
     }
+
+    public function websites()
+    {
+        return $this->morphMany(Website::class, 'owner');
+    }
 }

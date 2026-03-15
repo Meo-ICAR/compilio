@@ -263,4 +263,9 @@ class Client extends Model implements HasMedia
     {
         return $this->hasMedia('photos');
     }
+
+    public function websites()
+    {
+        return $this->morphMany(Website::class, 'owner');
+    }
 }

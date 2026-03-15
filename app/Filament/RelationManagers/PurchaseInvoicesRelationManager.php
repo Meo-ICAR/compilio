@@ -3,8 +3,30 @@
 namespace App\Filament\RelationManagers;
 
 use App\Filament\Resources\PurchaseInvoices\PurchaseInvoiceResource;
-use Filament\Actions\CreateAction;
+use App\Models\PurchaseInvoice;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,28 +42,28 @@ class PurchaseInvoicesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('number')
             ->columns([
-                Tables\Columns\TextColumn::make('number')
+                TextColumn::make('number')
                     ->label('Invoice Number')
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
-                Tables\Columns\TextColumn::make('supplier')
+                TextColumn::make('supplier')
                     ->label('Supplier')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label('Amount')
                     ->money('EUR')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount_including_vat')
+                TextColumn::make('amount_including_vat')
                     ->label('Amount incl. VAT')
                     ->money('EUR')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('document_date')
+                TextColumn::make('document_date')
                     ->label('Document Date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('due_date')
+                TextColumn::make('due_date')
                     ->label('Due Date')
                     ->date()
                     ->sortable()
@@ -50,14 +72,14 @@ class PurchaseInvoicesRelationManager extends RelationManager
                             return null;
                         return $state->isPast() ? 'danger' : null;
                     }),
-                Tables\Columns\IconColumn::make('closed')
+                IconColumn::make('closed')
                     ->label('Closed')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('supplier_category')
+                TextColumn::make('supplier_category')
                     ->label('Category')
                     ->searchable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('invoiceable_type')
+                TextColumn::make('invoiceable_type')
                     ->label('Attached To')
                     ->formatStateUsing(function ($state) {
                         if (!$state)
@@ -78,12 +100,12 @@ class PurchaseInvoicesRelationManager extends RelationManager
                     }),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('closed')
+                SelectFilter::make('closed')
                     ->options([
                         '1' => 'Closed',
                         '0' => 'Open',
                     ]),
-                Tables\Filters\Filter::make('overdue')
+                Filter::make('overdue')
                     ->label('Overdue')
                     ->query(function ($query) {
                         return $query
@@ -91,7 +113,7 @@ class PurchaseInvoicesRelationManager extends RelationManager
                             ->whereNotNull('due_date')
                             ->where('due_date', '<', now());
                     }),
-                Tables\Filters\SelectFilter::make('supplier_category')
+                SelectFilter::make('supplier_category')
                     ->label('Supplier Category')
                     ->options(function () {
                         return \App\Models\PurchaseInvoice::whereNotNull('supplier_category')
@@ -99,7 +121,7 @@ class PurchaseInvoicesRelationManager extends RelationManager
                             ->pluck('supplier_category', 'supplier_category')
                             ->toArray();
                     }),
-                Tables\Filters\SelectFilter::make('invoiceable_type')
+                SelectFilter::make('invoiceable_type')
                     ->label('Attached To')
                     ->options([
                         'App\Models\Client' => 'Client',
@@ -108,11 +130,11 @@ class PurchaseInvoicesRelationManager extends RelationManager
                     ]),
             ])
             ->headerActions([
-                CreateAction::make(),
+                // CreateAction::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                EditAction::make(),
+                // DeleteAction::make(),
             ])
             ->defaultSort('document_date', 'desc');
     }

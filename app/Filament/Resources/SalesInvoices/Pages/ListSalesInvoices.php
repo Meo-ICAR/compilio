@@ -3,19 +3,21 @@
 namespace App\Filament\Resources\SalesInvoices\Pages;
 
 use App\Filament\Resources\SalesInvoices\SalesInvoiceResource;
-use Filament\Actions;
+use App\Filament\Traits\HasRegolamentoAction;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListSalesInvoices extends ListRecords
 {
+    use HasRegolamentoAction;
+    
     protected static string $resource = SalesInvoiceResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
-                ->label('Nuova Fattura')
-                ->icon('heroicon-o-plus'),
+            CreateAction::make(),
+            $this->getRegolamentoAction(),
         ];
     }
 }
