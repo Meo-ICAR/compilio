@@ -26,16 +26,16 @@ class PurchaseInvoicesTable
         return $table
             ->columns([
                 TextColumn::make('number')
-                    ->label('Invoice Number')
+                    ->label('Doc. n.')
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 TextColumn::make('document_date')
-                    ->label('Document Date')
+                    ->label('Del')
                     ->date()
                     ->sortable(),
-                TextColumn::make('supplier')
-                    ->label('Supplier')
+                TextColumn::make('Supplier')
+                    ->label('Fornitore')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('amount')

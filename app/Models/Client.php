@@ -266,6 +266,6 @@ class Client extends Model implements HasMedia
 
     public function websites()
     {
-        return $this->morphMany(Website::class, 'owner');
+        return $this->morphMany(Website::class, 'websiteable');
     }
 }

@@ -23,6 +23,7 @@ use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -47,22 +48,32 @@ class PurchaseInvoicesRelationManager extends RelationManager
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
+                TextColumn::make('document_date')
+                    ->label('Document Date')
+                    ->date()
+                    ->sortable(),
                 TextColumn::make('supplier')
-                    ->label('Supplier')
+                    ->label('Fornitore')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label('Amount')
                     ->money('EUR')
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->money('EUR')),
                 TextColumn::make('amount_including_vat')
                     ->label('Amount incl. VAT')
                     ->money('EUR')
-                    ->sortable(),
-                TextColumn::make('document_date')
-                    ->label('Document Date')
-                    ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(Sum::make()->money('EUR')),
+                TextColumn::make('residual_amount')
+                    ->label('Residual')
+                    ->money('EUR')
+                    ->sortable()
+                    ->summarize(Sum::make()->money('EUR'))
+                    ->color(function ($state) {
+                        return $state > 0 ? 'warning' : 'success';
+                    }),
                 TextColumn::make('due_date')
                     ->label('Due Date')
                     ->date()
@@ -74,30 +85,12 @@ class PurchaseInvoicesRelationManager extends RelationManager
                     }),
                 IconColumn::make('closed')
                     ->label('Closed')
-                    ->boolean(),
-                TextColumn::make('supplier_category')
-                    ->label('Category')
-                    ->searchable()
-                    ->toggleable(),
-                TextColumn::make('invoiceable_type')
-                    ->label('Attached To')
-                    ->formatStateUsing(function ($state) {
-                        if (!$state)
-                            return 'None';
-                        return match ($state) {
-                            'App\Models\Client' => 'Client',
-                            'App\Models\Agent' => 'Agent',
-                            'App\Models\Principal' => 'Principal',
-                            default => class_basename($state),
-                        };
-                    })
-                    ->badge()
-                    ->color(fn($state) => match ($state) {
-                        'App\Models\Client' => 'success',
-                        'App\Models\Agent' => 'warning',
-                        'App\Models\Principal' => 'info',
-                        default => 'gray',
-                    }),
+                    ->boolean()
+                    ->sortable(),
+                IconColumn::make('cancelled')
+                    ->label('Cancelled')
+                    ->boolean()
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('closed')

@@ -179,7 +179,7 @@ class Principal extends Model
 
     public function websites()
     {
-        return $this->morphMany(Website::class, 'owner');
+        return $this->morphMany(Website::class, 'websiteable');
     }
 
     public function scopeAgents($query)
