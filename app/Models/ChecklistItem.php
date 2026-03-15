@@ -35,6 +35,7 @@ class ChecklistItem extends Model
         'dependency_type',
         'url_step',
         'url_callback',
+        'business_function_id',
     ];
 
     protected $casts = [
@@ -63,6 +64,11 @@ class ChecklistItem extends Model
     public function document(): BelongsTo
     {
         return $this->belongsTo(Document::class);
+    }
+
+    public function businessFunction(): BelongsTo
+    {
+        return $this->belongsTo(BusinessFunction::class);
     }
 
     /**

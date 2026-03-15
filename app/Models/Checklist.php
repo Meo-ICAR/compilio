@@ -32,6 +32,15 @@ class Checklist extends Model implements HasMedia
         'is_template',
         'is_unique',
         'status',
+        'checklist_type_id',
+        'richiedente',
+        'protocollo',
+        'duration',
+        'user_id',
+        'received_at',
+        'sended_at',
+        'annotation',
+        'business_function_id',
     ];
 
     protected $casts = [
@@ -41,6 +50,9 @@ class Checklist extends Model implements HasMedia
         'is_template' => 'boolean',
         'is_unique' => 'boolean',
         'status' => 'string',
+        'duration' => 'integer',
+        'received_at' => 'datetime',
+        'sended_at' => 'datetime',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -134,6 +146,21 @@ class Checklist extends Model implements HasMedia
     public function document(): BelongsTo
     {
         return $this->belongsTo(Document::class);
+    }
+
+    public function checklistType(): BelongsTo
+    {
+        return $this->belongsTo(ChecklistType::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function businessFunction(): BelongsTo
+    {
+        return $this->belongsTo(BusinessFunction::class);
     }
 
     // Helper methods per document_type
