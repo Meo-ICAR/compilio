@@ -9,12 +9,12 @@ use App\Models\Principal;
 use App\Services\PurchaseInvoiceImportService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
@@ -48,74 +48,22 @@ class PurchaseInvoiceForm
                                     ->maxLength(255),
                             ]),
                     ]),
-                Section::make('Relationships')
+                Section::make('Supplier Details')
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                Select::make('company_id')
-                                    ->label('Company')
-                                    ->relationship('company', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required(),
-                                Select::make('invoiceable_type')
-                                    ->label('Attach To')
-                                    ->options([
-                                        Client::class => 'Client',
-                                        Agent::class => 'Agent',
-                                        Principal::class => 'Principal',
-                                    ])
-                                    ->reactive()
-                                    ->afterStateUpdated(fn($state, callable $set) => $set('invoiceable_id', null)),
-                                Select::make('invoiceable_id')
-                                    ->label('Select Record')
-                                    ->required()
-                                    ->reactive()
-                                    ->getSearchResultsUsing(function (callable $get) {
-                                        $type = $get('invoiceable_type');
-                                        if (!$type)
-                                            return [];
-
-                                        $search = request()->get('search');
-                                        switch ($type) {
-                                            case Client::class:
-                                                return Client::where('name', 'like', "%{$search}%")
-                                                    ->orWhere('first_name', 'like', "%{$search}%")
-                                                    ->limit(50)
-                                                    ->pluck('name', 'id')
-                                                    ->toArray();
-                                            case Agent::class:
-                                                return Agent::where('name', 'like', "%{$search}%")
-                                                    ->orWhere('first_name', 'like', "%{$search}%")
-                                                    ->limit(50)
-                                                    ->pluck('name', 'id')
-                                                    ->toArray();
-                                            case Principal::class:
-                                                return Principal::where('name', 'like', "%{$search}%")
-                                                    ->limit(50)
-                                                    ->pluck('name', 'id')
-                                                    ->toArray();
-                                            default:
-                                                return [];
-                                        }
-                                    })
-                                    ->getOptionLabelUsing(function (callable $get) {
-                                        $type = $get('invoiceable_type');
-                                        $id = $get('invoiceable_id');
-                                        if (!$type || !$id)
-                                            return null;
-
-                                        switch ($type) {
-                                            case Client::class:
-                                                return Client::find($id)?->name;
-                                            case Agent::class:
-                                                return Agent::find($id)?->name;
-                                            case Principal::class:
-                                                return Principal::find($id)?->name;
-                                            default:
-                                                return null;
-                                        }
-                                    }),
+                                TextInput::make('vat_number')
+                                    ->label('VAT Number')
+                                    ->maxLength(255),
+                                TextInput::make('fiscal_code')
+                                    ->label('Fiscal Code')
+                                    ->maxLength(255),
+                                TextInput::make('document_type')
+                                    ->label('Document Type')
+                                    ->maxLength(255),
+                                TextInput::make('location_code')
+                                    ->label('Location Code')
+                                    ->maxLength(255),
                             ]),
                     ]),
                 Section::make('Financial Information')
@@ -190,22 +138,68 @@ class PurchaseInvoiceForm
                                     ->maxLength(2),
                             ]),
                     ]),
-                Section::make('Supplier Details')
+                Section::make('Relationships')
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                TextInput::make('vat_number')
-                                    ->label('VAT Number')
-                                    ->maxLength(255),
-                                TextInput::make('fiscal_code')
-                                    ->label('Fiscal Code')
-                                    ->maxLength(255),
-                                TextInput::make('document_type')
-                                    ->label('Document Type')
-                                    ->maxLength(255),
-                                TextInput::make('location_code')
-                                    ->label('Location Code')
-                                    ->maxLength(255),
+                                Select::make('invoiceable_type')
+                                    ->label('Attach To')
+                                    ->options([
+                                        Client::class => 'Client',
+                                        Agent::class => 'Agent',
+                                        Principal::class => 'Principal',
+                                    ])
+                                    ->reactive()
+                                    ->afterStateUpdated(fn($state, callable $set) => $set('invoiceable_id', null)),
+                                Select::make('invoiceable_id')
+                                    ->label('Select Record')
+                                    ->required()
+                                    ->reactive()
+                                    ->getSearchResultsUsing(function (callable $get) {
+                                        $type = $get('invoiceable_type');
+                                        if (!$type)
+                                            return [];
+
+                                        $search = request()->get('search');
+                                        switch ($type) {
+                                            case Client::class:
+                                                return Client::where('name', 'like', "%{$search}%")
+                                                    ->orWhere('first_name', 'like', "%{$search}%")
+                                                    ->limit(50)
+                                                    ->pluck('name', 'id')
+                                                    ->toArray();
+                                            case Agent::class:
+                                                return Agent::where('name', 'like', "%{$search}%")
+                                                    ->orWhere('first_name', 'like', "%{$search}%")
+                                                    ->limit(50)
+                                                    ->pluck('name', 'id')
+                                                    ->toArray();
+                                            case Principal::class:
+                                                return Principal::where('name', 'like', "%{$search}%")
+                                                    ->limit(50)
+                                                    ->pluck('name', 'id')
+                                                    ->toArray();
+                                            default:
+                                                return [];
+                                        }
+                                    })
+                                    ->getOptionLabelUsing(function (callable $get) {
+                                        $type = $get('invoiceable_type');
+                                        $id = $get('invoiceable_id');
+                                        if (!$type || !$id)
+                                            return null;
+
+                                        switch ($type) {
+                                            case Client::class:
+                                                return Client::find($id)?->name;
+                                            case Agent::class:
+                                                return Agent::find($id)?->name;
+                                            case Principal::class:
+                                                return Principal::find($id)?->name;
+                                            default:
+                                                return null;
+                                        }
+                                    }),
                             ]),
                     ]),
                 Section::make('Status')
@@ -222,65 +216,7 @@ class PurchaseInvoiceForm
                                     ->label('Corrected')
                                     ->default(false),
                             ]),
-                        TextInput::make('printed_copies')
-                            ->label('Printed Copies')
-                            ->numeric()
-                            ->default(0),
                     ]),
-                Section::make('Import Purchase Invoices')
-                    ->description('Upload a CSV file to import purchase invoices. The file will be processed using the import service.')
-                    ->schema([
-                        FileUpload::make('import_file')
-                            ->label('CSV File')
-                            ->helperText('Upload a CSV file containing purchase invoice data')
-                            ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
-                            ->maxSize(10240)  // 10MB
-                            ->directory('purchase-invoice-imports')
-                            ->visibility('private')
-                            ->required(),
-                        Placeholder::make('import_info')
-                            ->label('Import Information')
-                            ->content(function ($get) {
-                                $file = $get('import_file');
-                                if (!$file) {
-                                    return 'Please select a file to import.';
-                                }
-                                return "Selected file: {$file}";
-                            }),
-                    ])
-                    ->afterStateUpdated(function ($state, $set, $livewire) {
-                        if ($state && $livewire instanceof \Livewire\Component) {
-                            // Process the import when file is uploaded
-                            try {
-                                $filePath = storage_path('app/public/' . $state);
-                                $companyId = Auth::user()->company_id ?? Company::first()->id;
-                                $filename = basename($state);
-
-                                $importService = new PurchaseInvoiceImportService($companyId, $filename);
-                                $results = $importService->import($filePath, $companyId);
-
-                                // Show success notification
-                                Notification::make()
-                                    ->title('Import Completed')
-                                    ->body("Successfully processed import from {$filename}. Imported: {$results['imported']}, Updated: {$results['updated']}, Errors: {$results['errors']}")
-                                    ->success()
-                                    ->send();
-
-                                // Clear the file input
-                                $set('import_file', null);
-
-                                // Refresh the page to show new data
-                                $livewire->dispatch('refresh');
-                            } catch (\Exception $e) {
-                                // Show error notification
-                                Notification::make()
-                                    ->title('Import Failed')
-                                    ->body('Error during import: ' . $e->getMessage())
-                                    ->danger()
-                                    ->send();
-                            }
-                        }
-                    }),
             ]);
     }
 }

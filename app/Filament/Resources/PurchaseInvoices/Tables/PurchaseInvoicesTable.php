@@ -5,16 +5,21 @@ namespace App\Filament\Resources\PurchaseInvoices\Tables;
 use App\Models\Agent;
 use App\Models\Client;
 use App\Models\Principal;
+use App\Models\PurchaseInvoice;
+use App\Services\PurchaseInvoiceImportService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -34,7 +39,7 @@ class PurchaseInvoicesTable
                     ->label('Del')
                     ->date()
                     ->sortable(),
-                TextColumn::make('Supplier')
+                TextColumn::make('supplier')
                     ->label('Fornitore')
                     ->searchable()
                     ->sortable(),
@@ -78,12 +83,13 @@ class PurchaseInvoicesTable
                 SelectFilter::make('invoiceable_type')
                     ->label('Attached To')
                     ->options([
+                        null => 'Nessuno',
                         'App\Models\Client' => 'Client',
                         'App\Models\Agent' => 'Agent',
                         'App\Models\Principal' => 'Principal',
                     ]),
                 Filter::make('invoiceable_id')
-                    ->label('Senza attach')
+                    ->label('Non ancora collegato a Cliente / Agente')
                     ->query(fn($query) => $query->whereNull('invoiceable_id')),
                 Filter::make('open_invoices')
                     ->label('Open Invoices')
@@ -97,7 +103,7 @@ class PurchaseInvoicesTable
                             ->where('due_date', '<', now());
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 //   EditAction::make(),
                 Action::make('attach_to_model')
                     ->label('Associa')
@@ -176,7 +182,7 @@ class PurchaseInvoicesTable
                             ]);
 
                             // Poi associa tutte le altre fatture dello stesso supplier senza attach
-                            $updatedCount = \App\Models\PurchaseInvoice::where('supplier', $record->supplier)
+                            $updatedCount = PurchaseInvoice::where('supplier', $record->supplier)
                                 ->whereNull('invoiceable_id')
                                 ->update([
                                     'invoiceable_type' => $data['invoiceable_type'],
@@ -186,15 +192,80 @@ class PurchaseInvoicesTable
                             $totalUpdated = $updatedCount + 1;  // +1 per il record corrente
 
                             $actionText = (is_null($searchTerm) || $searchTerm === '') ? 'creato e associato' : 'associato';
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Fatture associate')
                                 ->body("{$totalUpdated} fatture del supplier '{$record->supplier}' {$actionText} correttamente")
                                 ->success()
                                 ->send();
                         }
                     }),
+            ], position: RecordActionsPosition::BeforeColumns)
+            ->headerActions([
+                Action::make('import_xml')
+                    ->label('Importa Fatture Acquisto')
+                    ->icon('heroicon-o-document-arrow-up')
+                    ->color('success')
+                    ->form([
+                        FileUpload::make('xml_file')
+                            ->label('File XML')
+                            ->acceptedFileTypes(['xml'])
+                            ->required()
+                            ->helperText('Carica un file XML delle fatture da importare')
+                            ->directory('purchase-invoices')
+                            ->maxSize(10240),  // 10MB
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $importService = new \App\Services\PurchaseInvoiceImportService();
+                            $result = $importService->importFromXml($data['xml_file']);
+
+                            if ($result['success']) {
+                                Notification::make()
+                                    ->title('Importazione completata')
+                                    ->body($result['message'])
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('Errore importazione')
+                                    ->body($result['message'])
+                                    ->danger()
+                                    ->send();
+                            }
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore importazione')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+                Action::make('associate_invoices')
+                    ->label('Associa')
+                    ->icon('heroicon-o-link')
+                    ->color('warning')
+                    ->action(function () {
+                        try {
+                            $importService = new PurchaseInvoiceImportService();
+
+                            // Esegui solo le funzioni di matching
+                            $importService->matchAgentsByVatNumber();
+                            $importService->matchClientsByVatNumber();
+
+                            Notification::make()
+                                ->title('Associazione completata')
+                                ->body('Le fatture sono state associate a agenti e clienti')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore associazione')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
             ])
-            ->headerActions([])
             ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('mark_as_closed')
@@ -205,7 +276,7 @@ class PurchaseInvoicesTable
                             $count = $records->where('closed', false)->count();
                             $records->where('closed', false)->each->update(['closed' => true]);
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Fatture chiuse')
                                 ->body("{$count} fatture chiuse correttamente")
                                 ->success()
@@ -262,9 +333,9 @@ class PurchaseInvoicesTable
                             // Se è selezionato "new", crea il record
                             if ($data['invoiceable_id'] === 'new') {
                                 $newRecord = match ($data['invoiceable_type']) {
-                                    'App\Models\Client' => \App\Models\Client::create(['name' => 'Nuovo Client ' . date('Y-m-d H:i')]),
-                                    'App\Models\Agent' => \App\Models\Agent::create(['name' => 'Nuovo Agent ' . date('Y-m-d H:i')]),
-                                    'App\Models\Principal' => \App\Models\Principal::create(['name' => 'Nuovo Principal ' . date('Y-m-d H:i')]),
+                                    'App\Models\Client' => Client::create(['name' => 'Nuovo Client ' . date('Y-m-d H:i')]),
+                                    'App\Models\Agent' => Agent::create(['name' => 'Nuovo Agent ' . date('Y-m-d H:i')]),
+                                    'App\Models\Principal' => Principal::create(['name' => 'Nuovo Principal ' . date('Y-m-d H:i')]),
                                     default => null
                                 };
 
@@ -286,7 +357,7 @@ class PurchaseInvoicesTable
                                         $totalUpdated++;
 
                                         // Associa tutte le altre fatture dello stesso supplier
-                                        $additionalUpdated = \App\Models\PurchaseInvoice::where('supplier', $record->supplier)
+                                        $additionalUpdated = PurchaseInvoice::where('supplier', $record->supplier)
                                             ->whereNull('invoiceable_id')
                                             ->where('id', '!=', $record->id)  // Escludi il record corrente
                                             ->update([
@@ -298,7 +369,7 @@ class PurchaseInvoicesTable
                                 }
 
                                 $actionText = $data['invoiceable_id'] === 'new' ? 'creati e associati' : 'associati';
-                                \Filament\Notifications\Notification::make()
+                                Notification::make()
                                     ->title('Fatture associate')
                                     ->body("{$totalUpdated} fatture {$actionText} correttamente (incluse tutte quelle degli stessi supplier)")
                                     ->success()

@@ -13,6 +13,7 @@ class ClientMandate extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'company_id',
         'client_id',
         'numero_mandato',
         'data_firma_mandato',
@@ -21,6 +22,13 @@ class ClientMandate extends Model
         'scopo_finanziamento',
         'data_consegna_trasparenza',
         'stato',
+        'ruolo',
+        'name',
+        'notes',
+        'purpose_of_relationship',
+        'funds_origin',
+        'oam_delivered',
+        'role_risk_level'
     ];
 
     protected $casts = [
@@ -28,6 +36,7 @@ class ClientMandate extends Model
         'data_scadenza_mandato' => 'date',
         'data_consegna_trasparenza' => 'date',
         'importo_richiesto_mandato' => 'decimal:2',
+        'oam_delivered' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',

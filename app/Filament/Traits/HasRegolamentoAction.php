@@ -22,9 +22,9 @@ trait HasRegolamentoAction
                 $modelClass = static::getResource()::getModel();
                 $modelName = class_basename($modelClass);
 
-                // Cerca un documento con model uguale ma senza documentable_id
+                // Verifica se esiste un documento di regolamento specifico per questo modello
                 $document = Document::where('documentable_type', $modelClass)
-                    ->whereNull('documentable_id')
+                    ->whereNull('documentable_id')  // Cerca documento template
                     ->first();
 
                 if ($document) {
@@ -44,29 +44,28 @@ trait HasRegolamentoAction
                 }
 
                 // Mostra notifica se non trovato
-                Notification::make()
-                    ->title('Regolamento non trovato')
-                    ->body("Nessun documento di regolamento trovato per {$modelName}")
-                    ->warning()
-                    ->send();
 
+                /*
+                 * Notification::make()
+                 *     ->title('Regolamento non trovato')
+                 *     ->body("Nessun documento di regolamento trovato per {$modelName}")
+                 *     ->warning()
+                 *     ->send();
+                 */
                 return null;
             })
             ->openUrlInNewTab()
-            ->visible(function () {
-                // Rendi sempre visibile il pulsante per debugging
-                return true;
+            ->disabled(function () {
+                // Disabilita il pulsante se non ci sono documenti di regolamento
+                $modelClass = static::getResource()::getModel();
+                $modelName = class_basename($modelClass);
 
-                /*
-                 * // Logica originale (commentata per debugging)
-                 * $modelClass = static::getResource()::getModel();
-                 * $modelName = class_basename($modelClass);
-                 *
-                 * // Verifica se esiste un documento di regolamento
-                 * return Document::where('documentable_type', $modelClass)
-                 *     ->whereNull('documentable_id')
-                 *     ->exists();
-                 */
+                // Verifica se esiste un documento di regolamento specifico per questo modello
+                $document = Document::where('documentable_type', $modelClass)
+                    ->whereNull('documentable_id')  // Cerca documento template
+                    ->first();
+
+                return $document !== null;
             });
     }
 

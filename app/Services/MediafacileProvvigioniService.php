@@ -140,8 +140,20 @@ ORDER BY x.principal_id, x.tipo_prodotto;
                 ) c ON p.id = c.practice_id
                 SET p.invoice_at = c.max_invoice_at, p.brokerage_fee = c.total_amount
             ');
-            // Delete dummy principals
-            DB::statement('DELETE FROM principals WHERE is_dummy = true');
+            // Delete dummy principals (only those without related records)
+            DB::statement('
+                DELETE FROM principals
+                WHERE is_dummy = true
+                AND id NOT IN (
+                    SELECT DISTINCT principal_id FROM principal_scopes WHERE principal_id IS NOT NULL
+                )
+                AND id NOT IN (
+                    SELECT DISTINCT principal_id FROM practice_commissions WHERE principal_id IS NOT NULL
+                )
+                AND id NOT IN (
+                    SELECT DISTINCT principal_id FROM practices WHERE principal_id IS NOT NULL
+                )
+            ');
 
             // Step 1: Delete all existing practice_oam records for the company
         } catch (Exception $e) {
@@ -220,7 +232,7 @@ ORDER BY x.principal_id, x.tipo_prodotto;
      */
     protected function processRecord(array $provvigioneData): void
     {
-        //    \Log::info('Processing provvigione record', $provvigioneData);
+        // Log::info('Processing provvigione record', $provvigioneData);
         $statusPayment = strtolower($provvigioneData['status_payment']);
         $commissionStatus = SoftwareMapping::firstOrCreate(
             ['software_application_id' => $this->softwareId, 'mapping_type' => 'COMMISSION_STATUS', 'external_value' => $statusPayment],
@@ -325,6 +337,12 @@ ORDER BY x.principal_id, x.tipo_prodotto;
          * ]);
          */
         if ($existing) {
+            if ($existing->is_client && empty($existing->client_id)) {
+                $client = Client::firstOrCreate(
+                    ['name' => $provvigioneData['denominazione_riferimento'], 'company_id' => $this->companyId],
+                );
+                $existing->update(['client_id' => $client->id]);
+            }
             if (!empty($existing->invoice_at)) {
                 $existing->update(['paided_at' => $existing->invoice_at]);
                 if (empty($existing->perfected_at)) {
@@ -432,7 +450,7 @@ ORDER BY x.principal_id, x.tipo_prodotto;
             //  'invoice_number' => $apiData['ANNULLATA'] ?? null,
             'fonte' => 'mediafacile',
             'is_coordination' => $apiData['Agente'] <> $apiData['Denominazione Riferimento'],
-            'is_client' => (isset($apiData['Descrizione']) && str_contains($apiData['Descrizione'], 'liente')),
+            'is_client' => ($apiData['Tipo']) && ($apiData['Tipo'] === 'Cliente') ? true : false,
         ];
     }
 }

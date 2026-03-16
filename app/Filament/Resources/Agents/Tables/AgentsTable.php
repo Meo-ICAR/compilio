@@ -47,9 +47,6 @@ class AgentsTable
                     ->label('Coordinato da (Agente)')
                     ->searchable()
                     ->placeholder('Nessuno'),
-                TextColumn::make('description')
-                    ->label('Descrizione')
-                    ->searchable(),
                 TextColumn::make('supervisor_type')
                     ->label('Tipo Supervisore')
                     ->badge()
@@ -68,21 +65,16 @@ class AgentsTable
                 TextColumn::make('oam')
                     ->label('Numero OAM')
                     ->searchable(),
-                TextColumn::make('oam_at')
-                    ->label('Data OAM')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('oam_name')
-                    ->label('Nome OAM')
+                TextColumn::make('vat_number')
+                    ->label('CF / Partita IVA')
                     ->searchable(),
                 TextColumn::make('ivass')
                     ->label('Codice IVASS')
                     ->searchable()
                     ->toggleable(),
-                TextColumn::make('ivass_name')
-                    ->label('Nome IVASS')
-                    ->searchable()
-                    ->toggleable(),
+                TextColumn::make('description')
+                    ->label('Descrizione')
+                    ->searchable(),
                 TextColumn::make('ivass_section')
                     ->label('Sezione IVASS')
                     ->badge()
@@ -94,11 +86,6 @@ class AgentsTable
                         'E' => 'purple',
                         default => 'gray',
                     })
-                    ->toggleable(),
-                TextColumn::make('ivass_at')
-                    ->label('Data IVASS')
-                    ->date()
-                    ->sortable()
                     ->toggleable(),
                 TextColumn::make('stipulated_at')
                     ->label('Stipula')
@@ -115,21 +102,10 @@ class AgentsTable
                     ->label('Contributo')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('contributeFrequency')
-                    ->label('Frequenza')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('contributeFrom')
-                    ->label('Valido dal')
-                    ->date()
-                    ->sortable(),
                 TextColumn::make('remburse')
                     ->label('Rimborso')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('vat_number')
-                    ->label('CF / Partita IVA')
-                    ->searchable(),
                 TextColumn::make('vat_name')
                     ->label('Ragione Sociale')
                     ->searchable(),

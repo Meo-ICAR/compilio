@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Agent;
 use App\Models\Client;
-use App\Models\ClientPractice;
+use App\Models\ClientMandate;
 use App\Models\Company;
 use App\Models\Practice;
 use App\Models\PracticeCommission;
@@ -162,7 +162,11 @@ class MediafacileImportService
      */
     protected function processRecord(array $praticaData): void
     {
+        if ($praticaData['is_notowned'] === 'true') {
+            return;
+        }
         $tipoProdotto = strtolower($praticaData['tipo_prodotto']);
+        //  Log::info('Processing pratica record', $praticaData);
         $practiceSwType = SoftwareMapping::firstOrCreate(
             ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $tipoProdotto],
             [
@@ -205,20 +209,72 @@ class MediafacileImportService
 
         // Gestione cliente
         $client = null;
-        if (!empty($praticaData['codice_fiscale'])) {
+        $clientId = null;
+        $practiceId = null;
+
+        // Definiamo $stato prima di usarlo
+        $stato = 'attivo';
+        if (!empty($existing) && $existing->status == 'rejected') {
+            $stato = 'annullato';
+        }
+        if (!empty($existing) && $existing->status == 'perfected') {
+            $stato = 'concluso_con_successo';
+        }
+        $codiceFiscale = $praticaData['codice_fiscale'];
+        //  Log::info('Processing client record', ['codice_fiscale' => $codiceFiscale]);
+        if (!empty($codiceFiscale)) {
+            // Log cerca il cliente per codice fiscale
             $client = Client::firstOrCreate(
-                ['tax_code' => $praticaData['codice_fiscale'], 'company_id' => $this->companyId],
+                ['tax_code' => $codiceFiscale, 'company_id' => $this->companyId],
                 [
-                    'first_name' => $praticaData['nome_cliente'],
                     'name' => $praticaData['cognome_cliente'],
+                    'first_name' => $praticaData['nome_cliente'],
                     'company_id' => $this->companyId,
                 ]
             );
+
+            // Debug: Log dei dati del client mandate
+            $scopo = 'Spese personali';
+            if ($tipoProdotto === 'Mutuo') {
+                $scopo = 'Acquisto immobile';
+            }
+            $clientMandate = ClientMandate::firstOrCreate(
+                [
+                    'client_id' => $client->id,
+                ],
+                [
+                    'client_id' => $client->id,
+                    'numero_mandato' => $praticaData['CRM_code'] ?? 'AUTO-' . date('Y-m-d-His'),
+                    'ruolo' => 'Intestatario',
+                    'data_firma_mandato' => $praticaData['inserted_at'] ?? null,
+                    'data_consegna_trasparenza' => $praticaData['inserted_at'] ?? null,
+                    'data_scadenza_mandato' => !empty($praticaData['erogated_at']) ? $praticaData['erogated_at'] : now()->addYears(3)->format('Y-m-d'),
+                    'stato' => $stato,
+                    'importo_richiesto_mandato' => $praticaData['net'] ?? null,
+                    'scopo_finanziamento' => $scopo,
+                    'name' => $praticaData['denominazione_prodotto'] ?? null,
+                    'purpose_of_relationship' => $scopo,
+                    'funds_origin' => null,  // Da popolare in base alle logiche di business
+                    'oam_delivered' => 0,  // Default a non consegnato
+                    'role_risk_level' => 'medio',  // Default a medio
+                ]
+            );
+
+            // Debug: Log del risultato
+            //  Log::info('ClientMandate result', [
+            // 'wasRecentlyCreated' => $clientMandate->wasRecentlyCreated,
+            // 'id' => $clientMandate->id,
+            // 'stato' => $clientMandate->stato,
+            // ]);
+
+            $praticaData['client_mandate_id'] = $clientMandate->id;
             $praticaData['client_id'] = $client->id;
         }
         if (!empty($client)) {
+            $clientId = $client->id;
             if ($existing) {
                 $existing->update($praticaData);
+                $practiceId = $existing->id;
             } else {
                 $praticaData['company_id'] = $this->companyId;
                 // Software Mapping
@@ -253,11 +309,6 @@ class MediafacileImportService
                 $praticaData['name'] = $praticaData['denominazione_prodotto'];
 
                 $existing = Practice::create($praticaData);
-                ClientPractice::create([
-                    'company_id' => $this->companyId,
-                    'client_id' => $client->id,
-                    'practice_id' => $existing->id,
-                ]);
             }
         }
 
@@ -268,10 +319,42 @@ class MediafacileImportService
                 $existing->update(['status' => $practiceStatus->status,
                     'practice_status_id' => $practiceStatus->id]);
                 if ($practiceStatus->is_rejected && !$existing->isPerfectedStatus() && empty($existing->rejected_at)) {
+                    $rejectedAt = $existing->inserted_at->addMonth();
+                    if ($rejectedAt >= now()) {
+                        $rejectedAt = now();
+                    }
                     // TODO: inviare email al cliente
-                    $existing->update(['rejected_at' => $existing->inserted_at->addMonth(), 'status' => 'rejected']);
+                    $existing->update(['rejected_at' => $rejectedAt, 'status' => 'rejected']);
                 }
-                $existing->save();
+            }
+            if (!empty($existing->client_mandate_id)) {
+                $stato = 'attivo';
+                if ($existing->status == 'rejected') {
+                    $stato = 'annullato';
+                }
+                if ($existing->status == 'perfected') {
+                    $stato = 'concluso_con_successo';
+                }
+
+                // Debug: Log prima dell'aggiornamento
+                Log::info('Updating existing ClientMandate', [
+                    'practice_id' => $existing->id,
+                    'client_mandate_id' => $existing->client_mandate_id,
+                    'current_stato' => $existing->clientMandate->stato,
+                    'new_stato' => $stato,
+                ]);
+
+                // Aggiorna lo stato se il mandato esisteva già
+                $existing->clientMandate->update([
+                    //  'ruolo' => 'Intestatario',
+                    'stato' => $stato,
+                ]);
+
+                // Debug: Log dopo l'aggiornamento
+                Log::info('ClientMandate updated successfully', [
+                    'client_mandate_id' => $existing->client_mandate_id,
+                    'final_stato' => $existing->clientMandate->stato,
+                ]);
             }
         }
     }
@@ -345,14 +428,14 @@ class MediafacileImportService
 
             foreach ($formats as $format) {
                 try {
-                    return Carbon::createFromFormat($format, trim($dateValue));
+                    return Carbon::createFromFormat($format, trim($dateValue))->format('Y-m-d');
                 } catch (\Exception $e) {
                     // Continue to next format
                 }
             }
 
             // If no format works, try Carbon's flexible parsing
-            return new Carbon($dateValue);
+            return new Carbon($dateValue)->format('Y-m-d');
         } catch (\Exception $e) {
             $this->warn('Failed to parse date: ' . $dateValue);
             return null;

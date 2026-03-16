@@ -98,4 +98,9 @@ class PracticeCommission extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function clients()
+    {
+        return $this->belongsTo(Client::class);
+    }
 }

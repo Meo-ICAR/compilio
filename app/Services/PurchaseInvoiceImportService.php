@@ -327,7 +327,7 @@ class PurchaseInvoiceImportService
      * Match purchase invoices to agents by VAT number
      * Updates the polymorphic relationship for matching invoices
      */
-    protected function matchAgentsByVatNumber(): void
+    public function matchAgentsByVatNumber(): void
     {
         $matchedCount = 0;
 
@@ -358,6 +358,31 @@ class PurchaseInvoiceImportService
                 // Find agent with matching VAT number
                 $agent = $this->findAgentByVatNumber($cleanVatNumber);
 
+                // Se l'agent ha un VAT number di 10 caratteri, confronta solo i primi 10
+                if (!$agent && strlen($cleanVatNumber) >= 10) {
+                    $first10Chars = substr($cleanVatNumber, 0, 10);
+                    $agent = Agent::where('company_id', $this->companyId)
+                        ->whereRaw('LENGTH(vat_number) >= 10')
+                        ->whereRaw('SUBSTRING(vat_number, 1, 10) = ?', [$first10Chars])
+                        ->first();
+
+                    if (!$agent) {
+                        $agent = $this->findAgentByNameSimilarity($invoice->supplier);
+                    }
+
+                    if ($agent) {
+                        // Rettifica il VAT number dell'agent con quello completo della fattura
+                        $agent->update(['vat_number' => $cleanVatNumber, 'vat_name' => $invoice->supplier]);
+
+                        Log::info('Agent VAT number corrected', [
+                            'agent_id' => $agent->id,
+                            'agent_name' => $agent->name,
+                            'old_vat' => $first10Chars,
+                            'new_vat' => $cleanVatNumber,
+                            'invoice_number' => $invoice->number,
+                        ]);
+                    }
+                }
                 if ($agent) {
                     // Update the invoice with the agent relationship
                     $invoice->update([
@@ -473,7 +498,7 @@ class PurchaseInvoiceImportService
      * Match purchase invoices to clients by VAT number
      * Updates the polymorphic relationship for matching invoices
      */
-    protected function matchClientsByVatNumber(): void
+    public function matchClientsByVatNumber(): void
     {
         $matchedCount = 0;
 
@@ -671,6 +696,36 @@ class PurchaseInvoiceImportService
             if ($score > $bestScore && $score >= $similarityThreshold) {
                 $bestScore = $score;
                 $bestMatch = $client;
+            }
+        }
+
+        return $bestMatch;
+    }
+
+    /**
+     * Find agent by name similarity using fuzzy matching
+     */
+    protected function findAgentByNameSimilarity(string $agentName): ?Agent
+    {
+        if (empty($agentName)) {
+            return null;
+        }
+
+        // Get all agents for this company
+        $agents = Agent::where('company_id', $this->companyId)
+            ->whereNotNull('name')
+            ->get();
+
+        $bestMatch = null;
+        $bestScore = 0;
+        $similarityThreshold = 70;  // 70% similarity threshold
+
+        foreach ($agents as $agent) {
+            $score = $this->calculateSimilarity($agentName, $agent->name);
+
+            if ($score > $bestScore && $score >= $similarityThreshold) {
+                $bestScore = $score;
+                $bestMatch = $agent;
             }
         }
 

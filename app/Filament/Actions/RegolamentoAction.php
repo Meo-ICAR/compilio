@@ -21,9 +21,11 @@ class RegolamentoAction extends Action
                 if (!$resource) {
                     return null;
                 }
-
                 $modelClass = $resource::getModel();
                 $modelName = class_basename($modelClass);
+                if (in_array($modelName, ['abi'])) {
+                    return null;
+                }
 
                 // Cerca un documento con model uguale ma senza documentable_id
                 $document = Document::where('documentable_type', $modelClass)
@@ -43,7 +45,7 @@ class RegolamentoAction extends Action
                     }
 
                     // Altrimenti reindirizza alla pagina di edit del documento
-                    return route('filament.admin.resources.documents.edit', ['record' => $document->id]);
+                    return route('filament.admin.resources.documents.edit', ['record' => $document->id, 'tenant' => filament()->getTenant()]);
                 }
 
                 // Nessuna notifica, restituisci null se non trovato

@@ -5,7 +5,7 @@ namespace App\Filament\Resources\ClientMandates\Schemas;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -49,14 +49,37 @@ class ClientMandateForm
 
                         return 'MAND-' . str_pad($progressive, 6, '0', STR_PAD_LEFT) . "-{$year}";
                     }),
+                TextInput::make('name')
+                    ->label('Descrizione')
+                    ->placeholder('Descrizione del mandato'),
                 DatePicker::make('data_firma_mandato')
                     ->required(),
                 DatePicker::make('data_scadenza_mandato')
                     ->required(),
                 TextInput::make('importo_richiesto_mandato')
-                    ->numeric(),
-                TextInput::make('scopo_finanziamento'),
-                DatePicker::make('data_consegna_trasparenza'),
+                    ->numeric()
+                    ->prefix('€'),
+                TextInput::make('scopo_finanziamento')
+                    ->label('Scopo Finanziamento'),
+                Textarea::make('purpose_of_relationship')
+                    ->label('Scopo del Rapporto')
+                    ->placeholder('Es: Acquisto prima casa'),
+                Textarea::make('funds_origin')
+                    ->label('Origine Fondi')
+                    ->placeholder('Es: Risparmi, donazione, stipendio'),
+                DatePicker::make('data_consegna_trasparenza')
+                    ->label('Data Consegna Trasparenza'),
+                Toggle::make('oam_delivered')
+                    ->label('Foglio Informativo Consegnato')
+                    ->default(false),
+                Select::make('role_risk_level')
+                    ->label('Livello Rischio Ruolo')
+                    ->options([
+                        'basso' => 'Basso',
+                        'medio' => 'Medio',
+                        'alto' => 'Alto',
+                    ])
+                    ->default('medio'),
                 Select::make('stato')
                     ->options([
                         'attivo' => 'Attivo',
@@ -66,6 +89,9 @@ class ClientMandateForm
                     ])
                     ->default('attivo')
                     ->required(),
+                Textarea::make('notes')
+                    ->label('Note Specifiche')
+                    ->placeholder('Note specifiche sul ruolo per questa pratica (es. "Garante solo per quota 50%")'),
             ]);
     }
 }
