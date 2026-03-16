@@ -106,7 +106,7 @@ class PurchaseInvoicesTable
             ->recordActions([
                 //   EditAction::make(),
                 Action::make('attach_to_model')
-                    ->label('Associa')
+                    ->label('Aggiungi')
                     ->icon('heroicon-o-link')
                     ->color('success')
                     ->visible(fn($record) => is_null($record->invoiceable_id))
@@ -118,6 +118,7 @@ class PurchaseInvoicesTable
                                 'App\Models\Agent' => 'Agenti',
                                 //  'App\Models\Principal' => 'Principal',
                             ])
+                            ->default('App\Models\Client')
                             ->required()
                             ->reactive(),
                         TextInput::make('invoiceable_name')
@@ -284,9 +285,10 @@ class PurchaseInvoicesTable
                         })
                         ->deselectRecordsAfterCompletion(),
                     Action::make('bulk_attach_to_model')
-                        ->label('Associa Selezionati')
+                        ->label('Associa Agente/Consulente Selezionato')
                         ->icon('heroicon-o-link')
                         ->color('success')
+                        ->accessSelectedRecords()
                         ->form([
                             Select::make('invoiceable_type')
                                 ->label('Tipo')
@@ -295,6 +297,7 @@ class PurchaseInvoicesTable
                                     'App\Models\Agent' => 'Agenti',
                                     // 'App\Models\Principal' => 'Mandanti',
                                 ])
+                                ->default('App\Models\Agent')
                                 ->required()
                                 ->reactive(),
                             Select::make('invoiceable_id')
@@ -305,9 +308,9 @@ class PurchaseInvoicesTable
                                         return [];
 
                                     return match ($type) {
-                                        'App\Models\Client' => \App\Models\Client::pluck('name', 'id'),
-                                        'App\Models\Agent' => \App\Models\Agent::pluck('name', 'id'),
-                                        'App\Models\Principal' => \App\Models\Principal::pluck('name', 'id'),
+                                        'App\Models\Client' => Client::pluck('name', 'id'),
+                                        'App\Models\Agent' => Agent::pluck('name', 'id'),
+                                        'App\Models\Principal' => Principal::pluck('name', 'id'),
                                         default => []
                                     };
                                 })
@@ -319,9 +322,9 @@ class PurchaseInvoicesTable
                                         return [];
 
                                     return match ($type) {
-                                        'App\Models\Client' => \App\Models\Client::where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
-                                        'App\Models\Agent' => \App\Models\Agent::where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
-                                        'App\Models\Principal' => \App\Models\Principal::where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
+                                        'App\Models\Client' => Client::where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
+                                        'App\Models\Agent' => Agent::where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
+                                        'App\Models\Principal' => Principal::where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
                                         default => []
                                     };
                                 }),

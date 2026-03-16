@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\SalesInvoices\Schemas;
 
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Schemas\Components\Section;
 
 class SalesInvoiceForm
 {
@@ -39,7 +39,6 @@ class SalesInvoiceForm
                         ->nullable(),
                 ])
                 ->columns(2),
-
             Section::make('Importi e Valuta')
                 ->description('Dati finanziari della fattura')
                 ->schema([
@@ -71,7 +70,7 @@ class SalesInvoiceForm
                         ->label('Tasso di Cambio')
                         ->numeric()
                         ->step(0.0001)
-                        ->default(1.0000)
+                        ->default(1.0)
                         ->nullable(),
                     Select::make('currency_code')
                         ->label('Valuta')
@@ -84,7 +83,6 @@ class SalesInvoiceForm
                         ->required(),
                 ])
                 ->columns(3),
-
             Section::make('Date e Scadenze')
                 ->description('Temporistiche della fattura')
                 ->schema([
@@ -96,7 +94,6 @@ class SalesInvoiceForm
                         ->nullable(),
                 ])
                 ->columns(2),
-
             Section::make('Informazioni Spedizione')
                 ->description('Dati di spedizione e indirizzo')
                 ->schema([
@@ -130,7 +127,6 @@ class SalesInvoiceForm
                         ->nullable(),
                 ])
                 ->columns(2),
-
             Section::make('Codici e Riferimenti')
                 ->description('Codici di sistema e riferimenti')
                 ->schema([
@@ -172,7 +168,6 @@ class SalesInvoiceForm
                         ->nullable(),
                 ])
                 ->columns(3),
-
             Section::make('Stati e Flag')
                 ->description('Stati della fattura')
                 ->schema([
@@ -196,7 +191,6 @@ class SalesInvoiceForm
                         ->default(false),
                 ])
                 ->columns(3),
-
             Section::make('Dati Aggiuntivi')
                 ->description('Informazioni supplementari')
                 ->schema([
