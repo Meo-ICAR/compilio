@@ -11,7 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('checklists', function (Blueprint $table) {
-            $table->string('richiedente')->nullable()->after('checklist_type_id');
+            $table->unsignedInteger('checklist_type_id')->nullable();
+            $table->string('richiedente')->nullable();
             $table->string('protocollo')->nullable()->after('richiedente');
             $table->integer('duration')->nullable()->after('protocollo');
             $table->foreignId('user_id')->nullable()->after('duration');
@@ -19,7 +20,6 @@ return new class extends Migration {
             $table->timestamp('sended_at')->nullable()->after('received_at');
             $table->text('annotation')->nullable()->after('sended_at');
 
-            $table->foreign('checklist_type_id')->references('id')->on('checklist_types')->onDelete('set null');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }

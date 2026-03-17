@@ -81,6 +81,11 @@ class PracticeOamService
                 ->whereNotIn('tipo_prodotto', ['Polizza', 'Utenza'])
                 ->where(function ($query) use ($endDateCarbon) {
                     $query
+                        ->whereNotNull('sended_at')
+                        ->orWhere('sended_at', '<', $endDateCarbon);
+                })
+                ->where(function ($query) use ($endDateCarbon) {
+                    $query
                         ->whereNull('rejected_at')
                         ->orWhere('rejected_at', '>', $endDateCarbon);
                 })

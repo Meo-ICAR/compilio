@@ -30,6 +30,7 @@ class PrincipalsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')
                     ->sortable()
@@ -52,8 +53,10 @@ class PrincipalsTable
                     ->sortable(),
                 TextColumn::make('vat_number')
                     ->label('CF / Partita IVA')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('oam')
+                    ->sortable()
                     ->searchable(),
                 TextColumn::make('principal_type')
                     ->label('Tipo Mandante')

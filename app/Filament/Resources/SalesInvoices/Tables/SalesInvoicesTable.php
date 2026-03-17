@@ -12,6 +12,7 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -23,6 +24,7 @@ use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class SalesInvoicesTable
 {
@@ -36,6 +38,10 @@ class SalesInvoicesTable
                     ->sortable(),
                 TextColumn::make('customer_name')
                     ->label('Cliente')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('vat_number')
+                    ->label('Partita IVA')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('registration_date')
@@ -60,21 +66,15 @@ class SalesInvoicesTable
                     ->label('Tipo Doc.')
                     ->searchable()
                     ->sortable(),
-                IconColumn::make('closed')
-                    ->label('Chiusa')
-                    ->boolean(),
                 IconColumn::make('cancelled')
                     ->label('Annullata')
-                    ->boolean(),
-                IconColumn::make('email_sent')
-                    ->label('Email')
                     ->boolean(),
             ])
             ->filters([
                 SelectFilter::make('document_type')
                     ->label('Tipo Documento')
                     ->options(function () {
-                        return \App\Models\SalesInvoice::distinct('document_type')
+                        return SalesInvoice::distinct('document_type')
                             ->whereNotNull('document_type')
                             ->pluck('document_type', 'document_type')
                             ->toArray();
@@ -82,9 +82,9 @@ class SalesInvoicesTable
                 Filter::make('registration_date')
                     ->label('Data Registrazione')
                     ->form([
-                        \Filament\Forms\Components\DatePicker::make('registered_from')
+                        DatePicker::make('registered_from')
                             ->label('Da'),
-                        \Filament\Forms\Components\DatePicker::make('registered_until')
+                        DatePicker::make('registered_until')
                             ->label('A'),
                     ])
                     ->query(function (array $data) {
@@ -98,6 +98,9 @@ class SalesInvoicesTable
                                 fn($query, $date) => $query->whereDate('registration_date', '<=', $date)
                             );
                     }),
+                Filter::make('invoiceable_id')
+                    ->label('Non ancora collegato a Cliente / Mandante')
+                    ->query(fn($query) => $query->whereNull('invoiceable_id')),
                 Filter::make('overdue')
                     ->label('Scadute')
                     ->query(fn($query) => $query->where('due_date', '<', now())->where('residual_amount', '>', 0)),
@@ -121,8 +124,8 @@ class SalesInvoicesTable
                             ->label('Tipo')
                             ->options([
                                 'App\Models\Client' => 'Clienti',
-                                'App\Models\Agent' => 'Agenti',
-                                // 'App\Models\Principal' => 'Principal',
+                                'App\Models\Principal' => 'Mandanti',
+                                // 'App\Models\Agent' => 'Agenti',
                             ])
                             ->default('App\Models\Client')
                             ->required()
@@ -140,9 +143,13 @@ class SalesInvoicesTable
                         // Se è vuoto o null, crea il record
                         if (is_null($searchTerm) || $searchTerm === '') {
                             $newRecord = match ($data['client_type']) {
-                                'App\Models\Client' => Client::create(['name' => $record->customer_name . date('Y-m-d H:i')]),
-                                'App\Models\Agent' => Agent::create(['name' => $record->customer_name . date('Y-m-d H:i')]),
-                                'App\Models\Principal' => Principal::create(['name' => $record->customer_name . date('Y-m-d H:i')]),
+                                'App\Models\Client' => Client::create(['name' => $record->customer_name . date('Y-m-d H:i'),
+                                    'vat_number' => $record->vat_number]),
+                                'App\Models\Principal' => Principal::create(['name' => $record->customer_name . date('Y-m-d H:i'),
+                                    'vat_number' => $record->vat_number]),
+                                'App\Models\Agent' => Agent::create(['name' => $record->customer_name . date('Y-m-d H:i'),
+                                    'vat_number' => $record->vat_number]),
+
                                 default => null
                             };
 
@@ -178,14 +185,16 @@ class SalesInvoicesTable
                         if ($clientId) {
                             // Prima aggiorna il record corrente
                             $record->update([
-                                'client_id' => $clientId,
+                                'invoiceable_type' => $data['client_type'],
+                                'invoiceable_id' => $clientId,
                             ]);
 
                             // Poi associa tutte le altre fatture dello stesso cliente
                             $updatedCount = SalesInvoice::where('customer_name', $record->customer_name)
-                                ->whereNull('client_id')
+                                ->whereNull('invoiceable_id')
                                 ->update([
-                                    'client_id' => $clientId,
+                                    'invoiceable_type' => $data['client_type'],
+                                    'invoiceable_id' => $clientId,
                                 ]);
 
                             $totalUpdated = $updatedCount + 1;  // +1 per il record corrente
@@ -226,9 +235,10 @@ class SalesInvoicesTable
                                 ->label('Tipo')
                                 ->options([
                                     'App\Models\Client' => 'Clienti',
-                                    'App\Models\Agent' => 'Agenti',
-                                    // 'App\Models\Principal' => 'Principal',
+                                    //  'App\Models\Agent' => 'Agenti',
+                                    'App\Models\Principal' => 'Mandanti',
                                 ])
+                                ->default('App\Models\Principal')
                                 ->required()
                                 ->reactive(),
                             Select::make('client_id')
@@ -267,9 +277,12 @@ class SalesInvoicesTable
                             // Se è selezionato "new", crea il record
                             if ($data['client_id'] === 'new') {
                                 $newRecord = match ($data['client_type']) {
-                                    'App\Models\Client' => Client::create(['name' => 'Nuovo Client ' . date('Y-m-d H:i')]),
-                                    'App\Models\Agent' => Agent::create(['name' => 'Nuovo Agent ' . date('Y-m-d H:i')]),
-                                    'App\Models\Principal' => Principal::create(['name' => 'Nuovo Principal ' . date('Y-m-d H:i')]),
+                                    'App\Models\Client' => Client::create(['name' => $record->customer_name,
+                                        'vat_number' => $record->vat_number]),
+                                    'App\Models\Principal' => Principal::create(['name' => $record->customer_name,
+                                        'vat_number' => $record->vat_number]),
+                                    'App\Models\Agent' => Agent::create(['name' => $record->customer_name,
+                                        'vat_number' => $record->vat_number]),
                                     default => null
                                 };
 
@@ -282,19 +295,21 @@ class SalesInvoicesTable
 
                             if ($clientId) {
                                 foreach ($records as $record) {
-                                    if (is_null($record->client_id)) {
+                                    if (is_null($record->invoiceable_id)) {
                                         // Aggiorna il record corrente
                                         $record->update([
-                                            'client_id' => $clientId,
+                                            'invoiceable_type' => $data['client_type'],
+                                            'invoiceable_id' => $clientId,
                                         ]);
                                         $totalUpdated++;
 
                                         // Associa tutte le altre fatture dello stesso cliente
                                         $additionalUpdated = SalesInvoice::where('customer_name', $record->customer_name)
-                                            ->whereNull('client_id')
+                                            ->whereNull('invoiceable_id')
                                             ->where('id', '!=', $record->id)  // Escludi il record corrente
                                             ->update([
-                                                'client_id' => $clientId,
+                                                'invoiceable_type' => $data['client_type'],
+                                                'invoiceable_id' => $clientId,
                                             ]);
                                         $totalUpdated += $additionalUpdated;
                                     }
@@ -349,20 +364,22 @@ class SalesInvoicesTable
                         }
                     }),
                 Action::make('associate_sales_invoices')
-                    ->label('Associa')
+                    ->label('Abbina')
                     ->icon('heroicon-o-link')
                     ->color('warning')
                     ->action(function () {
                         try {
-                            $importService = new PurchaseInvoiceImportService();
+                            $companyId = Auth::user()->company_id;
+                            $importService = new SalesInvoiceImportService();
+                            $importService->setCompanyId($companyId);  // Usa il metodo setter
 
-                            // Esegui solo le funzioni di matching (adattate per sales invoices)
+                            // Esegui solo le funzioni di matching per sales invoices
+                            $importService->matchPrincipalsByVatNumber();
                             $importService->matchClientsByVatNumber();
-                            $importService->matchAgentsByVatNumber();
 
                             Notification::make()
                                 ->title('Associazione completata')
-                                ->body('Le fatture di vendita sono state associate a clienti e agenti')
+                                ->body('Le fatture di vendita sono state associate a mandanti e clienti')
                                 ->success()
                                 ->send();
                         } catch (\Exception $e) {

@@ -16,6 +16,7 @@ return new class extends Migration {
                 ->nullable()
                 ->after('proforma_id')
                 ->comment('ID stato commissione pratica');
+            $table->bigInteger('client_id')->nullable();
 
             $table
                 ->foreign('practice_commission_status_id')

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Principals;
 
 use App\Filament\RelationManagers\DocumentsRelationManager;
+use App\Filament\RelationManagers\SalesInvoicesRelationManager;
 use App\Filament\RelationManagers\WebsitesRelationManager;
 use App\Filament\Resources\Principals\Imports\PrincipalsImport;
 use App\Filament\Resources\Principals\Pages\CreatePrincipal;
@@ -13,7 +14,6 @@ use App\Filament\Resources\Principals\RelationManagers\ContactsRelationManager;
 use App\Filament\Resources\Principals\RelationManagers\EmployeesRelationManager;
 use App\Filament\Resources\Principals\RelationManagers\PrincipalMandatesRelationManager;
 use App\Filament\Resources\Principals\RelationManagers\PrincipalScopesRelationManager;
-use App\Filament\Resources\Principals\RelationManagers\SalesInvoicesRelationManager;
 use App\Filament\Resources\Principals\Schemas\PrincipalForm;
 use App\Filament\Resources\Principals\Tables\PrincipalsTable;
 use App\Filament\Traits\HasChecklistAction;

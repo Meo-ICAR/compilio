@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->boolean('is_compliance')->default(true);
             $table->string('color')->nullable();
             $table->unsignedInteger('regulatory_body_id')->nullable();
+
             $table->timestamps();
             $table->softDeletes();
         });

@@ -23,13 +23,13 @@ use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\Summarizers\Sum;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Summarizers\Sum;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\IconColumn;
 use Filament\Tables;
+use Filament\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 
 class PurchaseInvoicesRelationManager extends RelationManager

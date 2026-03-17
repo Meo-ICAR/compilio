@@ -38,15 +38,9 @@ class DatabaseSeeder extends Seeder
             CompanyFunctionSeeder::class,
             FunctionPrivacySeeder::class,
             // Additional seeders that were missing or commented out
-            AbiSeeder::class,
-            //    ComuneSeeder::class,
             ProcessTaskSeeder::class,
             RaciAssignmentSeeder::class,
             // OamSeeder::class,
-            //  OamScopeSeeder::class,
-            //   OamCodeSeeder::class,
-            //  RuiSeeder::class,
-            //  RuiSectionSeeder::class,
             //   AgenteInAttivitaFinanziariaSeeder::class,
         ]);
     }
