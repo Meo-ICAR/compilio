@@ -343,7 +343,7 @@ ORDER BY x.principal_id, x.tipo_prodotto;
                 );
                 $existing->update(['client_id' => $client->id]);
             }
-            if (!empty($existing->invoice_at)) {
+            if (!empty($existing->invoice_at)) {  // se esiste fattura fai coincidere data pagamento
                 $existing->update(['paided_at' => $existing->invoice_at]);
                 if (empty($existing->perfected_at)) {
                     $existing->update(['perfected_at' => $existing->invoice_at]);

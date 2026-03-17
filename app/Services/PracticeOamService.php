@@ -77,25 +77,23 @@ class PracticeOamService
             Log::info("Deleted {$deletedCount} practice_oam records for company {$companyId} in date range");
 
             // Step 2: Get practices that meet the criteria
-            $practicesQuery = Practice::where(function ($query) use ($startDateCarbon, $endDateCarbon) {
-                // Practices sent before end date AND (perfected after start date OR not perfected yet)
-                $query
-                    ->where('sended_at', '<', '2026-01-01')
-                    ->where(function ($q) use ($startDateCarbon) {
-                        $q
-                            ->where('erogated_at', '>=', $startDateCarbon)
-                            ->orWhereNull('erogated_at');
-                    });
-            })
-                ->orWhere(function ($query) use ($startDateCarbon, $endDateCarbon) {
-                    // Practices that received invoices between start and end dates
+            $practicesQuery = Practice::where('brokerage_fee', '>', 0)
+                ->whereNotIn('tipo_prodotto', ['Polizza', 'Utenza'])
+                ->where(function ($query) use ($endDateCarbon) {
                     $query
-                        ->where('invoice_at', '>=', $startDateCarbon)
-                        ->where('erogated_at', '<=', $startDateCarbon);
+                        ->whereNull('rejected_at')
+                        ->orWhere('rejected_at', '>', $endDateCarbon);
                 })
-                ->whereNull('rejected_at')
-                ->whereNotNull('brokerage_fee');
-
+                ->where(function ($query) use ($startDateCarbon) {
+                    $query
+                        ->whereNull('erogated_at')
+                        ->orWhere('erogated_at', '>', $startDateCarbon);
+                })
+                ->where(function ($query) use ($startDateCarbon) {
+                    $query
+                        ->whereNull('invoice_at')
+                        ->orWhere('invoice_at', '>', $startDateCarbon);
+                });
             // Debug: Log the SQL query
             Log::info('SQL Query: ' . $practicesQuery->toSql());
             Log::info('Query Bindings: ' . json_encode($practicesQuery->getBindings()));
