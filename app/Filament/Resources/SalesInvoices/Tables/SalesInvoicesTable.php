@@ -17,12 +17,14 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,6 +33,12 @@ class SalesInvoicesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->paginated(['all', 10, 25, 50, 100])
+            ->groups([
+                Group::make('customer_name')
+                    ->label('Cliente')
+                    ->collapsible(),
+            ])
             ->columns([
                 TextColumn::make('number')
                     ->label('Numero')

@@ -76,11 +76,11 @@ class PracticesTable
                     ->label('Fatturata')
                     ->boolean()
                     ->sortable(),
-                TextColumn::make('clients_names')
-                    ->label('Contraenti')
+                TextColumn::make('clientMandate.client.name')
+                    ->label('Contraente')
                     ->searchable()
                     ->sortable()
-                    ->placeholder('Nessun cliente'),
+                    ->placeholder('No cliente'),
                 TextColumn::make('agent.name')
                     ->label('Agente')
                     ->searchable()

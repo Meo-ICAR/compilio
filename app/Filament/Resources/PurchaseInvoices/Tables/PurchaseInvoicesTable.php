@@ -6,6 +6,7 @@ use App\Models\Agent;
 use App\Models\Client;
 use App\Models\Principal;
 use App\Models\PurchaseInvoice;
+use App\Services\PurchaseCreditNoteImportService;
 use App\Services\PurchaseInvoiceImportService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -22,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,6 +32,13 @@ class PurchaseInvoicesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->paginated(['all', 10, 25, 50, 100])
+            ->paginated(['all', 10, 25, 50, 100])
+            ->groups([
+                Group::make('supplier')
+                    ->label('Fornitore')
+                    ->collapsible(),
+            ])
             ->columns([
                 TextColumn::make('number')
                     ->label('Doc. n.')
@@ -48,17 +57,17 @@ class PurchaseInvoicesTable
                     ->label('Amount')
                     ->money('EUR')
                     ->sortable()
-                    ->summarize(Sum::make()->money('EUR')),
+                    ->summarize(Sum::make()->money('EUR')->label('')),
                 TextColumn::make('amount_including_vat')
                     ->label('Amount incl. VAT')
                     ->money('EUR')
                     ->sortable()
-                    ->summarize(Sum::make()->money('EUR')),
+                    ->summarize(Sum::make()->money('EUR')->label('')),
                 TextColumn::make('residual_amount')
                     ->label('Residual')
                     ->money('EUR')
                     ->sortable()
-                    ->summarize(Sum::make()->money('EUR'))
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->color(function ($state) {
                         return $state > 0 ? 'warning' : 'success';
                     }),
@@ -237,6 +246,40 @@ class PurchaseInvoicesTable
                         } catch (\Exception $e) {
                             Notification::make()
                                 ->title('Errore importazione')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+                Action::make('import_credit_notes')
+                    ->label('Importa Note Credito')
+                    ->icon('heroicon-o-document-minus')
+                    ->color('warning')
+                    ->form([
+                        TextInput::make('filename')
+                            ->label('Nome File Excel')
+                            ->default('Note credito acquisto registrate.xlsx')
+                            ->helperText('Inserisci il nome del file Excel da importare dalla cartella public/'),
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $importService = new PurchaseCreditNoteImportService();
+                            $filePath = 'public/' . $data['filename'];
+
+                            if (!file_exists($filePath)) {
+                                throw new \Exception("File non trovato: {$filePath}");
+                            }
+
+                            $result = $importService->import($filePath, Auth::user()->company_id);
+
+                            Notification::make()
+                                ->title('Importazione Note Credito')
+                                ->body("Importate: {$result['imported']}, Aggiornate: {$result['updated']}, Errori: {$result['errors']}")
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore Importazione Note Credito')
                                 ->body($e->getMessage())
                                 ->danger()
                                 ->send();

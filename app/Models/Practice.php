@@ -163,13 +163,13 @@ class Practice extends Model
 
     public function getClientsNamesAttribute()
     {
-        $clients = \DB::table('clients')
-            ->join('client_practice', 'clients.id', '=', 'client_practice.client_id')
-            ->where('client_practice.practice_id', $this->id)
-            ->where('clients.company_id', $this->company_id)
-            ->pluck('clients.name');
+        if ($this->clientMandates) {
+            return $this->clientMandates->map(function ($clientMandate) {
+                return $clientMandate->client->name . ' ' . $clientMandate->client->first_name;
+            })->join(', ');
+        }
 
-        return $clients->join(', ');
+        return 'Nessun cliente associato';
     }
 
     /**

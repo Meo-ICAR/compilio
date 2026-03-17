@@ -232,7 +232,7 @@ class Client extends Model implements HasMedia
         ];
     }
 
-    protected function fullName(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function fullName(): Attribute
     {
         return Attribute::make(
             get: fn() => $this->is_person ? "{$this->name} {$this->first_name}" : $this->name,

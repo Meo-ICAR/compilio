@@ -26,14 +26,12 @@ class PracticeForm
                     ->label('Mandante')
                     ->relationship('principal', 'name')
                     ->searchable()
-                    ->preload()
-                    ->required(),
+                    ->preload(),
                 Select::make('agent_id')
                     ->label('Agente')
                     ->relationship('agent', 'name')
                     ->searchable()
-                    ->preload()
-                    ->required(),
+                    ->preload(),
                 Select::make('practice_status_id')
                     ->label('Stato Pratica')
                     ->relationship('practiceStatus', 'name')
@@ -47,14 +45,11 @@ class PracticeForm
                     ->nullable()
                     ->helperText('Stato pratica originale da sistema esterno'),
                 TextInput::make('name')
-                    ->label('Nome Pratica')
-                    ->required(),
+                    ->label('Nome Pratica'),
                 TextInput::make('CRM_code')
-                    ->label('Codice CRM')
-                    ->required(),
+                    ->label('Codice CRM'),
                 TextInput::make('principal_code')
-                    ->label('Codice Mandante')
-                    ->required(),
+                    ->label('Codice Mandante'),
                 TextInput::make('tipo_prodotto')
                     ->label('Tipo Prodotto')
                     ->maxLength(255)
@@ -63,19 +58,16 @@ class PracticeForm
                 TextInput::make('amount')
                     ->label('Importo')
                     ->numeric()
-                    ->prefix('€')
-                    ->required(),
+                    ->prefix('€'),
                 TextInput::make('net')
                     ->label('Netto')
                     ->numeric()
-                    ->prefix('€')
-                    ->required(),
+                    ->prefix('€'),
                 Select::make('practice_scope_id')
                     ->label('Ambito')
                     ->relationship('practiceScope', 'name')
                     ->searchable()
-                    ->preload()
-                    ->required(),
+                    ->preload(),
                 Select::make('status')
                     ->label('Stato')
                     ->options([
@@ -85,8 +77,7 @@ class PracticeForm
                         'respinta' => 'Respinta',
                         'annullata' => 'Annullata',
                     ])
-                    ->default('istruttoria')
-                    ->required(),
+                    ->default('istruttoria'),
                 Select::make('statoproforma')
                     ->label('Stato Proforma')
                     ->options([
@@ -123,8 +114,7 @@ class PracticeForm
                     ->nullable()
                     ->helperText('Data stato perfezionata ovvero possibile emissione proforma ad agente'),
                 DatePicker::make('perfected_at')
-                    ->label('Data Perfezionamento')
-                    ->required(),
+                    ->label('Data Perfezionamento'),
                 DatePicker::make('invoice_at')
                     ->label('Data Fatturazione')
                     ->nullable()
