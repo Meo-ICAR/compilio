@@ -1,5 +1,6 @@
-namespace App\Services;
 <?php
+
+namespace App\Services;
 
 use App\Models\Document;
 use App\Models\DocumentType;

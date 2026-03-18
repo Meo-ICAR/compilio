@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\PurchaseInvoice;
+use App\Models\Agent;
+use App\Models\Client;
+use App\Models\Principal;
+use App\Models\SalesInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 
-class PurchaseInvoiceImportService
+class SalesInvoiceImportService2025
 {
     protected $companyId;
     protected $filename;
@@ -53,7 +55,7 @@ class PurchaseInvoiceImportService
         $actualFilePath = $filePath;
         if (!file_exists($filePath)) {
             // Try storage path if public path doesn't exist
-            $storagePath = str_replace('public/', 'storage/app/private/purchase-invoice-imports/', $filePath);
+            $storagePath = str_replace('public/', 'storage/app/private/sales-invoice-imports/', $filePath);
             if (file_exists($storagePath)) {
                 $actualFilePath = $storagePath;
                 Log::info('File found in storage path', ['path' => $storagePath]);
@@ -65,17 +67,16 @@ class PurchaseInvoiceImportService
         DB::beginTransaction();
 
         try {
-            // Read Excel file using Excel facade
-            $data = Excel::toArray([], $actualFilePath);
-            
-            if (empty($data) || empty($data[0])) {
-                throw new \Exception('Cannot read data from Excel file');
+            // Read CSV file using fopen for 2025 format
+            $handle = fopen($actualFilePath, 'r');
+            if (!$handle) {
+                throw new \Exception("Cannot open file: {$actualFilePath}");
             }
 
-            $rows = $data[0];
-            $headers = array_shift($rows); // Remove first row as headers
-            
-            if (empty($headers)) {
+            // Read headers
+            $headers = fgetcsv($handle, 0, ';');
+            if (!$headers) {
+                fclose($handle);
                 throw new \Exception('Cannot read headers from file');
             }
 
@@ -90,28 +91,29 @@ class PurchaseInvoiceImportService
                 $cleanHeaders[] = $cleanHeader;
             }
 
-            Log::info('Purchase Invoice Excel Headers', ['original' => $headers, 'cleaned' => $cleanHeaders]);
+            Log::info('Sales Invoice 2025 CSV Headers', ['original' => $headers, 'cleaned' => $cleanHeaders]);
 
             $rowNumber = 2;  // Start from 2 since we already read header
 
-            foreach ($rows as $row) {
+            while (($row = fgetcsv($handle, 0, ';')) !== false) {
                 $this->processRow($row, $cleanHeaders, $rowNumber);
                 $rowNumber++;
             }
 
+            fclose($handle);
+
             DB::commit();
 
-            Log::info('Purchase invoices import completed', [
+            Log::info('Sales invoices import completed', [
                 'file' => $filePath,
                 'company_id' => $this->companyId,
                 'results' => $this->importResults
             ]);
 
             return $this->importResults;
-
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error importing purchase invoices', [
+            Log::error('Error importing sales invoices', [
                 'file' => $filePath,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -133,12 +135,12 @@ class PurchaseInvoiceImportService
                 $rowData[$header] = $row[$index] ?? '';
             }
 
-            // Skip empty rows
-            if (empty($rowData['nr_']) || empty($rowData['fornitore'])) {
+            // Skip empty rows - using 2025 format field names
+            if (empty($rowData['nr_']) || empty($rowData['ragione_sociale'])) {
                 Log::info('Skipping row due to empty data', [
                     'row_number' => $rowNumber,
                     'nr_' => $rowData['nr_'] ?? 'NULL',
-                    'fornitore' => $rowData['fornitore'] ?? 'NULL',
+                    'ragione_sociale' => $rowData['ragione_sociale'] ?? 'NULL',
                     'raw_row' => $rowData
                 ]);
                 $this->importResults['skipped']++;
@@ -151,22 +153,14 @@ class PurchaseInvoiceImportService
             $invoiceData['company_id'] = $this->companyId;
 
             // Check if invoice already exists
-            $existingInvoice = PurchaseInvoice::where('company_id', $this->companyId)
+            $existingInvoice = SalesInvoice::where('company_id', $this->companyId)
                 ->where('number', $invoiceData['number'])
                 ->first();
 
-            if ($existingInvoice) {
-                // Update existing invoice
-                $existingInvoice->update($invoiceData);
-                $this->importResults['updated']++;
-                $this->importResults['details'][] = "Updated invoice: {$invoiceData['number']} (row {$rowNumber})";
-            } else {
-                // Create new invoice
-                $invoice = PurchaseInvoice::create($invoiceData);
-                $this->importResults['imported']++;
-                $this->importResults['details'][] = "Imported invoice: {$invoiceData['number']} (row {$rowNumber})";
-            }
-
+            // Always create new invoice for 2025 (don't update existing)
+            $invoice = SalesInvoice::create($invoiceData);
+            $this->importResults['imported']++;
+            $this->importResults['details'][] = "Imported invoice: {$invoiceData['number']} (row {$rowNumber})";
         } catch (\Exception $e) {
             Log::error('Error processing row', [
                 'row_number' => $rowNumber,
@@ -183,32 +177,46 @@ class PurchaseInvoiceImportService
     {
         return [
             'number' => $this->cleanString($row['nr_'] ?? null),
-            'supplier_invoice_number' => $this->cleanString($row['nr__fatt__fornitore'] ?? null),
-            'supplier_number' => $this->cleanString($row['nr__fornitore'] ?? null),
-            'supplier' => $this->cleanString($row['fornitore'] ?? null),
+            'order_number' => $this->cleanString($row['nr__ordine'] ?? null),
+            'customer_number' => $this->cleanString($row['nr__cliente'] ?? null),
+            'customer_name' => $this->cleanString($row['ragione_sociale'] ?? null),
             'currency_code' => $this->cleanString($row['cod__valuta'] ?? null),
+            'due_date' => $this->parseDate($row['data_scadenza'] ?? null),
             'amount' => $this->parseDecimal($row['importo'] ?? null),
             'amount_including_vat' => $this->parseDecimal($row['importo_iva_inclusa'] ?? null),
-            'pay_to_cap' => $this->cleanString($row['pagare_a___cap'] ?? null),
-            'pay_to_country_code' => $this->cleanString($row['pagare_a___cod__paese'] ?? null),
+            'residual_amount' => $this->parseDecimal($row['importo_residuo'] ?? null),
+            'ship_to_code' => $this->cleanString($row['spedire_a___codice'] ?? null),
+            'ship_to_cap' => $this->cleanString($row['spedire_a___cap'] ?? null),
             'registration_date' => $this->parseDate($row['data_di_registrazione']) ?? now()->format('Y-m-d'),
+            'agent_code' => $this->cleanString($row['cod__agente'] ?? null),
+            'cdc_code' => $this->cleanString($row['cdc_codice'] ?? null),
+            'dimensional_link_code' => $this->cleanString($row['cod__colleg__dimen__2'] ?? null),
             'location_code' => $this->cleanString($row['cod__ubicazione'] ?? null),
             'printed_copies' => $this->parseInteger($row['copie_stampate'] ?? 0),
-            'document_date' => $this->parseDate($row['data_documento'] ?? null),
             'payment_condition_code' => $this->cleanString($row['cod__condizioni_pagam_'] ?? null),
-            'due_date' => $this->parseDate($row['data_scadenza'] ?? null),
-            'payment_method_code' => $this->cleanString($row['cod__metodo_di_pagamento'] ?? null),
-            'residual_amount' => $this->parseDecimal($row['importo_residuo'] ?? null),
             'closed' => $this->parseBoolean($row['chiuso'] ?? null),
             'cancelled' => $this->parseBoolean($row['annullato'] ?? null),
             'corrected' => $this->parseBoolean($row['rettifica'] ?? null),
-            'pay_to_address' => $this->cleanString($row['pagare_a___indirizzo'] ?? null),
-            'pay_to_city' => $this->cleanString($row['pagare_a___città'] ?? null),
-            'supplier_category' => $this->cleanString($row['cat__reg__fornitore'] ?? null),
+            'email_sent' => $this->parseBoolean($row['e_mail_inviata'] ?? null),
+            'email_sent_at' => $this->parseDateTime($row['data__ora_invio_mail'] ?? null),
+            'bill_to_address' => $this->cleanString($row['fatturare_a___indirizzo'] ?? null),
+            'bill_to_city' => $this->cleanString($row['fatturare_a___città'] ?? null),
+            'bill_to_province' => $this->cleanString($row['provincia_di_fatturazione'] ?? null),
+            'ship_to_address' => $this->cleanString($row['spedire_a___indirizzo'] ?? null),
+            'ship_to_city' => $this->cleanString($row['spedire_a___città'] ?? null),
+            'payment_method_code' => $this->cleanString($row['cod__metodo_di_pagamento'] ?? null),
+            'customer_category' => $this->cleanString($row['cat__reg__cliente'] ?? null),
             'exchange_rate' => $this->parseDecimal($row['fattore_valuta'] ?? null),
             'vat_number' => $this->cleanString($row['partita_iva'] ?? null),
-            'fiscal_code' => $this->cleanString($row['codice_fiscale'] ?? null),
-            'document_type' => $this->cleanString($row['tipo_documento_fattura'] ?? null),
+            'bank_account' => $this->cleanString($row['c_c_bancario'] ?? null),
+            'document_residual_amount' => $this->parseDecimal($row['importo_residuo_documento'] ?? null),
+            'document_type' => $this->cleanString($row['tipo_di_documento_fattura'] ?? null),
+            'credit_note_linked' => $this->cleanString($row['nota_di_credito_collegata'] ?? null),
+            'in_order' => $this->parseBoolean($row['flg_in_commessa'] ?? null),
+            'supplier_number' => $this->cleanString($row['nr__fornitore'] ?? null),
+            'supplier_description' => $this->cleanString($row['descrizione_fornitore'] ?? null),
+            'purchase_invoice_origin' => $this->cleanString($row['fattura_acquisto_origine'] ?? null),
+            'sent_to_sdi' => $this->parseBoolean($row['inviato_allo_sdi'] ?? null),
         ];
     }
 
@@ -217,7 +225,7 @@ class PurchaseInvoiceImportService
         if (empty($value)) {
             return null;
         }
-        
+
         return trim(preg_replace('/\s+/', ' ', $value));
     }
 
@@ -247,10 +255,36 @@ class PurchaseInvoiceImportService
         // Try Excel serial date format
         if (is_numeric($value)) {
             try {
-                $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((int)$value);
+                $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((int) $value);
                 return $date->format('Y-m-d');
             } catch (\Exception $e) {
                 // Continue to return null
+            }
+        }
+
+        return null;
+    }
+
+    protected function parseDateTime($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        // Handle Italian datetime formats
+        $dateTimeFormats = [
+            'd/m/Y H:i', 'd/m/Y H:i:s', 'd-m-Y H:i',
+            'd/m/y H:i', 'd-m-y H:i', 'Y-m-d H:i:s'
+        ];
+
+        foreach ($dateTimeFormats as $format) {
+            try {
+                $dateTime = Carbon::createFromFormat($format, $value);
+                if ($dateTime) {
+                    return $dateTime->format('Y-m-d H:i:s');
+                }
+            } catch (\Exception $e) {
+                // Continue to next format
             }
         }
 
@@ -265,9 +299,9 @@ class PurchaseInvoiceImportService
 
         // Remove dots and commas for Italian format
         $cleanValue = str_replace(['.', ','], '', $value);
-        
+
         if (is_numeric($cleanValue)) {
-            return (float)($cleanValue / 100); // Convert from cents
+            return (float) ($cleanValue / 100);  // Convert from cents
         }
 
         return null;
@@ -280,7 +314,7 @@ class PurchaseInvoiceImportService
         }
 
         if (is_numeric($value)) {
-            return (int)$value;
+            return (int) $value;
         }
 
         return null;
@@ -294,7 +328,7 @@ class PurchaseInvoiceImportService
 
         // Handle Excel TRUE/FALSE strings
         $value = strtoupper(trim($value));
-        
+
         if ($value === 'TRUE' || $value === 'VERO') {
             return true;
         } elseif ($value === 'FALSE' || $value === 'FALSO') {

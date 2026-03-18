@@ -145,7 +145,7 @@ class SalesInvoicesTable
                             ->helperText('Inserisci un nome esistente o uno nuovo per creare automaticamente il record'),
                     ])
                     ->action(function (array $data, $record) {
-                        $clientId = null;
+                        $recordId = null;
                         $searchTerm = $data['client_name'] ?? null;
 
                         // Se è vuoto o null, crea il record
@@ -162,7 +162,7 @@ class SalesInvoicesTable
                             };
 
                             if ($newRecord) {
-                                $clientId = $newRecord->id;
+                                $recordId = $newRecord->id;
                             }
                         } else {
                             // Verifica se esiste un record con questo nome
@@ -174,7 +174,7 @@ class SalesInvoicesTable
                             };
 
                             if ($existingRecord) {
-                                $clientId = $existingRecord->id;
+                                $recordId = $existingRecord->id;
                             } else {
                                 // Crea nuovo record con il nome cercato
                                 $newRecord = match ($data['client_type']) {
@@ -185,16 +185,16 @@ class SalesInvoicesTable
                                 };
 
                                 if ($newRecord) {
-                                    $clientId = $newRecord->id;
+                                    $recordId = $newRecord->id;
                                 }
                             }
                         }
 
-                        if ($clientId) {
+                        if ($recordId) {
                             // Prima aggiorna il record corrente
                             $record->update([
                                 'invoiceable_type' => $data['client_type'],
-                                'invoiceable_id' => $clientId,
+                                'invoiceable_id' => $recordId,
                             ]);
 
                             // Poi associa tutte le altre fatture dello stesso cliente
@@ -202,15 +202,22 @@ class SalesInvoicesTable
                                 ->whereNull('invoiceable_id')
                                 ->update([
                                     'invoiceable_type' => $data['client_type'],
-                                    'invoiceable_id' => $clientId,
+                                    'invoiceable_id' => $recordId,
                                 ]);
 
                             $totalUpdated = $updatedCount + 1;  // +1 per il record corrente
 
+                            $modelType = match ($data['client_type']) {
+                                'App\Models\Client' => 'Client',
+                                'App\Models\Principal' => 'Principal',
+                                'App\Models\Agent' => 'Agent',
+                                default => 'Record'
+                            };
+
                             $actionText = (is_null($searchTerm) || $searchTerm === '') ? 'creato e associato' : 'associato';
                             Notification::make()
-                                ->title('Fatture associate')
-                                ->body("{$totalUpdated} fatture del cliente '{$record->customer_name}' {$actionText} correttamente")
+                                ->title('Fattura associata')
+                                ->body("{$totalUpdated} fatture del cliente '{$record->customer_name}' {$actionText} correttamente a {$modelType}")
                                 ->success()
                                 ->send();
                         }
@@ -280,7 +287,7 @@ class SalesInvoicesTable
                         ])
                         ->action(function (array $data, $records) {
                             $totalUpdated = 0;
-                            $clientId = null;
+                            $recordId = null;
 
                             // Se è selezionato "new", crea il record
                             if ($data['client_id'] === 'new') {
@@ -295,19 +302,19 @@ class SalesInvoicesTable
                                 };
 
                                 if ($newRecord) {
-                                    $clientId = $newRecord->id;
+                                    $recordId = $newRecord->id;
                                 }
                             } else {
-                                $clientId = $data['client_id'];
+                                $recordId = $data['client_id'];
                             }
 
-                            if ($clientId) {
+                            if ($recordId) {
                                 foreach ($records as $record) {
                                     if (is_null($record->invoiceable_id)) {
                                         // Aggiorna il record corrente
                                         $record->update([
                                             'invoiceable_type' => $data['client_type'],
-                                            'invoiceable_id' => $clientId,
+                                            'invoiceable_id' => $recordId,
                                         ]);
                                         $totalUpdated++;
 
@@ -317,16 +324,23 @@ class SalesInvoicesTable
                                             ->where('id', '!=', $record->id)  // Escludi il record corrente
                                             ->update([
                                                 'invoiceable_type' => $data['client_type'],
-                                                'invoiceable_id' => $clientId,
+                                                'invoiceable_id' => $recordId,
                                             ]);
                                         $totalUpdated += $additionalUpdated;
                                     }
                                 }
 
+                                $modelType = match ($data['client_type']) {
+                                    'App\Models\Client' => 'Clienti',
+                                    'App\Models\Principal' => 'Mandanti',
+                                    'App\Models\Agent' => 'Agenti',
+                                    default => 'Record'
+                                };
+
                                 $actionText = $data['client_id'] === 'new' ? 'creati e associati' : 'associati';
                                 Notification::make()
                                     ->title('Fatture associate')
-                                    ->body("{$totalUpdated} fatture {$actionText} correttamente (incluse tutte quelle degli stessi clienti)")
+                                    ->body("{$totalUpdated} fatture {$actionText} correttamente a {$modelType} (incluse tutte quelle degli stessi clienti)")
                                     ->success()
                                     ->send();
                             }
@@ -336,7 +350,7 @@ class SalesInvoicesTable
             ])
             ->headerActions([
                 Action::make('import_sales_invoices')
-                    ->label('Importa Fatture Vendita')
+                    ->label('Importa Note Credito')
                     ->icon('heroicon-o-document-arrow-up')
                     ->color('success')
                     ->form([
@@ -366,6 +380,42 @@ class SalesInvoicesTable
                         } catch (\Exception $e) {
                             Notification::make()
                                 ->title('Errore importazione')
+                                ->body('Errore durante importazione: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+                Action::make('import_sales_invoices_2025')
+                    ->label('Importa Fatture')
+                    ->icon('heroicon-o-calendar')
+                    ->color('warning')
+                    ->form([
+                        FileUpload::make('import_file_2025')
+                            ->label('File CSV 2025')
+                            ->helperText('Carica il file CSV con i dati delle fatture di vendita 2025')
+                            ->acceptedFileTypes(['text/csv'])
+                            ->maxSize(10240)  // 10MB
+                            ->directory('sales-invoice-imports-2025')
+                            ->visibility('private')
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $filePath = storage_path('app/public/' . $data['import_file_2025']);
+                            $companyId = Auth::user()->company_id;
+                            $filename = basename($data['import_file_2025']);
+
+                            $importService = new \App\Services\SalesInvoiceImportService2025($filename);
+                            $results = $importService->import($filePath, $companyId);
+
+                            Notification::make()
+                                ->title('Importazione 2025 completata')
+                                ->body("Importazione da {$filename} completata. Importate: {$results['imported']}, Aggiornate: {$results['updated']}, Saltate: {$results['errors']}")
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore importazione 2025')
                                 ->body('Errore durante importazione: ' . $e->getMessage())
                                 ->danger()
                                 ->send();

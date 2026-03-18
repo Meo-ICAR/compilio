@@ -156,4 +156,16 @@ class SalesInvoice extends Model
     {
         return $query->where('invoiceable_type', $type);
     }
+
+    /**
+     * Get practice commissions where principal's VAT number matches this sales invoice's VAT number
+     */
+    public function practiceCommissions()
+    {
+        return $this
+            ->hasMany(PracticeCommission::class, 'principal_id', 'invoiceable_id')
+            ->whereHas('principal', function ($query) {
+                $query->where('vat_number', $this->vat_number);
+            });
+    }
 }

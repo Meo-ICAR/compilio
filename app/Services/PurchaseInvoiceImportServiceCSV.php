@@ -6,9 +6,8 @@ use App\Models\PurchaseInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 
-class PurchaseInvoiceImportService
+class PurchaseInvoiceImportServiceCSV
 {
     protected $companyId;
     protected $filename;
@@ -65,17 +64,16 @@ class PurchaseInvoiceImportService
         DB::beginTransaction();
 
         try {
-            // Read Excel file using Excel facade
-            $data = Excel::toArray([], $actualFilePath);
-            
-            if (empty($data) || empty($data[0])) {
-                throw new \Exception('Cannot read data from Excel file');
+            // Read CSV file using fopen for CSV format
+            $handle = fopen($actualFilePath, 'r');
+            if (!$handle) {
+                throw new \Exception("Cannot open file: {$actualFilePath}");
             }
 
-            $rows = $data[0];
-            $headers = array_shift($rows); // Remove first row as headers
-            
-            if (empty($headers)) {
+            // Read headers
+            $headers = fgetcsv($handle, 0, ';');
+            if (!$headers) {
+                fclose($handle);
                 throw new \Exception('Cannot read headers from file');
             }
 
@@ -90,14 +88,16 @@ class PurchaseInvoiceImportService
                 $cleanHeaders[] = $cleanHeader;
             }
 
-            Log::info('Purchase Invoice Excel Headers', ['original' => $headers, 'cleaned' => $cleanHeaders]);
+            Log::info('Purchase Invoice CSV Headers', ['original' => $headers, 'cleaned' => $cleanHeaders]);
 
             $rowNumber = 2;  // Start from 2 since we already read header
 
-            foreach ($rows as $row) {
+            while (($row = fgetcsv($handle, 0, ';')) !== false) {
                 $this->processRow($row, $cleanHeaders, $rowNumber);
                 $rowNumber++;
             }
+
+            fclose($handle);
 
             DB::commit();
 

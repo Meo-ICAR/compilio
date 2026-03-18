@@ -9,6 +9,7 @@ use App\Models\SalesInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SalesInvoiceImportService
 {
@@ -51,22 +52,33 @@ class SalesInvoiceImportService
             'filename' => $this->filename,
         ];
 
+        // Handle storage path
+        $actualFilePath = $filePath;
         if (!file_exists($filePath)) {
-            throw new \Exception("File not found: {$filePath}");
+            // Only try storage path, not public path
+            $storagePath = str_replace('public/', 'storage/app/private/sales-invoice-imports/', $filePath);
+            if (file_exists($storagePath)) {
+                $actualFilePath = $storagePath;
+                Log::info('File found in storage path', ['path' => $storagePath]);
+            } else {
+                throw new \Exception("File not found: {$filePath} (tried: {$storagePath})");
+            }
         }
 
         DB::beginTransaction();
 
         try {
-            $handle = fopen($filePath, 'r');
-            if (!$handle) {
-                throw new \Exception("Cannot open file: {$filePath}");
+            // Read Excel file using Excel facade
+            $data = Excel::toArray([], $actualFilePath);
+
+            if (empty($data) || empty($data[0])) {
+                throw new \Exception('Cannot read data from Excel file');
             }
 
-            // Read headers
-            $headers = fgetcsv($handle, 0, ';');
-            if (!$headers) {
-                fclose($handle);
+            $rows = $data[0];
+            $headers = array_shift($rows);  // Remove first row as headers
+
+            if (empty($headers)) {
                 throw new \Exception('Cannot read headers from file');
             }
 
@@ -81,16 +93,14 @@ class SalesInvoiceImportService
                 $cleanHeaders[] = $cleanHeader;
             }
 
-            Log::info('Sales Invoice CSV Headers', ['original' => $headers, 'cleaned' => $cleanHeaders]);
+            Log::info('Sales Invoice Excel Headers', ['original' => $headers, 'cleaned' => $cleanHeaders]);
 
             $rowNumber = 2;  // Start from 2 since we already read header
 
-            while (($row = fgetcsv($handle, 0, ';')) !== false) {
+            foreach ($rows as $row) {
                 $this->processRow($row, $cleanHeaders, $rowNumber);
                 $rowNumber++;
             }
-
-            fclose($handle);
 
             DB::commit();
 
@@ -150,7 +160,13 @@ WHERE p.tipo = 'Istituto'; ");
             }
 
             // Skip empty rows
-            if (empty($rowData['nr_']) || empty($rowData['ragione_sociale'])) {
+            if (empty($rowData['nr_']) || empty($rowData['nome_cliente'])) {
+                Log::info('Skipping row due to empty data', [
+                    'row_number' => $rowNumber,
+                    'nr_' => $rowData['nr_'] ?? 'NULL',
+                    'nome_cliente' => $rowData['nome_cliente'] ?? 'NULL',
+                    'raw_row' => $rowData
+                ]);
                 $this->importResults['skipped']++;
                 return;
             }
@@ -191,8 +207,8 @@ WHERE p.tipo = 'Istituto'; ");
         return [
             'number' => $this->cleanString($row['nr_'] ?? null),
             'order_number' => $this->cleanString($row['nr__ordine'] ?? null),
-            'customer_number' => $this->cleanString($row['nr__cliente'] ?? null),
-            'customer_name' => $this->cleanString($row['ragione_sociale'] ?? null),
+            'customer_number' => $this->cleanString($row['vendere_a___nr__cliente'] ?? null),
+            'customer_name' => $this->cleanString($row['nome_cliente'] ?? null),
             'currency_code' => $this->cleanString($row['cod__valuta'] ?? null),
             'due_date' => $this->parseDate($row['data_scadenza'] ?? null),
             'amount' => $this->parseDecimal($row['importo'] ?? null),
@@ -200,18 +216,18 @@ WHERE p.tipo = 'Istituto'; ");
             'residual_amount' => $this->parseDecimal($row['importo_residuo'] ?? null),
             'ship_to_code' => $this->cleanString($row['spedire_a___codice'] ?? null),
             'ship_to_cap' => $this->cleanString($row['spedire_a___cap'] ?? null),
-            'registration_date' => $this->parseDate($row['data_di_registrazione'] ?? null),
+            'registration_date' => $this->parseDate($row['data_di_registrazione']) ?? now()->format('Y-m-d'),
             'agent_code' => $this->cleanString($row['cod__agente'] ?? null),
             'cdc_code' => $this->cleanString($row['cdc_codice'] ?? null),
             'dimensional_link_code' => $this->cleanString($row['cod__colleg__dimen__2'] ?? null),
             'location_code' => $this->cleanString($row['cod__ubicazione'] ?? null),
             'printed_copies' => $this->parseInteger($row['copie_stampate'] ?? 0),
             'payment_condition_code' => $this->cleanString($row['cod__condizioni_pagam_'] ?? null),
-            'closed' => $this->parseBoolean($row['chiuso'] ?? null),
+            'closed' => $this->parseBoolean($row['pagato'] ?? null),
             'cancelled' => $this->parseBoolean($row['annullato'] ?? null),
             'corrected' => $this->parseBoolean($row['rettifica'] ?? null),
             'email_sent' => $this->parseBoolean($row['e_mail_inviata'] ?? null),
-            'email_sent_at' => $this->parseDateTime($row['data__ora_invio_mail'] ?? null),
+            'email_sent_at' => $this->parseDateTime($row['data_ora_invio_mail'] ?? null),
             'bill_to_address' => $this->cleanString($row['fatturare_a___indirizzo'] ?? null),
             'bill_to_city' => $this->cleanString($row['fatturare_a___città'] ?? null),
             'bill_to_province' => $this->cleanString($row['provincia_di_fatturazione'] ?? null),
@@ -224,7 +240,7 @@ WHERE p.tipo = 'Istituto'; ");
             'bank_account' => $this->cleanString($row['c_c_bancario'] ?? null),
             'document_residual_amount' => $this->parseDecimal($row['importo_residuo_documento'] ?? null),
             'document_type' => $this->cleanString($row['tipo_di_documento_fattura'] ?? null),
-            'credit_note_linked' => $this->cleanString($row['nota_di_credito_collegata'] ?? null),
+            'credit_note_linked' => $this->cleanString($row['nota_credito_origine'] ?? null),
             'in_order' => $this->parseBoolean($row['flg_in_commessa'] ?? null),
             'supplier_number' => $this->cleanString($row['nr__fornitore'] ?? null),
             'supplier_description' => $this->cleanString($row['descrizione_fornitore'] ?? null),

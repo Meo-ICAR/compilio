@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SalesInvoices\Schemas;
 
+use App\Filament\Resources\SalesInvoices\Schemas\PracticeCommissionsTable;
 use App\Models\Agent;
 use App\Models\Client;
 use App\Models\Company;
@@ -15,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Repeater;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
@@ -209,6 +211,7 @@ class SalesInvoiceForm
                                     ->default(false),
                             ]),
                     ]),
+                PracticeCommissionsTable::make('practiceCommissions'),
             ]);
     }
 }

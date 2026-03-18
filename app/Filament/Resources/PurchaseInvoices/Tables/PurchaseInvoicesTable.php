@@ -212,45 +212,6 @@ class PurchaseInvoicesTable
                     }),
             ], position: RecordActionsPosition::BeforeColumns)
             ->headerActions([
-                Action::make('import_xml')
-                    ->label('Importa Fatture Acquisto')
-                    ->icon('heroicon-o-document-arrow-up')
-                    ->color('success')
-                    ->form([
-                        FileUpload::make('xml_file')
-                            ->label('File XML')
-                            ->acceptedFileTypes(['xml'])
-                            ->required()
-                            ->helperText('Carica un file XML delle fatture da importare')
-                            ->directory('purchase-invoices')
-                            ->maxSize(10240),  // 10MB
-                    ])
-                    ->action(function (array $data) {
-                        try {
-                            $importService = new \App\Services\PurchaseInvoiceImportService();
-                            $result = $importService->importFromXml($data['xml_file']);
-
-                            if ($result['success']) {
-                                Notification::make()
-                                    ->title('Importazione completata')
-                                    ->body($result['message'])
-                                    ->success()
-                                    ->send();
-                            } else {
-                                Notification::make()
-                                    ->title('Errore importazione')
-                                    ->body($result['message'])
-                                    ->danger()
-                                    ->send();
-                            }
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title('Errore importazione')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
                 Action::make('import_credit_notes')
                     ->label('Importa Note Credito')
                     ->icon('heroicon-o-document-minus')
@@ -281,6 +242,78 @@ class PurchaseInvoicesTable
                             Notification::make()
                                 ->title('Errore Importazione Note Credito')
                                 ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+                Action::make('import_purchase_invoices_csv')
+                    ->label('Importa Fatture Acquisto')
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->form([
+                        FileUpload::make('import_file_csv')
+                            ->label('File CSV')
+                            ->helperText('Carica un file CSV con i dati delle fatture di acquisto')
+                            ->acceptedFileTypes(['text/csv'])
+                            ->maxSize(10240)  // 10MB
+                            ->directory('purchase-invoice-imports-csv')
+                            ->visibility('private')
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $filePath = storage_path('app/public/' . $data['import_file_csv']);
+                            $companyId = Auth::user()->company_id;
+                            $filename = basename($data['import_file_csv']);
+
+                            $importService = new \App\Services\PurchaseInvoiceImportServiceCSV($filename);
+                            $results = $importService->import('public/' . $data['import_file_csv'], $companyId);
+
+                            Notification::make()
+                                ->title('Importazione CSV completata')
+                                ->body("Importazione da {$filename} completata. Importate: {$results['imported']}, Aggiornate: {$results['updated']}, Errori: {$results['errors']}")
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore importazione CSV')
+                                ->body('Errore durante importazione: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+                Action::make('import_purchase_invoices_excel')
+                    ->label('Importa Fatture Acquisto Excel')
+                    ->icon('heroicon-o-document-arrow-up')
+                    ->color('success')
+                    ->form([
+                        FileUpload::make('import_file_excel')
+                            ->label('File Excel')
+                            ->helperText('Carica un file Excel con i dati delle fatture di acquisto')
+                            ->acceptedFileTypes(['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                            ->maxSize(10240)  // 10MB
+                            ->directory('purchase-invoice-imports')
+                            ->visibility('private')
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $filePath = storage_path('app/public/' . $data['import_file_excel']);
+                            $companyId = Auth::user()->company_id;
+                            $filename = basename($data['import_file_excel']);
+
+                            $importService = new \App\Services\PurchaseInvoiceImportService($filename);
+                            $results = $importService->import('public/' . $data['import_file_excel'], $companyId);
+
+                            Notification::make()
+                                ->title('Importazione Excel completata')
+                                ->body("Importazione da {$filename} completata. Importate: {$results['imported']}, Aggiornate: {$results['updated']}, Errori: {$results['errors']}")
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore importazione Excel')
+                                ->body('Errore durante importazione: ' . $e->getMessage())
                                 ->danger()
                                 ->send();
                         }
