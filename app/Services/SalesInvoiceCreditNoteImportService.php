@@ -180,6 +180,16 @@ WHERE p.tipo = 'Istituto'; ");
                 $rowData['customer_name'] = $rowData['Nome_cliente'];
             }
 
+            // Debug for FVI25-00100
+            if ($rowData['Nr.'] === 'FVI25-00100') {
+                Log::info('FVI25-00100 raw data', [
+                    'raw_row_data' => $rowData,
+                    'Importo_raw' => $rowData['Importo'] ?? 'NULL',
+                    'Importo_IVA_inclusa_raw' => $rowData['Importo_IVA_inclusa'] ?? 'NULL',
+                    'Importo_residuo_raw' => $rowData['Importo_residuo'] ?? 'NULL',
+                ]);
+            }
+
             $invoiceData = $this->mapRowToInvoiceData($rowData);
 
             // Add company_id
@@ -272,11 +282,53 @@ WHERE p.tipo = 'Istituto'; ");
             return 0;
         }
 
-        // Handle Italian format: 15.000,00 -> 15000.00
-        $value = str_replace('.', '', $value);
-        $value = str_replace(',', '.', $value);
+        // Debug logging for FVI25-00100
+        if (is_string($value) && (strpos($value, '29582') !== false || strpos($value, '29582,24') !== false)) {
+            Log::info('parseDecimal debug for FVI25-00100', [
+                'raw_value' => $value,
+                'type' => gettype($value),
+                'before_replacement' => $value,
+            ]);
+        }
 
-        return (float) $value;
+        // If it's already a float, return it directly
+        if (is_float($value)) {
+            $result = $value;
+
+            // Debug logging for FVI25-00100
+            if ($result == 29582.24 || $result == 29582 || $result == 2958224) {
+                Log::info('parseDecimal result for FVI25-00100 (already float)', [
+                    'result' => $result,
+                    'formatted_result' => number_format($result, 2, ',', '.'),
+                ]);
+            }
+
+            return $result;
+        }
+
+        // Handle Italian format: 29.582,24 -> 29582.24
+        // First, remove thousands separators (dots) only if there's a comma for decimal
+        if (strpos($value, ',') !== false) {
+            $parts = explode(',', $value);
+            $integer_part = str_replace('.', '', $parts[0]);
+            $decimal_part = $parts[1] ?? '0';
+            $value = $integer_part . '.' . $decimal_part;
+        } else {
+            // If no comma, just remove dots (might be thousands separators)
+            $value = str_replace('.', '', $value);
+        }
+
+        $result = (float) $value;
+
+        // Debug logging for FVI25-00100
+        if ($result == 29582.24 || $result == 29582 || $result == 2958224) {
+            Log::info('parseDecimal result for FVI25-00100', [
+                'result' => $result,
+                'formatted_result' => number_format($result, 2, ',', '.'),
+            ]);
+        }
+
+        return $result;
     }
 
     protected function parseInteger($value)

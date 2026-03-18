@@ -43,25 +43,12 @@ class PracticeCommissionResource extends Resource
         return PracticeCommissionsTable::configure($table);
     }
 
-    public static function getNavigationItems(): array
-    {
-        return [
-            ...parent::getNavigationItems(),
-            NavigationItem::make('Provvigioni Attive')
-                //   ->group('Pratiche')  // <--- Aggiungi questo
-                ->icon('heroicon-o-check-circle')
-                ->url(static::getUrl('attive'))
-                ->sort(20),
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
             'index' => ListPracticeCommissions::route('/'),
             'create' => CreatePracticeCommission::route('/create'),
             'edit' => EditPracticeCommission::route('/{record}/edit'),
-            'attive' => ListPracticeCompensi::route('/attive'),
         ];
     }
 }

@@ -158,9 +158,14 @@ class SalesInvoiceImportService
                 ->first();
 
             // Always create new invoice for 2025 (don't update existing)
-            $invoice = SalesInvoice::create($invoiceData);
-            $this->importResults['imported']++;
-            $this->importResults['details'][] = "Imported invoice: {$invoiceData['number']} (row {$rowNumber})";
+            if (!$existingInvoice) {
+                $invoice = SalesInvoice::create($invoiceData);
+                $this->importResults['imported']++;
+                $this->importResults['details'][] = "Imported invoice: {$invoiceData['number']} (row {$rowNumber})";
+            } else {
+                $this->importResults['skipped']++;
+                $this->importResults['details'][] = "Skipped existing invoice: {$invoiceData['number']} (row {$rowNumber})";
+            }
         } catch (\Exception $e) {
             Log::error('Error processing row', [
                 'row_number' => $rowNumber,
@@ -297,19 +302,24 @@ class SalesInvoiceImportService
             return 0;
         }
 
-        // Remove dots and commas for Italian format
-        $cleanValue = str_replace(['.', ','], '', $value);
-
-        if (is_numeric($cleanValue)) {
-            return (float) ($cleanValue / 100);  // Convert from cents
+        // If it's already a float, return it directly
+        if (is_float($value)) {
+            return $value;
         }
 
-        // Try direct conversion if not in cents format
-        if (is_numeric($value)) {
-            return (float) $value;
+        // Handle Italian format: 29.582,24 -> 29582.24
+        // First, remove thousands separators (dots) only if there's a comma for decimal
+        if (is_string($value) && strpos($value, ',') !== false) {
+            $parts = explode(',', $value);
+            $integer_part = str_replace('.', '', $parts[0]);
+            $decimal_part = $parts[1] ?? '0';
+            $value = $integer_part . '.' . $decimal_part;
+        } else {
+            // If no comma, just remove dots (might be thousands separators)
+            $value = str_replace('.', '', $value);
         }
 
-        return 0;
+        return (float) $value;
     }
 
     protected function parseInteger($value)

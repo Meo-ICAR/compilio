@@ -46,14 +46,8 @@ class PracticeCompensiTable
                     ->label('Proforma')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('practiceCommissionStatus.status_payment')
+                TextColumn::make('practiceCommissionStatus.name')
                     ->label('Stato Commissione')
-                    ->badge()
-                    ->color(fn($record) => $record->practiceCommissionStatus?->is_perfectioned
-                        ? 'success'
-                        : ($record->practiceCommissionStatus?->is_working ? 'warning' : 'gray'))
-                    ->searchable()
-                    ->sortable()
                     ->placeholder('Nessuno stato'),
                 TextColumn::make('agent.name')
                     ->label('Agente')
@@ -83,10 +77,6 @@ class PracticeCompensiTable
                 IconColumn::make('is_enasarco')
                     ->label('Enasarco')
                     ->boolean(),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

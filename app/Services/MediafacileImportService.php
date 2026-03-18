@@ -216,7 +216,7 @@ class MediafacileImportService
 
         $crmCode = $praticaData['CRM_code'];
         if ($crmCode === 'QT06105') {
-            Log::info('CRM code is QT06105', $praticaData);
+            //       Log::info('CRM code is QT06105', $praticaData);
         }
         $existing = Practice::where('CRM_code', $crmCode)->first();
 

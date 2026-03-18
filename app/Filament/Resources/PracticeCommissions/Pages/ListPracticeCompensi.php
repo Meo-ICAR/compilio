@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PracticeCommissions\Pages;
 
+use App\Filament\Resources\PracticeCommissions\Tables\PracticeCompensiTable;
 use App\Filament\Resources\PracticeCommissions\PracticeCommissionResource;
 use App\Filament\Traits\HasRegolamentoAction;
 use Filament\Actions\CreateAction;
@@ -17,8 +18,13 @@ class ListPracticeCompensi extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            // CreateAction::make(),
             $this->getRegolamentoAction(),
         ];
+    }
+
+    protected function configureTable(Table $table): Table
+    {
+        return PracticeCompensiTable::configure($table);
     }
 }
