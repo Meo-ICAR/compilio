@@ -6,7 +6,7 @@ use App\Models\Agent;
 use App\Models\Client;
 use App\Models\Principal;
 use App\Models\SalesInvoice;
-use App\Services\SalesInvoiceImportService;
+use App\Services\SalesInvoiceCreditNoteImportService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -372,7 +372,7 @@ class SalesInvoicesTable
                             $companyId = Auth::user()->company_id;
                             $filename = basename($data['import_file']);
 
-                            $importService = new SalesInvoiceImportService($filename);
+                            $importService = new SalesInvoiceCreditNoteImportService($filename);
                             $results = $importService->import($filePath, $companyId);
 
                             Notification::make()
@@ -431,7 +431,7 @@ class SalesInvoicesTable
                     ->action(function () {
                         try {
                             $companyId = Auth::user()->company_id;
-                            $importService = new SalesInvoiceImportService();
+                            $importService = new SalesInvoiceCreditNoteImportService();
                             $importService->setCompanyId($companyId);  // Usa il metodo setter
 
                             // Esegui solo le funzioni di matching per sales invoices
