@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Practices\RelationManagers;
 
+use App\Filament\Resources\PracticeCommissions\Schemas\PracticeCommissionForm;
 use App\Models\PracticeCommission;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
@@ -17,6 +18,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -36,40 +38,36 @@ class PracticeCommissionsRelationManager extends RelationManager
             ->recordTitleAttribute('amount')
             ->columns([
                 TextColumn::make('agent.name')
-                    ->label('Agent')
+                    ->label('Denominazione')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label('Importo')
                     ->money('EUR')
                     ->sortable(),
-                TextColumn::make('percentage')
-                    ->label('Percentuale')
-                    ->suffix('%')
+                TextColumn::make('perfected_at')
+                    ->label('Perfezionata')
+                    ->date()
                     ->sortable(),
-                TextColumn::make('status')
-                    ->label('Stato')
-                    ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'PENDING' => 'warning',
-                        'APPROVED' => 'success',
-                        'REJECTED' => 'danger',
-                        default => 'gray',
-                    }),
+                IconColumn::make('is_coordination')
+                    ->label('Coord.')
+                    ->boolean(),
+                TextColumn::make('practiceCommissionStatus.name')
+                    ->label('Stato Pagamento')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('name')
+                    ->label('Causale')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('notes')
                     ->label('Note')
                     ->searchable()
                     ->limit(50),
-                TextColumn::make('created_at')
-                    ->label('Data Creazione')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->label('Data Aggiornamento')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('CRM_code')
+                    ->label('CRM')
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -81,54 +79,13 @@ class PracticeCommissionsRelationManager extends RelationManager
                     ]),
             ])
             ->headerActions([
-                CreateAction::make()
-                    ->label('Nuova Commissione'),
+                //  CreateAction::make()->label('Nuova Commissione'),
             ])
             ->actions([
                 EditAction::make()
-                    ->label('Modifica'),
-                DeleteAction::make()
-                    ->label('Elimina'),
+                    ->label('Modifica')
+                    ->form(fn($record) => PracticeCommissionForm::configure(new Schema)),
             ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->label('Elimina Selezionati'),
-                ]),
-            ]);
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                Select::make('agent_id')
-                    ->label('Agent')
-                    ->relationship('agent', 'name')
-                    ->searchable()
-                    ->preload(),
-                TextInput::make('amount')
-                    ->label('Importo')
-                    ->numeric()
-                    ->prefix('€')
-                    ->required()
-                    ->step(0.01),
-                TextInput::make('percentage')
-                    ->label('Percentuale')
-                    ->numeric()
-                    ->suffix('%'),
-                Select::make('status')
-                    ->label('Stato')
-                    ->options([
-                        'PENDING' => 'In Attesa',
-                        'APPROVED' => 'Approvata',
-                        'REJECTED' => 'Rifiutata',
-                    ])
-                    ->default('PENDING')
-                    ->required(),
-                Textarea::make('notes')
-                    ->label('Note')
-                    ->rows(3),
-            ]);
+            ->bulkActions([]);
     }
 }

@@ -48,9 +48,9 @@ class PracticeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ClientsRelationManager::class,
             PracticeCommissionsRelationManager::class,
             DocumentsRelationManager::class,
+            //  ClientsRelationManager::class,
         ];
     }
 

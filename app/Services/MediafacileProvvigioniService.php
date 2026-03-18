@@ -87,6 +87,29 @@ class MediafacileProvvigioniService
                 }
             }
             // Update practices perfected_at based on commission data
+
+            /*
+             * DB::table('practice_commissions')
+             *     ->where('is_payment', false)
+             *     ->whereNotIn('id', function ($query) {
+             *         $query
+             *             ->selectRaw('MAX(id)')
+             *             ->from('practice_commissions')
+             *             ->where('is_payment', false)
+             *             ->groupBy('practice_id', 'name');
+             *     })
+             *     ->delete();
+             */
+            DB::statement('
+                DELETE p1 FROM practice_commissions p1
+                INNER JOIN practice_commissions p2 ON
+                    p1.practice_id = p2.practice_id AND
+                    p1.name = p2.name AND
+                    p1.id < p2.id
+                WHERE p1.is_payment = 0
+                AND p2.is_payment = 0
+                AND p1.perfected_at IS NULL
+            ');
             DB::statement("
                 INSERT IGNORE INTO principal_scopes (
     principal_id,
@@ -233,7 +256,15 @@ ORDER BY x.principal_id, x.tipo_prodotto;
     protected function processRecord(array $provvigioneData): void
     {
         // Log::info('Processing provvigione record', $provvigioneData);
+        $practice = Practice::where('company_id', $this->companyId)
+            ->where('CRM_code', $provvigioneData['id_pratica'])
+            ->first();
+
+        if (!$practice) {
+            return;
+        }
         $statusPayment = strtolower($provvigioneData['status_payment']);
+
         $commissionStatus = SoftwareMapping::firstOrCreate(
             ['software_application_id' => $this->softwareId, 'mapping_type' => 'COMMISSION_STATUS', 'external_value' => $statusPayment],
             [
@@ -252,13 +283,6 @@ ORDER BY x.principal_id, x.tipo_prodotto;
             $commissionStatus->save();
         }
         $provvigioneData['practice_commission_status_id'] = $commissionStatus->internal_id;
-
-        $practice = Practice::firstOrCreate(
-            ['company_id' => $this->companyId, 'CRM_code' => $provvigioneData['id_pratica']],
-            [
-                'name' => 'Mapping automatico da Mediafacile',
-            ]
-        );
 
         $existing = PracticeCommission::where('CRM_code', $provvigioneData['CRM_code'])->first();
 
@@ -422,7 +446,7 @@ ORDER BY x.principal_id, x.tipo_prodotto;
         $dataPagamento = $parseDate($apiData['Data Pagamento'] ?? null);
         $dataFattura = $parseDate($apiData['Data Fattura'] ?? null);
         $dataStatus = $parseDate($apiData['Data Status'] ?? null);
-
+        $isPayment = $apiData['Entrata Uscita'] === 'Uscita';
         return [
             'ID Compenso' => $apiData['ID Compenso'] ?? null,
             'CRM_code' => $apiData['ID Compenso'] ?? null,
@@ -436,7 +460,7 @@ ORDER BY x.principal_id, x.tipo_prodotto;
             'invoice_at' => $dataFattura ? $dataFattura->toDateTimeString() : null,
             'status_at' => $dataStatus ? $dataStatus->toDateTimeString() : null,
             'status_payment' => $apiData['Status Compenso'] ?? null,
-            'is_payment' => $apiData['Entrata Uscita'] === 'Uscita' ? true : false,
+            'is_payment' => $isPayment ? true : false,
             'id_pratica' => $apiData['ID Pratica'] ?? null,
             'segnalatore' => $apiData['Agente'] ?? null,
             'istituto_finanziario' => $apiData['Istituto finanziario'] ?? null,
@@ -449,7 +473,7 @@ ORDER BY x.principal_id, x.tipo_prodotto;
             // 'annullato' => !empty($apiData['ANNULLATA']) && $apiData['ANNULLATA'] === 'SI',
             //  'invoice_number' => $apiData['ANNULLATA'] ?? null,
             'fonte' => 'mediafacile',
-            'is_coordination' => $apiData['Agente'] <> $apiData['Denominazione Riferimento'],
+            'is_coordination' => $isPayment && ($apiData['Agente'] <> $apiData['Denominazione Riferimento']),
             'is_client' => ($apiData['Tipo']) && ($apiData['Tipo'] === 'Cliente') ? true : false,
         ];
     }

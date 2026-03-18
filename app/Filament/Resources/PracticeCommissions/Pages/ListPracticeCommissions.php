@@ -10,13 +10,13 @@ use Filament\Resources\Pages\ListRecords;
 class ListPracticeCommissions extends ListRecords
 {
     use HasRegolamentoAction;
-    
+
     protected static string $resource = PracticeCommissionResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            // CreateAction::make(),
             $this->getRegolamentoAction(),
         ];
     }

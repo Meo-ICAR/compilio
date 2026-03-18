@@ -15,6 +15,7 @@ class ProformasTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->paginated(['all', 10, 25, 50, 100])
             ->columns([
                 TextColumn::make('agent.name')
                     ->label('Agente')

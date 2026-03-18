@@ -18,6 +18,7 @@ class Practice extends Model
     protected $fillable = [
         'practice_id',
         'client_mandate_id',
+        'client_id',
         'company_id',
         'principal_id',
         'agent_id',
@@ -155,6 +156,11 @@ class Practice extends Model
     public function clientMandate()
     {
         return $this->belongsTo(ClientMandate::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function practiceStatus()

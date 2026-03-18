@@ -162,50 +162,63 @@ class MediafacileImportService
      */
     protected function processRecord(array $praticaData): void
     {
-        if ($praticaData['is_notowned'] === 'true') {
+        if ($praticaData['is_notowned'] === true) {
             return;
         }
+        if ($praticaData['CRM_code'] === ' QT06260') {
+            Log::info('Processing pratica QT06260', $praticaData);
+        }
+
         $tipoProdotto = strtolower($praticaData['tipo_prodotto']);
-        //  Log::info('Processing pratica record', $praticaData);
-        $practiceSwType = SoftwareMapping::firstOrCreate(
-            ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $tipoProdotto],
-            [
-                'name' => $tipoProdotto,
-                'internal_id' => 0,  // ID, da mappare correttamente in base alla logica di business
-                'description' => 'Mapping automatico da Mediafacile',
-            ]
-        );
-        if ($practiceSwType->internal_id === 0) {
-            $practiceScope = PracticeScope::create([
-                'name' => $tipoProdotto,
-                'code' => 'Mediafacile',
-                //  'description' => 'Mapping automatico da Mediafacile',
-            ]);
-            $practiceSwType->internal_id = $practiceScope->id;
-            $practiceSwType->save();
-        }
-        $praticaData['practice_scope_id'] = $practiceSwType->internal_id;
+        //  Log::inpublic/storagefo('Processing pratica record', $praticaData);
 
+        /*
+         * $practiceSwType = SoftwareMapping::firstOrCreate(
+         *     ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_TYPE', 'external_value' => $tipoProdotto],
+         *     [
+         *         'name' => $tipoProdotto,
+         *         'internal_id' => 0,  // ID, da mappare correttamente in base alla logica di business
+         *         'description' => 'Mapping automatico da Mediafacile',
+         *     ]
+         * );
+         * if ($practiceSwType->internal_id === 0) {
+         *     $practiceScope = PracticeScope::create([
+         *         'name' => $tipoProdotto,
+         *         'code' => 'Mediafacile',
+         *         //  'description' => 'Mapping automatico da Mediafacile',
+         *     ]);
+         *     $practiceSwType->internal_id = $practiceScope->id;
+         *     $practiceSwType->save();
+         * }
+         * $praticaData['practice_scope_id'] = $practiceSwType->internal_id;
+         */
         $statoPratica = strtolower($praticaData['stato_pratica']);
-        $status = SoftwareMapping::firstOrCreate(
-            ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_STATUS', 'external_value' => $statoPratica],
-            [
-                'name' => $statoPratica,
-                'internal_id' => 0,  // Default ID, da mappare correttamente in base alla logica di business
-                'description' => 'Mapping automatico da Mediafacile',
-            ]
-        );
-        if ($status->internal_id === 0) {
-            $practiceStatus = PracticeStatus::create([
-                'name' => $statoPratica,
-                'code' => 'Mediafacile',
-            ]);
-            $status->internal_id = $practiceStatus->id;
-            $status->save();
-        }
-        $praticaData['practice_status_id'] = $status->internal_id;
 
-        $existing = Practice::where('CRM_code', $praticaData['CRM_code'])->first();
+        /*
+         * $status = SoftwareMapping::firstOrCreate(
+         *     ['software_application_id' => $this->softwareId, 'mapping_type' => 'PRACTICE_STATUS', 'external_value' => $statoPratica],
+         *     [
+         *         'name' => $statoPratica,
+         *         'internal_id' => 0,  // Default ID, da mappare correttamente in base alla logica di business
+         *         'description' => 'Mapping automatico da Mediafacile',
+         *     ]
+         * );
+         * if ($status->internal_id === 0) {
+         *     $practiceStatus = PracticeStatus::create([
+         *         'name' => $statoPratica,
+         *         'code' => 'Mediafacile',
+         *     ]);
+         *     $status->internal_id = $practiceStatus->id;
+         *     $status->save();
+         * }
+         * $praticaData['practice_status_id'] = $status->internal_id;
+         */
+
+        $crmCode = $praticaData['CRM_code'];
+        if ($crmCode === 'QT06105') {
+            Log::info('CRM code is QT06105', $praticaData);
+        }
+        $existing = Practice::where('CRM_code', $crmCode)->first();
 
         // Gestione cliente
         $client = null;
@@ -337,12 +350,12 @@ class MediafacileImportService
                 }
 
                 // Debug: Log prima dell'aggiornamento
-                Log::info('Updating existing ClientMandate', [
-                    'practice_id' => $existing->id,
-                    'client_mandate_id' => $existing->client_mandate_id,
-                    'current_stato' => $existing->clientMandate->stato,
-                    'new_stato' => $stato,
-                ]);
+                //     Log::info('Updating existing ClientMandate', [
+                //      'practice_id' => $existing->id,
+                //      'client_mandate_id' => $existing->client_mandate_id,
+                //      'current_stato' => $existing->clientMandate->stato,
+                //      'new_stato' => $stato,
+                //  ]);
 
                 // Aggiorna lo stato se il mandato esisteva già
                 $existing->clientMandate->update([
@@ -351,10 +364,10 @@ class MediafacileImportService
                 ]);
 
                 // Debug: Log dopo l'aggiornamento
-                Log::info('ClientMandate updated successfully', [
-                    'client_mandate_id' => $existing->client_mandate_id,
-                    'final_stato' => $existing->clientMandate->stato,
-                ]);
+                //    Log::info('ClientMandate updated successfully', [
+                //        'client_mandate_id' => $existing->client_mandate_id,
+                //        'final_stato' => $existing->clientMandate->stato,
+                //    ]);
             }
         }
     }
@@ -378,9 +391,20 @@ class MediafacileImportService
         $amount = $this->parseDecimal($apiData['Montante'] ?? null);
         $net = $this->parseDecimal($apiData['Importo_Erogazione'] ?? null);
 
+        // Find client by fiscal code
+        $clientId = null;
+        $fiscalCode = $apiData['Codice Fiscale'] ?? null;
+        if (!empty($fiscalCode)) {
+            $client = Client::where('tax_code', $fiscalCode)->first();
+            if ($client) {
+                $clientId = $client->id;
+            }
+        }
+
         return [
             'id' => $apiData['ID Pratica'] ?? (string) Str::uuid(),
             'CRM_code' => $apiData['ID Pratica'] ?? null,
+            'client_id' => $clientId,
             'nome_cliente' => $apiData['Cognome Cliente'] ?? null,
             'cognome_cliente' => $apiData['Nome Cliente'] ?? null,
             'codice_fiscale' => $apiData['Codice Fiscale'] ?? null,

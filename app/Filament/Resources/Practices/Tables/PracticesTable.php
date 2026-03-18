@@ -30,6 +30,8 @@ class PracticesTable
     {
         return $table
             ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'practiceScope', 'practiceStatus', 'clientMandate', 'parentPractice']))
+            ->paginated(['all', 10, 25, 50, 100])
+            ->defaultSort('inserted_at', 'desc')
             ->columns([
                 TextColumn::make('tipo_prodotto')
                     ->label('Tipo Prodotto')
@@ -41,13 +43,6 @@ class PracticesTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('Nessun mandante'),
-                TextColumn::make('parentPractice.name')
-                    ->label('Pratica Collegata')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('Nessuna pratica collegata')
-                    ->description(fn($record): string => $record->parentPractice?->CRM_code ?? '')
-                    ->toggleable(),
                 TextColumn::make('inserted_at')
                     ->label('Data Inserimento')
                     ->date()
@@ -83,9 +78,8 @@ class PracticesTable
                     ->label('Fatturata')
                     ->boolean()
                     ->sortable(),
-                TextColumn::make('clientMandate.client.name')
+                TextColumn::make('client.full_name')
                     ->label('Contraente')
-                    ->searchable()
                     ->sortable()
                     ->placeholder('No cliente'),
                 TextColumn::make('agent.name')
@@ -198,6 +192,17 @@ class PracticesTable
                     ->falseIcon('heroicon-o-check-circle')
                     ->color(fn($state) => $state ? 'danger' : 'success')
                     ->tooltip(fn($record) => $record->isRejected() ? 'Respinta' : 'Non respinta'),
+                TextColumn::make('parentPractice.name')
+                    ->label('Pratica Collegata')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Nessuna pratica collegata')
+                    ->description(fn($record): string => $record->parentPractice?->CRM_code ?? '')
+                    ->toggleable(),
+                TextColumn::make('client.name')
+                    ->label('Cognome')
+                    ->sortable()
+                    ->placeholder('No cliente'),
             ])
             ->filters([
                 SelectFilter::make('Istruttoria')

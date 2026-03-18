@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PracticeCommissions\Tables;
 
 use App\Filament\Imports\PracticeCommissionsImporter;
+use App\Models\PracticeCommission;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,6 +18,9 @@ class PracticeCommissionsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->query(fn() => PracticeCommission::query()->where('is_payment', true))
+            ->paginated(['all', 10, 25, 50, 100])
+            ->defaultSort('perfected_at', 'desc')
             ->columns([
                 TextColumn::make('agent.name')
                     ->label('Agente')
@@ -32,7 +36,7 @@ class PracticeCommissionsTable
                     ->date()
                     ->sortable(),
                 TextColumn::make('practice.name')
-                    ->label('Practica')
+                    ->label('Pratica')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('proforma.name')
@@ -48,6 +52,10 @@ class PracticeCommissionsTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('Nessuno stato'),
+                TextColumn::make('name')
+                    ->label('Causale')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('principal.name')
                     ->label('Mandante')
                     ->searchable()
@@ -79,10 +87,10 @@ class PracticeCommissionsTable
                 IconColumn::make('is_enasarco')
                     ->label('Enasarco')
                     ->boolean(),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('CRM_code')
+                    ->label('CRM')
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 //

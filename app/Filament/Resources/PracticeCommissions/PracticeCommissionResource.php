@@ -48,9 +48,10 @@ class PracticeCommissionResource extends Resource
         return [
             ...parent::getNavigationItems(),
             NavigationItem::make('Provvigioni Attive')
+                //   ->group('Pratiche')  // <--- Aggiungi questo
                 ->icon('heroicon-o-check-circle')
                 ->url(static::getUrl('attive'))
-                ->sort(2),
+                ->sort(20),
         ];
     }
 

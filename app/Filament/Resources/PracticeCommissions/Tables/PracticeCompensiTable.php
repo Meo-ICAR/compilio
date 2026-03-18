@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PracticeCommissions\Tables;
 
 use App\Filament\Imports\PracticeCommissionsImporter;
+use App\Models\PracticeCommission;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,6 +18,8 @@ class PracticeCompensiTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->query(fn() => PracticeCommission::query()->where('is_payment', false))
+            ->paginated(['all', 10, 25, 50, 100])
             ->columns([
                 TextColumn::make('principal.name')
                     ->label('Mandante')

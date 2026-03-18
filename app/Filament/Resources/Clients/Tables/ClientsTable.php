@@ -34,6 +34,7 @@ class ClientsTable
                 // Identificazione Rapida
                 TextColumn::make('full_name')  // Presuppone un accessor nel modello o usa formatStateUsing
                     ->label('Cliente')
+                    //   ->sortable()
                     ->description(fn($record) => $record->tax_code)
                     ->searchable(['name', 'first_name', 'tax_code'])
                     ->state(fn($record) => $record->is_person
@@ -62,6 +63,7 @@ class ClientsTable
                         ? 'Letta il: ' . $record->privacy_policy_read_at->format('d/m/Y H:i')
                         : 'Non ancora letta'),
                 IconColumn::make('is_pep')
+                    ->sortable()
                     ->label('PEP')
                     ->boolean()
                     ->trueIcon('heroicon-o-flag')
@@ -81,12 +83,14 @@ class ClientsTable
                     ->color(fn($state) => $state ? 'success' : 'gray'),
                 // Dati Finanziari
                 TextColumn::make('salary')
+                    ->sortable()
                     ->label('RAL')
                     ->money('EUR')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 // Date
                 TextColumn::make('created_at')
+                    ->sortable()
                     ->label('Acquisito il')
                     ->dateTime('d/m/Y')
                     ->sortable(),
@@ -125,6 +129,7 @@ class ClientsTable
                 //  BulkActionGroup::make([
                 //      DeleteBulkAction::make(),
                 //  ]),
-            ]);
+            ])
+            ->defaultSort('name');
     }
 }
