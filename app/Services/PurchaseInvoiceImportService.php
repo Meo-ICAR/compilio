@@ -67,14 +67,14 @@ class PurchaseInvoiceImportService
         try {
             // Read Excel file using Excel facade
             $data = Excel::toArray([], $actualFilePath);
-            
+
             if (empty($data) || empty($data[0])) {
                 throw new \Exception('Cannot read data from Excel file');
             }
 
             $rows = $data[0];
-            $headers = array_shift($rows); // Remove first row as headers
-            
+            $headers = array_shift($rows);  // Remove first row as headers
+
             if (empty($headers)) {
                 throw new \Exception('Cannot read headers from file');
             }
@@ -108,7 +108,6 @@ class PurchaseInvoiceImportService
             ]);
 
             return $this->importResults;
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error importing purchase invoices', [
@@ -166,7 +165,6 @@ class PurchaseInvoiceImportService
                 $this->importResults['imported']++;
                 $this->importResults['details'][] = "Imported invoice: {$invoiceData['number']} (row {$rowNumber})";
             }
-
         } catch (\Exception $e) {
             Log::error('Error processing row', [
                 'row_number' => $rowNumber,
@@ -217,7 +215,7 @@ class PurchaseInvoiceImportService
         if (empty($value)) {
             return null;
         }
-        
+
         return trim(preg_replace('/\s+/', ' ', $value));
     }
 
@@ -247,7 +245,7 @@ class PurchaseInvoiceImportService
         // Try Excel serial date format
         if (is_numeric($value)) {
             try {
-                $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((int)$value);
+                $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((int) $value);
                 return $date->format('Y-m-d');
             } catch (\Exception $e) {
                 // Continue to return null
@@ -260,17 +258,27 @@ class PurchaseInvoiceImportService
     protected function parseDecimal($value)
     {
         if (empty($value)) {
-            return null;
+            return 0;
         }
 
-        // Remove dots and commas for Italian format
-        $cleanValue = str_replace(['.', ','], '', $value);
-        
-        if (is_numeric($cleanValue)) {
-            return (float)($cleanValue / 100); // Convert from cents
+        // If it's already a float, return it directly
+        if (is_float($value)) {
+            return $value;
         }
 
-        return null;
+        // Handle Italian format: 29.582,24 -> 29582.24
+        // First, remove thousands separators (dots) only if there's a comma for decimal
+        if (is_string($value) && strpos($value, ',') !== false) {
+            $parts = explode(',', $value);
+            $integer_part = str_replace('.', '', $parts[0]);
+            $decimal_part = $parts[1] ?? '0';
+            $value = $integer_part . '.' . $decimal_part;
+        } else {
+            // If no comma, just remove dots (might be thousands separators)
+            $value = str_replace('.', '', $value);
+        }
+
+        return (float) $value;
     }
 
     protected function parseInteger($value)
@@ -280,7 +288,7 @@ class PurchaseInvoiceImportService
         }
 
         if (is_numeric($value)) {
-            return (int)$value;
+            return (int) $value;
         }
 
         return null;
@@ -294,7 +302,7 @@ class PurchaseInvoiceImportService
 
         // Handle Excel TRUE/FALSE strings
         $value = strtoupper(trim($value));
-        
+
         if ($value === 'TRUE' || $value === 'VERO') {
             return true;
         } elseif ($value === 'FALSE' || $value === 'FALSO') {

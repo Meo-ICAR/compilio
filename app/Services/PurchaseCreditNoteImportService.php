@@ -281,11 +281,24 @@ class PurchaseCreditNoteImportService
             return 0;
         }
 
-        // Remove currency symbols and formatting
-        $cleaned = preg_replace('/[^0-9.,-]/', '', (string) $value);
-        $cleaned = str_replace(',', '.', $cleaned);
+        // If it's already a float, return it directly
+        if (is_float($value)) {
+            return $value;
+        }
 
-        return (float) $cleaned;
+        // Handle Italian format: 29.582,24 -> 29582.24
+        // First, remove thousands separators (dots) only if there's a comma for decimal
+        if (is_string($value) && strpos($value, ',') !== false) {
+            $parts = explode(',', $value);
+            $integer_part = str_replace('.', '', $parts[0]);
+            $decimal_part = $parts[1] ?? '0';
+            $value = $integer_part . '.' . $decimal_part;
+        } else {
+            // If no comma, just remove dots (might be thousands separators)
+            $value = str_replace('.', '', $value);
+        }
+
+        return (float) $value;
     }
 
     /**
