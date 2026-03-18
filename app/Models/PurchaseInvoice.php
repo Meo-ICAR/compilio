@@ -31,6 +31,7 @@ class PurchaseInvoice extends Model
         'closed',
         'cancelled',
         'corrected',
+        'is_nopractice',
         'pay_to_address',
         'pay_to_city',
         'supplier_category',
@@ -54,6 +55,7 @@ class PurchaseInvoice extends Model
         'closed' => 'boolean',
         'cancelled' => 'boolean',
         'corrected' => 'boolean',
+        'is_nopractice' => 'boolean',
         'printed_copies' => 'integer',
     ];
 

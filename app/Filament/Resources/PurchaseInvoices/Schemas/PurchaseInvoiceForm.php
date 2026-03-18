@@ -215,6 +215,10 @@ class PurchaseInvoiceForm
                                 Toggle::make('corrected')
                                     ->label('Corrected')
                                     ->default(false),
+                                Toggle::make('is_nopractice')
+                                    ->label('Non Practice')
+                                    ->default(false)
+                                    ->helperText('Seleziona se questa fattura non è associata a una practice'),
                             ]),
                     ]),
             ]);

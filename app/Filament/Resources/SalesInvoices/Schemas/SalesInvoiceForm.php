@@ -209,6 +209,10 @@ class SalesInvoiceForm
                                 Toggle::make('corrected')
                                     ->label('Corretta')
                                     ->default(false),
+                                Toggle::make('is_nopractice')
+                                    ->label('Non Practice')
+                                    ->default(false)
+                                    ->helperText('Seleziona se questa fattura non è associata a una practice'),
                             ]),
                     ]),
                 PracticeCommissionsTable::make('practiceCommissions'),

@@ -53,6 +53,10 @@ class PurchaseInvoicesTable
                     ->label('Fornitore')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('vat_number')
+                    ->label('Partita IVA')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('amount')
                     ->label('Amount')
                     ->money('EUR')
@@ -112,6 +116,9 @@ class PurchaseInvoicesTable
                             ->whereNotNull('due_date')
                             ->where('due_date', '<', now());
                     }),
+                Filter::make('is_nopractice')
+                    ->label('Non Practice')
+                    ->query(fn($query) => $query->where('is_nopractice', true)),
             ])
             ->recordActions([
                 //   EditAction::make(),

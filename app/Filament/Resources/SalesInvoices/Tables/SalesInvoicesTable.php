@@ -118,6 +118,9 @@ class SalesInvoicesTable
                 Filter::make('cancelled')
                     ->label('Annullate')
                     ->query(fn($query) => $query->where('cancelled', true)),
+                Filter::make('is_nopractice')
+                    ->label('Non Practice')
+                    ->query(fn($query) => $query->where('is_nopractice', true)),
             ])
             ->recordActions([
                 // ViewAction::make(),

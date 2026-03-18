@@ -6,6 +6,7 @@ use App\Filament\Resources\PracticeCommissions\PracticeCommissionResource;
 use App\Filament\Traits\HasRegolamentoAction;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use UnitEnum;
 
 class ListPracticeCompensi extends ListRecords
 {

@@ -48,6 +48,23 @@ class PracticeForm
                     ->label('Nome Pratica'),
                 TextInput::make('CRM_code')
                     ->label('Codice CRM'),
+                Select::make('practice_id')
+                    ->label('Pratica Collegata')
+                    ->relationship('parentPractice', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Seleziona la pratica principale a cui questa è collegata (es. mutuo principale per polizze accessorie)')
+                    ->getSearchResultsUsing(function (string $search) {
+                        return \App\Models\Practice::where('name', 'like', "%{$search}%")
+                            ->orWhere('CRM_code', 'like', "%{$search}%")
+                            ->limit(50)
+                            ->pluck('name', 'id');
+                    })
+                    ->getOptionLabelUsing(function ($value) {
+                        $practice = \App\Models\Practice::find($value);
+                        return $practice ? $practice->name . ' (' . $practice->CRM_code . ')' : $value;
+                    }),
                 TextInput::make('principal_code')
                     ->label('Codice Mandante'),
                 TextInput::make('tipo_prodotto')

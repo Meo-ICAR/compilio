@@ -16,6 +16,7 @@ class Practice extends Model
     use BelongsToCompany;
 
     protected $fillable = [
+        'practice_id',
         'client_mandate_id',
         'company_id',
         'principal_id',
@@ -159,6 +160,16 @@ class Practice extends Model
     public function practiceStatus()
     {
         return $this->belongsTo(PracticeStatus::class);
+    }
+
+    public function parentPractice()
+    {
+        return $this->belongsTo(Practice::class, 'practice_id');
+    }
+
+    public function childPractices()
+    {
+        return $this->hasMany(Practice::class, 'practice_id');
     }
 
     public function getClientsNamesAttribute()

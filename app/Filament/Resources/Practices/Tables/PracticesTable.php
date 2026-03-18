@@ -29,7 +29,7 @@ class PracticesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'practiceScope', 'practiceStatus', 'clientMandate']))
+            ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'practiceScope', 'practiceStatus', 'clientMandate', 'parentPractice']))
             ->columns([
                 TextColumn::make('tipo_prodotto')
                     ->label('Tipo Prodotto')
@@ -41,6 +41,13 @@ class PracticesTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('Nessun mandante'),
+                TextColumn::make('parentPractice.name')
+                    ->label('Pratica Collegata')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('Nessuna pratica collegata')
+                    ->description(fn($record): string => $record->parentPractice?->CRM_code ?? '')
+                    ->toggleable(),
                 TextColumn::make('inserted_at')
                     ->label('Data Inserimento')
                     ->date()
