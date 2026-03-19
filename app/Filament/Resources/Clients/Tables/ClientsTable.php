@@ -38,6 +38,7 @@ class ClientsTable
                     ->label('Cliente')
                     //   ->sortable()
                     ->description(fn($record) => $record->tax_code)
+                    ->sortable()
                     ->searchable(['name', 'first_name', 'tax_code'])
                     ->state(fn($record) => $record->is_person
                         ? "{$record->name} {$record->first_name}"

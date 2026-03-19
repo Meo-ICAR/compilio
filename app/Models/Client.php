@@ -28,6 +28,7 @@ class Client extends Model implements HasMedia
         'name',
         'first_name',
         'tax_code',
+        'vat_number',
         'email',
         'phone',
         'is_pep',

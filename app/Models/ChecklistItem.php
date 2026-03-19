@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class ChecklistItem extends Model
 {
@@ -92,14 +93,21 @@ class ChecklistItem extends Model
      */
     public function getAvailableDocumentsForTarget(): \Illuminate\Database\Eloquent\Collection
     {
-        if (!$this->checklist || !$this->checklist->target) {
+        if (!$this->checklist_id || !$this->checklist) {
             return new \Illuminate\Database\Eloquent\Collection();
         }
 
-        $target = $this->checklist->target;
+        // Use direct database query for better performance
+        $target = DB::table('checklists')
+            ->where('id', $this->checklist_id)
+            ->first(['target_type', 'target_id']);
 
-        return Document::where('documentable_type', get_class($target))
-            ->where('documentable_id', $target->id)
+        if (!$target || !$target->target_type || !$target->target_id) {
+            return new \Illuminate\Database\Eloquent\Collection();
+        }
+
+        return Document::where('documentable_type', $target->target_type)
+            ->where('documentable_id', $target->target_id)
             ->with(['documentType'])
             ->get();
     }
@@ -233,9 +241,9 @@ class ChecklistItem extends Model
             return null;
         }
 
-        $dependencyItem = $this
-            ->checklist
-            ->items()
+        // Use direct database query to avoid potential infinite loops
+        $dependencyItem = DB::table('checklist_items')
+            ->where('checklist_id', $this->checklist_id)
             ->where('item_code', $this->depends_on_code)
             ->first();
 

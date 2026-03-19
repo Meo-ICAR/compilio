@@ -154,11 +154,11 @@ class PurchaseInvoicesTable
                         // Se è vuoto o null, crea il record
                         if (is_null($searchTerm) || $searchTerm === '') {
                             $newRecord = match ($data['invoiceable_type']) {
-                                'App\Models\Client' => \App\Models\Client::create(['name' => $record->supplier . date('Y-m-d H:i'),
+                                'App\Models\Client' => Client::create(['name' => $record->supplier . date('Y-m-d H:i'),
                                     'vat_number' => $record->vat_number]),
-                                'App\Models\Agent' => \App\Models\Agent::create(['name' => $record->supplier . date('Y-m-d H:i'),
+                                'App\Models\Agent' => Agent::create(['name' => $record->supplier . date('Y-m-d H:i'),
                                     'vat_number' => $record->vat_number]),
-                                'App\Models\Principal' => \App\Models\Principal::create(['name' => $record->supplier . date('Y-m-d H:i'),
+                                'App\Models\Principal' => Principal::create(['name' => $record->supplier . date('Y-m-d H:i'),
                                     'vat_number' => $record->vat_number]),
                                 default => null
                             };
@@ -256,42 +256,6 @@ class PurchaseInvoicesTable
                                 ->send();
                         }
                     }),
-                Action::make('import_purchase_invoices_csv')
-                    ->label('Importa Fatture Acquisto')
-                    ->icon('heroicon-o-document-text')
-                    ->color('info')
-                    ->form([
-                        FileUpload::make('import_file_csv')
-                            ->label('File CSV')
-                            ->helperText('Carica un file CSV con i dati delle fatture di acquisto')
-                            ->acceptedFileTypes(['text/csv'])
-                            ->maxSize(10240)  // 10MB
-                            ->directory('purchase-invoice-imports-csv')
-                            ->visibility('private')
-                            ->required(),
-                    ])
-                    ->action(function (array $data) {
-                        try {
-                            $filePath = storage_path('app/public/' . $data['import_file_csv']);
-                            $companyId = Auth::user()->company_id;
-                            $filename = basename($data['import_file_csv']);
-
-                            $importService = new \App\Services\PurchaseInvoiceImportServiceCSV($filename);
-                            $results = $importService->import('public/' . $data['import_file_csv'], $companyId);
-
-                            Notification::make()
-                                ->title('Importazione CSV completata')
-                                ->body("Importazione da {$filename} completata. Importate: {$results['imported']}, Aggiornate: {$results['updated']}, Errori: {$results['errors']}")
-                                ->success()
-                                ->send();
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->title('Errore importazione CSV')
-                                ->body('Errore durante importazione: ' . $e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
                 Action::make('import_purchase_invoices_excel')
                     ->label('Importa Fatture Acquisto Excel')
                     ->icon('heroicon-o-document-arrow-up')
@@ -337,8 +301,8 @@ class PurchaseInvoicesTable
                             $importService = new PurchaseInvoiceImportService();
 
                             // Esegui solo le funzioni di matching
-                            $importService->matchAgentsByVatNumber();
-                            $importService->matchClientsByVatNumber();
+                            //  $importService->matchAgentsByVatNumber(Auth::user()->company_id);
+                            $importService->matchClientsByVatNumber(Auth::user()->company_id);
 
                             Notification::make()
                                 ->title('Associazione completata')

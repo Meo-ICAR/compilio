@@ -150,14 +150,24 @@ class PracticeCommissionForm
                                 ->helperText('Data annullamento provvigione'),
                         ]),
                         Grid::make(2)->schema([
+                            Select::make('proforma_stato')
+                                ->label('Stato Proforma')
+                                ->options([
+                                    'Inserito' => 'Inserito',
+                                    'Sospeso' => 'Sospeso',
+                                ])
+                                ->nullable()
+                                ->helperText('Stato della proforma di liquidazione'),
                             TextInput::make('invoice_number')
                                 ->label('Numero Fattura')
                                 ->maxLength(30),
+                        ]),
+                        Grid::make(2)->schema([
                             DatePicker::make('invoice_at')
                                 ->label('Data Fattura'),
+                            DatePicker::make('paided_at')
+                                ->label('Data Pagamento'),
                         ]),
-                        DatePicker::make('paided_at')
-                            ->label('Data Pagamento'),
                         DatePicker::make('status_at')
                             ->label('Data Stato Pagamento'),
                     ]),

@@ -4,12 +4,17 @@ namespace App\Filament\Resources\Practices\Tables;
 
 use App\Filament\Imports\PracticesImporter;
 use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
+use App\Models\Agent;
 use App\Models\Practice;
 use App\Models\PracticeStatus;
+use App\Models\Principal;
 use App\Traits\CanExportTable;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
@@ -21,6 +26,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Excel;
 
 class PracticesTable
@@ -207,87 +213,24 @@ class PracticesTable
                     ->placeholder('No cliente'),
             ])
             ->filters([
-                SelectFilter::make('Istruttoria')
-                    ->label('Inviate in Istruttoria')
-                    ->options([
-                        'stipulated' => 'Inviati in Istruttoria',
-                        'not_stipulated' => 'Non Inviati in Istruttoria',
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['value'] === 'stipulated',
-                                fn(Builder $query): Builder => $query->whereNotNull('sended_at'),
-                            )
-                            ->when(
-                                $data['value'] === 'not_stipulated',
-                                fn(Builder $query): Builder => $query->whereNull('sended_at'),
-                            );
-                    }),
-                SelectFilter::make('Deliberati')
-                    ->label('Pratiche deliberate')
-                    ->options([
-                        'stipulated' => 'Deliberati',
-                        'not_stipulated' => 'Non Deliberati',
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['value'] === 'stipulated',
-                                fn(Builder $query): Builder => $query->whereNotNull('approved_at'),
-                            )
-                            ->when(
-                                $data['value'] === 'not_stipulated',
-                                fn(Builder $query): Builder => $query->whereNull('approved_at'),
-                            );
-                    }),
-                SelectFilter::make('Erogati')
-                    ->label('Pratiche erogate')
-                    ->options([
-                        'stipulated' => 'Erogati',
-                        'not_stipulated' => 'Non Erogati',
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['value'] === 'stipulated',
-                                fn(Builder $query): Builder => $query->whereNotNull('erogated_at'),
-                            )
-                            ->when(
-                                $data['value'] === 'not_stipulated',
-                                fn(Builder $query): Builder => $query->whereNull('erogated_at'),
-                            );
-                    }),
-                SelectFilter::make('Perfezionate')
-                    ->label('Pratiche perfezionate')
-                    ->options([
-                        'stipulated' => 'Perfezionate',
-                        'not_stipulated' => 'Non Perfezionate',
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['value'] === 'stipulated',
-                                fn(Builder $query): Builder => $query->whereNotNull('perfected_at'),
-                            )
-                            ->when(
-                                $data['value'] === 'not_stipulated',
-                                fn(Builder $query): Builder => $query->whereNull('perfected_at'),
-                            );
-                    }),
-                TernaryFilter::make('is_invoiced')
-                    ->label('Fatturato')
-                    ->placeholder('Tutti gli stati')
-                    ->trueLabel('Almeno una provvigione fatturata')
-                    ->falseLabel('Nessuna provvigione fatturata')
-                    ->queries(
-                        true: fn(Builder $query) => $query->whereHas('practiceCommissions', function ($commissionQuery) {
-                            $commissionQuery->whereNotNull('invoice_at');
-                        }),
-                        false: fn(Builder $query) => $query->whereDoesntHave('practices.practiceCommissions', function ($commissionQuery) {
-                            $commissionQuery->whereNotNull('invoice_at');
-                        })
-                    ),
+                SelectFilter::make('principal_id')
+                    ->label('Mandante')
+                    ->multiple()
+                    ->options(function () {
+                        return Principal::all()
+                            ->pluck('name', 'id')
+                            ->sort();
+                    })
+                    ->searchable(),
+                SelectFilter::make('agent_id')
+                    ->label('Agente')
+                    ->multiple()
+                    ->options(function () {
+                        return Agent::all()
+                            ->pluck('name', 'id')
+                            ->sort();
+                    })
+                    ->searchable(),
                 SelectFilter::make('tipo_prodotto')
                     ->label('Filtra per Tipo')
                     ->multiple()  // Abilita la selezione multipla
@@ -299,17 +242,67 @@ class PracticesTable
                             ->sort()
                             ->toArray()
                     )
-                    ->searchable()  // Opzionale: aggiunge una barra di ricerca nel dropdown
+                    ->searchable(),  // Opzionale: aggiunge una barra di ricerca nel dropdown
+                SelectFilter::make('stato_pratica')
+                    ->options(PracticeStatus::pluck('name', 'id'))
+                    ->multiple()
+                    ->label('Stato Pratica')
+                    ->default(['PERFEZIONATA', 'IN AMMORTAMENTO']),
+                Filter::make('sended_at')
+                    ->label('Inviate in Istruttoria fino al')
+                    ->form([
+                        DatePicker::make('sended_until')
+                            ->label('Inviate fino al'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['sended_until'],
+                            fn(Builder $query, $date): Builder => $query->whereDate('sended_at', '<=', $date),
+                        );
+                    }),
+                Filter::make('approved_at')
+                    ->label('Pratiche deliberate'),
+                Filter::make('erogated_at')
+                    ->label('Pratiche erogate'),
+                Filter::make('perfected_at')
+                    ->label('Pratiche perfezionate'),
+                Filter::make('invoice_at')
+                    ->label('Fatturate'),
             ])
             ->recordActions([
-                ...self::getChecklistActions(
-                    code: 'Cessione',  // <-- Il 'code' esatto presente nel tuo DB
-                    label: 'Cessione'
-                    // icon: 'heroicon-o-clipboard-document-check'
-                ),
+                Action::make('checklist')
+                    ->label(fn($record) => $record->tipo_prodotto ?: 'Checklist')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('primary')
+                    ->action(function ($record) {
+                        // Get the checklist actions for this record's tipo_prodotto
+                        $actions = self::getChecklistActions(
+                            code: $record->tipo_prodotto,
+                            label: $record->tipo_prodotto ?: 'Checklist'
+                        );
+
+                        // Check if checklist exists for this record
+                        $exists = DB::table('checklists')
+                            ->where('target_id', $record->id)
+                            ->where('target_type', get_class($record))
+                            ->where('code', $record->tipo_prodotto)
+                            ->exists();
+
+                        if ($exists) {
+                            // Execute manage action (second action in array)
+                            $manageAction = $actions[1];
+                            $manageAction->call(['record' => $record]);
+                        } else {
+                            // Execute generate action (first action in array)
+                            $generateAction = $actions[0];
+                            $generateAction->call(['record' => $record]);
+                        }
+                    }),
             ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
-                BulkActionGroup::make([$this->getExportBulkAction()]),
+                BulkActionGroup::make([
+                    //   getExportBulkAction(),
+                ]),
             ]);
     }
 }

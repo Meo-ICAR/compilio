@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Agent;
+use App\Models\Client;
 use App\Models\PurchaseInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -315,5 +317,546 @@ class PurchaseInvoiceImportService
     public function getResults(): array
     {
         return $this->importResults;
+    }
+
+    /**
+     * Match Purchase invoices to Agents by VAT number
+     * Updates the relationship for matching invoices
+     */
+    public function matchAgentsByVatNumber($companyId = null): void
+    {
+        // Use provided companyId or fall back to instance property
+        $companyId = $companyId ?? $this->companyId;
+
+        $matchedCount = 0;
+
+        try {
+            // Get all Purchase invoices for this company that have a VAT number but no Agent relationship
+            $invoices = PurchaseInvoice::where('company_id', $companyId)
+                ->whereNotNull('vat_number')
+                ->whereNull('invoiceable_id')
+                ->get();
+
+            Log::info('Starting Agent matching by VAT number', [
+                'company_id' => $companyId,
+                'invoices_to_check' => $invoices->count()
+            ]);
+
+            foreach ($invoices as $invoice) {
+                // Clean VAT number for comparison
+                $cleanVatNumber = $this->cleanVatNumber($invoice->vat_number);
+
+                if (empty($cleanVatNumber)) {
+                    continue;
+                }
+
+                // Find Agent with matching VAT number
+                $Agent = $this->findAgentByVatNumber($cleanVatNumber, $companyId);
+
+                if (!$Agent && !empty($invoice->supplier)) {
+                    $Agent = $this->findAgentByNameSimilarity($invoice->supplier, $companyId);
+                }
+
+                // Se il Agent ha un VAT number di 10 caratteri, confronta solo i primi 10
+                if (!$Agent && strlen($cleanVatNumber) >= 10) {
+                    $first10Chars = substr($cleanVatNumber, 0, 10);
+                    $Agent = Agent::where('company_id', $companyId)
+                        ->whereRaw('LENGTH(vat_number) >= 10')
+                        ->whereRaw('SUBSTRING(vat_number, 1, 10) = ?', [$first10Chars])
+                        ->first();
+
+                    if (!$Agent) {
+                        $Agent = $this->findAgentByNameSimilarity($invoice->supplier, $companyId);
+                    }
+
+                    if ($Agent) {
+                        // Rettifica il VAT number del Agent con quello completo della fattura
+                        $Agent->update(['vat_number' => $cleanVatNumber, 'contoCOGE' => $invoice->supplier_number]);
+                    }
+                }
+
+                if ($Agent) {
+                    // Update the invoice with the Agent relationship
+                    $invoice->update([
+                        'invoiceable_type' => Agent::class,
+                        'invoiceable_id' => $Agent->id,
+                    ]);
+
+                    $matchedCount++;
+                }
+            }
+
+            // Update import results
+            $this->importResults['Agent_matches'] = $matchedCount;
+            $this->importResults['details'][] = "Matched {$matchedCount} invoices to Agents by VAT number";
+        } catch (\Exception $e) {
+            Log::error('Agent matching failed', [
+                'company_id' => $this->companyId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            $this->importResults['Agent_match_errors'] = ($this->importResults['Agent_match_errors'] ?? 0) + 1;
+            $this->importResults['details'][] = 'Agent matching error: ' . $e->getMessage();
+        }
+    }
+
+    /**
+     * Clean and normalize VAT number for comparison
+     */
+    protected function cleanVatNumber(string $vatNumber): string
+    {
+        // Remove spaces, dots, dashes, and common Italian VAT formatting
+        $cleaned = preg_replace('/[\s\.\-_]/', '', $vatNumber);
+
+        // Remove country prefix if present (IT for Italy)
+        if (str_starts_with(strtoupper($cleaned), 'IT')) {
+            $cleaned = substr($cleaned, 2);
+        }
+
+        // Remove any remaining non-alphanumeric characters
+        $cleaned = preg_replace('/[^A-Z0-9]/', '', strtoupper($cleaned));
+
+        return $cleaned;
+    }
+
+    /**
+     * Get variations of VAT number for flexible matching
+     */
+    protected function getVatNumberVariations(string $vatNumber): array
+    {
+        $variations = [$vatNumber];
+
+        // Add with country prefix
+        if (!str_starts_with(strtoupper($vatNumber), 'IT')) {
+            $variations[] = 'IT' . $vatNumber;
+        }
+
+        // Add with spaces and formatting variations
+        $formatted = preg_replace('/([A-Z0-9]{2})/', '$1 ', $vatNumber);
+        $formatted = trim($formatted);
+        if ($formatted !== $vatNumber) {
+            $variations[] = $formatted;
+        }
+
+        return array_unique($variations);
+    }
+
+    /**
+     * Match Purchase invoices to clients by VAT number
+     * Updates the relationship for matching invoices
+     */
+    public function matchClientsByVatNumber($companyId = null): void
+    {
+        // Use provided companyId or fall back to instance property
+        $companyId = $companyId ?? $this->companyId;
+
+        $matchedCount = 0;
+
+        try {
+            // Get all Purchase invoices for this company that have a VAT number but no client relationship
+            $invoices = PurchaseInvoice::where('company_id', $companyId)
+                ->whereNotNull('vat_number')
+                ->whereNull('invoiceable_id')
+                ->get();
+
+            foreach ($invoices as $invoice) {
+                // Clean VAT number for comparison
+                $vatNumber = $invoice->vat_number;
+
+                $cleanVatNumber = $this->cleanVatNumber($vatNumber);
+
+                if (empty($cleanVatNumber)) {
+                    continue;
+                }
+
+                // Find client with matching VAT number
+                $client = $this->findClientByVatNumber($cleanVatNumber, $companyId);
+
+                if (!$client && !empty($invoice->supplier)) {
+                    // Try to match by customer name similarity
+                    $client = $this->findClientByNameSimilarity($invoice->supplier, $companyId);
+                }
+
+                if (!$client && !empty($invoice->supplier)) {
+                    // Try to match by full name (name + first_name)
+                    $client = $this->findClientByFullName($invoice->supplier, $companyId);
+                }
+
+                if ($client) {
+                    // Update the invoice with the client relationship
+                    $invoice->update([
+                        'invoiceable_type' => Client::class,
+                        'invoiceable_id' => $client->id,
+                    ]);
+
+                    $matchedCount++;
+                } else {
+                    // Create new client if no matches found
+                    $newClient = $this->createClientFromInvoice($invoice, $companyId);
+
+                    if ($newClient) {
+                        // Update the invoice with the new client relationship
+                        $invoice->update([
+                            'invoiceable_type' => Client::class,
+                            'invoiceable_id' => $newClient->id,
+                        ]);
+
+                        $this->importResults['clients_created'] = ($this->importResults['clients_created'] ?? 0) + 1;
+                    }
+                }
+            }
+
+            Log::info('Client matching completed', [
+                'company_id' => $companyId,
+                'total_checked' => $invoices->count(),
+                'matched' => $matchedCount,
+            ]);
+
+            // Update import results
+            $this->importResults['client_matches'] = $matchedCount;
+            $this->importResults['details'][] = "Matched {$matchedCount} invoices to clients by VAT number";
+        } catch (\Exception $e) {
+            Log::error('Client matching failed', [
+                'company_id' => $this->companyId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            $this->importResults['client_match_errors'] = ($this->importResults['client_match_errors'] ?? 0) + 1;
+            $this->importResults['details'][] = 'Client matching error: ' . $e->getMessage();
+        }
+    }
+
+    /**
+     * Create a new client from invoice data
+     */
+    protected function createClientFromInvoice(PurchaseInvoice $invoice, $companyId): ?Client
+    {
+        try {
+            $clientData = [
+                'company_id' => $companyId,
+                'name' => $invoice->supplier,
+                'tax_code' => $invoice->fiscal_code,
+                'vat_number' => $invoice->vat_number,
+                'contoCOGE' => $invoice->supplier_number,
+                'is_client' => false,
+                'is_company' => true,  // Assume customers are companies
+                'status' => 'active',
+            ];
+
+            $client = Client::create($clientData);
+
+            // Check if address with address_type_id => 5 already exists
+            $existingAddress = $client
+                ->addresses()
+                ->where('address_type_id', 5)
+                ->first();
+
+            if (!$existingAddress) {
+                $address = $client->addresses()->create([
+                    'address_type_id' => 5,
+                    'name' => 'Fatturazione',
+                    'street' => $invoice->pay_to_address,
+                    'city' => $invoice->pay_to_city,
+                    //   'zip_code' => $invoice->ship_to_cap,
+                ]);
+            }
+
+            Log::info('Successfully created new client', [
+                'client_id' => $client->id,
+                'client_name' => $client->name,
+                'invoice_number' => $invoice->number,
+                'tax_code' => $client->tax_code,
+            ]);
+
+            return $client;
+        } catch (\Exception $e) {
+            Log::error('Failed to create client from invoice', [
+                'invoice_number' => $invoice->number,
+                'supplier' => $invoice->supplier,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Find client by matching VAT number (checks both vat_number and tax_code)
+     */
+    protected function findClientByVatNumber(string $vatNumber, string $companyId): ?Client
+    {
+        if (empty($vatNumber)) {
+            return null;
+        }
+
+        // Try to find by tax_code
+        $client = Client::where('company_id', $companyId)
+            ->where('tax_code', $vatNumber)
+            ->first();
+
+        if ($client) {
+            Log::info('Found client by tax_code', [
+                'vat_number' => $vatNumber,
+                'client_id' => $client->id,
+                'client_name' => $client->name,
+                'tax_code' => $client->tax_code,
+            ]);
+            return $client;
+        }
+
+        // Try variations
+        $variations = $this->getVatNumberVariations($vatNumber, $companyId);
+
+        foreach ($variations as $variation) {
+            try {
+                $client = Client::where('company_id', $companyId)
+                    ->where('tax_code', $variation)
+                    ->first();
+
+                if ($client) {
+                    return $client;
+                }
+            } catch (\Exception $e) {
+                // Column vat_number doesn't exist, try tax_code
+            }
+
+            $client = Client::where('company_id', $companyId)
+                ->where('tax_code', $variation)
+                ->first();
+
+            if ($client) {
+                return $client;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Find Agent by VAT number with flexible matching
+     */
+    protected function findAgentByVatNumber(string $vatNumber, string $companyId): ?Agent
+    {
+        // Try exact match first
+        $Agent = Agent::where('vat_number', $vatNumber)
+            ->where('company_id', $companyId)
+            ->first();
+
+        if ($Agent) {
+            return $Agent;
+        }
+
+        // Try cleaned versions
+        $cleanedVariations = $this->getVatNumberVariations($vatNumber);
+
+        foreach ($cleanedVariations as $variation) {
+            $Agent = Agent::where('vat_number', $variation)
+                ->where('company_id', $companyId)
+                ->first();
+
+            if ($Agent) {
+                return $Agent;
+            }
+        }
+
+        // Try to find by tax_code if vat_number column doesn't exist
+        $variations = $this->getVatNumberVariations($vatNumber);
+
+        foreach ($variations as $variation) {
+            try {
+                $client = Client::where('company_id', $companyId)
+                    ->where('vat_number', $variation)
+                    ->first();
+
+                if ($client) {
+                    return $client;
+                }
+            } catch (\Exception $e) {
+                // Column vat_number doesn't exist, try tax_code
+            }
+
+            $client = Client::where('company_id', $companyId)
+                ->where('tax_code', $variation)
+                ->first();
+
+            if ($client) {
+                return $client;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Find Agent by name similarity using fuzzy matching
+     */
+    protected function findAgentByNameSimilarity($AgentName, $companyId): ?Agent
+    {
+        if (empty($AgentName)) {
+            return null;
+        }
+
+        // Get all Agents for this company
+        $Agents = Agent::where('company_id', $companyId)
+            ->whereNotNull('name')
+            ->get();
+
+        $bestMatch = null;
+        $bestScore = 0;
+        $similarityThreshold = 70;  // 70% similarity threshold
+
+        foreach ($Agents as $Agent) {
+            $score = $this->calculateSimilarity($AgentName, $Agent->name);
+
+            if ($score > $bestScore && $score >= $similarityThreshold) {
+                $bestScore = $score;
+                $bestMatch = $Agent;
+            }
+        }
+
+        return $bestMatch;
+    }
+
+    /**
+     * Find client by name similarity using fuzzy matching
+     */
+    protected function findClientByNameSimilarity(string $clientName, string $companyId): ?Client
+    {
+        if (empty($clientName)) {
+            return null;
+        }
+
+        // Get all clients for this company
+        $clients = Client::where('company_id', $companyId)
+            ->whereNotNull('name')
+            ->get();
+
+        $bestMatch = null;
+        $bestScore = 0;
+        $similarityThreshold = 70;  // 70% similarity threshold
+
+        foreach ($clients as $client) {
+            $score = $this->calculateSimilarity($clientName, $client->name);
+
+            if ($score > $bestScore && $score >= $similarityThreshold) {
+                $bestScore = $score;
+                $bestMatch = $client;
+            }
+        }
+
+        return $bestMatch;
+    }
+
+    /**
+     * Calculate similarity between two strings using Levenshtein distance
+     */
+    protected function calculateSimilarity(string $string1, string $string2): int
+    {
+        $string1 = strtolower(trim($string1));
+        $string2 = strtolower(trim($string2));
+
+        if (empty($string1) || empty($string2)) {
+            return 0;
+        }
+
+        // Remove common company suffixes for better matching
+        $suffixes = ['s.r.l.', 'srl', 's.p.a.', 'spa', 'ltd', 'limited', 'inc', 'llc', 'gmbh'];
+        foreach ($suffixes as $suffix) {
+            $string1 = preg_replace('/\b' . preg_quote($suffix) . '\b/i', '', $string1);
+            $string2 = preg_replace('/\b' . preg_quote($suffix) . '\b/i', '', $string2);
+        }
+
+        // Clean up extra spaces
+        $string1 = preg_replace('/\s+/', ' ', trim($string1));
+        $string2 = preg_replace('/\s+/', ' ', trim($string2));
+
+        // Use Levenshtein distance for similarity calculation
+        $distance = levenshtein($string1, $string2);
+        $maxLength = max(strlen($string1), strlen($string2));
+
+        if ($maxLength === 0) {
+            return 100;
+        }
+
+        $similarity = 100 - (($distance / $maxLength) * 100);
+
+        return (int) round($similarity);
+    }
+
+    /**
+     * Find client by matching full name (name + first_name)
+     */
+    protected function findClientByFullName(string $customerName, string $companyId): ?Client
+    {
+        if (empty($customerName)) {
+            return null;
+        }
+
+        // Get all clients for this company
+        $clients = Client::where('company_id', $companyId)
+            ->whereNotNull('name')
+            ->get();
+
+        foreach ($clients as $client) {
+            // Build full name from client data
+            $fullName = trim($client->name);
+
+            if (!empty($client->first_name)) {
+                $fullName = trim($client->name . ' ' . $client->first_name);
+            }
+
+            // Exact match first
+            if (strcasecmp($fullName, $customerName) === 0) {
+                Log::info('Found exact full name match', [
+                    'supplier' => $customerName,
+                    'client_full_name' => $fullName,
+                    'client_id' => $client->id,
+                ]);
+                return $client;
+            }
+
+            // Check if client name is contained in customer name (inverse matching)
+            if (stripos($client->name, $customerName) !== false) {
+                Log::info('Found inverse partial name match', [
+                    'supplier' => $customerName,
+                    'client_name' => $client->name,
+                    'client_id' => $client->id,
+                ]);
+                return $client;
+            }
+
+            // Clean both strings for better comparison (remove common suffixes)
+            $cleanCustomerName = $this->cleanCompanyName($customerName);
+            $cleanClientName = $this->cleanCompanyName($client->name);
+
+            if (strcasecmp($cleanCustomerName, $cleanClientName) === 0) {
+                Log::info('Found cleaned name match', [
+                    'supplier' => $customerName,
+                    'client_clean_name' => $cleanClientName,
+                    'client_id' => $client->id,
+                ]);
+                return $client;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Clean company name by removing common suffixes and formatting
+     */
+    protected function cleanCompanyName(string $name): string
+    {
+        // Remove common company suffixes for better matching
+        $suffixes = ['SPA', 'SRL', 'SNC', 'S.P.A.', 'SNC'];
+        $cleaned = preg_replace('/\b' . implode('|', array_map('preg_quote', $suffixes)) . '\b/i', '', $name);
+
+        // Clean up extra spaces and standardize
+        $cleaned = preg_replace('/\s+/', ' ', trim($cleaned));
+        $cleaned = strtoupper(trim($cleaned));
+
+        return $cleaned;
     }
 }

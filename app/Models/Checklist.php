@@ -125,7 +125,7 @@ class Checklist extends Model implements HasMedia
 
     public function checklistItems(): HasMany
     {
-        return $this->hasMany(ChecklistItem::class);
+        return $this->hasMany(ChecklistItem::class)->orderBy('ordine');
     }
 
     public function items(): HasMany

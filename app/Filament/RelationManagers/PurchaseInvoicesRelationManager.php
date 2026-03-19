@@ -23,13 +23,14 @@ use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Summarizers\Sum;
+use Filament\Tables\Columns\Summarizers\Count;
+use Filament\Tables\Columns\Summarizers\Sum;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\IconColumn;
 use Filament\Tables;
-use Filament\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 
 class PurchaseInvoicesRelationManager extends RelationManager
@@ -44,36 +45,24 @@ class PurchaseInvoicesRelationManager extends RelationManager
             ->recordTitleAttribute('number')
             ->columns([
                 TextColumn::make('number')
-                    ->label('Invoice Number')
+                    ->label('Fattura n.')
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 TextColumn::make('document_date')
-                    ->label('Document Date')
+                    ->label('Del')
                     ->date()
-                    ->sortable(),
-                TextColumn::make('supplier')
-                    ->label('Fornitore')
-                    ->searchable()
                     ->sortable(),
                 TextColumn::make('amount')
                     ->label('Amount')
                     ->money('EUR')
                     ->sortable()
                     ->summarize(Sum::make()->money('EUR')),
-                TextColumn::make('amount_including_vat')
-                    ->label('Amount incl. VAT')
+                TextColumn::make('amount')
+                    ->label(__('Importo'))
                     ->money('EUR')
                     ->sortable()
                     ->summarize(Sum::make()->money('EUR')),
-                TextColumn::make('residual_amount')
-                    ->label('Residual')
-                    ->money('EUR')
-                    ->sortable()
-                    ->summarize(Sum::make()->money('EUR'))
-                    ->color(function ($state) {
-                        return $state > 0 ? 'warning' : 'success';
-                    }),
                 TextColumn::make('due_date')
                     ->label('Due Date')
                     ->date()
@@ -114,13 +103,6 @@ class PurchaseInvoicesRelationManager extends RelationManager
                             ->pluck('supplier_category', 'supplier_category')
                             ->toArray();
                     }),
-                SelectFilter::make('invoiceable_type')
-                    ->label('Attached To')
-                    ->options([
-                        'App\Models\Client' => 'Client',
-                        'App\Models\Agent' => 'Agent',
-                        'App\Models\Principal' => 'Principal',
-                    ]),
             ])
             ->headerActions([
                 // CreateAction::make(),

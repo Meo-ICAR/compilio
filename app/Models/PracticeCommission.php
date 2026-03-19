@@ -30,6 +30,7 @@ class PracticeCommission extends Model
         'amount',
         'description',
         'status_payment',
+        'proforma_stato',
         'status_at',
         'perfected_at',
         'cancellation_at',

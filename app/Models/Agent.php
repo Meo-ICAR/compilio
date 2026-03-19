@@ -63,6 +63,11 @@ class Agent extends Model implements HasMedia
         'is_active' => 'boolean',
     ];
 
+    public function addresses(): MorphMany
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
+
     public function checklists()
     {
         // Un agente ha molte checklist (le sue copie assegnate)

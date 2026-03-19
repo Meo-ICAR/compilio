@@ -2,17 +2,20 @@
 
 namespace App\Filament\Resources\SalesInvoices\Tables;
 
+use App\Filament\Resources\PracticeCommissions\PracticeCommissionResource;
 use App\Models\Agent;
 use App\Models\Client;
 use App\Models\Principal;
 use App\Models\SalesInvoice;
 use App\Services\SalesInvoiceCreditNoteImportService;
+use App\Services\SalesInvoiceImportService;
 use App\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -52,23 +55,30 @@ class SalesInvoicesTable
                     ->label('Cliente')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('amount')
+                    ->label('Importo Totale')
+                    ->money('EUR')
+                    ->summarize(
+                        Sum::make()
+                            ->money('EUR')
+                            ->label('')
+                    )
+                    ->sortable(),
                 TextColumn::make('vat_number')
                     ->label('Partita IVA')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('invoiceable_type')
+                    ->label('Model')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('registration_date')
                     ->label('Data Registrazione')
                     ->date('d/m/Y')
                     ->sortable(),
-                TextColumn::make('due_date')
-                    ->label('Scadenza')
-                    ->date('d/m/Y')
-                    ->sortable()
-                    ->color(fn($record) => $record->isOverdue() ? 'danger' : null),
-                TextColumn::make('amount_including_vat')
-                    ->label('Importo Totale')
-                    ->money('EUR')
-                    ->sortable(),
+                IconColumn::make('is_nopractice')
+                    ->label('No Provvigioni')
+                    ->boolean(),
                 TextColumn::make('residual_amount')
                     ->label('Importo Residuo')
                     ->money('EUR')
@@ -113,12 +123,6 @@ class SalesInvoicesTable
                 Filter::make('invoiceable_id')
                     ->label('Non ancora collegato a Cliente / Mandante')
                     ->query(fn($query) => $query->whereNull('invoiceable_id')),
-                Filter::make('overdue')
-                    ->label('Scadute')
-                    ->query(fn($query) => $query->where('due_date', '<', now())->where('residual_amount', '>', 0)),
-                Filter::make('open')
-                    ->label('Aperte')
-                    ->query(fn($query) => $query->where('closed', false)),
                 Filter::make('cancelled')
                     ->label('Annullate')
                     ->query(fn($query) => $query->where('cancelled', true)),
@@ -129,11 +133,29 @@ class SalesInvoicesTable
             ->recordActions([
                 // ViewAction::make(),
                 // EditAction::make(),
+                Action::make('view_practice_commissions')
+                    ->label('Abbina Prov.')
+                    ->visible(fn($record) => !is_null($record->invoiceable_id) && !($record->is_nopractice) && ($record->invoiceable_type === 'App\Models\Principal') && ($record->document_type === 'TD04'))
+                    ->icon('heroicon-o-banknotes')
+                    ->color('primary')
+                    ->url(fn($record) => PracticeCommissionResource::getUrl('index', [
+                        'tableFilters' => [
+                            'principal_id' => [
+                                'values' => [
+                                    $record->invoiceable_id
+                                ]
+                            ],
+                            'invoice_at' => [
+                                'date' => $record->registration_date?->format('Y-m-d')
+                            ]
+                        ]
+                    ]))
+                    ->openUrlInNewTab(),
                 Action::make('attach_to_model')
                     ->label('Aggiungi')
                     ->icon('heroicon-o-link')
                     ->color('success')
-                    ->visible(fn($record) => is_null($record->client_id))
+                    ->visible(fn($record) => is_null($record->invoiceable_id))
                     ->form([
                         Select::make('client_type')
                             ->label('Tipo')
@@ -158,10 +180,11 @@ class SalesInvoicesTable
                         // Se è vuoto o null, crea il record
                         if (is_null($searchTerm) || $searchTerm === '') {
                             $newRecord = match ($data['client_type']) {
-                                'App\Models\Client' => Client::create(['name' => $record->customer_name . date('Y-m-d H:i'),
-                                    'vat_number' => $record->vat_number]),
                                 'App\Models\Principal' => Principal::create(['name' => $record->customer_name . date('Y-m-d H:i'),
                                     'vat_number' => $record->vat_number]),
+                                'App\Models\Client' => Client::create(['name' => $record->customer_name . date('Y-m-d H:i'),
+                                    'vat_number' => $record->vat_number]),
+
                                 'App\Models\Agent' => Agent::create(['name' => $record->customer_name . date('Y-m-d H:i'),
                                     'vat_number' => $record->vat_number]),
 
@@ -256,8 +279,8 @@ class SalesInvoicesTable
                                         return [];
 
                                     return match ($type) {
-                                        'App\Models\Client' => Client::pluck('name', 'id'),
-                                        'App\Models\Agent' => Agent::pluck('name', 'id'),
+                                        'App\Models\Client' => Client::pluck('name', 'id')->sort(),
+                                        'App\Models\Agent' => Agent::pluck('name', 'id')->sort(),
                                         'App\Models\Principal' => Principal::whereNull('vat_number')->orWhere('vat_number', '')->pluck('name', 'id')->sort(),
                                         default => []
                                     };
@@ -290,9 +313,9 @@ class SalesInvoicesTable
                                 $newRecord = match ($data['client_type']) {
                                     'App\Models\Client' => Client::create(['name' => $record->customer_name,
                                         'vat_number' => $record->vat_number]),
-                                    'App\Models\Principal' => Principal::create(['name' => $record->customer_name,
-                                        'vat_number' => $record->vat_number]),
                                     'App\Models\Agent' => Agent::create(['name' => $record->customer_name,
+                                        'vat_number' => $record->vat_number]),
+                                    'App\Models\Principal' => Principal::create(['name' => $record->customer_name,
                                         'vat_number' => $record->vat_number]),
                                     default => null
                                 };
@@ -301,7 +324,25 @@ class SalesInvoicesTable
                                     $recordId = $newRecord->id;
                                 }
                             } else {
-                                $recordId = $data['client_id'];
+                                // Per i Principal, cerca prima per VAT number, poi crea se non trovato
+                                if ($data['client_type'] === 'App\Models\Principal') {
+                                    $existingPrincipal = Principal::where(function ($query) use ($record) {
+                                        $query
+                                            ->whereNull('vat_number')
+                                            ->orWhere('vat_number', '');
+                                    })->where('name', $record->customer_name)->first();
+
+                                    if ($existingPrincipal) {
+                                        $recordId = $existingPrincipal->id;
+                                    } else {
+                                        // Crea nuovo Principal solo se non esiste
+                                        $newPrincipal = Principal::create(['name' => $record->customer_name,
+                                            'vat_number' => $record->vat_number]);
+                                        $recordId = $newPrincipal->id;
+                                    }
+                                } else {
+                                    $recordId = $data['client_id'];
+                                }
                             }
 
                             if ($recordId) {
@@ -350,10 +391,10 @@ class SalesInvoicesTable
                     ->icon('heroicon-o-document-arrow-up')
                     ->color('success')
                     ->form([
-                        FileUpload::make('import_file')
-                            ->label('File CSV/Excel')
-                            ->helperText('Carica un file CSV o Excel con i dati delle fatture di vendita')
-                            ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                        FileUpload::make('import_file_excel')
+                            ->label('File Excel')
+                            ->helperText('Carica un file Excel con i dati delle fatture di vendita')
+                            ->acceptedFileTypes(['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
                             ->maxSize(10240)  // 10MB
                             ->directory('sales-invoice-imports')
                             ->visibility('private')
@@ -361,57 +402,57 @@ class SalesInvoicesTable
                     ])
                     ->action(function (array $data) {
                         try {
-                            $filePath = storage_path('app/' . $data['import_file']);
+                            $filePath = storage_path('app/private/' . $data['import_file_excel']);
                             $companyId = Auth::user()->company_id;
-                            $filename = basename($data['import_file']);
+                            $filename = basename($data['import_file_excel']);
 
                             $importService = new SalesInvoiceCreditNoteImportService($filename);
                             $results = $importService->import($filePath, $companyId);
 
                             Notification::make()
-                                ->title('Importazione completata')
+                                ->title('Importazione Excel completata')
                                 ->body("Importazione da {$filename} completata. Importate: {$results['imported']}, Aggiornate: {$results['updated']}, Errori: {$results['errors']}")
                                 ->success()
                                 ->send();
                         } catch (\Exception $e) {
                             Notification::make()
-                                ->title('Errore importazione')
+                                ->title('Errore importazione Excel')
                                 ->body('Errore durante importazione: ' . $e->getMessage())
                                 ->danger()
                                 ->send();
                         }
                     }),
-                Action::make('import_sales_invoices_2025')
-                    ->label('Importa Fatture')
-                    ->icon('heroicon-o-calendar')
-                    ->color('warning')
+                Action::make('import_sales_invoices_excel')
+                    ->label('Importa Fatture Vendita Excel')
+                    ->icon('heroicon-o-document-arrow-up')
+                    ->color('success')
                     ->form([
-                        FileUpload::make('import_file_2025')
-                            ->label('File CSV 2025')
-                            ->helperText('Carica il file CSV con i dati delle fatture di vendita 2025')
-                            ->acceptedFileTypes(['text/csv'])
+                        FileUpload::make('import_file_excel')
+                            ->label('File Excel')
+                            ->helperText('Carica un file Excel con i dati delle fatture di vendita')
+                            ->acceptedFileTypes(['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
                             ->maxSize(10240)  // 10MB
-                            ->directory('sales-invoice-imports-2025')
+                            ->directory('sales-invoice-imports')
                             ->visibility('private')
                             ->required(),
                     ])
                     ->action(function (array $data) {
                         try {
-                            $filePath = storage_path('app/' . $data['import_file_2025']);
+                            $filePath = storage_path('app/private/' . $data['import_file_excel']);
                             $companyId = Auth::user()->company_id;
-                            $filename = basename($data['import_file_2025']);
+                            $filename = basename($data['import_file_excel']);
 
-                            $importService = new \App\Services\SalesInvoiceImportService2025($filename);
+                            $importService = new SalesInvoiceImportService($filename);
                             $results = $importService->import($filePath, $companyId);
 
                             Notification::make()
-                                ->title('Importazione 2025 completata')
-                                ->body("Importazione da {$filename} completata. Importate: {$results['imported']}, Aggiornate: {$results['updated']}, Saltate: {$results['errors']}")
+                                ->title('Importazione Excel completata')
+                                ->body("Importazione da {$filename} completata. Importate: {$results['imported']}, Aggiornate: {$results['updated']}, Errori: {$results['errors']}")
                                 ->success()
                                 ->send();
                         } catch (\Exception $e) {
                             Notification::make()
-                                ->title('Errore importazione 2025')
+                                ->title('Errore importazione Excel')
                                 ->body('Errore durante importazione: ' . $e->getMessage())
                                 ->danger()
                                 ->send();
@@ -429,7 +470,7 @@ class SalesInvoicesTable
 
                             // Esegui solo le funzioni di matching per sales invoices
                             $importService->matchPrincipalsByVatNumber();
-                            $importService->matchClientsByVatNumber();
+                            //  $importService->matchClientsByVatNumber();
 
                             Notification::make()
                                 ->title('Associazione completata')
