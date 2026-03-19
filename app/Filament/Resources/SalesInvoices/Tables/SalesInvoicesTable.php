@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Principal;
 use App\Models\SalesInvoice;
 use App\Services\SalesInvoiceCreditNoteImportService;
+use App\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -30,9 +31,12 @@ use Illuminate\Support\Facades\Auth;
 
 class SalesInvoicesTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table
+            ->selectable()
             ->paginated(['all', 10, 25, 50, 100])
             ->groups([
                 Group::make('customer_name')
@@ -228,23 +232,8 @@ class SalesInvoicesTable
             ], position: RecordActionsPosition::BeforeColumns)
             ->bulkActions([
                 BulkActionGroup::make([
-                    BulkAction::make('mark_as_closed')
-                        ->label('Chiudi Selezionati')
-                        ->icon('heroicon-o-check')
-                        ->color('success')
-                        ->action(function ($records) {
-                            $count = $records->where('closed', false)->count();
-                            $records->where('closed', false)->each->update(['closed' => true]);
-
-                            Notification::make()
-                                ->title('Fatture chiuse')
-                                ->body("{$count} fatture chiuse correttamente")
-                                ->success()
-                                ->send();
-                        })
-                        ->deselectRecordsAfterCompletion(),
                     Action::make('bulk_attach_to_model')
-                        ->label('Associa Cliente Selezionato')
+                        ->label('Associa')
                         ->icon('heroicon-o-link')
                         ->color('success')
                         ->accessSelectedRecords()
@@ -269,7 +258,7 @@ class SalesInvoicesTable
                                     return match ($type) {
                                         'App\Models\Client' => Client::pluck('name', 'id'),
                                         'App\Models\Agent' => Agent::pluck('name', 'id'),
-                                        'App\Models\Principal' => Principal::pluck('name', 'id'),
+                                        'App\Models\Principal' => Principal::whereNull('vat_number')->orWhere('vat_number', '')->pluck('name', 'id')->sort(),
                                         default => []
                                     };
                                 })
@@ -283,7 +272,11 @@ class SalesInvoicesTable
                                     return match ($type) {
                                         'App\Models\Client' => Client::where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
                                         'App\Models\Agent' => Agent::where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
-                                        'App\Models\Principal' => Principal::where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
+                                        'App\Models\Principal' => Principal::where(function ($query) use ($search) {
+                                            $query
+                                                ->whereNull('vat_number')
+                                                ->orWhere('vat_number', '');
+                                        })->where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
                                         default => []
                                     };
                                 }),
@@ -368,7 +361,7 @@ class SalesInvoicesTable
                     ])
                     ->action(function (array $data) {
                         try {
-                            $filePath = storage_path('app/public/' . $data['import_file']);
+                            $filePath = storage_path('app/' . $data['import_file']);
                             $companyId = Auth::user()->company_id;
                             $filename = basename($data['import_file']);
 
@@ -404,7 +397,7 @@ class SalesInvoicesTable
                     ])
                     ->action(function (array $data) {
                         try {
-                            $filePath = storage_path('app/public/' . $data['import_file_2025']);
+                            $filePath = storage_path('app/' . $data['import_file_2025']);
                             $companyId = Auth::user()->company_id;
                             $filename = basename($data['import_file_2025']);
 

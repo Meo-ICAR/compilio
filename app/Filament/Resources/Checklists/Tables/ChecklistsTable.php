@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Checklists\Tables;
 
 use App\Models\Checklist;
+use App\Traits\CanExportTable;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -18,6 +19,8 @@ use Filament\Tables\Table;
 
 class ChecklistsTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

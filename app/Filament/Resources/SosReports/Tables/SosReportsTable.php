@@ -6,6 +6,7 @@ use App\Filament\Resources\Checklists\ChecklistResource;
 use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\SosReport;
 use App\Services\ChecklistService;
+use App\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SosReportsTable
 {
+    use CanExportTable;
     use HasChecklistAction;
 
     public static function configure(Table $table): Table

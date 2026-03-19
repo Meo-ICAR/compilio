@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ComplianceViolations\Tables;
 
 use App\Filament\Resources\ComplianceViolations\ComplianceViolationResource;
+use App\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -25,6 +26,8 @@ use Maatwebsite\Excel\Excel;
 
 class ComplianceViolationsTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

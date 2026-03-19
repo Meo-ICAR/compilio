@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PrincipalEmployees\Tables;
 
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -13,6 +14,8 @@ use Filament\Tables\Table;
 
 class PrincipalEmployeesTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

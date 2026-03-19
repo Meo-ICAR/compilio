@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Principals\Tables;
 
 use App\Models\Principal;
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\DB;
 
 class PrincipalScopesTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

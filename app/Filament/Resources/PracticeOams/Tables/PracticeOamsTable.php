@@ -7,6 +7,7 @@ use App\Filament\Exports\PracticeOamAnaliticoExporter;
 use App\Filament\Exports\PracticeOamExporter;
 use App\Models\PracticeOam;
 use App\Models\PracticeOamBase;
+use App\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -33,6 +34,8 @@ use Maatwebsite\Excel\Facades\Excel;  // USA LA FACADE!
 
 class PracticeOamsTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

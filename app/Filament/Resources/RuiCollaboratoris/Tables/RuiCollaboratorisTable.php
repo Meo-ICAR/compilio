@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RuiCollaboratoris\Tables;
 
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -10,6 +11,8 @@ use Filament\Tables\Table;
 
 class RuiCollaboratorisTable
 {
+    use CanExportTable;
+
     /*
      * create view vwruicollaboratori as select
      *   concat(r.cognome_nome, r.ragione_sociale) as intermediario,

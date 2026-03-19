@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Proformas\Tables;
 
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -12,6 +13,8 @@ use Maatwebsite\Excel\Excel;
 
 class ProformasTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

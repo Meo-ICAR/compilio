@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DocumentStatuses\Tables;
 
 use App\Models\DocumentStatus;
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -12,6 +13,8 @@ use Filament\Tables\Table;
 
 class DocumentStatusesTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -21,14 +24,12 @@ class DocumentStatusesTable
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
-
                 TextColumn::make('status')
                     ->label('Codice')
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color(fn($record) => $record->getStatusClass()),
-
                 IconColumn::make('is_ok')
                     ->label('Positivo')
                     ->boolean()
@@ -36,7 +37,6 @@ class DocumentStatusesTable
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
                     ->falseColor('gray'),
-
                 IconColumn::make('is_rejected')
                     ->label('Rifiutato')
                     ->boolean()
@@ -44,7 +44,6 @@ class DocumentStatusesTable
                     ->falseIcon('heroicon-o-check-circle')
                     ->trueColor('danger')
                     ->falseColor('gray'),
-
                 TextColumn::make('description')
                     ->label('Descrizione')
                     ->searchable()

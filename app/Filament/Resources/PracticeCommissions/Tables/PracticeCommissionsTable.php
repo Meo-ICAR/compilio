@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PracticeCommissions\Tables;
 
 use App\Filament\Imports\PracticeCommissionsImporter;
 use App\Models\PracticeCommission;
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -15,6 +16,8 @@ use Maatwebsite\Excel\Excel;
 
 class PracticeCommissionsTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

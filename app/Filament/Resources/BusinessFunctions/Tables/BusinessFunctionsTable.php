@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BusinessFunctions\Tables;
 
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -12,6 +13,8 @@ use Filament\Tables\Table;
 
 class BusinessFunctionsTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

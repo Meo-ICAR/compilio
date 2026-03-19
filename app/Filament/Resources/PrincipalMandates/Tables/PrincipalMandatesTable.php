@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PrincipalMandates\Tables;
 
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -11,6 +12,8 @@ use Filament\Tables\Table;
 
 class PrincipalMandatesTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -29,7 +32,7 @@ class PrincipalMandatesTable
                     ->boolean(),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'ATTIVO' => 'success',
                         'SCADUTO' => 'danger',
                         'RECEDUTO' => 'warning',

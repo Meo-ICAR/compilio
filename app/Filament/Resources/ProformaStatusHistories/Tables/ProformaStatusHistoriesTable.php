@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ProformaStatusHistories\Tables;
 
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -9,6 +10,8 @@ use Filament\Tables\Table;
 
 class ProformaStatusHistoriesTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

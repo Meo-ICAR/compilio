@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ClientMandates\Tables;
 
 use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
+use App\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ClientMandatesTable
 {
+    use CanExportTable;
     use HasChecklistAction;
 
     public static function configure(Table $table): Table

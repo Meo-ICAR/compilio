@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CompanySenders\Tables;
 
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -11,6 +12,8 @@ use Filament\Tables\Table;
 
 class CompanySendersTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

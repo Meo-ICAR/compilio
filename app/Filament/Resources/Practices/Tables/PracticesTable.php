@@ -6,6 +6,7 @@ use App\Filament\Imports\PracticesImporter;
 use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\Practice;
 use App\Models\PracticeStatus;
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,6 +25,7 @@ use Maatwebsite\Excel\Excel;
 
 class PracticesTable
 {
+    use CanExportTable;
     use HasChecklistAction;
 
     public static function configure(Table $table): Table
@@ -307,7 +309,7 @@ class PracticesTable
                 ),
             ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
-                BulkActionGroup::make([]),
+                BulkActionGroup::make([$this->getExportBulkAction()]),
             ]);
     }
 }

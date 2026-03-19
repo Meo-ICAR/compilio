@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Employees\Tables;
 
 use App\Filament\Imports\EmployeesImporter;
 use App\Models\Employee;
+use App\Traits\CanExportTable;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -41,6 +42,8 @@ use Maatwebsite\Excel\Excel;
 
 class EmployeesTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table

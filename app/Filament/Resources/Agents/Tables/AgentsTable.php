@@ -7,6 +7,7 @@ use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\Agent;
 use App\Services\ChecklistService;
 use App\Services\GeminiVisionService;
+use App\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -22,8 +23,8 @@ use Maatwebsite\Excel\Excel;
 
 class AgentsTable
 {
+    use CanExportTable;
     // 2. Usa il Trait nella classe della Risorsa
-
     use HasChecklistAction;
 
     public static function configure(Table $table): Table

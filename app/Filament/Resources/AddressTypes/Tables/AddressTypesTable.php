@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AddressTypes\Tables;
 
+use App\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -10,6 +11,8 @@ use Filament\Tables\Table;
 
 class AddressTypesTable
 {
+    use CanExportTable;
+
     public static function configure(Table $table): Table
     {
         return $table
@@ -25,7 +28,8 @@ class AddressTypesTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    //   DeleteBulkAction::make(),
+                    $this->getExportBulkAction(),
                 ]),
             ]);
     }
