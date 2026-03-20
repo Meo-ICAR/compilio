@@ -59,24 +59,17 @@ class PracticeCommissionForm
                                 ->helperText('Proforma di liquidazione'),
                         ]),
                         Grid::make(2)->schema([
-                            Select::make('agent_id')
+                            Select::make('agent.name')
                                 ->label('Agente')
                                 ->relationship('agent', 'name')
                                 ->searchable()
                                 ->preload(),
-                            Select::make('principal_id')
+                            Select::make('principal.name')
                                 ->label('Mandante')
                                 ->relationship('principal', 'name')
                                 ->searchable()
                                 ->preload(),
                         ]),
-                        Select::make('practice_commission_status_id')
-                            ->label('Stato Commissione')
-                            ->relationship('practiceCommissionStatus', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->nullable()
-                            ->helperText('Seleziona lo stato della commissione'),
                         TextInput::make('CRM_code')
                             ->label('Codice CRM')
                             ->maxLength(255),

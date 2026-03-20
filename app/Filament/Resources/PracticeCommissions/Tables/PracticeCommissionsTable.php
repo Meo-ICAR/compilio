@@ -49,6 +49,7 @@ class PracticeCommissionsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->query(fn() => PracticeCommission::query()->where('is_payment', true)->whereNotNull('agent_id'))
             ->paginated(['all', 10, 25, 50, 100])
             ->selectable()
             ->defaultSort('status_at', 'desc')
@@ -86,8 +87,6 @@ class PracticeCommissionsTable
                     ->label('Proforma')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('practiceCommissionStatus.name')
-                    ->label('Stato Pagamento'),
                 TextColumn::make('name')
                     ->label('Causale')
                     ->searchable()
@@ -99,9 +98,6 @@ class PracticeCommissionsTable
                 TextColumn::make('description')
                     ->label('Descrizione')
                     ->searchable(),
-                IconColumn::make('is_coordination')
-                    ->label('Coord.')
-                    ->boolean(),
                 TextColumn::make('cancellation_at')
                     ->label('Annullata')
                     ->date()
@@ -117,9 +113,6 @@ class PracticeCommissionsTable
                     ->label('Pagata il')
                     ->date()
                     ->sortable(),
-                IconColumn::make('is_payment')
-                    ->label('Pagamento')
-                    ->boolean(),
                 IconColumn::make('is_storno')
                     ->label('Storno')
                     ->boolean(),
@@ -152,41 +145,21 @@ class PracticeCommissionsTable
                             ->sort();
                     })
                     ->searchable(),
-                TernaryFilter::make('is_payment')
-                    ->label('Pagamento'),
                 TernaryFilter::make('is_enasarco')
-                    ->label('Enasarco'),
-                TernaryFilter::make('is_insurance')
-                    ->label('Assicurazione'),
-                TernaryFilter::make('is_prize')
-                    ->label('Premio da mandante')
-                    ->query(fn($query) => $query->when(
-                        request()->input('filters.is_prize') === '1',
-                        fn($query) => $query->where('is_prize', true)
-                    )->when(
-                        request()->input('filters.is_prize') === '0',
-                        fn($query) => $query->where('is_prize', false)
-                    )),
-                TernaryFilter::make('is_client')
-                    ->label('Compenso da cliente'),
+                    ->label('Soggetta ad Enasarco'),
                 TernaryFilter::make('is_coordination')
-                    ->label('Coordinamento'),
-                TernaryFilter::make('is_recurrent')
-                    ->label('Compenso ricorrente'),
-                SelectFilter::make('practice_commission_status_id')
-                    ->label('Stato Pagamento')
-                    ->options(function () {
-                        return PracticeCommissionStatus::distinct()
-                            ->orderBy('name')
-                            ->pluck('name', 'id');
-                    })
-                    ->searchable()
-                    ->multiple()
-                    ->preload(),
+                    ->label('Provv. Coordinamento'),
+
+                /*
+                 * TernaryFilter::make('is_recurrent')
+                 *     ->label('Compenso ricorrente'),
+                 *      TernaryFilter::make('is_insurance')
+                 *     ->label('Provv. Assicurative'),
+                 */
                 QueryBuilder::make()
                     ->constraints([
                         DateConstraint::make('perfected_at')
-                            ->label('Pratiche perfezionate'),
+                            ->label('Perfezionamento'),
                         DateConstraint::make('invoice_at')
                             ->label('Fatturate'),
                     ])

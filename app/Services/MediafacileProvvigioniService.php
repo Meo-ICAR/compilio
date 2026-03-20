@@ -263,27 +263,29 @@ ORDER BY x.principal_id, x.tipo_prodotto;
         if (!$practice) {
             return;
         }
-        $statusPayment = strtolower($provvigioneData['status_payment']);
 
-        $commissionStatus = SoftwareMapping::firstOrCreate(
-            ['software_application_id' => $this->softwareId, 'mapping_type' => 'COMMISSION_STATUS', 'external_value' => $statusPayment],
-            [
-                'name' => $statusPayment,
-                'description' => 'Mapping automatico da Mediafacile',
-                'internal_id' => 0,  // Default ID, da mappare correttamente in base al valore
-            ]
-        );
-        if ($commissionStatus->internal_id === 0) {
-            $practiceCommissionStatus = PracticeCommissionStatus::create([
-                'name' => $statusPayment,
-                'code' => 'Mediafacile',
-                //  'description' => 'Mapping automatico da Mediafacile',
-            ]);
-            $commissionStatus->internal_id = $practiceCommissionStatus->id;
-            $commissionStatus->save();
-        }
-        $provvigioneData['practice_commission_status_id'] = $commissionStatus->internal_id;
-
+        /*
+         * $statusPayment = strtolower($provvigioneData['status_payment']);
+         *
+         * $commissionStatus = SoftwareMapping::firstOrCreate(
+         *     ['software_application_id' => $this->softwareId, 'mapping_type' => 'COMMISSION_STATUS', 'external_value' => $statusPayment],
+         *     [
+         *         'name' => $statusPayment,
+         *         'description' => 'Mapping automatico da Mediafacile',
+         *         'internal_id' => 0,  // Default ID, da mappare correttamente in base al valore
+         *     ]
+         * );
+         * if ($commissionStatus->internal_id === 0) {
+         *     $practiceCommissionStatus = PracticeCommissionStatus::create([
+         *         'name' => $statusPayment,
+         *         'code' => 'Mediafacile',
+         *         //  'description' => 'Mapping automatico da Mediafacile',
+         *     ]);
+         *     $commissionStatus->internal_id = $practiceCommissionStatus->id;
+         *     $commissionStatus->save();
+         * }
+         * $provvigioneData['practice_commission_status_id'] = $commissionStatus->internal_id;
+         */
         $existing = PracticeCommission::where('CRM_code', $provvigioneData['CRM_code'])->first();
 
         if ($existing) {
