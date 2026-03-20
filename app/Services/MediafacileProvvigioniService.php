@@ -63,7 +63,7 @@ class MediafacileProvvigioniService
                     $provvigioneData = $this->mapApiToModel($item);
 
                     if (empty($provvigioneData['amount']) || $provvigioneData['amount'] == 0) {
-                        Log::warning('Skipping item without Importo: ' . json_encode($item));
+                        // Log::warning('Skipping item without Importo: ' . json_encode($item));
                         $result['errors']++;
                         continue;
                     }

@@ -35,13 +35,13 @@ return new class extends Migration {
             $table->string('bank_name')->nullable()->comment('Nome banca erogatrice');
             $table->string('tipo_prodotto')->nullable()->comment('tipo prodotto CRM');
             $table->string('principal_code')->nullable()->comment('Codice mandante');
-            $table->decimal('amount', 12)->nullable()->comment('Importo del finanziamento/mutuo richiesto o erogato');
-            $table->decimal('net', 12)->nullable()->comment('Netto erogato');
-            $table->decimal('brokerage_fee', 10, 2)->nullable()->comment('Provvigione pattuita');
-            $table->decimal('principal_fee', 10, 2)->nullable()->comment('Provvigione mandante');
-            $table->decimal('client_fee', 10, 2)->nullable()->comment('Provvigione cliente');
-            $table->decimal('prize_fee', 10, 2)->nullable()->comment('Provvigione assicurativa');
-            $table->decimal('insurance_fee', 10, 2)->nullable()->comment('Provvigione assicurazione');
+            $table->decimal('amount', 12)->nullable()->default(0)->comment('Importo del finanziamento/mutuo richiesto o erogato');
+            $table->decimal('net', 12)->nullable()->default(0)->comment('Netto erogato');
+            $table->decimal('brokerage_fee', 10, 2)->nullable()->default(0)->comment('Provvigione pattuita');
+            $table->decimal('principal_fee', 10, 2)->nullable()->default(0)->comment('Provvigione mandante');
+            $table->decimal('client_fee', 10, 2)->nullable()->default(0)->comment('Provvigione cliente');
+            $table->decimal('prize_fee', 10, 2)->nullable()->default(0)->comment('Provvigione assicurativa');
+            $table->decimal('insurance_fee', 10, 2)->nullable()->default(0)->comment('Provvigione assicurazione');
             $table->unsignedInteger('practice_scope_id')->nullable()->comment('Ambito della pratica');
             // Lo stato governato da Spatie Model States
             $table->string('status', 50)->nullable()->default('working')->comment('Stato interno attuale: working, rejected, perfected');
