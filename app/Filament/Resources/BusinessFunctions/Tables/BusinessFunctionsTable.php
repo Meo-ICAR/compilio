@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\BusinessFunctions\Tables;
 
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -18,6 +18,7 @@ class BusinessFunctionsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->paginated(['all', 25, 50, 100])
             ->columns([
                 TextColumn::make('code')
                     ->label('Codice')

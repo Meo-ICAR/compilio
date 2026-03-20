@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Rui extends Model
 {
     use HasFactory;
-
+protected $connection = 'unicodb';
     protected $table = 'rui';
 
     protected $fillable = [

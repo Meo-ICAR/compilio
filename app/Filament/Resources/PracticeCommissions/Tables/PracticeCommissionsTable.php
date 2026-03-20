@@ -7,7 +7,7 @@ use App\Models\Agent;
 use App\Models\PracticeCommission;
 use App\Models\PracticeCommissionStatus;
 use App\Models\Principal;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;

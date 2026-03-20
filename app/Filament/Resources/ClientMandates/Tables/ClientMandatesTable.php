@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\ClientMandates\Tables;
 
 use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;

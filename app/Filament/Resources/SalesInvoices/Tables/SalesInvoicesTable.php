@@ -9,7 +9,7 @@ use App\Models\Principal;
 use App\Models\SalesInvoice;
 use App\Services\SalesInvoiceCreditNoteImportService;
 use App\Services\SalesInvoiceImportService;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class RuiIntermediari extends Model
 {
+    protected $connection = 'unicodb';
     protected $table = 'rui_intermediaris';
 
     protected $fillable = [

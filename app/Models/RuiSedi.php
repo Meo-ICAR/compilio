@@ -10,6 +10,7 @@ class RuiSedi extends Model
     use HasFactory;
 
     protected $table = 'rui_sedi';
+    protected $connection = 'unicodb';
 
     protected $fillable = [
         'oss',

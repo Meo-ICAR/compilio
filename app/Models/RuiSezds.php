@@ -9,6 +9,7 @@ class RuiSezds extends Model
 {
     use HasFactory;
 
+    protected $connection = 'unicodb';
     protected $table = 'rui_sezds';
 
     protected $fillable = [

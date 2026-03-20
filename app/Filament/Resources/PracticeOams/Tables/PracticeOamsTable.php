@@ -7,7 +7,7 @@ use App\Filament\Exports\PracticeOamAnaliticoExporter;
 use App\Filament\Exports\PracticeOamExporter;
 use App\Models\PracticeOam;
 use App\Models\PracticeOamBase;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;

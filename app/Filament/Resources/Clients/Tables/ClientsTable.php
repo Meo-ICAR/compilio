@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Clients\Tables;
 
 use App\Filament\Imports\ClientsImporter;
 use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;

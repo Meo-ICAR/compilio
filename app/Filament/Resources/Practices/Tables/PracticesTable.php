@@ -8,7 +8,7 @@ use App\Models\Agent;
 use App\Models\Practice;
 use App\Models\PracticeStatus;
 use App\Models\Principal;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

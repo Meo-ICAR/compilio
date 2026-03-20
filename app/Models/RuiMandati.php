@@ -9,6 +9,7 @@ class RuiMandati extends Model
 {
     use HasFactory;
 
+    protected $connection = 'unicodb';
     protected $table = 'rui_mandati';
 
     protected $fillable = [

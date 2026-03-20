@@ -68,7 +68,7 @@ class AgentImportService
                             $results['errors'][] = "Company ID {$companyId} does not exist";
                             return;
                         }
-
+                        Log::info('Company ID: ' . $companyId, ['name' => $agentData['name']]);
                         // Check if Agent already exists
                         $existingAgent = Agent::where('company_id', $companyId)
                             ->where('name', $agentData['name'])
@@ -77,11 +77,21 @@ class AgentImportService
                         if ($existingAgent) {
                             // Skip if agent exists (as requested)
                             $results['skipped']++;
-                            continue;
                         } else {
                             // Create new Agent
-                            Agent::create($agentData);
+                            $existingAgent = Agent::create($agentData);
                             $results['imported']++;
+                        }
+                        if ($existingAgent) {
+                            // Update agent data if needed
+                            $existingAgent->update($agentData);
+                            if ($existingAgent->wasChanged()) {
+                                $isActive = now() >= $existingAgent->dismissed_at;
+                                if ($isActive <> $existingAgent->is_active) {
+                                    $existingAgent->update(['is_active' => $isActive]);
+                                }
+                                Log::info('Agent updated: ' . $existingAgent->name, ['changes' => $existingAgent->getChanges(), 'is_active' => $isActive]);
+                            }
                         }
                     } catch (\Exception $e) {
                         $results['errors'][] = 'Row ' . ($index + 1) . ': ' . $e->getMessage();
@@ -133,13 +143,19 @@ class AgentImportService
         // Agent structure: ["Nominativo Dipendente","sede","email","Nomina","Data Firma nomina Responsabile al Trattamento ","Data Dimissioni ",...]
         return [
             'company_id' => $companyId,
-            'name' => $this->cleanString($row[0] ?? ''),  // Nominativo Dipendente (column A)
-            'email' => $this->cleanString($row[1] ?? ''),  // email (column B) - for reference only
-            'phone' => $this->truncatePhone($this->cleanString($row[2] ?? '')),  // sede (column C) - for reference only
-            'description' => $this->cleanString($row[3] ?? ''),  // Nomina (column D)
-            'supervisor_type' => $this->mapSupervisorType($row[3] ?? ''),  // Based on Nomina
-            'stipulated_at' => $this->mapDate($row[5] ?? ''),  // Data Firma nomina Responsabile (column F)
-            'dismissed_at' => $this->mapDate($row[6] ?? ''),  // Data Dimissioni (column G)
+            'name' => $this->cleanString($row[1] ?? ''),  // Nominativo Dipendente (column B)
+            'stipulated_at' => $this->mapDate($row[3] ?? ''),  // Data inizio
+            'dismissed_at' => $this->mapDate($row[4] ?? ''),  // Data inizio
+
+            /*
+             * 'name' => $this->cleanString($row[0] ?? ''),  // Nominativo Dipendente (column A)
+             * 'email' => $this->cleanString($row[1] ?? ''),  // email (column B) - for reference only
+             * 'phone' => $this->truncatePhone($this->cleanString($row[2] ?? '')),  // sede (column C) - for reference only
+             * 'description' => $this->cleanString($row[3] ?? ''),  // Nomina (column D)
+             * 'supervisor_type' => $this->mapSupervisorType($row[3] ?? ''),  // Based on Nomina
+             * 'stipulated_at' => $this->mapDate($row[5] ?? ''),  // Data Firma nomina Responsabile (column F)
+             * 'dismissed_at' => $this->mapDate($row[6] ?? ''),  // Data Dimissioni (column G)
+             */
         ];
     }
 

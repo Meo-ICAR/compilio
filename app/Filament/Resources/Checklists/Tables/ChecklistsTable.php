@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Checklists\Tables;
 
 use App\Models\Checklist;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Employees\Tables;
 
 use App\Filament\Imports\EmployeesImporter;
 use App\Models\Employee;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;

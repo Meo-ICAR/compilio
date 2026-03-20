@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class RuiWebsite extends Model
 {
+    protected $connection = 'unicodb';
+
     protected $fillable = [
         'numero_iscrizione_rui',
         'web_url',

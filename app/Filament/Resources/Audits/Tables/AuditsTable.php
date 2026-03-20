@@ -6,7 +6,7 @@ use App\Models\Checklist;
 use App\Models\ChecklistAnswer;
 use App\Models\ChecklistSubmission;
 use App\Services\ChecklistService;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

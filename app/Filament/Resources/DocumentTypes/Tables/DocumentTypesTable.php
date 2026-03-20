@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\DocumentTypes\Tables;
 
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\SalesInvoices\Schemas;
 
 use App\Models\PracticeCommission;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\ComplianceViolations\Tables;
 
 use App\Filament\Resources\ComplianceViolations\ComplianceViolationResource;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

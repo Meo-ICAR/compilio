@@ -9,6 +9,8 @@ class RuiSection extends Model
 {
     use HasFactory;
 
+    protected $connection = 'unicodb';
+
     protected $fillable = [
         'sezione',
         'categoria',

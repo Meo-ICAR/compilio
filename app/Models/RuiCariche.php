@@ -9,6 +9,7 @@ class RuiCariche extends Model
 {
     use HasFactory;
 
+    protected $connection = 'unicodb';
     protected $table = 'rui_cariche';
 
     protected $fillable = [

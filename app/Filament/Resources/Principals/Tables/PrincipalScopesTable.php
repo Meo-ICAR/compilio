@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Principals\Tables;
 
 use App\Models\Principal;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;

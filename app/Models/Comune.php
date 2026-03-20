@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comune extends Model
 {
+    protected $connection = 'unicodb';
+
     protected $fillable = [
         'codice_regione',
         'codice_unita_territoriale',

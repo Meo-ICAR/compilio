@@ -6,7 +6,7 @@ use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\Abi;  // Assicurati che il modello Abi esista
 use App\Models\Principal;  // Assicurati che il modello Abi esista
 use App\Services\ChecklistService;
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;

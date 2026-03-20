@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\PrincipalEmployees\Tables;
 
-use App\Traits\CanExportTable;
+use App\Filament\Traits\CanExportTable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
