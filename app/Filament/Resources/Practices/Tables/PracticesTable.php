@@ -3,24 +3,32 @@
 namespace App\Filament\Resources\Practices\Tables;
 
 use App\Filament\Imports\PracticesImporter;
+use App\Filament\Traits\CanExportTable;
 use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\Agent;
 use App\Models\Practice;
 use App\Models\PracticeStatus;
 use App\Models\Principal;
-use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\QueryBuilder\Constraints\BooleanConstraint;
 use Filament\QueryBuilder\Constraints\DateConstraint;
+use Filament\QueryBuilder\Constraints\NumberConstraint;
+use Filament\QueryBuilder\Constraints\RelationshipConstraint;
+use Filament\QueryBuilder\Constraints\SelectConstraint;
+use Filament\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Grouping\Group;
@@ -40,11 +48,14 @@ class PracticesTable
             ->modifyQueryUsing(fn($query) => $query->with(['principal', 'agent', 'practiceScope', 'practiceStatus', 'clientMandate', 'parentPractice']))
             ->paginated(['all', 10, 25, 50, 100])
             ->defaultSort('inserted_at', 'desc')
+            ->selectable()
+            ->reorderableColumns()
             ->columns([
                 TextColumn::make('tipo_prodotto')
                     ->label('Tipo Prodotto')
                     ->searchable()
                     ->sortable()
+                    ->summarize(Count::make()->label(''))
                     ->placeholder('Assente'),
                 TextColumn::make('principal.name')
                     ->label('Mandante')
@@ -95,18 +106,11 @@ class PracticesTable
                     ->searchable()
                     ->sortable()
                     ->placeholder('Nessun agente'),
-                TextColumn::make('practiceStatus.name')
-                    ->label('Stato Pratica')
-                    ->badge()
-                    ->color(fn($record) => $record->practiceStatus?->color ?? 'gray')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('Nessuno stato'),
                 TextColumn::make('stato_pratica')
-                    ->label('Stato Originale')
+                    ->label('Stato CRM')
                     ->searchable()
                     ->toggleable()
-                    ->placeholder('Nessuno stato originale'),
+                    ->placeholder('Nessuno stato'),
                 TextColumn::make('name')
                     ->label('Nome Pratica')
                     ->searchable()
@@ -115,23 +119,28 @@ class PracticesTable
                     ->label('Codice CRM')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('principal_code')
-                    ->label('Codice Mandante')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('amount')
-                    ->label('Importo')
+                    ->label('Montante')
                     ->money('EUR')
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('net')
-                    ->label('Netto')
+                    ->label('Erogato')
                     ->money('EUR')
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
-                TextColumn::make('practiceScope.name')
-                    ->label('Ambito')
-                    ->searchable()
+                TextColumn::make('rejected_at')
+                    ->label('Data Rifiuto')
+                    ->date()
                     ->sortable()
-                    ->placeholder('Nessun ambito'),
+                    ->toggleable()
+                    ->placeholder('Non definita'),
+                TextColumn::make('status_at')
+                    ->label('Data Stato')
+                    ->date()
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('Non definita'),
                 TextColumn::make('statoproforma')
                     ->label('Stato Proforma')
                     ->badge()
@@ -146,28 +155,11 @@ class PracticesTable
                     ->searchable()
                     ->toggleable()
                     ->placeholder('Nessuno stato proforma'),
-                TextColumn::make('rejected_at')
-                    ->label('Data Rifiuto')
-                    ->date()
-                    ->sortable()
-                    ->toggleable()
-                    ->placeholder('Non definita'),
-                TextColumn::make('status_at')
-                    ->label('Data Stato')
-                    ->date()
-                    ->sortable()
-                    ->toggleable()
-                    ->placeholder('Non definita'),
-                TextColumn::make('status')
-                    ->label('Stato')
-                    ->badge()
-                    ->color(fn($state) => PracticeStatus::where('name', $state)->value('color') ?? 'gray')
-                    ->searchable()
-                    ->sortable(),
                 TextColumn::make('brokerage_fee')
                     ->label('Provvigione')
                     ->money('EUR')
                     ->sortable()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
                     ->placeholder('Non definita'),
                 TextColumn::make('rejected_reason')
                     ->label('Causale Rifiuto')
@@ -202,7 +194,6 @@ class PracticesTable
                     ->tooltip(fn($record) => $record->isRejected() ? 'Respinta' : 'Non respinta'),
                 TextColumn::make('parentPractice.name')
                     ->label('Pratica Collegata')
-                    ->searchable()
                     ->sortable()
                     ->placeholder('Nessuna pratica collegata')
                     ->description(fn($record): string => $record->parentPractice?->CRM_code ?? '')
@@ -248,27 +239,67 @@ class PracticesTable
                     ->multiple()
                     ->label('Stato Pratica')
                     ->default(['PERFEZIONATA', 'IN AMMORTAMENTO']),
-                Filter::make('sended_at')
-                    ->label('Inviate in Istruttoria fino al')
-                    ->form([
-                        DatePicker::make('sended_until')
-                            ->label('Inviate fino al'),
+                TernaryFilter::make('isRejected')
+                    ->label('Respinta')
+                    ->placeholder('Tutte')
+                    ->trueLabel('Respinte')
+                    ->falseLabel('Non respinte')
+                    ->default(null)
+                    ->queries(
+                        true: fn(Builder $query) => $query->whereNotNull('rejected_at'),
+                        false: fn(Builder $query) => $query->whereNull('rejected_at'),
+                        blank: fn(Builder $query) => $query,  // Show all
+                    ),
+                QueryBuilder::make()
+                    ->constraints([
+                        DateConstraint::make('sended_at')
+                            ->label('Inviate in Istruttoria'),
+                        DateConstraint::make('approved_at')
+                            ->label('Pratiche deliberate'),
+                        DateConstraint::make('erogated_at')
+                            ->label('Pratiche erogate'),
+                        DateConstraint::make('perfected_at')
+                            ->label('Pratiche perfezionate'),
+                        DateConstraint::make('invoice_at')
+                            ->label('Fatturate'),
+                        DateConstraint::make('rejected_at')
+                            ->label('Pratiche Rifiutate'),
+                        NumberConstraint::make('amount')
+                            ->label('Montante'),
+                        NumberConstraint::make('net')
+                            ->label('Erogato'),
+                        NumberConstraint::make('brokerage_fee')
+                            ->label('Provvigioni'),
+                        TextConstraint::make('stato_pratica')
+                            ->label('Stato Pratica'),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                            $data['sended_until'],
-                            fn(Builder $query, $date): Builder => $query->whereDate('sended_at', '<=', $date),
-                        );
-                    }),
-                Filter::make('approved_at')
-                    ->label('Pratiche deliberate'),
-                Filter::make('erogated_at')
-                    ->label('Pratiche erogate'),
-                Filter::make('perfected_at')
-                    ->label('Pratiche perfezionate'),
-                Filter::make('invoice_at')
-                    ->label('Fatturate'),
-            ])
+
+                /*
+                 * TextConstraint::make('name'),
+                 * BooleanConstraint::make('is_visible'),
+                 * NumberConstraint::make('stock'),
+                 * SelectConstraint::make('status')
+                 *     ->options([
+                 *         'draft' => 'Draft',
+                 *         'reviewing' => 'Reviewing',
+                 *         'published' => 'Published',
+                 *     ])
+                 *     ->multiple(),
+                 */
+
+                /*
+                 * RelationshipConstraint::make('categories')
+                 *     ->multiple()
+                 *     ->selectable(
+                 *         IsRelatedToOperator::make()
+                 *             ->titleAttribute('name')
+                 *             ->searchable()
+                 *             ->multiple(),
+                 *     ),
+                 * NumberConstraint::make('reviews.rating')
+                 *     ->integer(),,
+                 */
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 Action::make('checklist')
                     ->label(fn($record) => $record->tipo_prodotto ?: 'Checklist')
@@ -301,7 +332,8 @@ class PracticesTable
             ], position: RecordActionsPosition::BeforeColumns)
             ->toolbarActions([
                 BulkActionGroup::make([
-                    //   getExportBulkAction(),
+                    static::getExportBulkAction(),  // 2. Richiama l'azione dal trait
+                    //   DeleteBulkAction::make(),
                 ]),
             ]);
     }

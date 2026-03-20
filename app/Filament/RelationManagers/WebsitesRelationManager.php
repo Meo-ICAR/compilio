@@ -117,6 +117,7 @@ class WebsitesRelationManager extends RelationManager
                         'ecommerce' => 'warning',
                         'blog' => 'secondary',
                         'other' => 'gray',
+                        default => 'gray',
                     }),
                 IconColumn::make('is_active')
                     ->label('Attivo')

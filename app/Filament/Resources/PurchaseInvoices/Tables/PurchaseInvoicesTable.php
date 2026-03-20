@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\PurchaseInvoices\Tables;
 
+use App\Filament\Traits\CanExportTable;
 use App\Models\Agent;
 use App\Models\Client;
 use App\Models\Principal;
 use App\Models\PurchaseInvoice;
 use App\Services\PurchaseCreditNoteImportService;
 use App\Services\PurchaseInvoiceImportService;
-use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -35,7 +35,6 @@ class PurchaseInvoicesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->paginated(['all', 10, 25, 50, 100])
             ->paginated(['all', 10, 25, 50, 100])
             ->groups([
                 Group::make('supplier')

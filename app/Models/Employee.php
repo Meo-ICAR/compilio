@@ -19,6 +19,7 @@ class Employee extends Model
         'coordinated_by_id',
         'name',
         'email',
+        'pec',
         'phone',
         'role',
         'department',
@@ -89,6 +90,11 @@ class Employee extends Model
     public function rui()
     {
         return $this->belongsTo(Rui::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
+    }
+
+    public function principalEmployees()
+    {
+        return $this->morphMany(PrincipalEmployee::class, 'personable');
     }
 
     public function scopeSameBranchCoordinators($query)

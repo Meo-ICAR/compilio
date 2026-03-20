@@ -165,9 +165,6 @@ class MediafacileImportService
         if ($praticaData['is_notowned'] === true) {
             return;
         }
-        if ($praticaData['CRM_code'] === ' QT06260') {
-            Log::info('Processing pratica QT06260', $praticaData);
-        }
 
         $tipoProdotto = strtolower($praticaData['tipo_prodotto']);
         //  Log::inpublic/storagefo('Processing pratica record', $praticaData);
@@ -349,27 +346,33 @@ class MediafacileImportService
                     $stato = 'concluso_con_successo';
                 }
 
-                // Debug: Log prima dell'aggiornamento
-                //     Log::info('Updating existing ClientMandate', [
-                //      'practice_id' => $existing->id,
-                //      'client_mandate_id' => $existing->client_mandate_id,
-                //      'current_stato' => $existing->clientMandate->stato,
-                //      'new_stato' => $stato,
-                //  ]);
-
-                // Aggiorna lo stato se il mandato esisteva già
                 $existing->clientMandate->update([
                     //  'ruolo' => 'Intestatario',
                     'stato' => $stato,
                 ]);
-
-                // Debug: Log dopo l'aggiornamento
-                //    Log::info('ClientMandate updated successfully', [
-                //        'client_mandate_id' => $existing->client_mandate_id,
-                //        'final_stato' => $existing->clientMandate->stato,
-                //    ]);
             }
-        }
+            if (empty($existing->principal_id)) {
+                // pratiche da storico
+                $existing->update(['invoice_at' => '2025-01-01']);
+            }
+            if (empty($existing->rejected_at)) {
+                if (($tipoProdotto === 'Mutuo') && year($existing->inserted_at) < 2025 && empty($existing->invoice_at)) {
+                    $existing->update(['invoice_at' => '2025-01-01']);
+                }
+                if (!empty($existing->invoice_at) && empty($existing->perfected_at)) {
+                    $existing->update(['perfected_at' => $existing->invoice_at]);
+                }
+                if (!empty($existing->perfected_at) && empty($existing->erogated_at)) {
+                    $existing->update(['erogated_at' => $existing->perfected_at]);
+                }
+                if (!empty($existing->erogated_at) && empty($existing->approved_at)) {
+                    $existing->update(['approved_at' => $existing->erogated_at]);
+                }
+                if (!empty($existing->approved_at) && empty($existing->sended_at)) {
+                    $existing->update(['sended_at' => $existing->approved_at]);
+                }
+            }
+        }  // pratica esiste
     }
 
     /**

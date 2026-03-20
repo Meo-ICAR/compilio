@@ -182,6 +182,11 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         return $this->hasMany(Principal::class);
     }
 
+    public function principalEmployees(): HasMany
+    {
+        return $this->hasMany(PrincipalEmployee::class);
+    }
+
     public function apiUsageLogs(): HasMany
     {
         return $this->hasMany(CompanyApiUsageLog::class);

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;  // <--- Aggiungi questa
 use Spatie\MediaLibrary\InteractsWithMedia;  // <--- Assicurati che ci sia questa
 
-class Principal extends Model
+class Principal extends Model implements HasMedia
 {
     use BelongsToCompany;
     use InteractsWithMedia;  // <--- Usa il trait di Spatie
@@ -61,6 +61,16 @@ class Principal extends Model
         'is_reported' => 'boolean',
         'principal_type' => 'string',
     ];
+
+    public function practices(): HasMany
+    {
+        return $this->hasMany(Practice::class);
+    }
+
+    public function addresses(): MorphMany
+    {
+        return $this->morphMany(Address::class, 'addressable');
+    }
 
     public function rui()
     {

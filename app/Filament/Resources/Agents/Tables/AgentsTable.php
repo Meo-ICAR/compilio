@@ -22,6 +22,7 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -280,7 +281,7 @@ class AgentsTable
                                 ->send();
                         } catch (\Exception $e) {
                             Notification::make()
-                                ->title('Errore abbina Agenti a RUI')
+                                ->title('Errore abbina Agenti a OAM')
                                 ->body('Errore durante abbina: ' . $e->getMessage())
                                 ->danger()
                                 ->send();

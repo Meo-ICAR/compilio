@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Principals\Tables;
 
+use App\Filament\Traits\CanExportTable;
 use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\Abi;  // Assicurati che il modello Abi esista
 use App\Models\Principal;  // Assicurati che il modello Abi esista
 use App\Services\ChecklistService;
-use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -57,7 +57,8 @@ class PrincipalsTable
                     ->label('CF / Partita IVA')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('oam')
+                TextColumn::make('numero_iscrizione_rui')
+                    ->label('Numero Iscrizione OAM')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('principal_type')

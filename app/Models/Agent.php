@@ -21,6 +21,7 @@ class Agent extends Model implements HasMedia
         'coordinated_by_agent_id',
         'name',
         'email',
+        'pec',
         'phone',
         'description',
         'supervisor_type',
@@ -127,6 +128,11 @@ class Agent extends Model implements HasMedia
     public function rui()
     {
         return $this->belongsTo(Rui::class, 'numero_iscrizione_rui', 'numero_iscrizione_rui');
+    }
+
+    public function principalEmployees()
+    {
+        return $this->morphMany(PrincipalEmployee::class, 'personable');
     }
 
     public function websites()

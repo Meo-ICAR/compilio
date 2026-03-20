@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Employees\Tables;
 
 use App\Filament\Imports\EmployeesImporter;
-use App\Models\Employee;
 use App\Filament\Traits\CanExportTable;
+use App\Models\Employee;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -15,6 +15,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -22,6 +23,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Illuminate\Http\UploadedFile;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
@@ -34,11 +36,10 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Forms;
-use Filament\Tables;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Maatwebsite\Excel\Excel;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeesTable
 {
@@ -142,12 +143,84 @@ class EmployeesTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-                ImportAction::make('import')
-                    ->label('Importa Excel')
-                    ->icon('heroicon-o-document-arrow-down')
+                Action::make('match_employee_rui')
+                    ->label('Abbina Dipendenti a OAM')
+                    ->icon('heroicon-o-link')
+                    ->color('warning')
+                    ->action(function () {
+                        try {
+                            $companyId = Auth::user()->company_id;
+                            $matchedCount = 0;
+                            $errors = [];
+
+                            // Get all agents
+                            $employees = Employee::where('company_id', $companyId)->get();
+
+                            foreach ($employees as $employee) {
+                                // Try to find matching RUI record by name
+                                $rui = Rui::where('cognome_nome', 'like', '%' . $employee->name . '%')
+                                    ->first();
+
+                                if ($rui && !$employee->numero_iscrizione_rui) {
+                                    // Update agent with RUI registration number
+                                    $employee->update([
+                                        'numero_iscrizione_rui' => $rui->numero_iscrizione_rui,
+                                        'oam_at' => $rui->data_iscrizione,
+                                        'oam_name' => $rui->cognome_nome
+                                    ]);
+                                    $matchedCount++;
+                                }
+                            }
+
+                            Notification::make()
+                                ->title('Abbinamento Agenti a OAM completata')
+                                ->body("Abbinate trovate: {$matchedCount}, Errori: " . count($errors))
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore abbina Agenti a OAM')
+                                ->body('Errore durante abbina: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
+                Action::make('import_employees_excel')
+                    ->label('Importa Dipendenti Excel')
+                    ->icon('heroicon-o-document-arrow-up')
                     ->color('success')
-                    ->importer(EmployeesImporter::class)
-                    ->maxRows(1000),
+                    ->form([
+                        FileUpload::make('import_file_excel')
+                            ->label('File Excel')
+                            ->helperText('Carica un file Excel con i dati dei dipendenti')
+                            ->acceptedFileTypes(['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                            ->maxSize(10240)  // 10MB
+                            ->directory('employee-imports')
+                            ->visibility('public')
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        try {
+                            $filePath = storage_path('app/public/' . $data['import_file_excel']);
+                            $companyId = Auth::user()->company_id;
+                            $filename = basename($data['import_file_excel']);
+
+                            $importService = new \App\Services\EmployeeImportService($companyId);
+                            $results = $importService->import($filePath);
+
+                            Notification::make()
+                                ->title('Importazione Excel completata')
+                                ->body("Importazione da {$filename} completata. Importate: {$results['imported']}, Aggiornate: {$results['updated']}, Errori: {$results['errors']}")
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore importazione Excel')
+                                ->body('Errore durante importazione: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ]);
     }
 }

@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\PracticeCommissions\Tables;
 
 use App\Filament\Imports\PracticeCommissionsImporter;
+use App\Filament\Traits\CanExportTable;
 use App\Models\Agent;
 use App\Models\PracticeCommission;
 use App\Models\PracticeCommissionStatus;
 use App\Models\Principal;
-use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -19,12 +19,21 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\QueryBuilder\Constraints\BooleanConstraint;
+use Filament\QueryBuilder\Constraints\DateConstraint;
+use Filament\QueryBuilder\Constraints\NumberConstraint;
+use Filament\QueryBuilder\Constraints\RelationshipConstraint;
+use Filament\QueryBuilder\Constraints\SelectConstraint;
+use Filament\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Enums\RecordActionsPosition;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Grouping\Group;
@@ -41,7 +50,8 @@ class PracticeCommissionsTable
     {
         return $table
             ->paginated(['all', 10, 25, 50, 100])
-            ->defaultSort('perfected_at', 'desc')
+            ->selectable()
+            ->defaultSort('sended_at', 'desc')
             ->reorderableColumns()
             ->recordActionsPosition(RecordActionsPosition::BeforeColumns)
             ->columns([
@@ -173,35 +183,14 @@ class PracticeCommissionsTable
                     ->searchable()
                     ->multiple()
                     ->preload(),
-                Filter::make('invoice_at')
-                    ->label('Fatturato prima del')
-                    ->form([
-                        DatePicker::make('date')
-                            ->label('Data fatturazione antecedente')
-                            ->required(),
+                QueryBuilder::make()
+                    ->constraints([
+                        DateConstraint::make('perfected_at')
+                            ->label('Pratiche perfezionate'),
+                        DateConstraint::make('invoice_at')
+                            ->label('Fatturate'),
                     ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['date'],
-                                fn(Builder $query, $date): Builder => $query->where('invoice_at', '<', $date),
-                            );
-                    }),
-                Filter::make('perfected_at')
-                    ->label('Perfezionato prima del')
-                    ->form([
-                        DatePicker::make('date')
-                            ->label('Data perfezionamento antecedente')
-                            ->required(),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                $data['date'],
-                                fn(Builder $query, $date): Builder => $query->where('perfected_at', '<', $date),
-                            );
-                    }),
-            ])
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 // EditAction::make(),
                 Action::make('toggleStatus')
@@ -222,14 +211,9 @@ class PracticeCommissionsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    static::getExportBulkAction(),  // 2. Richiama l'azione dal trait
+                    //   DeleteBulkAction::make(),
                 ]),
-                ImportAction::make('import')
-                    ->label('Importa Excel')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('success')
-                    ->importer(PracticeCommissionsImporter::class)
-                    ->maxRows(1000),
             ]);
     }
 }

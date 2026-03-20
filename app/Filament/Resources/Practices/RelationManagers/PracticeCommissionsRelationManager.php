@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Practices\RelationManagers;
 
 use App\Filament\Resources\PracticeCommissions\Schemas\PracticeCommissionForm;
 use App\Models\PracticeCommission;
+use Filament\Actions\Action;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -84,7 +85,7 @@ class PracticeCommissionsRelationManager extends RelationManager
                     ->label('Annulla storno')
                     ->icon('heroicon-o-arrow-uturn-left')
                     ->color('danger')
-                    ->visible($record->is_storno && ($record->tipo === 'Istituto'))
+                    ->visible(fn(PracticeCommission $record): bool => $record->is_storno && ($record->tipo === 'Istituto'))
                     //  ->icon('heroicon-o-erase')
                     ->action(function (array $data, PracticeCommission $record): void {
                         $record->update([
@@ -104,13 +105,13 @@ class PracticeCommissionsRelationManager extends RelationManager
                     }),
                 Action::make('storna')
                     ->label('Storna')
-                    ->visible(fn($record): bool => ($record->tipo === 'Istituto') && !$record->is_storno && !empty($record->invoice_at))
+                    ->visible(fn(PracticeCommission $record): bool => ($record->tipo === 'Istituto') && !$record->is_storno && !empty($record->invoice_at))
                     ->form([
                         TextInput::make('quota')
                             ->label('Importo Storno')
                             ->numeric()
                             ->required()
-                            ->maxValue(fn($record) => $record->amount)
+                            ->maxValue(fn(PracticeCommission $record): float => $record->amount)
                             ->prefix('€')
                     ])
                     ->action(function (array $data, PracticeCommission $record): void {
