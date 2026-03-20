@@ -391,8 +391,8 @@ class MediafacileImportService
             // Log::warning('Erogated item: ' . json_encode($apiData));
         }
 
-        $amount = $this->parseDecimal($apiData['Montante'] ?? null);
-        $net = $this->parseDecimal($apiData['Importo_Erogazione'] ?? null);
+        $amount = $this->parseDecimal($apiData['Montante'] ?? 0);
+        $net = $this->parseDecimal($apiData['Importo_Erogazione'] ?? 0);
 
         // Find client by fiscal code
         $clientId = null;
