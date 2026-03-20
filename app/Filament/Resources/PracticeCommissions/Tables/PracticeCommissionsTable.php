@@ -51,7 +51,7 @@ class PracticeCommissionsTable
         return $table
             ->paginated(['all', 10, 25, 50, 100])
             ->selectable()
-            ->defaultSort('sended_at', 'desc')
+            ->defaultSort('status_at', 'desc')
             ->reorderableColumns()
             ->recordActionsPosition(RecordActionsPosition::BeforeColumns)
             ->columns([

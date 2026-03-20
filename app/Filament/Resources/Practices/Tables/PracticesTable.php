@@ -192,16 +192,16 @@ class PracticesTable
                     ->falseIcon('heroicon-o-check-circle')
                     ->color(fn($state) => $state ? 'danger' : 'success')
                     ->tooltip(fn($record) => $record->isRejected() ? 'Respinta' : 'Non respinta'),
+                TextColumn::make('client.name')
+                    ->label('Cognome')
+                    ->sortable()
+                    ->placeholder('No cliente'),
                 TextColumn::make('parentPractice.name')
                     ->label('Pratica Collegata')
                     ->sortable()
                     ->placeholder('Nessuna pratica collegata')
                     ->description(fn($record): string => $record->parentPractice?->CRM_code ?? '')
                     ->toggleable(),
-                TextColumn::make('client.name')
-                    ->label('Cognome')
-                    ->sortable()
-                    ->placeholder('No cliente'),
             ])
             ->filters([
                 SelectFilter::make('principal_id')
