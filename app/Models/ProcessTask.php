@@ -2,17 +2,28 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class ProcessTask extends Model
 {
     //
-    protected $fillable = ['practice_scope_id', 'name', 'slug', 'sort_order'];
+    protected $fillable = [
+        'taskable_id',
+        'taskable_type',
+        'name',
+        'groupcode',
+        'code',
+        'slug',
+        'sort_order'
+    ];
 
-    public function scope(): BelongsTo
+    public function taskable(): MorphTo
     {
-        return $this->belongsTo(PracticeScope::class, 'practice_scope_id');
+        return $this->morphTo();
     }
 
     public function businessFunctions(): BelongsToMany
@@ -23,21 +34,21 @@ class ProcessTask extends Model
             ->withTimestamps();
     }
 
+    public function raciAssignments()
+    {
+        return $this->hasMany(RaciAssignment::class);
+    }
+
     /**
-     * Utility: Restituisce la matrice RACI strutturata per questo prodotto
+     * Utility: Restituisce la matrice RACI strutturata per questo task
      */
     public function getRaciMatrix(): \Illuminate\Support\Collection
     {
-        return $this->tasks()->with('businessFunctions')->get()->map(function ($task) {
+        return $this->businessFunctions->map(function ($func) {
             return [
-                'task_name' => $task->name,
-                'responsibilities' => $task->businessFunctions->map(function ($func) {
-                    return [
-                        'function_name' => $func->name,
-                        'function_code' => $func->code,
-                        'role' => $func->pivot->role,  // R, A, C o I
-                    ];
-                })
+                'function_name' => $func->name,
+                'function_code' => $func->code,
+                'role' => $func->pivot->role,  // R, A, C o I
             ];
         });
     }

@@ -41,6 +41,7 @@ class Checklist extends Model implements HasMedia
         'sended_at',
         'annotation',
         'business_function_id',
+        'process_task_groupcode',
     ];
 
     protected $casts = [

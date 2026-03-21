@@ -27,7 +27,7 @@ class TrainingRecordForm
                     ->schema([
                         Select::make('training_session_id')
                             ->label('Sessione Formativa')
-                            ->relationship('trainingSession', 'title')
+                            ->relationship('trainingSession', 'name')
                             ->searchable()
                             ->required(),
                     ]),
@@ -53,9 +53,17 @@ class TrainingRecordForm
                                     return [];
 
                                 $model = new $type;
-                                return $model::where('name', 'like', "%{$search}%")
-                                    ->limit(50)
-                                    ->pluck('name', 'id');
+                                $query = $model::where('name', 'like', "%{$search}%");
+
+                                // Apply company scope if the model uses BelongsToCompany
+                                if (method_exists($model, 'scopeForCompany')) {
+                                    $companyId = auth()->user()->company_id ?? filament()->getTenant()?->id;
+                                    if ($companyId) {
+                                        $query->where('company_id', $companyId);
+                                    }
+                                }
+
+                                return $query->limit(50)->pluck('name', 'id');
                             })
                             ->getOptionLabelUsing(function ($value, callable $get) {
                                 $type = $get('trainable_type');

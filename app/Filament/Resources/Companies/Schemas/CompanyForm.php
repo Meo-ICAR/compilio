@@ -66,8 +66,6 @@ class CompanyForm
                                 ->preload()
                                 ->nullable(),
                         ]),
-                    Section::make('---')
-                        ->schema([]),
                     Section::make('Brand e Documentazione')
                         ->description('Logo aziendale e intestazione carta intestata')
                         ->collapsed()

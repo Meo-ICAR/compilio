@@ -4,6 +4,7 @@ namespace App\Filament\RelationManagers;
 
 use App\Filament\Actions\BulkClassifyDocumentsAction;
 use App\Filament\Actions\ClassifyDocumentAction;
+use App\Models\Company;
 use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\Principal;
@@ -17,7 +18,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Filter;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Placeholder;
@@ -35,6 +35,13 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 
 class DocumentsRelationManager extends RelationManager
@@ -49,6 +56,10 @@ class DocumentsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('name')
+            ->paginated(['all', 10, 25, 50, 100])
+            ->defaultSort('modified_at', 'desc')
+            ->selectable()
+            ->reorderableColumns()
             ->columns([
                 TextColumn::make('name')
                     ->label('Nome Documento')
@@ -88,7 +99,29 @@ class DocumentsRelationManager extends RelationManager
                     ->toggleable()
                     ->placeholder('Non verificato'),
             ])
-            ->filters([])  // headerFilters
+            ->filters([
+                SelectFilter::make('document_type_id')
+                    ->options(function ($livewire) {
+                        // $livewire->ownerRecord is the model instance this relation belongs to
+                        $owner = $livewire->ownerRecord;
+
+                        return DocumentType::query()
+                            ->whereHasMorph('documentable', [get_class($owner)])
+                            ->pluck('name', 'id')
+                            ->sort();
+                    })
+                    ->multiple()
+                    ->label('Tipo Documento'),
+                TernaryFilter::make('is_oldversion')
+                    //  ->query(fn($query) => $query->whereNotNull('deleted_at', true))
+                    ->label('Vecchie versioni'),
+                TernaryFilter::make('is_signed')
+                    //    ->query(fn($query) => $query->where('is_signed', true)),
+                    ->label('Firmato'),
+                TernaryFilter::make('is_verified')
+                    ->label('Verificato')
+                    ->query(fn($query) => $query->whereNotNull('verified_at')),
+            ], layout: FiltersLayout::AboveContent)
             ->headerActions([
                 CreateAction::make()
                     ->steps([
@@ -192,14 +225,14 @@ class DocumentsRelationManager extends RelationManager
                                 $companyId = $ownerRecord->company_id;
                             } elseif (method_exists($ownerRecord, 'company')) {
                                 $companyId = $ownerRecord->company?->id;
-                            } elseif ($ownerRecord instanceof \App\Models\Company) {
+                            } elseif ($ownerRecord instanceof Company) {
                                 $companyId = $ownerRecord->id;
                             }
 
                             if (!$companyId) {
                                 Notification::make()
-                                    ->title('Errore Company ID')
-                                    ->body('Impossibile determinare la company ID dal record corrente')
+                                    ->title('Errore Company')
+                                    ->body('Impossibile determinare la company  dal documento corrente')
                                     ->danger()
                                     ->send();
                                 return;
@@ -327,7 +360,7 @@ class DocumentsRelationManager extends RelationManager
                         SpatieMediaLibraryFileUpload::make('document')
                             ->label('File Documento')
                             ->collection('documents')
-                            ->disk('public')
+                            ->disk('private')
                             ->preserveFilenames()
                             ->downloadable()
                             ->previewable(true)

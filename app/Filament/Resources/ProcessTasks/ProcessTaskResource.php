@@ -18,18 +18,14 @@ use UnitEnum;
 class ProcessTaskResource extends Resource
 {
     protected static ?string $model = ProcessTask::class;
-
+    protected static bool $shouldRegisterNavigation = false;
     protected static bool $isScopedToTenant = false;
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
-
-    protected static ?string $navigationLabel = 'Processi';
-
-    protected static ?string $modelLabel = 'Processo';
-
-    protected static ?string $pluralModelLabel = 'Processi';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
+    protected static ?string $navigationLabel = 'Task';
+    protected static ?string $modelLabel = 'Task';
+    protected static ?string $pluralModelLabel = 'Task';
+    protected static string|UnitEnum|null $navigationGroup = 'Processi';
+    protected static ?int $navigationSort = 15;
 
     public static function form(Schema $schema): Schema
     {

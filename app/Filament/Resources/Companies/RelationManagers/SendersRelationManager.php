@@ -5,6 +5,9 @@ namespace App\Filament\Resources\Companies\RelationManagers;
 use App\Filament\Resources\CompanySenders\CompanySenderResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -15,7 +18,7 @@ class SendersRelationManager extends RelationManager
 
     protected static ?string $relatedResource = CompanySenderResource::class;
 
-    protected static ?string $title = 'Mittenti';
+    protected static ?string $title = 'Reinoltro Email / PEC';
 
     public function table(Table $table): Table
     {

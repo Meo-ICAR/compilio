@@ -29,7 +29,9 @@ class RaciAssignementResource extends Resource
 
     protected static ?string $pluralModelLabel = 'RACI';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tabelle';
+    protected static string|UnitEnum|null $navigationGroup = 'Processi';
+
+    protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
     {

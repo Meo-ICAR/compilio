@@ -30,7 +30,7 @@ class ChecklistResource extends Resource
 
     protected static ?int $navigationSort = 6;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Configurazione';
+    protected static string|UnitEnum|null $navigationGroup = 'Processi';
 
     public static function form(Schema $schema): Schema
     {

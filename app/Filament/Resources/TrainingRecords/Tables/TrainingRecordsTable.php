@@ -18,7 +18,7 @@ class TrainingRecordsTable
         return $table
             ->modifyQueryUsing(fn($query) => $query->with(['trainable', 'trainingSession']))
             ->columns([
-                TextColumn::make('trainingSession.title')
+                TextColumn::make('trainingSession.name')
                     ->label('Sessione Formativa')
                     ->searchable()
                     ->sortable()

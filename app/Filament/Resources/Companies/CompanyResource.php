@@ -54,10 +54,10 @@ class CompanyResource extends Resource
     {
         return [
             DocumentsRelationManager::class,
+            WebsitesRelationManager::class,
             CompanyClientsRelationManager::class,
             CompanyFunctionsRelationManager::class,
             SendersRelationManager::class,
-            WebsitesRelationManager::class,
             BranchesRelationManager::class,
             SoftwareApplicationsRelationManager::class,
         ];

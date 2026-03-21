@@ -209,7 +209,7 @@ class WebsitesRelationManager extends RelationManager
                     ->label('Test URL')
                     ->icon('heroicon-o-globe-alt')
                     ->color('info')
-                    ->url(fn(Website $record): string => $record->url)
+                    ->url(fn(Website $record): ?string => $record->url)
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([

@@ -14,6 +14,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
@@ -38,21 +39,24 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->databaseNotifications()
             ->navigationGroups([
-                'Pratiche',
-                'Amministrazione',
-                'Formazione',
-                'Compliance',
-                'Segnalazioni',
-                'Organizzazione',
-                'Configurazione',
-                'Archivi',
-                'Elenchi'
+                NavigationGroup::make()->label('Pratiche'),
+                NavigationGroup::make()->label('Amministrazione')->collapsed(),
+                NavigationGroup::make()->label('Compliance')->collapsed(),
+                NavigationGroup::make()->label('Segnalazioni')->collapsed(),
+                NavigationGroup::make()->label('Organizzazione')->collapsed(),
+                NavigationGroup::make()->label('Processi')->collapsed(),
+                NavigationGroup::make()->label('Formazione')->collapsed(),
+                NavigationGroup::make()->label('Configurazione')->collapsed(),
+                NavigationGroup::make()->label('Archivi')->collapsed(),
+                NavigationGroup::make()->label('Elenchi')->collapsed(),
+                NavigationGroup::make()->label('Tabelle')->collapsed(),
+                NavigationGroup::make()->label('OAM-RUI')->collapsed(),
             ])
             ->default()
             ->id('admin')
             ->path('admin')
             ->favicon(asset('favicon.ico'))
-            ->brandName('Compilio')
+            ->brandName('UnicoFinance')
             ->brandLogo(asset('logo_compilio.png'))
             ->login()
             ->tenant(Company::class)
@@ -84,7 +88,8 @@ class AdminPanelProvider extends PanelProvider
                 ActivityLogPlugin::make()
                     ->label('Log')
                     ->pluralLabel('Logs')
-                    ->navigationGroup('Compliance'),
+                    ->navigationGroup('Compliance')
+                    ->navigationSort(30),
                 // ->cluster('System'),  // Optional: Group inside a cluster
                 FilamentSocialitePlugin::make()
                     ->providers([

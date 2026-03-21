@@ -37,6 +37,7 @@ class ChecklistItem extends Model
         'url_step',
         'url_callback',
         'business_function_id',
+        'process_task_code',
     ];
 
     protected $casts = [

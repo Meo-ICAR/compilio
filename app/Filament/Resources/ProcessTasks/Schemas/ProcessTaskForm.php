@@ -2,7 +2,21 @@
 
 namespace App\Filament\Resources\ProcessTasks\Schemas;
 
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 
 class ProcessTaskForm
 {
@@ -10,38 +24,77 @@ class ProcessTaskForm
     {
         return $schema
             ->components([
-                Forms\Components\Section::make('Definizione Attività')
+                Section::make('Definizione Attività')
                     ->description("Collega il task al prodotto e definisci l'ordine di esecuzione.")
                     ->schema([
-                        Forms\Components\Select::make('practice_scope_id')
-                            ->label('Ambito Pratica (Prodotto)')
-                            ->relationship('scope', 'name')
+                        Select::make('taskable_type')
+                            ->label('Tipo Entità')
+                            ->options([
+                                'App\Models\PracticeScope' => 'Ambito Pratica (Prodotto)',
+                                'App\Models\Company' => 'Azienda',
+                                'App\Models\Client' => 'Cliente',
+                                'App\Models\Project' => 'Progetto',
+                                'App\Models\Process' => 'Processo',
+                            ])
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(fn($state, callable $set) => $set('taskable_id', null)),
+                        Select::make('taskable_id')
+                            ->label('Entità Selezionata')
                             ->required()
                             ->searchable()
-                            ->preload(),
-                        Forms\Components\TextInput::make('name')
+                            ->getSearchResultsUsing(function (string $search, callable $get) {
+                                $type = $get('taskable_type');
+                                if (!$type)
+                                    return [];
+
+                                $model = new $type;
+                                return $model::where('name', 'like', "%{$search}%")
+                                    ->limit(50)
+                                    ->pluck('name', 'id');
+                            })
+                            ->getOptionLabelUsing(function ($value, callable $get) {
+                                $type = $get('taskable_type');
+                                if (!$type || !$value)
+                                    return '';
+
+                                $model = new $type;
+                                $record = $model::find($value);
+                                return $record?->name ?? '';
+                            }),
+                        TextInput::make('name')
                             ->label('Nome Task')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('sort_order')
+                        TextInput::make('groupcode')
+                            ->label('Codice Task')
+                            ->nullable()
+                            ->maxLength(50)
+                            ->helperText('Codice identificativo del task (es. OAM-01)'),
+                        TextInput::make('code')
+                            ->label('Codice Dettaglio')
+                            ->nullable()
+                            ->maxLength(50)
+                            ->helperText('Codice specifico per checklist items (es. RICEZIONE-PEC)'),
+                        TextInput::make('sort_order')
                             ->label('Ordine Sequenza')
                             ->numeric()
                             ->default(0),
                     ])
                     ->columns(3),
-                Forms\Components\Section::make('Matrice RACI')
+                Section::make('Matrice RACI')
                     ->description('Assegna le responsabilità alle funzioni business.')
                     ->schema([
-                        Forms\Components\Repeater::make('raciAssignments')
+                        Repeater::make('raciAssignments')
                             ->relationship()  // Laravel 12 + Filament 5.2 gestiscono la pivot automaticamente
                             ->schema([
-                                Forms\Components\Select::make('business_function_id')
+                                Select::make('business_function_id')
                                     ->label('Funzione Business')
                                     ->relationship('businessFunction', 'name')
                                     ->required()
                                     ->distinct()  // Impedisce di selezionare la stessa funzione due volte nel repeater
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
-                                Forms\Components\Select::make('role')
+                                Select::make('role')
                                     ->label('Ruolo')
                                     ->options([
                                         'R' => 'Responsible (Chi esegue)',

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 
 class RaciAssignment extends Model
@@ -18,4 +19,14 @@ class RaciAssignment extends Model
         'business_function_id',
         'role',
     ];
+
+    public function processTask(): BelongsTo
+    {
+        return $this->belongsTo(ProcessTask::class);
+    }
+
+    public function businessFunction(): BelongsTo
+    {
+        return $this->belongsTo(BusinessFunction::class);
+    }
 }
