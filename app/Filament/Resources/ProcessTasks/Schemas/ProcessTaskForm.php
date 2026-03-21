@@ -27,14 +27,36 @@ class ProcessTaskForm
                 Section::make('Definizione Attività')
                     ->description("Collega il task al prodotto e definisci l'ordine di esecuzione.")
                     ->schema([
+                        TextInput::make('process.name')
+                            ->label('Processo Padre')
+                            ->disabled()
+                            ->helperText('Processo padre del task'),
+                        TextInput::make('name')
+                            ->label('Nome Task')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('groupcode')
+                            ->label('Codice Task')
+                            ->nullable()
+                            ->maxLength(50)
+                            ->helperText('Codice identificativo del task (es. OAM-01)'),
+                        TextInput::make('code')
+                            ->label('Codice Dettaglio')
+                            ->nullable()
+                            ->maxLength(50)
+                            ->helperText('Codice specifico per checklist items (es. RICEZIONE-PEC)'),
+                        TextInput::make('sort_order')
+                            ->label('Ordine Sequenza')
+                            ->numeric()
+                            ->default(0),
                         Select::make('taskable_type')
                             ->label('Tipo Entità')
                             ->options([
                                 'App\Models\PracticeScope' => 'Ambito Pratica (Prodotto)',
                                 'App\Models\Company' => 'Azienda',
                                 'App\Models\Client' => 'Cliente',
-                                'App\Models\Project' => 'Progetto',
-                                'App\Models\Process' => 'Processo',
+                                'App\Models\Principal' => 'Mandante',
+                                'App\Models\Agent' => 'Agente',
                             ])
                             ->required()
                             ->reactive()
@@ -60,40 +82,15 @@ class ProcessTaskForm
 
                                 $model = new $type;
                                 $record = $model::find($value);
-                                return $record?->name ?? '';
+                                return $record ? $record->name : $value;
                             }),
-                        TextInput::make('name')
-                            ->label('Nome Task')
-                            ->required()
-                            ->maxLength(255),
-                        TextInput::make('groupcode')
-                            ->label('Codice Task')
-                            ->nullable()
-                            ->maxLength(50)
-                            ->helperText('Codice identificativo del task (es. OAM-01)'),
-                        TextInput::make('code')
-                            ->label('Codice Dettaglio')
-                            ->nullable()
-                            ->maxLength(50)
-                            ->helperText('Codice specifico per checklist items (es. RICEZIONE-PEC)'),
-                        TextInput::make('sort_order')
-                            ->label('Ordine Sequenza')
-                            ->numeric()
-                            ->default(0),
-                    ])
-                    ->columns(3),
+                    ]),
                 Section::make('Matrice RACI')
                     ->description('Assegna le responsabilità alle funzioni business.')
                     ->schema([
                         Repeater::make('raciAssignments')
                             ->relationship()  // Laravel 12 + Filament 5.2 gestiscono la pivot automaticamente
                             ->schema([
-                                Select::make('business_function_id')
-                                    ->label('Funzione Business')
-                                    ->relationship('businessFunction', 'name')
-                                    ->required()
-                                    ->distinct()  // Impedisce di selezionare la stessa funzione due volte nel repeater
-                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
                                 Select::make('role')
                                     ->label('Ruolo')
                                     ->options([
@@ -104,6 +101,12 @@ class ProcessTaskForm
                                     ])
                                     ->required()
                                     ->native(false),
+                                Select::make('business_function_id')
+                                    ->label('Funzione Business')
+                                    ->relationship('businessFunction', 'name')
+                                    ->required()
+                                    ->distinct()  // Impedisce di selezionare la stessa funzione due volte nel repeater
+                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
                             ])
                             ->columns(2)
                             ->itemLabel(fn(array $state): ?string =>

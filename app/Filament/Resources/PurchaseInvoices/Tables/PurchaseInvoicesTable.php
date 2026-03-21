@@ -358,9 +358,9 @@ class PurchaseInvoicesTable
                                         return [];
 
                                     return match ($type) {
-                                        'App\Models\Client' => Client::pluck('name', 'id'),
-                                        'App\Models\Agent' => Agent::pluck('name', 'id'),
-                                        'App\Models\Principal' => Principal::pluck('name', 'id'),
+                                        'App\Models\Client' => Client::pluck('name', 'id')->where('is_company', true)->sort(),
+                                        'App\Models\Agent' => Agent::pluck('name', 'id')->sort(),
+                                        'App\Models\Principal' => Principal::pluck('name', 'id')->sort(),
                                         default => []
                                     };
                                 })

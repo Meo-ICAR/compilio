@@ -2,6 +2,11 @@
 
 namespace App\Filament\Resources\Processes;
 
+use App\Filament\RelationManagers\DocumentsRelationManager;
+use App\Filament\Resources\Processes\Pages\CreateProcess;
+use App\Filament\Resources\Processes\Pages\EditProcess;
+use App\Filament\Resources\Processes\Pages\ListProcess;
+use App\Filament\Resources\Processes\RelationManagers\ProcessTasksRelationManager;
 use App\Filament\Resources\Processes\Schemas\ProcessForm;
 use App\Filament\Resources\Processes\Tables\ProcessTable;
 use App\Models\Process;
@@ -20,7 +25,7 @@ class ProcessResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
-    protected static ?string $navigationLabel = 'Processi';
+    protected static ?string $navigationLabel = 'Processi Aziendali';
 
     protected static ?string $modelLabel = 'Processo';
 
@@ -28,15 +33,31 @@ class ProcessResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Processi';
 
-    protected static ?int $navigationSort = 15;
+    protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
     {
-        return ProcessTaskForm::configure($schema);
+        return ProcessForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return ProcessTasksTable::configure($table);
+        return ProcessTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ProcessTasksRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListProcess::route('/'),
+            'create' => CreateProcess::route('/create'),
+            'edit' => EditProcess::route('/{record}/edit'),
+        ];
     }
 }

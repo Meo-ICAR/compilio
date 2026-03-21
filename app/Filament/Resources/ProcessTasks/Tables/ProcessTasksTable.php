@@ -20,48 +20,14 @@ class ProcessTasksTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with(['businessFunctions', 'businessFunctions.pivot']))
             ->columns([
-                TextColumn::make('groupcode')
-                    ->label('Codice Task')
-                    ->searchable()
-                    ->sortable()
-                    ->badge()
-                    ->toggleable(),
-                TextColumn::make('sort_order')
-                    ->label('Ordinamento')
-                    ->sortable()
-                    ->badge(),
                 TextColumn::make('name')
                     ->label('Attività')
                     ->searchable()
                     ->sortable()
                     ->limit(50)
                     ->tooltip(fn($record) => $record->name),
-                TextColumn::make('code')
-                    ->label('Codice Dettaglio')
-                    ->searchable()
-                    ->sortable()
-                    ->badge()
-                    ->toggleable(),
-                TextColumn::make('slug')
-                    ->label('Slug')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('business_functions_count')
-                    ->label('Funzioni RACI')
-                    ->counts('businessFunctions')
-                    ->sortable()
-                    ->badge()
-                    ->color(fn($record) => $record->businessFunctions_count > 0 ? 'success' : 'gray'),
-                IconColumn::make('has_accountable')
-                    ->label('Accountable')
-                    ->boolean()
-                    ->getStateUsing(fn($record) =>
-                        $record->businessFunctions->contains(fn($f) => $f->pivot->role === 'A'))
-                    ->trueColor('danger')
-                    ->falseColor('gray')
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle'),
                 TextColumn::make('raci_summary')
                     ->label('Matrice RACI')
                     ->formatStateUsing(fn($record) =>
@@ -72,10 +38,25 @@ class ProcessTasksTable
                             ->implode(' | '))
                     ->badge()
                     ->color(fn($record) =>
-                        $record->businessFunctions->contains(fn($f) => $f->pivot->role === 'A') ? 'danger' : 'primary')
-                    ->searchable(),
+                        $record->businessFunctions->contains(fn($f) => $f->pivot->role === 'A') ? 'danger' : 'primary'),
+                TextColumn::make('code')
+                    ->label('Codice Dettaglio')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->toggleable(),
+                TextColumn::make('sort_order')
+                    ->label('Ordinamento')
+                    ->sortable()
+                    ->badge(),
+                TextColumn::make('business_functions_count')
+                    ->label('Funzioni RACI')
+                    ->counts('businessFunctions')
+                    ->sortable()
+                    ->badge()
+                    ->color(fn($record) => $record->businessFunctions_count > 0 ? 'success' : 'gray'),
             ])
-            ->defaultSort('groupcode')
+            ->defaultSort('sort_order')
             ->filters([
                 SelectFilter::make('taskable_type')
                     ->label('Tipo Entità')

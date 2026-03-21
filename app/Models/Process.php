@@ -4,9 +4,9 @@ namespace App\Models;
 
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Model;
 
 class Process extends Model
 {
@@ -32,16 +32,7 @@ class Process extends Model
      */
     public function processTasks(): HasMany
     {
-        return $this->hasMany(ProcessTask::class, 'taskable_id')
-            ->where('taskable_type', self::class);
-    }
-
-    /**
-     * Get all tasks that can be morphed to this process.
-     */
-    public function tasks(): MorphMany
-    {
-        return $this->morphMany(ProcessTask::class, 'taskable');
+        return $this->hasMany(ProcessTask::class);
     }
 
     /**
@@ -81,11 +72,12 @@ class Process extends Model
     public function scopeNeedingExecution($query)
     {
         return $query->active()->where(function ($q) {
-            $q->where('periodicity', 'once')
-              ->orWhere('periodicity', 'monthly')
-              ->orWhere('periodicity', 'quarterly')
-              ->orWhere('periodicity', 'semiannual')
-              ->orWhere('periodicity', 'annual');
+            $q
+                ->where('periodicity', 'once')
+                ->orWhere('periodicity', 'monthly')
+                ->orWhere('periodicity', 'quarterly')
+                ->orWhere('periodicity', 'semiannual')
+                ->orWhere('periodicity', 'annual');
         });
     }
 }

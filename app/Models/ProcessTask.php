@@ -14,6 +14,7 @@ class ProcessTask extends Model
     protected $fillable = [
         'taskable_id',
         'taskable_type',
+        'process_id',
         'name',
         'groupcode',
         'code',
@@ -37,6 +38,11 @@ class ProcessTask extends Model
     public function raciAssignments()
     {
         return $this->hasMany(RaciAssignment::class);
+    }
+
+    public function process(): BelongsTo
+    {
+        return $this->belongsTo(Process::class);
     }
 
     /**

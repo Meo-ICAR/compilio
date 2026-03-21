@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\Processes\Tables;
 
 use App\Filament\Traits\CanExportTable;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\ction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -19,7 +20,9 @@ use Filament\Tables\Table;
 
 class ProcessTable
 {
-    public static function table(Table $table): Table
+    use CanExportTable;
+
+    public static function configure(Table $table): Table
     {
         return $table
             ->columns([
@@ -28,15 +31,17 @@ class ProcessTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('name')
-                    ->label('Nome Processo')
+                    ->label('Processo')
                     ->searchable()
                     ->sortable()
                     ->limit(50)
                     ->tooltip(fn($record) => $record->name),
-                TextColumn::make('slug')
-                    ->label('Slug')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('process_tasks_count')
+                    ->label('Task')
+                    ->sortable()
+                    ->badge()
+                    ->color(fn($record) => $record->process_tasks_count > 0 ? 'success' : 'gray')
+                    ->suffix(' task'),
                 TextColumn::make('groupcode')
                     ->label('Codice Gruppo')
                     ->searchable()
@@ -55,6 +60,10 @@ class ProcessTable
                         'annual' => 'purple',
                         default => 'gray',
                     }),
+                TextColumn::make('slug')
+                    ->label('Slug')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_active')
                     ->label('Attivo')
                     ->boolean()
@@ -62,12 +71,6 @@ class ProcessTable
                     ->falseColor('danger')
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle'),
-                TextColumn::make('process_tasks_count')
-                    ->label('Task Associati')
-                    ->sortable()
-                    ->badge()
-                    ->color(fn($record) => $record->process_tasks_count > 0 ? 'success' : 'gray')
-                    ->suffix(' task'),
                 TextColumn::make('created_at')
                     ->label('Creato il')
                     ->dateTime('d/m/Y H:i')

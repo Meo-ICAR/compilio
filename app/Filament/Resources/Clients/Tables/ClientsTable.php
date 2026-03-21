@@ -100,13 +100,14 @@ class ClientsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 // Date
-                TextColumn::make('created_at')
-                    ->sortable()
-                    ->label('Acquisito il')
-                    ->dateTime('d/m/Y')
-                    ->sortable(),
             ])
             ->filters([
+                TernaryFilter::make('is_company')
+                    ->label('Consulenti')
+                    ->placeholder('Tutti')
+                    ->default(false)
+                    ->trueLabel('Consulenti')
+                    ->falseLabel('Clienti'),
                 // Filtro per tipologia
                 TernaryFilter::make('is_person')
                     ->label('Tipo Soggetto')
