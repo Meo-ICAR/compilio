@@ -20,7 +20,7 @@ class ProcessTasksTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->with(['businessFunctions', 'businessFunctions.pivot']))
+            ->modifyQueryUsing(fn($query) => $query->with(['businessFunctions']))
             ->columns([
                 TextColumn::make('name')
                     ->label('Attività')
@@ -30,15 +30,23 @@ class ProcessTasksTable
                     ->tooltip(fn($record) => $record->name),
                 TextColumn::make('raci_summary')
                     ->label('Matrice RACI')
-                    ->formatStateUsing(fn($record) =>
-                        $record
-                            ->businessFunctions
-                            ->groupBy(fn($f) => $f->pivot->role)
-                            ->map(fn($functions, $role) => "{$role}: " . $functions->pluck('code')->implode(', '))
-                            ->implode(' | '))
-                    ->badge()
-                    ->color(fn($record) =>
-                        $record->businessFunctions->contains(fn($f) => $f->pivot->role === 'A') ? 'danger' : 'primary'),
+                    ->formatStateUsing(function ($record) {
+                        // Debug: verifica cosa contiene il record
+                        if (!$record)
+                            return 'Nessun dato';
+                        if (!isset($record->businessFunctions))
+                            return 'Nessuna business function';
+
+                        return 'RACIS';
+
+                        /*
+                         * $record
+                         *   ->businessFunctions
+                         *   ->groupBy(fn($f) => $f->pivot->role ?? 'N/D')
+                         *   ->map(fn($functions, $role) => "{$role}: " . $functions->pluck('code')->implode(', '))
+                         *   ->implode(' | ');
+                         */
+                    }),
                 TextColumn::make('code')
                     ->label('Codice Dettaglio')
                     ->searchable()
@@ -49,12 +57,6 @@ class ProcessTasksTable
                     ->label('Ordinamento')
                     ->sortable()
                     ->badge(),
-                TextColumn::make('business_functions_count')
-                    ->label('Funzioni RACI')
-                    ->counts('businessFunctions')
-                    ->sortable()
-                    ->badge()
-                    ->color(fn($record) => $record->businessFunctions_count > 0 ? 'success' : 'gray'),
             ])
             ->defaultSort('sort_order')
             ->filters([
