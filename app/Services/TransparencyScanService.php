@@ -189,7 +189,7 @@ class TransparencyScanService
                 'company_id' => $website->company_id,
                 'documentable_id' => $website->company_id,
                 'documentable_type' => Company::class,
-                'document_type_id' => $documentType->id,
+                'document_type_id' => null,  // Leave null for classification
                 'name' => $name,
                 'description' => "Document found on transparency page: {$transparencyUrl}",
                 'status' => 'uploaded',

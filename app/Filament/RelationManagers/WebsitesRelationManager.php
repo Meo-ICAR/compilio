@@ -19,7 +19,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
@@ -32,26 +31,37 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
 
 class WebsitesRelationManager extends RelationManager
 {
     protected static string $relationship = 'websites';
     protected static ?string $title = 'Siti Web';
 
-    public function schema(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Nome Sito')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('url')
                     ->label('URL Sito')
                     ->required()
                     ->url()
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        // Estrai il dominio dall'URL e rimuovi www.
+                        if ($state) {
+                            $domain = parse_url($state, PHP_URL_HOST);
+                            // Rimuovi www. se presente
+                            $domain = preg_replace('/^www\./', '', $domain ?: '');
+                            $set('domain', $domain);
+                        } else {
+                            $set('domain', '');
+                        }
+                    }),
+                TextInput::make('domain')
+                    ->label('Dominio')
+                    ->helperText("Dominio estratto automaticamente dall'URL")
+                    ->readOnly()
                     ->maxLength(255),
                 TextInput::make('url_transparency')
                     ->label('URL Trasparenza')
@@ -89,11 +99,7 @@ class WebsitesRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nome Sito')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('url')
-                    ->label('URL')
+                    ->label('URL sito')
                     ->searchable()
                     ->limit(40)
                     ->copyable()
@@ -104,9 +110,8 @@ class WebsitesRelationManager extends RelationManager
                     ->searchable()
                     ->limit(40)
                     ->placeholder('Non impostato')
-                    ->copyable()
-                    ->copyMessage('URL copiato!')
-                    ->copyMessageDuration(1500),
+                    ->url(fn($record) => $record->url_transparency)
+                    ->openUrlInNewTab(),
                 TextColumn::make('type')
                     ->label('Tipo')
                     ->badge()
@@ -199,7 +204,7 @@ class WebsitesRelationManager extends RelationManager
                     })
                     ->visible(function () {
                         $ownerRecord = $this->getOwnerRecord();
-                        return $ownerRecord && $this->getWebsitesWithTransparency($ownerRecord)->isNotEmpty();
+                        return $ownerRecord && $ownerRecord->websites()->exists();
                     }),
             ])
             ->actions([
@@ -209,8 +214,43 @@ class WebsitesRelationManager extends RelationManager
                     ->label('Test URL')
                     ->icon('heroicon-o-globe-alt')
                     ->color('info')
-                    ->url(fn(Website $record): ?string => $record->url)
-                    ->openUrlInNewTab(),
+                    ->action(function (Website $record) {
+                        try {
+                            $scanService = new TransparencyScanService();
+                            $ownerRecord = $this->getOwnerRecord();
+
+                            // Get company ID from owner
+                            $companyId = $this->getCompanyIdFromOwner($ownerRecord);
+
+                            if (!$companyId) {
+                                Notification::make()
+                                    ->title('Errore Scansione')
+                                    ->body("Impossibile determinare l'azienda associata")
+                                    ->danger()
+                                    ->send();
+                                return;
+                            }
+
+                            // Scan specific website
+                            $results = $scanService->scanSingleWebsite($record);
+
+                            $message = "Scansione completata per {$record->name}!\n"
+                                . 'Pagina trasparenza trovata: ' . ($results['found_transparency_page'] ? 'Sì' : 'No') . "\n"
+                                . "Documenti estratti: {$results['documents_created']}";
+
+                            Notification::make()
+                                ->title('Scansione URL Completata')
+                                ->body($message)
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Errore Scansione URL')
+                                ->body('Si è verificato un errore durante la scansione: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
             ])
             ->bulkActions([
                 DeleteBulkAction::make(),

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -20,7 +21,6 @@ class Document extends Model implements HasMedia
         'documentable_id',
         'documentable_type',
         'document_type_id',
-        'document_status_id',
         'name',
         'annotation',
         'description',
@@ -63,7 +63,7 @@ class Document extends Model implements HasMedia
 
     public function documentStatus(): BelongsTo
     {
-        return $this->belongsTo(DocumentStatus::class);
+        return $this->belongsTo(DocumentStatus::class, 'status');
     }
 
     public function verifiedBy(): BelongsTo
@@ -98,6 +98,40 @@ class Document extends Model implements HasMedia
     public function isValid(): bool
     {
         return $this->documentStatus?->is_ok ?? false;
+    }
+
+    /**
+     * Register media collections
+     */
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('documents')
+            ->useDisk('public')
+            ->singleFile()
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
+    }
+
+    /**
+     * Get document URL from media or url_document field
+     */
+    public function getUrlDocumentAttribute(): ?string
+    {
+        // Try to get URL from media first
+        if ($this->hasMedia('documents')) {
+            return $this->getFirstMediaUrl('documents');
+        }
+
+        // Fallback to url_document field
+        return $this->attributes['url_document'] ?? null;
+    }
+
+    /**
+     * Get document URL for viewing
+     */
+    public function getViewUrl(): ?string
+    {
+        return $this->url_document;
     }
 
     /**

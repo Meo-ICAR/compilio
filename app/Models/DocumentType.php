@@ -3,11 +3,30 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class DocumentType extends Model
 {
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($documentType) {
+            if (empty($documentType->slug)) {
+                $documentType->slug = Str::slug($documentType->name);
+            }
+        });
+
+        static::updating(function ($documentType) {
+            if ($documentType->isDirty('name') && empty($documentType->slug)) {
+                $documentType->slug = Str::slug($documentType->name);
+            }
+        });
+    }
+
     protected $fillable = [
         'name',
+        'slug',
         'code',
         'is_person',
         'is_signed',
@@ -80,6 +99,14 @@ class DocumentType extends Model
     }
 
     /**
+     * Scope per aziende
+     */
+    public function scopeForCompanies($query)
+    {
+        return $query->where('is_company', true);
+    }
+
+    /**
      * Scope per agenti
      */
     public function scopeForAgents($query)
@@ -133,5 +160,23 @@ class DocumentType extends Model
     public function isGeneral(): bool
     {
         return !$this->isPracticeRelated();
+    }
+
+    /**
+     * Get company ID from various owner record types
+     */
+    public static function getCompanyIdFromOwner($ownerRecord): ?string
+    {
+        $companyId = null;
+
+        if (method_exists($ownerRecord, 'company_id')) {
+            $companyId = $ownerRecord->company_id;
+        } elseif (method_exists($ownerRecord, 'company')) {
+            $companyId = $ownerRecord->company?->id;
+        } elseif ($ownerRecord instanceof \App\Models\Company) {
+            $companyId = $ownerRecord->id;
+        }
+
+        return $companyId;
     }
 }

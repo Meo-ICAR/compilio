@@ -52,14 +52,52 @@ class DocumentsRelationManager extends RelationManager
 
     protected static ?string $title = 'Documenti';
 
+    /**
+     * Get company ID from owner record with error handling
+     */
+    protected function getCompanyIdFromOwner(): ?string
+    {
+        $ownerRecord = $this->getOwnerRecord();
+        $companyId = DocumentType::getCompanyIdFromOwner($ownerRecord);
+
+        if (!$companyId) {
+            Notification::make()
+                ->title('Errore Company')
+                ->body('Impossibile determinare la company dal documento corrente')
+                ->danger()
+                ->send();
+            return null;
+        }
+
+        return $companyId;
+    }
+
     public function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('name')
-            ->paginated(['all', 10, 25, 50, 100])
-            ->defaultSort('modified_at', 'desc')
+            ->groups([
+                Group::make('documentType.codegroup')
+                    ->label('Tipologia')
+                    ->titlePrefixedWithLabel(false)
+                    ->collapsible(),
+            ])
+            ->paginated([25, 50, 100])
+            ->defaultPaginationPageOption(25)
+            ->defaultSort('updated_at', 'desc')
             ->selectable()
             ->reorderableColumns()
+            ->modifyQueryUsing(function ($query) {
+                // Load relationships without company filtering
+                $query->with(['documentType', 'documentStatus']);
+
+                // Always include trashed records for the filter to work
+                $query->withTrashed();
+
+                // Debug: log the query and count
+                \Log::info('Documents query SQL: ' . $query->toSql());
+                \Log::info('Documents count: ' . $query->count());
+            })
             ->columns([
                 TextColumn::make('name')
                     ->label('Nome Documento')
@@ -101,26 +139,48 @@ class DocumentsRelationManager extends RelationManager
             ])
             ->filters([
                 SelectFilter::make('document_type_id')
+                    ->label('Tipo Documento')
                     ->options(function ($livewire) {
-                        // $livewire->ownerRecord is the model instance this relation belongs to
                         $owner = $livewire->ownerRecord;
+                        $ownerClass = get_class($owner);
 
-                        return DocumentType::query()
-                            ->whereHasMorph('documentable', [get_class($owner)])
+                        // Use existing logic for all owner types including Company
+                        $types = DocumentType::query()
+                            ->when($ownerClass === 'App\Models\Company', function ($query) {
+                                return $query->forCompanies();
+                            })
+                            ->when($ownerClass === 'App\Models\Agent', function ($query) {
+                                return $query->forAgents();
+                            })
+                            ->when($ownerClass === 'App\Models\Principal', function ($query) {
+                                return $query->forPrincipals();
+                            })
+                            ->when($ownerClass === 'App\Models\Client', function ($query) {
+                                return $query->forClients();
+                            })
+                            ->when($ownerClass === 'App\Models\Practice', function ($query) {
+                                return $query->forPractices();
+                            })
                             ->pluck('name', 'id')
-                            ->sort();
+                            ->sort()
+                            ->toArray();
+
+                        // Add null option for unclassified documents
+                        return ['' => 'Senza tipo'] + $types;
                     })
-                    ->multiple()
-                    ->label('Tipo Documento'),
-                TernaryFilter::make('is_oldversion')
-                    //  ->query(fn($query) => $query->whereNotNull('deleted_at', true))
-                    ->label('Vecchie versioni'),
-                TernaryFilter::make('is_signed')
-                    //    ->query(fn($query) => $query->where('is_signed', true)),
-                    ->label('Firmato'),
-                TernaryFilter::make('is_verified')
-                    ->label('Verificato')
-                    ->query(fn($query) => $query->whereNotNull('verified_at')),
+                    ->placeholder('Tutti i tipi')
+                    ->default(null),
+                TernaryFilter::make('trashed')
+                    ->label('Documenti Cancellati')
+                    ->placeholder('Tutti i documenti')
+                    ->trueLabel('Solo cancellati')
+                    ->falseLabel('Solo attivi')
+                    ->default(false)
+                    ->queries(
+                        true: fn($query) => $query->onlyTrashed(),
+                        false: fn($query) => $query->whereNull('deleted_at'),
+                        blank: fn($query) => $query,
+                    ),
             ], layout: FiltersLayout::AboveContent)
             ->headerActions([
                 CreateAction::make()
@@ -159,12 +219,16 @@ class DocumentsRelationManager extends RelationManager
                                     TextInput::make('name')
                                         ->label('Nome Documento')
                                         ->columnSpan(2),
-                                    Select::make('document_status_id')
+                                    Select::make('status')
                                         ->label('Stato Documento')
                                         ->relationship('documentStatus', 'name')
                                         ->searchable()
                                         ->preload()
-                                        ->nullable(),
+                                        ->default(function () {
+                                            // Get first status as default
+                                            return \App\Models\DocumentStatus::first()?->id;
+                                        })
+                                        ->required(),
                                     Toggle::make('is_signed')
                                         ->label('Firmato')
                                         ->default(false),
@@ -215,27 +279,14 @@ class DocumentsRelationManager extends RelationManager
                     ->modalDescription('Classifica tutti i documenti non classificati  usando le regole dei tipi documento')
                     ->modalSubmitActionLabel('Avvia Classificazione')
                     ->action(function () {
-                        $ownerRecord = $this->getOwnerRecord();
                         $classificationService = new DocumentClassificationService();
 
                         try {
-                            // Get company_id from the owner record
-                            $companyId = null;
-                            if (method_exists($ownerRecord, 'company_id')) {
-                                $companyId = $ownerRecord->company_id;
-                            } elseif (method_exists($ownerRecord, 'company')) {
-                                $companyId = $ownerRecord->company?->id;
-                            } elseif ($ownerRecord instanceof Company) {
-                                $companyId = $ownerRecord->id;
-                            }
+                            // Get company_id using the generic method
+                            $companyId = $this->getCompanyIdFromOwner();
 
                             if (!$companyId) {
-                                Notification::make()
-                                    ->title('Errore Company')
-                                    ->body('Impossibile determinare la company  dal documento corrente')
-                                    ->danger()
-                                    ->send();
-                                return;
+                                return;  // Error already handled in getCompanyIdFromOwner
                             }
 
                             // Get unclassified documents for this company
@@ -284,18 +335,42 @@ class DocumentsRelationManager extends RelationManager
             ])  // Action::make('create_document')
             ->actions([
                 // AZIONE PER VEDERE IL DOCUMENTO
-                EditAction::make()
-                    ->label('Modifica')
-                    ->modalHeading('Modifica Documento'),
+
+                /*
+                 * EditAction::make()
+                 *     ->label('Modifica')
+                 *     ->modalHeading('Modifica Documento'),
+                 */
                 ClassifyDocumentAction::make()
                     ->visible(fn($record) => $record && $record->document_type_id === null),
-                DeleteAction::make()
-                    ->label('Elimina')
+                Action::make('soft_delete')
+                    ->label('Archivia')
+                    ->icon('heroicon-o-archive-box-arrow-down')
+                    ->color('warning')
                     ->requiresConfirmation()
-                    ->modalHeading('Elimina Documento')
-                    ->modalDescription('Sei sicuro di voler eliminare questo documento? Questa azione non è reversibile.')
-                    ->modalSubmitActionLabel('Sì, elimina')
-                    ->modalCancelActionLabel('Annulla'),
+                    ->modalHeading('Archivia Documento')
+                    ->modalDescription('Sei sicuro di voler archiviare questo documento? Potrà essere ripristinato.')
+                    ->modalSubmitActionLabel('Sì, archivia')
+                    ->modalCancelActionLabel('Annulla')
+                    ->action(function ($record) {
+                        $record->delete();  // Soft delete
+                        Notification::make()
+                            ->title('Documento Archiviato')
+                            ->body('Il documento è stato archiviato correttamente')
+                            ->success()
+                            ->send();
+                    }),
+
+                /*
+                 * DeleteAction::make()
+                 *     ->label('Elimina Definitivamente')
+                 *     ->color('danger')
+                 *     ->requiresConfirmation()
+                 *     ->modalHeading('Elimina Documento Definitivamente')
+                 *     ->modalDescription('ATTENZIONE: Questa azione eliminerà permanentemente il documento. Non è reversibile.')
+                 *     ->modalSubmitActionLabel('Sì, elimina definitivamente')
+                 *     ->modalCancelActionLabel('Annulla'),
+                 */
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -319,12 +394,16 @@ class DocumentsRelationManager extends RelationManager
                                 ->searchable()
                                 ->preload()
                                 ->nullable(),
-                            Select::make('document_status_id')
+                            Select::make('status')
                                 ->label('Stato Documento')
                                 ->relationship('documentStatus', 'name')
                                 ->searchable()
                                 ->preload()
-                                ->nullable(),
+                                ->default(function () {
+                                    // Get first status as default
+                                    return \App\Models\DocumentStatus::first()?->id;
+                                })
+                                ->required(),
                             Toggle::make('is_signed')
                                 ->label('Firmato')
                                 ->default(false),

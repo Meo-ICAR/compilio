@@ -47,10 +47,14 @@ class DocumentForm
                             ->relationship('documentType', 'name')
                             ->label('Tipo Documento')
                             ->required(),
-                        Select::make('document_status_id')
+                        Select::make('status')
                             ->relationship('documentStatus', 'name')
                             ->label('Stato Documento')
-                            ->nullable()
+                            ->default(function () {
+                                // Get first status as default
+                                return \App\Models\DocumentStatus::first()?->id;
+                            })
+                            ->required()
                             ->helperText('Stato di validità del documento'),
                         TextInput::make('name')
                             ->label('Nome Documento')
