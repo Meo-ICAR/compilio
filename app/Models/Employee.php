@@ -8,10 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Employee extends Model
+class Employee extends Model implements HasMedia
 {
-    use BelongsToCompany, HasFactory;
+    use BelongsToCompany, HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'company_id',
@@ -23,7 +26,7 @@ class Employee extends Model
         'phone',
         'role',
         'department',
-        'hire_date',
+        'hiring_date',
         'employment_type_id',
         'employee_types',
         'supervisor_type',
@@ -39,7 +42,7 @@ class Employee extends Model
     protected $casts = [
         'is_structure' => 'boolean',
         'is_ghost' => 'boolean',
-        'hire_date' => 'date',
+        'hiring_date' => 'date',
         'oam_at' => 'date',
         'oam_dismissed_at' => 'date',
         'employee_types' => 'string',
@@ -55,6 +58,11 @@ class Employee extends Model
     public function trainingRecords()
     {
         return $this->morphMany(TrainingRecord::class, 'trainable');
+    }
+
+    public function employmentType(): BelongsTo
+    {
+        return $this->belongsTo(EmploymentType::class);
     }
 
     public function companyBranch(): BelongsTo
@@ -80,11 +88,6 @@ class Employee extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
-    }
-
-    public function employmentType()
-    {
-        return $this->belongsTo(EmploymentType::class);
     }
 
     public function rui()
@@ -237,5 +240,37 @@ class Employee extends Model
     protected function full_name(): string
     {
         return $this->name . ' ' . $this->first_name;
+    }
+
+    /**
+     * Register media collections
+     */
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('employee_documents')
+            ->useDisk('public')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
+
+        $this
+            ->addMediaCollection('nomina_privacy')
+            ->useDisk('public')
+            ->acceptsMimeTypes(['application/pdf'])
+            ->singleFile();
+    }
+
+    /**
+     * Get media conversions
+     */
+    public function registerMediaConversions(Media $media = null): void
+    {
+        if ($media->mime_type === 'application/pdf') {
+            $this
+                ->addMediaConversion('thumbnail')
+                ->width(200)
+                ->height(200)
+                ->extractVideoPosterIfVideo()
+                ->nonQueued();
+        }
     }
 }

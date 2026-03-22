@@ -330,6 +330,25 @@ class PurchaseInvoiceImportService
 
         $matchedCount = 0;
 
+        Log::info('Starting mass Agent matching by exact VAT number', [
+            'company_id' => $companyId
+        ]);
+
+        // Esegue un singolo UPDATE con JOIN a livello di database
+        $affectedRows = DB::table('purchase_invoices as pi')
+            ->join('agents as a', 'pi.vat_number', '=', 'a.vat_number')
+            ->where('pi.company_id', $companyId)
+            ->whereNotNull('pi.vat_number')
+            ->whereNull('pi.invoiceable_id')
+            ->update([
+                'pi.invoiceable_id' => DB::raw('a.id'),
+                'pi.invoiceable_type' => Agent::class,
+            ]);
+
+        Log::info('Agent matching completed', [
+            'company_id' => $companyId,
+            'matched_and_updated_invoices' => $affectedRows
+        ]);
         try {
             // Get all Purchase invoices for this company that have a VAT number but no Agent relationship
             $invoices = PurchaseInvoice::where('company_id', $companyId)
@@ -470,6 +489,13 @@ class PurchaseInvoiceImportService
                     continue;
                 }
 
+                // Find Agent with matching VAT number
+                $Agent = $this->findAgentByVatNumber($cleanVatNumber, $companyId);
+
+                if ($Agent) {
+                    continue;
+                }
+
                 // Find client with matching VAT number
                 $client = $this->findClientByVatNumber($cleanVatNumber, $companyId);
 
@@ -591,19 +617,9 @@ class PurchaseInvoiceImportService
             return null;
         }
 
-        // Try to find by tax_code
-        $client = Client::where('company_id', $companyId)
-            ->where('tax_code', $vatNumber)
-            ->first();
-
-        if ($client) {
-            Log::info('Found client by tax_code', [
-                'vat_number' => $vatNumber,
-                'client_id' => $client->id,
-                'client_name' => $client->name,
-                'tax_code' => $client->tax_code,
-            ]);
-            return $client;
+        $agent = $this->findAgentByVatNumber($vatNumber, $companyId);
+        if ($agent) {
+            return $agent;
         }
 
         // Try variations
@@ -671,7 +687,7 @@ class PurchaseInvoiceImportService
                     ->first();
 
                 if ($client) {
-                    return $client;
+                    continue;
                 }
             } catch (\Exception $e) {
                 // Column vat_number doesn't exist, try tax_code
@@ -682,7 +698,7 @@ class PurchaseInvoiceImportService
                 ->first();
 
             if ($client) {
-                return $client;
+                continue;
             }
         }
 

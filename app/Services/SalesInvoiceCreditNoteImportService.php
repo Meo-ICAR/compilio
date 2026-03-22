@@ -387,6 +387,26 @@ WHERE p.tipo = 'Istituto'; ");
 
         $matchedCount = 0;
 
+        Log::info('Starting mass Principal matching by exact VAT number', [
+            'company_id' => $companyId
+        ]);
+
+        // Esegue un singolo UPDATE con JOIN a livello di database
+        $affectedRows = DB::table('sales_invoices as si')
+            ->join('principals as p', 'si.vat_number', '=', 'p.vat_number')
+            ->where('si.company_id', $companyId)
+            ->whereNotNull('si.vat_number')
+            ->whereNull('si.invoiceable_id')
+            ->update([
+                'si.invoiceable_id' => DB::raw('p.id'),
+                'pi.invoiceable_type' => Principal::class,
+            ]);
+
+        Log::info('Principal matching completed', [
+            'company_id' => $companyId,
+            'matched_and_updated_invoices' => $affectedRows
+        ]);
+
         try {
             // Get all Sales invoices for this company that have a VAT number but no Principal relationship
             $invoices = SalesInvoice::where('company_id', $companyId)

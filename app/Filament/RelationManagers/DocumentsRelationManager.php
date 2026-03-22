@@ -43,6 +43,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\Builder;
 
 class DocumentsRelationManager extends RelationManager
 {
@@ -166,10 +168,23 @@ class DocumentsRelationManager extends RelationManager
                             ->toArray();
 
                         // Add null option for unclassified documents
-                        return ['' => 'Senza tipo'] + $types;
+                        return ['null' => 'Senza tipo'] + $types;
                     })
                     ->placeholder('Tutti i tipi')
-                    ->default(null),
+                    ->default(null)
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = $data['value'] ?? null;
+
+                        if ($value === 'null') {
+                            // Filter for documents without document_type_id
+                            return $query->whereNull('document_type_id');
+                        } elseif ($value) {
+                            // Filter for specific document type
+                            return $query->where('document_type_id', $value);
+                        }
+
+                        return $query;
+                    }),
                 TernaryFilter::make('trashed')
                     ->label('Documenti Cancellati')
                     ->placeholder('Tutti i documenti')

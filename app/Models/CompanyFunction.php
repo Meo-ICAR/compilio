@@ -14,9 +14,9 @@ class CompanyFunction extends Model
 
     protected $fillable = [
         'company_id',
-        'function_id',
-        'internal_employee_id',
-        'external_client_id',
+        'business_function_id',
+        'employee_id',
+        'client_id',
         'is_privacy',
         'is_outsourced',
         'report_frequency',
@@ -36,17 +36,17 @@ class CompanyFunction extends Model
         return $this->belongsTo(Company::class);
     }
 
-    public function function(): BelongsTo
+    public function businessFunction(): BelongsTo
     {
         return $this->belongsTo(BusinessFunction::class, 'business_function_id');
     }
 
-    public function internalEmployee(): BelongsTo
+    public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
-    public function externalClient(): BelongsTo
+    public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
     }
@@ -67,14 +67,14 @@ class CompanyFunction extends Model
         return $this->is_privacy;
     }
 
-    public function hasInternalEmployee(): bool
+    public function hasEmployee(): bool
     {
-        return !is_null($this->internal_employee_id);
+        return !is_null($this->employee_id);
     }
 
-    public function hasExternalClient(): bool
+    public function hasClient(): bool
     {
-        return !is_null($this->external_client_id);
+        return !is_null($this->client_id);
     }
 
     public function getContractStatusAttribute(): string
@@ -150,19 +150,19 @@ class CompanyFunction extends Model
         return $query->where('company_id', $companyId);
     }
 
-    public function scopeByFunction($query, int $functionId)
+    public function scopeByBusinessFunction($query, int $functionId)
     {
-        return $query->where('function_id', $functionId);
+        return $query->where('business_function_id', $functionId);
     }
 
     public function scopeWithInternalEmployee($query)
     {
-        return $query->whereNotNull('internal_employee_id');
+        return $query->whereNotNull('employee_id');
     }
 
     public function scopeWithExternalClient($query)
     {
-        return $query->whereNotNull('external_client_id');
+        return $query->whereNotNull('client_id');
     }
 
     public function scopeContractExpiring($query, int $days = 30)

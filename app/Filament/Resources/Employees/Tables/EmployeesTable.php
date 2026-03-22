@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Employees\Tables;
 use App\Filament\Imports\EmployeesImporter;
 use App\Filament\Traits\CanExportTable;
 use App\Models\Employee;
+use App\Models\Rui;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -48,6 +49,7 @@ class EmployeesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('name')
             ->columns([
                 TextColumn::make('name')
                     ->label('Nominativo')
@@ -60,9 +62,19 @@ class EmployeesTable
                 TextColumn::make('employe_type.name')
                     ->label('Tipo di impiego')
                     ->searchable(),
+                TextColumn::make('hiring_date')
+                    ->date()
+                    ->sortable(),
+                TextColumn::make('coordinatedBy.name')
+                    ->label('Coordinato da')
+                    ->searchable()
+                    ->placeholder('Nessun coordinatore'),
                 TextColumn::make('company_branch.name')
                     ->label('Sede')
                     ->sortable()
+                    ->searchable(),
+                TextColumn::make('numero_iscrizione_rui')
+                    ->label('Numero Iscrizione OAM')
                     ->searchable(),
                 TextColumn::make('email')
                     ->label('Email address')
@@ -71,20 +83,9 @@ class EmployeesTable
                     ->searchable(),
                 TextColumn::make('department')
                     ->searchable(),
-                TextColumn::make('hiring_date')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('coordinatedBy.name')
-                    ->label('Coordinato da')
-                    ->searchable()
-                    ->placeholder('Nessun coordinatore'),
                 TextColumn::make('termination_date')
                     ->date()
                     ->sortable(),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -101,7 +102,7 @@ class EmployeesTable
                         $ruolo = $record->employmentType;
 
                         if (!$ruolo) {
-                            Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Errore')
                                 ->body('Questo utente non ha una mansione assegnata.')
                                 ->danger()
@@ -130,12 +131,42 @@ class EmployeesTable
                             'logoBase64' => $logoBase64,
                         ]);
 
-                        // Scarichiamo il file con un nome pulito (es. nomina-privacy-mario-rossi.pdf)
+                        // Salviamo il PDF nella Spatie Media Library dell'employee
                         $nomeFile = 'nomina-privacy-' . Str::slug($record->name) . '.pdf';
+                        $pdfContent = $pdf->output();
 
-                        return response()->streamDownload(function () use ($pdf) {
-                            echo $pdf->stream();
-                        }, $nomeFile);
+                        $record
+                            ->addMediaFromString($pdfContent)
+                            ->usingFileName($nomeFile)
+                            ->usingName('Nomina Privacy')
+                            ->toMediaCollection('nomina_privacy');
+
+                        // Creiamo il record Document
+                        $documentType = \App\Models\DocumentType::where('name', 'Nomina Incaricato')->first();
+
+                        $document = \App\Models\Document::create([
+                            'name' => 'Nomina Privacy - ' . $record->name,
+                            'documentable_id' => $record->id,
+                            'documentable_type' => Employee::class,
+                            'document_type_id' => $documentType?->id,
+                            'status' => 'active',
+                            'company_id' => $record->company_id,
+                        ]);
+
+                        // Associamo il media al documento
+                        if ($record->hasMedia('nomina_privacy')) {
+                            $media = $record->getFirstMedia('nomina_privacy');
+                            $document
+                                ->addMedia($media->getPath())
+                                ->usingFileName($nomeFile)
+                                ->toMediaCollection('documents');
+                        }
+
+                        Notification::make()
+                            ->title('Successo')
+                            ->body('Nomina privacy salvata con successo e documento creato.')
+                            ->success()
+                            ->send();
                     }),
                 // ])
             ])
@@ -153,8 +184,10 @@ class EmployeesTable
                             $matchedCount = 0;
                             $errors = [];
 
-                            // Get all agents
-                            $employees = Employee::where('company_id', $companyId)->get();
+                            // Get all employee
+                            $employees = Employee::where('company_id', $companyId)
+                                ->where('numero_iscrizione_rui', null)
+                                ->get();
 
                             foreach ($employees as $employee) {
                                 // Try to find matching RUI record by name

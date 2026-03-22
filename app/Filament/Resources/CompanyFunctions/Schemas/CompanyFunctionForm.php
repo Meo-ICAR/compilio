@@ -26,9 +26,9 @@ class CompanyFunctionForm
                     ->description('Associazione tra azienda e funzione aziendale')
                     ->schema([
                         Grid::make(2)->schema([
-                            Select::make('function_id')
+                            Select::make('business_function_id')
                                 ->label('Funzione Aziendale')
-                                ->relationship('function', 'name')
+                                ->relationship('businessFunction', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->required()
@@ -37,14 +37,14 @@ class CompanyFunctionForm
                         Grid::make(2)->schema([
                             Select::make('employee_id')
                                 ->label('Referente Interno')
-                                ->relationship('internalEmployee', 'name')
+                                ->relationship('employee', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->nullable()
                                 ->helperText('Dipendente responsabile interno'),
                             Select::make('client_id')
                                 ->label('Referente Esterno')
-                                ->relationship('externalClient', 'name')
+                                ->relationship('client', 'name')
                                 ->searchable()
                                 ->preload()
                                 ->nullable()

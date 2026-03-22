@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\Companies\RelationManagers;
 
-use App\Filament\Resources\CompanyClients\Tables\CompanyClientsTable;
+use App\Filament\Resources\Clients\Tables\ClientsTable;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class CompanyClientsRelationManager extends RelationManager
+class ClientsRelationManager extends RelationManager
 {
     protected static string $relationship = 'companyClients';
 
@@ -19,7 +19,10 @@ class CompanyClientsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return CompanyClientsTable::configure($table);
+        return ClientsTable::configure($table)
+            ->modifyQueryUsing(function ($query) {
+                $query->where('is_company', 1);
+            });
     }
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
