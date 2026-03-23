@@ -55,7 +55,7 @@ class ProcessResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListProcess::route('/'),
+            'index' => ListProcesses::route('/'),
             'create' => CreateProcess::route('/create'),
             'edit' => EditProcess::route('/{record}/edit'),
         ];
