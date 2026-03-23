@@ -159,8 +159,10 @@ class PracticeCommissionsTable
                 QueryBuilder::make()
                     ->constraints([
                         DateConstraint::make('perfected_at')
+                            ->nullable()
                             ->label('Perfezionamento'),
                         DateConstraint::make('invoice_at')
+                            ->nullable()
                             ->label('Fatturate'),
                     ])
             ], layout: FiltersLayout::AboveContent)

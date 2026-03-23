@@ -424,6 +424,7 @@ class MediafacileImportService
             'amount' => $amount,
             'net' => $net,
             'is_notowned' => ($apiData['Pratica_terzi'] ?? '') == 'SI' ? true : false,
+            'uploaded_at' => now(),
         ];
     }
 

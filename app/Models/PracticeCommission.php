@@ -41,6 +41,7 @@ class PracticeCommission extends Model
         'storned_at',
         'storno_amount',
         'alternative_number_invoice',
+        'uploaded_at',
     ];
 
     protected $casts = [
@@ -55,6 +56,7 @@ class PracticeCommission extends Model
         'cancellation_at' => 'date',
         'invoice_at' => 'date',
         'paided_at' => 'date',
+        'uploaded_at' => 'datetime',
         'is_enasarco' => 'boolean',
         'is_insurance' => 'boolean',
         'is_payment' => 'boolean',

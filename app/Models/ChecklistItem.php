@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\ProcessTask;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -38,6 +39,7 @@ class ChecklistItem extends Model
         'url_callback',
         'business_function_id',
         'process_task_code',
+        'process_task_id',  // Aggiunto per relazione con ProcessTask
     ];
 
     protected $casts = [
@@ -71,6 +73,11 @@ class ChecklistItem extends Model
     public function businessFunction(): BelongsTo
     {
         return $this->belongsTo(BusinessFunction::class);
+    }
+
+    public function processTask(): BelongsTo
+    {
+        return $this->belongsTo(ProcessTask::class);
     }
 
     /**

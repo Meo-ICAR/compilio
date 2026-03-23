@@ -42,6 +42,9 @@ class Document extends Model implements HasMedia
         'ai_confidence_score',
         'extracted_text',
         'metadata',
+        'document_type',
+        'collection',
+        'is_unique',
         'sharepoint_id',
         'file_hash',
     ];
@@ -52,6 +55,7 @@ class Document extends Model implements HasMedia
         'verified_at' => 'datetime',
         'is_signed' => 'boolean',
         'is_template' => 'boolean',
+        'is_unique' => 'boolean',
         'ai_confidence_score' => 'integer',
         'metadata' => 'array',
     ];

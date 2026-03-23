@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Process;
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,6 +43,7 @@ class Checklist extends Model implements HasMedia
         'annotation',
         'business_function_id',
         'process_task_groupcode',
+        'process_id',  // Aggiunto per relazione con Process
     ];
 
     protected $casts = [
@@ -162,6 +164,11 @@ class Checklist extends Model implements HasMedia
     public function businessFunction(): BelongsTo
     {
         return $this->belongsTo(BusinessFunction::class);
+    }
+
+    public function process(): BelongsTo
+    {
+        return $this->belongsTo(Process::class);
     }
 
     // Helper methods per document_type

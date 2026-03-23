@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Processes\RelationManagers;
 
+use App\Filament\Resources\ProcessTasks\Schemas\ProcessTaskForm;
 use App\Filament\Resources\ProcessTasks\Tables\ProcessTasksTable;
 use App\Models\ProcessTask;
 use Filament\Actions\Action;
@@ -45,12 +46,20 @@ class ProcessTasksRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([]);
+        return ProcessTaskForm::make($schema);
     }
 
     public function table(Table $table): Table
     {
-        return ProcessTasksTable::configure($table);
+        $table = ProcessTasksTable::configure($table);
+
+        // Override the EditAction to use our custom form
+        $table->actions([
+            EditAction::make()
+                ->form(fn($record) => ProcessTaskForm::configure(\Filament\Schemas\Schema::make())->getComponents()),
+            // ... altre actions se necessarie
+        ]);
+
+        return $table;
     }
 }

@@ -547,6 +547,11 @@ WHERE p.tipo = 'Istituto'; ");
                     continue;
                 }
 
+                $principal = $this->findPrincipalByVatNumber($cleanVatNumber, $companyId);
+                if (!empty($principal)) {
+                    continue;
+                }
+
                 // Find client with matching VAT number
                 $client = $this->findClientByVatNumber($cleanVatNumber, $companyId);
 

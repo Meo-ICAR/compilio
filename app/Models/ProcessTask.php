@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\ChecklistItem;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -33,6 +35,20 @@ class ProcessTask extends Model
             ->belongsToMany(BusinessFunction::class, 'raci_assignments')
             ->withPivot('role')
             ->withTimestamps();
+    }
+
+    public function checklistItems(): HasMany
+    {
+        // Correliamo tramite il campo process_task_id della tabella checklist_items
+        return $this->hasMany(ChecklistItem::class, 'process_task_id');
+    }
+
+    /**
+     * Get checklist items also correlated by process_task_code (legacy support)
+     */
+    public function checklistItemsByCode(): HasMany
+    {
+        return $this->hasMany(ChecklistItem::class, 'process_task_code', 'slug');
     }
 
     public function raciAssignments()

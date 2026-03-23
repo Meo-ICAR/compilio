@@ -27,8 +27,9 @@ class ProcessTaskForm
                 Section::make('Definizione Attività')
                     ->description("Collega il task al prodotto e definisci l'ordine di esecuzione.")
                     ->schema([
-                        TextInput::make('process.name')
+                        Select::make('process_id')
                             ->label('Processo Padre')
+                            ->relationship('process', 'name')
                             ->disabled()
                             ->helperText('Processo padre del task'),
                         TextInput::make('name')

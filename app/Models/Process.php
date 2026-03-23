@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Checklist;
 use App\Traits\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -33,6 +34,14 @@ class Process extends Model
     public function processTasks(): HasMany
     {
         return $this->hasMany(ProcessTask::class);
+    }
+
+    /**
+     * Get the checklists for this process.
+     */
+    public function checklists(): HasMany
+    {
+        return $this->hasMany(Checklist::class);
     }
 
     /**

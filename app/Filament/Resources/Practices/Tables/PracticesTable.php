@@ -255,20 +255,28 @@ class PracticesTable
                         DateConstraint::make('sended_at')
                             ->label('Inviate in Istruttoria'),
                         DateConstraint::make('approved_at')
+                            ->nullable()
                             ->label('Pratiche deliberate'),
                         DateConstraint::make('erogated_at')
+                            ->nullable()
                             ->label('Pratiche erogate'),
                         DateConstraint::make('perfected_at')
+                            ->nullable()
                             ->label('Pratiche perfezionate'),
                         DateConstraint::make('invoice_at')
+                            ->nullable()
                             ->label('Fatturate'),
                         DateConstraint::make('rejected_at')
+                            ->nullable()
                             ->label('Pratiche Rifiutate'),
                         NumberConstraint::make('amount')
+                            ->nullable()
                             ->label('Montante'),
                         NumberConstraint::make('net')
+                            ->nullable()
                             ->label('Erogato'),
                         NumberConstraint::make('brokerage_fee')
+                            ->nullable()
                             ->label('Provvigioni'),
                         TextConstraint::make('stato_pratica')
                             ->label('Stato Pratica'),

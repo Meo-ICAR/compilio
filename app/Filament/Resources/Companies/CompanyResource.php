@@ -19,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 use BackedEnum;
 use UnitEnum;
 
@@ -70,5 +71,20 @@ class CompanyResource extends Resource
             'create' => CreateCompany::route('/create'),
             'edit' => EditCompany::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * Get the navigation URL for the current user's company.
+     */
+    public static function getNavigationUrl(): string
+    {
+        $user = Auth::user();
+
+        if (!$user || !$user->company_id) {
+            // Fallback to index if user has no company
+            return static::getUrl('index');
+        }
+
+        return static::getUrl('edit', ['record' => $user->company_id]);
     }
 }

@@ -109,17 +109,22 @@ class DocumentsRelationManager extends RelationManager
                     ->weight('bold')
                     ->url(fn($record): ?string => $record->url_document)
                     ->openUrlInNewTab(),
-                TextColumn::make('documentType.name')
-                    ->label('Tipo Documento')
+                TextColumn::make('expires_at')
+                    ->label('Scadenza')
+                    ->date('d/m/Y')
                     ->sortable()
-                    ->searchable()
-                    ->badge(),
+                    ->toggleable(),
                 TextColumn::make('documentStatus.name')
                     ->label('Stato')
                     ->sortable()
                     ->searchable()
                     ->badge()
                     ->color(fn($record) => $record->documentStatus?->getStatusClass() ?? 'gray'),
+                TextColumn::make('documentType.name')
+                    ->label('Tipo Documento')
+                    ->sortable()
+                    ->searchable()
+                    ->badge(),
                 IconColumn::make('is_signed')
                     ->label('Firmato')
                     ->boolean()
@@ -127,11 +132,6 @@ class DocumentsRelationManager extends RelationManager
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
                     ->falseColor('gray'),
-                TextColumn::make('expires_at')
-                    ->label('Scadenza')
-                    ->date('d/m/Y')
-                    ->sortable()
-                    ->toggleable(),
                 TextColumn::make('verified_at')
                     ->label('Data Verifica')
                     ->dateTime('d/m/Y H:i')
@@ -140,6 +140,16 @@ class DocumentsRelationManager extends RelationManager
                     ->placeholder('Non verificato'),
             ])
             ->filters([
+                TernaryFilter::make('expires_at')
+                    ->label('Documenti Scaduti')
+                    ->placeholder('Tutti i documenti')
+                    ->trueLabel('Solo scaduti')
+                    ->falseLabel('Solo non scaduti')
+                    ->queries(
+                        true: fn($query) => $query->where('expires_at', '<', now()),
+                        false: fn($query) => $query->where('expires_at', '>=', now()),
+                        blank: fn($query) => $query,
+                    ),
                 SelectFilter::make('document_type_id')
                     ->label('Tipo Documento')
                     ->options(function ($livewire) {
@@ -350,12 +360,9 @@ class DocumentsRelationManager extends RelationManager
             ])  // Action::make('create_document')
             ->actions([
                 // AZIONE PER VEDERE IL DOCUMENTO
-
-                /*
-                 * EditAction::make()
-                 *     ->label('Modifica')
-                 *     ->modalHeading('Modifica Documento'),
-                 */
+                EditAction::make()
+                    ->label('Modifica')
+                    ->modalHeading('Modifica'),
                 ClassifyDocumentAction::make()
                     ->visible(fn($record) => $record && $record->document_type_id === null),
                 Action::make('soft_delete')
@@ -363,14 +370,14 @@ class DocumentsRelationManager extends RelationManager
                     ->icon('heroicon-o-archive-box-arrow-down')
                     ->color('warning')
                     ->requiresConfirmation()
-                    ->modalHeading('Archivia Documento')
+                    ->modalHeading('Archivia')
                     ->modalDescription('Sei sicuro di voler archiviare questo documento? Potrà essere ripristinato.')
                     ->modalSubmitActionLabel('Sì, archivia')
                     ->modalCancelActionLabel('Annulla')
                     ->action(function ($record) {
                         $record->delete();  // Soft delete
                         Notification::make()
-                            ->title('Documento Archiviato')
+                            ->title('Archiviazione')
                             ->body('Il documento è stato archiviato correttamente')
                             ->success()
                             ->send();

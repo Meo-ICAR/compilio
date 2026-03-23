@@ -2,13 +2,18 @@
 
 namespace App\Filament\Resources\Companies\RelationManagers;
 
+use App\Exports\RaciMansionarioExport;
 use App\Filament\Resources\CompanyFunctions\Schemas\CompanyFunctionForm;
 use App\Filament\Resources\CompanyFunctions\Tables\CompanyFunctionsTable;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use Filament\Actions\ExportAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Actions;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CompanyFunctionsRelationManager extends RelationManager
 {
@@ -34,7 +39,12 @@ class CompanyFunctionsRelationManager extends RelationManager
     {
         return CompanyFunctionsTable::configure($table)
             ->headerActions([
-                Actions\CreateAction::make(),
+                Action::make('exportExcel')
+                    ->label('Scarica Mansionario Excel')
+                    ->icon('heroicon-o-document-chart-bar')
+                    ->color('success')
+                    ->action(fn() => Excel::download(new RaciMansionarioExport, 'mansionario_aziendale_2026.xlsx')),
+                CreateAction::make(),
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([

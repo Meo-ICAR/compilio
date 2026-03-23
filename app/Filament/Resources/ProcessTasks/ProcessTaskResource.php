@@ -18,7 +18,7 @@ use UnitEnum;
 class ProcessTaskResource extends Resource
 {
     protected static ?string $model = ProcessTask::class;
-    //  protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = false;
     protected static bool $isScopedToTenant = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
     protected static ?string $navigationLabel = 'Task';

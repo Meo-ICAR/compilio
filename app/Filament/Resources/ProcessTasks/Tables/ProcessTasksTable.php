@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ProcessTasks\Tables;
 
 use App\Filament\Traits\CanExportTable;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -28,38 +29,54 @@ class ProcessTasksTable
                     ->sortable()
                     ->limit(50)
                     ->tooltip(fn($record) => $record->name),
-                TextColumn::make('raci_summary')
-                    ->label('Matrice RACI')
-                    ->formatStateUsing(function ($record) {
-                        // Debug: verifica cosa contiene il record
-                        if (!$record)
-                            return 'Nessun dato';
-                        if (!isset($record->businessFunctions))
-                            return 'Nessuna business function';
-
-                        return 'RACIS';
-
-                        /*
-                         * $record
-                         *   ->businessFunctions
-                         *   ->groupBy(fn($f) => $f->pivot->role ?? 'N/D')
-                         *   ->map(fn($functions, $role) => "{$role}: " . $functions->pluck('code')->implode(', '))
-                         *   ->implode(' | ');
-                         */
-                    }),
-                TextColumn::make('code')
-                    ->label('Codice Dettaglio')
-                    ->searchable()
-                    ->sortable()
+                // --- COLONNE MATRICE RACI ---
+                // R - Responsible (Chi esegue)
+                TextColumn::make('responsible')
+                    ->label('R')
+                    ->tooltip("Responsible: Chi esegue l'attività")
+                    ->state(fn($record) =>
+                        $record->businessFunctions->where('pivot.role', 'R')->pluck('code')->toArray())
                     ->badge()
-                    ->toggleable(),
-                TextColumn::make('sort_order')
-                    ->label('Ordinamento')
-                    ->sortable()
-                    ->badge(),
+                    ->color('gray')
+                    ->separator(','),
+                // A - Accountable (Chi approva/risponde)
+                TextColumn::make('accountable')
+                    ->label('A')
+                    ->tooltip('Accountable: Chi ha la responsabilità ultima e approva')
+                    ->state(fn($record) =>
+                        $record->businessFunctions->where('pivot.role', 'A')->pluck('code')->toArray())
+                    ->badge()
+                    ->color('danger')
+                    ->separator(','),
+                // C - Consulted (Chi aiuta)
+                TextColumn::make('consulted')
+                    ->label('C')
+                    ->tooltip('Consulted: Chi deve essere consultato (scambio bidirezionale)')
+                    ->state(fn($record) =>
+                        $record->businessFunctions->where('pivot.role', 'C')->pluck('code')->toArray())
+                    ->badge()
+                    ->color('info')
+                    ->separator(','),
+                // I - Informed (Chi riceve info)
+                TextColumn::make('informed')
+                    ->label('I')
+                    ->tooltip('Informed: Chi deve essere informato (scambio unidirezionale)')
+                    ->state(fn($record) =>
+                        $record->businessFunctions->where('pivot.role', 'I')->pluck('code')->toArray())
+                    ->badge()
+                    ->color('success')
+                    ->separator(','),
+                TextColumn::make('checklist_items_count')
+                    ->label('Step Checklist')
+                    ->counts('checklistItems')
+                    ->badge()
+                    ->color('warning'),
             ])
             ->defaultSort('sort_order')
             ->filters([
+                SelectFilter::make('function')
+                    ->relationship('businessFunctions', 'code')
+                    ->label('Filtra per Funzione'),
                 SelectFilter::make('taskable_type')
                     ->label('Tipo Entità')
                     ->options([
@@ -97,6 +114,14 @@ class ProcessTasksTable
                     }),
             ])
             ->actions([
+                Action::make('view_checklist')
+                    ->label('Checklist')
+                    ->icon('heroicon-o-list-bullet')
+                    ->color('info')
+                    ->modalHeading(fn($record) => 'Checklist per: ' . $record->name)
+                    ->modalContent(fn($record) => view('filament.components.checklist-preview', [
+                        'items' => $record->checklistItems()->orderBy('ordine')->get()
+                    ])),
                 EditAction::make(),
             ])
             ->bulkActions([

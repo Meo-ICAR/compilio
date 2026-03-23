@@ -477,6 +477,7 @@ ORDER BY x.principal_id, x.tipo_prodotto;
             'fonte' => 'mediafacile',
             'is_coordination' => $isPayment && ($apiData['Agente'] <> $apiData['Denominazione Riferimento']),
             'is_client' => ($apiData['Tipo']) && ($apiData['Tipo'] === 'Cliente') ? true : false,
+            'uploaded_at' => now(),
         ];
     }
 }

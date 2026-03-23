@@ -130,8 +130,10 @@ class BusinessFunctionsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    static::getExportBulkAction(),  // 2. Richiama l'azione dal trait
+                    //   DeleteBulkAction::make(),
                 ]),
+                // DeleteBulkAction::make(),
             ]);
     }
 }

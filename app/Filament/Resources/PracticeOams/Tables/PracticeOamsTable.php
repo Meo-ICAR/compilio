@@ -5,9 +5,9 @@ namespace App\Filament\Resources\PracticeOams\Tables;
 use App\Exports\PracticeOamBaseExport;
 use App\Filament\Exports\PracticeOamAnaliticoExporter;
 use App\Filament\Exports\PracticeOamExporter;
+use App\Filament\Traits\CanExportTable;
 use App\Models\PracticeOam;
 use App\Models\PracticeOamBase;
-use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -17,11 +17,17 @@ use Filament\Actions\ExportAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
+use Filament\QueryBuilder\Constraints\BooleanConstraint;
+use Filament\QueryBuilder\Constraints\DateConstraint;
+use Filament\QueryBuilder\Constraints\NumberConstraint;
+use Filament\QueryBuilder\Constraints\RelationshipConstraint;
+use Filament\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
@@ -218,24 +224,42 @@ class PracticeOamsTable
                     ->sortable(),
             ])
             ->filters([
-                Filter::make('is_conventioned')
-                    ->label('Convenzionata')
-                    ->query(fn($query) => $query->where('is_conventioned', true)),
-                Filter::make('is_notconventioned')
-                    ->label('NON Convenzionata')
-                    ->query(fn($query) => $query->where('is_conventioned', true)),
-                Filter::make('is_working')
-                    ->label('Lavorazione')
-                    ->query(fn($query) => $query->where('is_working', true)),
-                Filter::make('is_perfected')
-                    ->label('Erogata')
-                    ->query(fn($query) => $query->where('is_perfected', true)),
-                Filter::make('is_before')
-                    ->label('Perfezionata prima')
-                    ->query(fn($query) => $query->where('is_before', true)),
-                Filter::make('is_after')
-                    ->label('Perfezionata dopo')
-                    ->query(fn($query) => $query->where('is_after', true)),
+                QueryBuilder::make()
+                    ->constraints([
+                        BooleanConstraint::make('is_conventioned')
+                            ->label('Convenzionata'),
+                        BooleanConstraint::make('is_working')
+                            ->label('Lavorazione'),
+                        BooleanConstraint::make('is_perfected')
+                            ->label('Erogata'),
+                        BooleanConstraint::make('is_before')
+                            ->label('Perfezionata prima'),
+                        BooleanConstraint::make('is_after')
+                            ->label('Perfezionata dopo'),
+                        DateConstraint::make('perfected_at')
+                            ->nullable()
+                            ->label('Perfezionamento'),
+                        SelectConstraint::make('mese')
+                            ->label('Mese perfezionamento')
+                            ->multiple()
+                            ->options([
+                                '01' => 'Gennaio',
+                                '02' => 'Febbraio',
+                                '03' => 'Marzo',
+                                '04' => 'Aprile',
+                                '05' => 'Maggio',
+                                '06' => 'Giugno',
+                                '07' => 'Luglio',
+                                '08' => 'Agosto',
+                                '09' => 'Settembre',
+                                '10' => 'Ottobre',
+                                '11' => 'Novembre',
+                                '12' => 'Dicembre',
+                            ]),
+                        DateConstraint::make('invoice_at')
+                            ->nullable()
+                            ->label('Fatturate'),
+                    ]),
                 SelectFilter::make('oam_name')
                     ->label('Filtra per OAM')
                     ->multiple()  // Abilita la selezione multipla
@@ -272,23 +296,6 @@ class PracticeOamsTable
                             ->toArray()
                     )
                     ->searchable(),  // Opzionale: aggiunge una barra di
-                SelectFilter::make('mese')
-                    ->label('Mese perfezionamento')
-                    ->multiple()
-                    ->options([
-                        '01' => 'Gennaio',
-                        '02' => 'Febbraio',
-                        '03' => 'Marzo',
-                        '04' => 'Aprile',
-                        '05' => 'Maggio',
-                        '06' => 'Giugno',
-                        '07' => 'Luglio',
-                        '08' => 'Agosto',
-                        '09' => 'Settembre',
-                        '10' => 'Ottobre',
-                        '11' => 'Novembre',
-                        '12' => 'Dicembre',
-                    ])
             ])
             ->recordActions([
                 EditAction::make(),
