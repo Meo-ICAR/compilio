@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Company;
-use App\Models\OamCode;
 use App\Models\OamScope;
 use App\Models\Practice;
 use App\Models\PracticeCommission;
@@ -47,32 +46,6 @@ class PracticeOamService
 
             // Step 1: Delete existing practice_oam records for the date range
             $deletedCount = PracticeOam::where('company_id', $companyId)->delete();
-
-            /*
-             * ->where('is_active', true)
-             * ->where(function ($query) use ($startDateCarbon, $endDateCarbon) {
-             *     // Delete records that would be recreated by this sync
-             *     $query
-             *         ->where(function ($subQuery) use ($startDateCarbon, $endDateCarbon) {
-             *             $subQuery
-             *                 ->whereNotNull('erogated_at')
-             *                 ->where('erogated_at', '>=', $startDateCarbon)
-             *                 ->where('erogated_at', '<=', $endDateCarbon);
-             *         })
-             *         ->orWhere(function ($subQuery) use ($startDateCarbon, $endDateCarbon) {
-             *             $subQuery
-             *                 ->whereNull('erogated_at')
-             *                 ->where('inserted_at', '>=', $startDateCarbon)
-             *                 ->where('inserted_at', '<=', $endDateCarbon);
-             *         })
-             *         ->orWhere(function ($subQuery) use ($startDateCarbon, $endDateCarbon) {
-             *             $subQuery
-             *                 ->whereNotNull('invoice_at')
-             *                 ->where('invoice_at', '>=', $startDateCarbon)
-             *                 ->where('invoice_at', '<=', $endDateCarbon);
-             *         });
-             * })
-             */
 
             Log::info("Deleted {$deletedCount} practice_oam records for company {$companyId} in date range");
 
@@ -179,20 +152,37 @@ class PracticeOamService
                         $liquidato = 0;
                         $commissionSums['provvigione'] = 0;
                     }
-                    $oam_code = $practice?->practiceScope?->oam_code;
-                    $comCliente = $commissionSums['cliente'] ?? 0;
-                    if (!empty($oam_code)) {
-                        $oam_name = OamScope::where('code', $oam_code)->first()?->name;
 
-                        $oam_name = $oam_code . ' ' . $oam_name;
+                    $comCliente = $commissionSums['cliente'] ?? 0;
+
+                    // Recupera l'OAM scope direttamente dal tipo_prodotto
+                    $validOamScope = OamScope::whereJsonContains('tipo_prodotto', $tipoProdotto)->first();
+                    $oam_code = $validOamScope?->code;
+
+                    if ($validOamScope) {
+                        $oam_name = $validOamScope->code . ' ' . $validOamScope->name;
+                        $oam_code = $validOamScope->code;
                     } else {
                         $oam_name = '--';
-                    }
-                    if (($tipoProdotto == 'Mutuo') && ($somma == $comCliente)) {
-                        $oam_code = $oam_name;
-                        //  Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
+                        $oam_code = null;
                     }
 
+                    if ($tipoProdotto == 'Mutuo') {
+                        if ($somma == $comCliente) {
+                            $oam_code = $oam_name;
+                            //  Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
+                        }
+                        if (in_array($practice->CRM_code, ['QT01012', 'QT05961', 'QT01875', 'QT01711', 'QT01530'])) {
+                            $oam_name = 'Segnalazione mutuo';
+                            $oam_code = $oam_name;
+                            //  Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
+                        }
+                        if (str_contains($practice->name, ' - PRS') !== false) {
+                            $oam_name = 'Segnalazione mutuo';
+                            $oam_code = $oam_name;
+                            //  Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
+                        }
+                    }
                     // Use effective perfected date (perfected_at or fallback to erogated_at)
 
                     PracticeOam::updateOrCreate(
@@ -214,7 +204,7 @@ class PracticeOamService
                             'is_previous' => 0,  // Default value
                             'mese' => $mese,
                             'tipo_prodotto' => $tipoProdotto,
-                            'name' => $practice->principal->name,
+                            'name' => $practice->client->name . ' ' . $practice->client->first_name,
                             // Commission sums based on tipo grouping
                             'erogato' => $erogato ?? 0,
                             'erogato_lavorazione' => $erogato_lavorazione ?? 0,

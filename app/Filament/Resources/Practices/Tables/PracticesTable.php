@@ -281,32 +281,6 @@ class PracticesTable
                         TextConstraint::make('stato_pratica')
                             ->label('Stato Pratica'),
                     ])
-
-                /*
-                 * TextConstraint::make('name'),
-                 * BooleanConstraint::make('is_visible'),
-                 * NumberConstraint::make('stock'),
-                 * SelectConstraint::make('status')
-                 *     ->options([
-                 *         'draft' => 'Draft',
-                 *         'reviewing' => 'Reviewing',
-                 *         'published' => 'Published',
-                 *     ])
-                 *     ->multiple(),
-                 */
-
-                /*
-                 * RelationshipConstraint::make('categories')
-                 *     ->multiple()
-                 *     ->selectable(
-                 *         IsRelatedToOperator::make()
-                 *             ->titleAttribute('name')
-                 *             ->searchable()
-                 *             ->multiple(),
-                 *     ),
-                 * NumberConstraint::make('reviews.rating')
-                 *     ->integer(),,
-                 */
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 Action::make('checklist')

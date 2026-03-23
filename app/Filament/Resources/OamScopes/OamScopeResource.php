@@ -17,14 +17,14 @@ use UnitEnum;
 
 class OamScopeResource extends Resource
 {
-    protected static bool $shouldRegisterNavigation = false;
+    // protected static bool $shouldRegisterNavigation = false;
     protected static ?string $model = OamScope::class;
     protected static bool $isScopedToTenant = false;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
-    protected static string|UnitEnum|null $navigationGroup = 'Elenchi';
+    protected static string|UnitEnum|null $navigationGroup = 'Compliance';
     protected static ?string $modelLabel = 'OAM Prodotto';
     protected static ?string $pluralModelLabel = 'OAM Prodotti';
-    protected static ?int $navigationSort = 15;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {

@@ -9,6 +9,12 @@ class OamScope extends Model
     protected $fillable = [
         'code',
         'name',
+        'description',
+        'tipo_prodotto',
+    ];
+
+    protected $casts = [
+        'tipo_prodotto' => 'array',
     ];
 
     public function oams()

@@ -6,6 +6,7 @@ use App\Exports\PracticeOamBaseExport;
 use App\Filament\Exports\PracticeOamAnaliticoExporter;
 use App\Filament\Exports\PracticeOamExporter;
 use App\Filament\Traits\CanExportTable;
+use App\Filament\Traits\HasChecklistAction;  // 1. Importa il namespace
 use App\Models\PracticeOam;
 use App\Models\PracticeOamBase;
 use Filament\Actions\Action;
@@ -26,6 +27,7 @@ use Filament\Tables\Columns\Summarizers\Count;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\SelectFilter;
@@ -49,6 +51,9 @@ class PracticeOamsTable
             ->reorderableColumns()
             ->selectable()
             ->groups([
+                Group::make('principal_name')
+                    ->label('Mandante')
+                    ->collapsible(),  // SOSTITUISCE le vecchie impostazioni di groupingSettings
                 Group::make('oam_name')
                     ->label('OAM')
                     ->collapsible(),  // SOSTITUISCE le vecchie impostazioni di groupingSettings
@@ -192,25 +197,29 @@ class PracticeOamsTable
                 TextColumn::make('name')
                     ->label('Mandante')
                     ->sortable(),
-                TextColumn::make('practice.clients.name')
+                TextColumn::make('name')
                     ->label('Cliente')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('practice.CRM_code')
+                TextColumn::make('CRM_code')
                     ->label('Codice')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('practice.name')
-                    ->label('Pratica')
+                TextColumn::make('name')
+                    ->label('Cliente')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('practice.inserted_at')
+                TextColumn::make('inserted_at')
                     ->label('Inserita')
                     ->date()
                     ->sortable(),
-                TextColumn::make('practice.erogated_at')
+                TextColumn::make('erogated_at')
                     ->label('Erogata')
                     ->date()
                     ->sortable(),
-                TextColumn::make('practice.principal.type')
-                    ->label('Tipo fin.')
+                TextColumn::make('accepted_at')
+                    ->label('Accettata')
+                    ->date()
                     ->sortable(),
                 TextColumn::make('compenso_lavorazione')
                     ->money('EUR')  // Forza Euro e formato italiano
@@ -224,8 +233,60 @@ class PracticeOamsTable
                     ->sortable(),
             ])
             ->filters([
+                // Opzionale: aggiunge una barra di ricerca nel dropdown
+                SelectFilter::make('tipo_prodotto')
+                    ->label('Tipo Prodotto')
+                    ->multiple()  // Abilita la selezione multipla
+                    ->options(
+                        // Recupera i valori unici della colonna 'type' dal database
+                        fn() => PracticeOam::query()
+                            ->whereNotNull('tipo_prodotto')
+                            ->pluck('tipo_prodotto', 'tipo_prodotto')  // 'valore' => 'etichetta'
+                            ->sort()
+                            ->toArray()
+                    ),  // Opzionale: aggiunge una barra di ricerca nel dropdown
+                SelectFilter::make('principal_name')
+                    ->label('Mandante')
+                    ->multiple()  // Abilita la selezione multipla
+                    ->options(
+                        // Recupera i valori unici della colonna 'type' dal database
+                        fn() => PracticeOam::query()
+                            ->whereNotNull('principal_name')
+                            ->pluck('principal_name', 'principal_name')  // 'valore' => 'etichetta'
+                            ->sort()
+                            ->toArray()
+                    ),  // Opzionale: aggiunge una barra di ricerca nel dropdown
+                SelectFilter::make('name')
+                    ->label('Cliente')
+                    ->multiple()  // Abilita la selezione multipla
+                    ->options(
+                        // Recupera i valori unici della colonna 'name' dalla tabella practice_oams
+                        fn() => PracticeOam::query()
+                            ->whereNotNull('practice_oams.name')
+                            ->pluck('practice_oams.name', 'practice_oams.name')  // 'valore' => 'etichetta'
+                            ->sort()
+                            ->toArray()
+                    )
+                    ->searchable(),  // Opzionale: aggiunge una barra di
+                SelectFilter::make('oam_name')
+                    ->label('Codice OAM')
+                    ->multiple()  // Abilita la selezione multipla
+                    ->options(
+                        // Recupera i valori unici della colonna 'type' dal database
+                        fn() => PracticeOam::query()
+                            ->whereNotNull('oam_name')
+                            ->pluck('oam_name', 'oam_name')  // 'valore' => 'etichetta'
+                            ->sort()
+                            ->toArray()
+                    ),
                 QueryBuilder::make()
                     ->constraints([
+                        NumberConstraint::make('erogato')
+                            ->nullable()
+                            ->label('Montante'),
+                        NumberConstraint::make('liquidato')
+                            ->nullable()
+                            ->label('Erogato'),
                         BooleanConstraint::make('is_conventioned')
                             ->label('Convenzionata'),
                         BooleanConstraint::make('is_working')
@@ -260,43 +321,7 @@ class PracticeOamsTable
                             ->nullable()
                             ->label('Fatturate'),
                     ]),
-                SelectFilter::make('oam_name')
-                    ->label('Filtra per OAM')
-                    ->multiple()  // Abilita la selezione multipla
-                    ->options(
-                        // Recupera i valori unici della colonna 'type' dal database
-                        fn() => PracticeOam::query()
-                            ->whereNotNull('oam_name')
-                            ->pluck('oam_name', 'oam_name')  // 'valore' => 'etichetta'
-                            ->sort()
-                            ->toArray()
-                    )
-                    ->searchable(),  // Opzionale: aggiunge una barra di ricerca nel dropdown
-                SelectFilter::make('tipo_prodotto')
-                    ->label('Filtra per Tipo Prodotto')
-                    ->multiple()  // Abilita la selezione multipla
-                    ->options(
-                        // Recupera i valori unici della colonna 'type' dal database
-                        fn() => PracticeOam::query()
-                            ->whereNotNull('tipo_prodotto')
-                            ->pluck('tipo_prodotto', 'tipo_prodotto')  // 'valore' => 'etichetta'
-                            ->sort()
-                            ->toArray()
-                    )
-                    ->searchable(),  // Opzionale: aggiunge una barra di ricerca nel dropdown
-                SelectFilter::make('name')
-                    ->label('Mandante')
-                    ->multiple()  // Abilita la selezione multipla
-                    ->options(
-                        // Recupera i valori unici della colonna 'type' dal database
-                        fn() => PracticeOam::query()
-                            ->whereNotNull('name')
-                            ->pluck('name', 'name')  // 'valore' => 'etichetta'
-                            ->sort()
-                            ->toArray()
-                    )
-                    ->searchable(),  // Opzionale: aggiunge una barra di
-            ])
+            ], layout: FiltersLayout::AboveContent)
             ->recordActions([
                 EditAction::make(),
             ])
@@ -326,6 +351,8 @@ class PracticeOamsTable
                                 DB::raw('SUM(compenso) as J_Provvigione_Istituto'),
                                 DB::raw('SUM(compenso_lavorazione) as K_Provvigione_Istituto_Lavorazione'),
                                 DB::raw('SUM(provvigione) as O_Provvigione_Rete'),
+                                DB::raw('SUM(liquidato) as liquidato'),
+                                DB::raw('SUM(liquidato_lavorazione) as liquidato_Lavorazione'),
                             ])
                             ->groupBy('oam_name');
 
@@ -351,6 +378,8 @@ class PracticeOamsTable
                                 'J_Provvigione_Istituto' => $row->J_Provvigione_Istituto,
                                 'K_Provvigione_Istituto_Lavorazione' => $row->K_Provvigione_Istituto_Lavorazione,
                                 'O_Provvigione_Rete' => $row->O_Provvigione_Rete,
+                                'liquidato' => $row->liquidato,
+                                'liquidato_Lavorazione' => $row->liquidato_Lavorazione,
                             ]);
                         }
                         // 4. Download immediato dalla tabella piatta
@@ -360,13 +389,19 @@ class PracticeOamsTable
                                 {
                                     $currentCompanyId = auth()->user()?->company_id ?? session('current_company_id');
                                     $query = PracticeOamBase::query()->select([
-                                        'B_OAM', 'C_Convenzionata', 'D_Non_Convenzionata', 'E_Intermediate',
-                                        'F_Lavorazione', 'G_Erogato', 'H_Erogato_Lavorazione',
-                                        'I_Provvigione_Cliente', 'J_Provvigione_Istituto',
+                                        'B_OAM',
+                                        'C_Convenzionata',
+                                        'D_Non_Convenzionata',
+                                        'E_Intermediate',
+                                        'F_Lavorazione',
+                                        'G_Erogato',
+                                        'H_Erogato_Lavorazione',
+                                        'I_Provvigione_Cliente',
+                                        'J_Provvigione_Istituto',
                                         'K_Provvigione_Istituto_Lavorazione',
                                         'O_Provvigione_Rete',
                                         'liquidato',
-                                        'liquidato_lavorazione'
+                                        'liquidato_Lavorazione',
                                     ]);
 
                                     // Filter by company if company_id is available
@@ -425,7 +460,7 @@ class PracticeOamsTable
                                         '-',  //  M
                                         '-',  //  N
                                         'Liquidato',
-                                        'Liquidato_Lavorazione',
+                                        'Liquidato_lavorazione',
                                     ];
                                 }
                             },
@@ -441,7 +476,7 @@ class PracticeOamsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    static::getExportBulkAction(),  // 2. Richiama l'azione dal trait
                     BulkAction::make('update_oam_name')
                         ->label('Aggiorna OAM')
                         ->icon('heroicon-o-pencil')
@@ -507,15 +542,52 @@ class PracticeOamsTable
                             $records->each(function ($record) use ($data) {
                                 $record->update([
                                     'is_perfected' => $data['is_perfected'] ?? false,
-                                    'is_working' => $data['is_working'] ?? false
+                                    'is_working' => $data['is_working'] ?? false,
                                 ]);
                             });
-
                             Notification::make()
                                 ->title('Stati pratica aggiornati')
                                 ->success()
                                 ->send();
                         }),
+                    BulkAction::make('update_mutuo_oam_name')
+                        ->label('Cambia OAM Mutuo')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('warning')
+                        ->form([
+                            Select::make('oam_name')
+                                ->label('Nuovo OAM Mutuo')
+                                ->required()
+                                ->options([
+                                    'A.1' => 'A.1 Segnalazione mutuo',
+                                    'A.4 bis' => 'A.4 bis Anticipazione TFS',
+                                ])
+                                ->searchable()
+                                ->default(fn($record) => $record->oam_name)
+                        ])
+                        ->action(function (array $data, Collection $records) {
+                            $records->each(function ($record) use ($data) {
+                                $oldOamName = $record->oam_name;
+                                $newOamName = $data['oam_name'];
+
+                                // Aggiorna l'oam_name
+                                $record->update(['oam_name' => $newOamName]);
+
+                                // Aggiorna anche il nome del OAM scope corrispondente
+                                $oamScope = OamScope::where('code', $newOamName)->first();
+                                if ($oamScope) {
+                                    $oamScope->update(['name' => $newOamName]);
+                                }
+
+                                Log::info("Updated OAM name for practice {$record->practice_id}: '{$oldOamName}' → '{$newOamName}'");
+                            });
+
+                            Notification::make()
+                                ->title('OAM Mutuo aggiornato con successo')
+                                ->success()
+                                ->send();
+                        }),
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

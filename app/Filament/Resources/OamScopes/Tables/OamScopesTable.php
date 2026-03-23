@@ -25,14 +25,11 @@ class OamScopesTable
                     ->label('Descrizione')
                     ->searchable()
                     ->wrap(),
-                TextColumn::make('created_at')
-                    ->dateTime()
+                TextColumn::make('tipo_prodotto')
+                    ->label('Tipo Prodotto')
+                    ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->wrap(),
             ])
             ->filters([
                 //
