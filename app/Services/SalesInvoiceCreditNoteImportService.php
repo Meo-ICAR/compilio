@@ -399,7 +399,7 @@ WHERE p.tipo = 'Istituto'; ");
             ->whereNull('si.invoiceable_id')
             ->update([
                 'si.invoiceable_id' => DB::raw('p.id'),
-                'pi.invoiceable_type' => Principal::class,
+                'si.invoiceable_type' => Principal::class,
             ]);
 
         Log::info('Principal matching completed', [
