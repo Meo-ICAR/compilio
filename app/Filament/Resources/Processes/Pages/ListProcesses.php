@@ -7,7 +7,7 @@ use App\Filament\Traits\HasRegolamentoAction;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
-class ListProcess extends ListRecords
+class ListProcesses extends ListRecords
 {
     use HasRegolamentoAction;
 
