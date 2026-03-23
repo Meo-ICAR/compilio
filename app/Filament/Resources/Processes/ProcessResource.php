@@ -5,7 +5,7 @@ namespace App\Filament\Resources\Processes;
 use App\Filament\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Processes\Pages\CreateProcess;
 use App\Filament\Resources\Processes\Pages\EditProcess;
-use App\Filament\Resources\Processes\Pages\ListProcess;
+use App\Filament\Resources\Processes\Pages\ListProcesses;
 use App\Filament\Resources\Processes\RelationManagers\ProcessTasksRelationManager;
 use App\Filament\Resources\Processes\Schemas\ProcessForm;
 use App\Filament\Resources\Processes\Tables\ProcessTable;
