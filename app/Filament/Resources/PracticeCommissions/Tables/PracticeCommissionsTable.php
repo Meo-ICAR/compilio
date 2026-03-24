@@ -49,8 +49,21 @@ class PracticeCommissionsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(fn() => PracticeCommission::query()->where('is_payment', true)->whereNotNull('agent_id'))
-            ->paginated(['all', 10, 25, 50, 100])
+            ->groups([
+                Group::make('agent.name')
+                    ->label('Agente')
+                    ->collapsible(),
+                Group::make('principal.name')
+                    ->label('Mandante')
+                    ->collapsible(),
+                Group::make('invoice_number')
+                    ->label('N. fattura')
+                    ->collapsible(),
+                Group::make('alternative_number_invoice')
+                    ->label('Fattura')
+                    ->collapsible(),
+            ])
+            ->paginated([10, 25, 50, 100, 'all'])
             ->selectable()
             ->defaultSort('status_at', 'desc')
             ->reorderableColumns()
@@ -104,10 +117,15 @@ class PracticeCommissionsTable
                     ->sortable(),
                 TextColumn::make('invoice_number')
                     ->label('Num. fattura')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('invoice_at')
                     ->label('Fattura del')
                     ->date()
+                    ->sortable(),
+                TextColumn::make('alternative_invoice_number')
+                    ->label('Fattura')
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('paided_at')
                     ->label('Pagata il')
@@ -127,6 +145,11 @@ class PracticeCommissionsTable
             ->filters([
                 TernaryFilter::make('is_coordination')
                     ->label('Coordinamento'),
+                TernaryFilter::make('is_payment')
+                    ->label('Pagamenti / Incassi')
+                    ->trueLabel('Solo pagamenti')
+                    ->falseLabel('Solo incassi')
+                    ->default(true),
                 SelectFilter::make('principal_id')
                     ->label('Mandante')
                     ->multiple()
@@ -145,6 +168,8 @@ class PracticeCommissionsTable
                             ->sort();
                     })
                     ->searchable(),
+                TernaryFilter::make('is_insurance')
+                    ->label('Polizze'),
                 TernaryFilter::make('is_enasarco')
                     ->label('Soggetta ad Enasarco'),
                 TernaryFilter::make('is_coordination')
@@ -153,8 +178,6 @@ class PracticeCommissionsTable
                 /*
                  * TernaryFilter::make('is_recurrent')
                  *     ->label('Compenso ricorrente'),
-                 *      TernaryFilter::make('is_insurance')
-                 *     ->label('Provv. Assicurative'),
                  */
                 QueryBuilder::make()
                     ->constraints([

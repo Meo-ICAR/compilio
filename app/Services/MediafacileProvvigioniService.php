@@ -348,8 +348,6 @@ ORDER BY x.principal_id, x.tipo_prodotto;
 
                 $provvigioneData['name'] = $provvigioneData['descrizione'];
 
-                $provvigioneData['is_insurance'] = false;
-
                 $existing = PracticeCommission::create($provvigioneData);
             }
         }
@@ -363,6 +361,10 @@ ORDER BY x.principal_id, x.tipo_prodotto;
          * ]);
          */
         if ($existing) {
+            $nameprovv = strtolower($existing->name);
+            $namepractice = strtolower($existing->practice->name);
+            $isInsurance = (stripos($nameprovv, 'olizz') !== false) || (stripos($namepractice, 'olizz') !== false);
+            $existing->update(['is_insurance' => $isInsurance]);
             if ($existing->is_client && empty($existing->client_id)) {
                 $client = Client::firstOrCreate(
                     ['name' => $provvigioneData['denominazione_riferimento'], 'company_id' => $this->companyId],

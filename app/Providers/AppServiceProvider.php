@@ -8,7 +8,10 @@ use App\Models\Practice;
 use App\Observers\ClientMandateObserver;
 use App\Observers\PracticeObserver;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Event;  // Aggiungi questo import
 use Illuminate\Support\ServiceProvider;
+use SocialiteProviders\Manager\SocialiteWasCalled;  // Aggiungi questo import
+use SocialiteProviders\Microsoft\MicrosoftExtendSocialite;  // Aggiungi questo import
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,6 +44,9 @@ class AppServiceProvider extends ServiceProvider
             if (Filament::getTenant()) {
                 $activityLog->company_id = Filament::getTenant()->id;
             }
+        });
+        Event::listen(function (SocialiteWasCalled $event) {
+            $event->extendSocialite('microsoft', \SocialiteProviders\Microsoft\Provider::class);
         });
     }
 

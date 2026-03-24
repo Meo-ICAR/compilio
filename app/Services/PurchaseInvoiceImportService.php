@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Agent;
 use App\Models\Client;
+use App\Models\PracticeCommission;
 use App\Models\PurchaseInvoice;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -55,12 +56,20 @@ class PurchaseInvoiceImportService
         $actualFilePath = $filePath;
         if (!file_exists($filePath)) {
             // Try storage path if public path doesn't exist
-            $storagePath = str_replace('public/', 'storage/app/private/purchase-invoice-imports/', $filePath);
+            $storagePath = str_replace('public/purchase-invoice-imports/', 'storage/app/private/purchase-invoice-imports/', $filePath);
             if (file_exists($storagePath)) {
                 $actualFilePath = $storagePath;
                 Log::info('File found in storage path', ['path' => $storagePath]);
             } else {
-                throw new \Exception("File not found: {$filePath} (tried: {$storagePath})");
+                // Try using Laravel's Storage path
+                $filename = basename($filePath);
+                $laravelStoragePath = storage_path('app/private/purchase-invoice-imports/' . $filename);
+                if (file_exists($laravelStoragePath)) {
+                    $actualFilePath = $laravelStoragePath;
+                    Log::info('File found in Laravel storage path', ['path' => $laravelStoragePath]);
+                } else {
+                    throw new \Exception("File not found: {$filePath} (tried: {$storagePath}, {$laravelStoragePath})");
+                }
             }
         }
 
@@ -102,6 +111,79 @@ class PurchaseInvoiceImportService
             }
 
             DB::commit();
+
+            /*
+             * UPDATE practice_commissions p
+             * INNER JOIN (
+             *     -- La tua query originale trasformata in tabella derivata
+             *     SELECT
+             *         p_sub.invoice_number,
+             *         p_sub.invoice_at,
+             *         p_sub.agent_id,
+             *         s_sub.supplier_invoice_number AS matched_supplier_invoice
+             *     FROM practice_commissions p_sub
+             *     INNER JOIN agents a_sub
+             *         ON a_sub.id = p_sub.agent_id
+             *     INNER JOIN purchase_invoices s_sub
+             *         ON s_sub.vat_number = a_sub.vat_number
+             *     WHERE p_sub.invoice_number > '0'
+             *       AND p_sub.is_payment = 1
+             *       AND s_sub.supplier_invoice_number LIKE CONCAT('%', p_sub.invoice_number, '%')
+             *     GROUP BY
+             *         a_sub.name,
+             *         p_sub.invoice_at,
+             *         p_sub.invoice_number,
+             *         p_sub.agent_id,  -- Aggiunto per poter fare la join esterna in sicurezza
+             *         s_sub.supplier_invoice_number,
+             *         s_sub.supplier,
+             *         s_sub.amount
+             *     HAVING s_sub.amount = SUM(p_sub.amount)
+             * ) AS dati_calcolati
+             *     -- Uniamo la tabella originale con i risultati della subquery
+             *     ON p.invoice_number = dati_calcolati.invoice_number
+             *     AND p.invoice_at = dati_calcolati.invoice_at
+             *     AND p.agent_id = dati_calcolati.agent_id
+             *     AND p.is_payment = 1 -- Sicurezza extra per limitare l'update solo ai pagamenti
+             * -- Impostiamo il nuovo valore (modifica il nome del campo se necessario)
+             * SET p.alternative_number_invoice = dati_calcolati.matched_supplier_invoice;
+             */
+
+            // 1. Prepariamo la subquery con i calcoli e le join aggiuntive
+            $subquery = PracticeCommission::select([
+                'practice_commissions.invoice_number',
+                'practice_commissions.invoice_at',
+                'practice_commissions.agent_id',
+                'purchase_invoices.supplier_invoice_number as matched_supplier_invoice'
+            ])
+                ->join('agents', 'agents.id', '=', 'practice_commissions.agent_id')
+                ->join('purchase_invoices', 'purchase_invoices.vat_number', '=', 'agents.vat_number')
+                ->where('practice_commissions.invoice_number', '>', '0')
+                ->where('practice_commissions.is_payment', 1)
+                // Usiamo doveRaw per gestire la concatenazione dinamica in SQL in modo pulito
+                ->whereRaw("purchase_invoices.supplier_invoice_number LIKE CONCAT('%', practice_commissions.invoice_number, '%')")
+                ->groupBy([
+                    'agents.name',
+                    'practice_commissions.invoice_at',
+                    'practice_commissions.invoice_number',
+                    'practice_commissions.agent_id',
+                    'purchase_invoices.supplier_invoice_number',
+                    'purchase_invoices.supplier',
+                    'purchase_invoices.amount'
+                ])
+                ->havingRaw('purchase_invoices.amount = SUM(practice_commissions.amount)');
+
+            // 2. Eseguiamo l'UPDATE sulla tabella principale
+            DB::table('practice_commissions as p')
+                ->joinSub($subquery, 'dati_calcolati', function ($join) {
+                    $join
+                        ->on('p.invoice_number', '=', 'dati_calcolati.invoice_number')
+                        ->on('p.invoice_at', '=', 'dati_calcolati.invoice_at')
+                        ->on('p.agent_id', '=', 'dati_calcolati.agent_id');
+                })
+                ->where('p.is_payment', 1)  // Condizione di sicurezza extra sulla query esterna
+                ->update([
+                    'p.alternative_number_invoice' => DB::raw('dati_calcolati.matched_supplier_invoice')
+                ]);
 
             Log::info('Purchase invoices import completed', [
                 'file' => $filePath,
@@ -257,9 +339,35 @@ class PurchaseInvoiceImportService
         return null;
     }
 
-    protected function parseDecimal($value)
+    protected function parseDateTime($value)
     {
         if (empty($value)) {
+            return null;
+        }
+
+        // Handle Italian datetime formats
+        $dateTimeFormats = [
+            'd/m/Y H:i', 'd/m/Y H:i:s', 'd-m-Y H:i',
+            'd/m/y H:i', 'd-m-y H:i', 'Y-m-d H:i:s'
+        ];
+
+        foreach ($dateTimeFormats as $format) {
+            try {
+                $dateTime = Carbon::createFromFormat($format, $value);
+                if ($dateTime) {
+                    return $dateTime->format('Y-m-d H:i:s');
+                }
+            } catch (\Exception $e) {
+                // Continue to next format
+            }
+        }
+
+        return null;
+    }
+
+    protected function parseDecimal($value)
+    {
+        if (empty($value) || $value === '' || $value === null) {
             return 0;
         }
 
@@ -302,12 +410,12 @@ class PurchaseInvoiceImportService
             return null;
         }
 
-        // Handle Excel TRUE/FALSE strings
+        // Handle Excel TRUE/FALSE strings and formulas
         $value = strtoupper(trim($value));
 
-        if ($value === 'TRUE' || $value === 'VERO') {
+        if ($value === 'TRUE' || $value === 'VERO' || $value === '=TRUE()') {
             return true;
-        } elseif ($value === 'FALSE' || $value === 'FALSO') {
+        } elseif ($value === 'FALSE' || $value === 'FALSO' || $value === '=FALSE()') {
             return false;
         }
 

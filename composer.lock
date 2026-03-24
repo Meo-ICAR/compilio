@@ -5781,22 +5781,22 @@
         },
         {
             "name": "owenvoke/blade-fontawesome",
-            "version": "v3.2.0",
+            "version": "v3.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/owenvoke/blade-fontawesome.git",
-                "reference": "d75e6de9f689aaeab89d3208244f4abebadeeba4"
+                "reference": "5a199630dd70c5133d58c158a974e12bcd8b3a71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/owenvoke/blade-fontawesome/zipball/d75e6de9f689aaeab89d3208244f4abebadeeba4",
-                "reference": "d75e6de9f689aaeab89d3208244f4abebadeeba4",
+                "url": "https://api.github.com/repos/owenvoke/blade-fontawesome/zipball/5a199630dd70c5133d58c158a974e12bcd8b3a71",
+                "reference": "5a199630dd70c5133d58c158a974e12bcd8b3a71",
                 "shasum": ""
             },
             "require": {
                 "blade-ui-kit/blade-icons": "^1.8",
                 "illuminate/support": "^12.0|^13.0",
-                "php": "^8.4"
+                "php": "^8.3"
             },
             "require-dev": {
                 "laravel/pint": "^1.25",
@@ -5825,7 +5825,7 @@
             "description": "A package to easily make use of Font Awesome in your Laravel Blade views",
             "support": {
                 "issues": "https://github.com/owenvoke/blade-fontawesome/issues",
-                "source": "https://github.com/owenvoke/blade-fontawesome/tree/v3.2.0"
+                "source": "https://github.com/owenvoke/blade-fontawesome/tree/v3.2.2"
             },
             "funding": [
                 {
@@ -5837,7 +5837,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-23T09:42:08+00:00"
+            "time": "2026-03-20T08:37:22+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",

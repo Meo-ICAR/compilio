@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Agent;
 use App\Models\Client;
+use App\Models\PracticeCommission;
 use App\Models\Principal;
 use App\Models\SalesInvoice;
 use Carbon\Carbon;
@@ -104,6 +105,42 @@ class SalesInvoiceImportService
 
             DB::commit();
 
+            /*
+             * // 1. Definiamo la subquery (la tabella derivata con i calcoli)
+             * $subquery = PracticeCommission::select([
+             *     'practice_commissions.invoice_number',
+             *     DB::raw('YEAR(practice_commissions.invoice_at) as invoice_year'),
+             *     'practice_commissions.is_payment',
+             *     'sales_invoices.number as matched_s_number'
+             * ])
+             *     ->join('sales_invoices', function ($join) {
+             *         $join->on('sales_invoices.number', 'like', DB::raw("CONCAT('%', SUBSTR(CONCAT('00000', practice_commissions.invoice_number), -5))"));
+             *     })
+             *     ->where('practice_commissions.invoice_number', '>', '0')
+             *     ->where('practice_commissions.is_payment', 0)
+             *     ->where('sales_invoices.number', 'like', 'FVI2%')
+             *     ->groupBy(
+             *         'practice_commissions.invoice_number',
+             *         DB::raw('YEAR(practice_commissions.invoice_at)'),
+             *         'practice_commissions.is_payment',
+             *         'sales_invoices.number',
+             *         'sales_invoices.amount'
+             *     )
+             *     ->havingRaw('sales_invoices.amount = SUM(practice_commissions.amount)');
+             *
+             * // 2. Eseguiamo l'UPDATE unendo la tabella principale con la subquery
+             * DB::table('practice_commissions as p')
+             *     ->joinSub($subquery, 'dati_calcolati', function ($join) {
+             *         $join
+             *             ->on('p.invoice_number', '=', 'dati_calcolati.invoice_number')
+             *             ->whereRaw('YEAR(p.invoice_at) = dati_calcolati.invoice_year')  // whereRaw per gestire la funzione YEAR()
+             *             ->on('p.is_payment', '=', 'dati_calcolati.is_payment');
+             *     })
+             *     ->update([
+             *         // Usiamo DB::raw affinché Laravel non lo tratti come una semplice stringa di testo
+             *         'p.alternative_number_invoice' => DB::raw('dati_calcolati.matched_s_number')
+             *     ]);
+             */
             Log::info('Sales invoices import completed', [
                 'file' => $filePath,
                 'company_id' => $this->companyId,

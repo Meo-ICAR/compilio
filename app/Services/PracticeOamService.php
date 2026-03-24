@@ -172,7 +172,7 @@ class PracticeOamService
                             $oam_code = $oam_name;
                             //  Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
                         }
-                        if (in_array($practice->CRM_code, ['QT01012', 'QT05961', 'QT01875', 'QT01711', 'QT01530'])) {
+                        if (in_array($practice->CRM_code, ['QT01012', 'QT05961', 'QT01875', 'QT01711', 'QT01530', 'QT06176', 'QT05785', 'QT06118', 'QT06110', 'QT06109', 'QT06065', 'QT05915'])) {
                             $oam_name = 'Segnalazione mutuo';
                             $oam_code = $oam_name;
                             //  Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
@@ -290,6 +290,7 @@ class PracticeOamService
 
             $tipo = strtolower($commission->tipo ?? '');
             $name = strtolower($commission->name ?? '');
+            $isInsurance = $commission->is_insurance;
 
             // Non-agent, non-client commissions
             if ($tipo === 'istituto') {
@@ -299,7 +300,7 @@ class PracticeOamService
                 if (strpos($name, 'premio')) {
                     $premio += $amount;
                 } else {
-                    if (strpos($name, 'polizza') || strpos($name, 'broker')) {
+                    if ($isInsurance || strpos($name, 'olizza') || strpos($name, 'broker')) {
                         $assicurazione += $amount;
                     } else {
                         //   $compenso += $amount;
