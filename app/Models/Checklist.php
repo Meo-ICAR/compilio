@@ -44,6 +44,7 @@ class Checklist extends Model implements HasMedia
         'business_function_id',
         'process_task_groupcode',
         'process_id',  // Aggiunto per relazione con Process
+        'checklist_padre_id',  // Aggiunto per relazione self-referencing
     ];
 
     protected $casts = [
@@ -169,6 +170,16 @@ class Checklist extends Model implements HasMedia
     public function process(): BelongsTo
     {
         return $this->belongsTo(Process::class);
+    }
+
+    public function checklistPadre(): BelongsTo
+    {
+        return $this->belongsTo(Checklist::class, 'checklist_padre_id');
+    }
+
+    public function checklistFiglie(): HasMany
+    {
+        return $this->hasMany(Checklist::class, 'checklist_padre_id');
     }
 
     // Helper methods per document_type

@@ -269,6 +269,38 @@ class AgentForm
                                 ->columnSpan(3),
                         ]),
                     ]),
+                // 5. SEZIONE CAMPAGNA E BUDGET
+                Section::make('Campagna e Budget')
+                    ->collapsible()
+                    ->collapsed()
+                    ->description('Dati relativi a campagne di acquisizione e budget assegnato.')
+                    ->icon('heroicon-o-flag')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('welcome_bonus')
+                                ->label('Premio Benvenuto')
+                                ->numeric()
+                                ->prefix('€')
+                                ->maxValue(99999999.99)
+                                ->step(0.01)
+                                ->helperText('Bonus una tantum per nuovi agenti'),
+                            TextInput::make('budget')
+                                ->label('Budget Assegnato')
+                                ->numeric()
+                                ->prefix('€')
+                                ->maxValue(99999999.99)
+                                ->step(0.01)
+                                ->helperText("Budget annuale/mensile assegnato all'agente"),
+                            TextInput::make('campagna')
+                                ->label('Codice Campagna')
+                                ->maxLength(255)
+                                ->helperText('Codice della campagna di acquisizione'),
+                            DatePicker::make('available_at')
+                                ->label('Data Disponibilità')
+                                ->displayFormat('d/m/Y')
+                                ->helperText("Data da cui l'agente è disponibile"),
+                        ]),
+                    ]),
             ]);
     }
 }

@@ -149,28 +149,29 @@ class PurchaseInvoiceImportService
              */
 
             // 1. Prepariamo la subquery con i calcoli e le join aggiuntive
-            $subquery = PracticeCommission::select([
-                'practice_commissions.invoice_number',
-                'practice_commissions.invoice_at',
-                'practice_commissions.agent_id',
-                'purchase_invoices.supplier_invoice_number as matched_supplier_invoice'
-            ])
-                ->join('agents', 'agents.id', '=', 'practice_commissions.agent_id')
-                ->join('purchase_invoices', 'purchase_invoices.vat_number', '=', 'agents.vat_number')
-                ->where('practice_commissions.invoice_number', '>', '0')
-                ->where('practice_commissions.is_payment', 1)
-                // Usiamo doveRaw per gestire la concatenazione dinamica in SQL in modo pulito
-                ->whereRaw("purchase_invoices.supplier_invoice_number LIKE CONCAT('%', practice_commissions.invoice_number, '%')")
-                ->groupBy([
-                    'agents.name',
-                    'practice_commissions.invoice_at',
-                    'practice_commissions.invoice_number',
-                    'practice_commissions.agent_id',
-                    'purchase_invoices.supplier_invoice_number',
-                    'purchase_invoices.supplier',
-                    'purchase_invoices.amount'
+            // 1. Definiamo la subquery usando gli alias esatti della tua query SQL
+            $subquery = PracticeCommission::from('practice_commissions as p_sub')
+                ->select([
+                    'p_sub.invoice_number',
+                    'p_sub.invoice_at',
+                    'p_sub.agent_id',
+                    's_sub.number as matched_supplier_invoice'  // Aggiornato con s_sub.number
                 ])
-                ->havingRaw('purchase_invoices.amount = SUM(practice_commissions.amount)');
+                ->join('agents as a_sub', 'a_sub.id', '=', 'p_sub.agent_id')
+                ->join('purchase_invoices as s_sub', 's_sub.vat_number', '=', 'a_sub.vat_number')
+                ->where('p_sub.invoice_number', '>', '0')
+                ->where('p_sub.is_payment', 1)
+                ->whereRaw("s_sub.supplier_invoice_number LIKE CONCAT('%', p_sub.invoice_number, '%')")
+                ->groupBy([
+                    'a_sub.name',
+                    'p_sub.invoice_at',
+                    'p_sub.invoice_number',
+                    'p_sub.agent_id',
+                    's_sub.number',
+                    's_sub.supplier',
+                    's_sub.amount'
+                ])
+                ->havingRaw('s_sub.amount = SUM(p_sub.amount)');
 
             // 2. Eseguiamo l'UPDATE sulla tabella principale
             DB::table('practice_commissions as p')
@@ -180,11 +181,10 @@ class PurchaseInvoiceImportService
                         ->on('p.invoice_at', '=', 'dati_calcolati.invoice_at')
                         ->on('p.agent_id', '=', 'dati_calcolati.agent_id');
                 })
-                ->where('p.is_payment', 1)  // Condizione di sicurezza extra sulla query esterna
+                ->where('p.is_payment', 1)  // Sicurezza extra richiesta
                 ->update([
                     'p.alternative_number_invoice' => DB::raw('dati_calcolati.matched_supplier_invoice')
                 ]);
-
             Log::info('Purchase invoices import completed', [
                 'file' => $filePath,
                 'company_id' => $this->companyId,

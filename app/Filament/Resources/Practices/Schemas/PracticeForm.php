@@ -36,6 +36,13 @@ class PracticeForm
                             ->unique(ignoreRecord: true)
                             ->placeholder('es. FVI25-00185')
                             ->helperText('Codice CRM univoco'),
+                        TextInput::make('campagna')
+                            ->label('Codice Campagna')
+                            ->maxLength(255)
+                            ->nullable()
+                            ->placeholder('es. CAMP2025-01')
+                            ->helperText('Codice della campagna di acquisizione')
+                            ->columnSpanFull(),
                         Select::make('client_id')
                             ->label('Cliente')
                             ->relationship('client', 'name')

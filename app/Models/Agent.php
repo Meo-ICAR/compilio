@@ -48,6 +48,10 @@ class Agent extends Model implements HasMedia
         'contoCOGE',
         'user_id',
         'numero_iscrizione_rui',
+        'welcome_bonus',
+        'campagna',
+        'available_at',
+        'budget',
     ];
 
     protected $casts = [
@@ -62,6 +66,9 @@ class Agent extends Model implements HasMedia
         'contributeFrequency' => 'integer',
         'is_art108' => 'boolean',
         'is_active' => 'boolean',
+        'welcome_bonus' => 'decimal:2',
+        'available_at' => 'date',
+        'budget' => 'decimal:2',
     ];
 
     public function addresses(): MorphMany

@@ -51,7 +51,8 @@ class Practice extends Model
         'perfected_at',
         'invoice_at',
         'is_active',
-        'is_convenctioned'
+        'is_convenctioned',
+        'campagna',
     ];
 
     protected $appends = ['clients_names', 'is_invoiced'];

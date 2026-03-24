@@ -181,12 +181,15 @@ class PracticeCommissionsTable
                  */
                 QueryBuilder::make()
                     ->constraints([
+                        TextConstraint::make('alternative_number_invoice')
+                            ->nullable()
+                            ->label('Fattura'),
                         DateConstraint::make('perfected_at')
                             ->nullable()
                             ->label('Perfezionamento'),
                         DateConstraint::make('invoice_at')
                             ->nullable()
-                            ->label('Fatturate'),
+                            ->label('Fattura del'),
                     ])
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([

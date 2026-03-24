@@ -8,10 +8,10 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Get;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Forms\Get;
 
 class ChecklistForm
 {
@@ -116,6 +116,15 @@ class ChecklistForm
                                 ->preload()
                                 ->nullable()
                                 ->helperText('Funzione business associata'),
+                        ]),
+                        Grid::make(2)->schema([
+                            Select::make('checklist_padre_id')
+                                ->label('Checklist Padre')
+                                ->relationship('checklistPadre', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->nullable()
+                                ->helperText('Checklist padre per relazione gerarchica'),
                         ]),
                     ]),
                 // SEZIONE GESTIONE
