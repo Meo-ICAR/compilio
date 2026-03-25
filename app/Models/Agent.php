@@ -21,6 +21,7 @@ class Agent extends Model implements HasMedia
         'coordinated_by_agent_id',
         'name',
         'email',
+        'email_personal',
         'pec',
         'phone',
         'description',

@@ -80,9 +80,15 @@ class AgentForm
                                     }
                                 }),
                             TextInput::make('email')
-                                ->label('Email')
+                                ->label('Email Lavoro')
                                 ->email()
-                                ->maxLength(100),
+                                ->maxLength(100)
+                                ->helperText('Email professionale per comunicazioni di lavoro'),
+                            TextInput::make('email_personal')
+                                ->label('Email Personale')
+                                ->email()
+                                ->maxLength(100)
+                                ->helperText('Email personale per contatti diretti'),
                             TextInput::make('phone')
                                 ->label('Telefono')
                                 ->tel()
