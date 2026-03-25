@@ -93,6 +93,12 @@ class AgentForm
                                 ->label('Telefono')
                                 ->tel()
                                 ->maxLength(20),
+                            TextInput::make('tax_code')
+                                ->label('Codice Fiscale')
+                                ->maxLength(16)
+                                ->placeholder('es. RSSMRA85A01H501Z')
+                                ->helperText("Codice fiscale dell'agente")
+                                ->unique(ignoreRecord: true, table: 'agents'),
                             Select::make('type')
                                 ->label('Tipologia Collaboratore')
                                 ->options([

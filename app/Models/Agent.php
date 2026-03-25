@@ -24,6 +24,7 @@ class Agent extends Model implements HasMedia
         'email_personal',
         'pec',
         'phone',
+        'tax_code',
         'description',
         'supervisor_type',
         'oam',
