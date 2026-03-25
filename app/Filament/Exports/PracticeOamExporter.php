@@ -12,78 +12,105 @@ class PracticeOamExporter extends Exporter
 {
     protected static ?string $model = PracticeOam::class;
 
-    public static function modifyQuery(Builder $query): Builder
-    {
-        // Caricamento ottimizzato per evitare centinaia di query al database
-        return $query->with([
-            'practice.clients',
-            'practice.principal'
-        ]);
-    }
-
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('oam_code')
-                ->label('B-OAM Code'),
+            // ID columns
+            ExportColumn::make('oam_name')
+                ->label('OAM Name'),
             ExportColumn::make('tipo_prodotto')
                 ->label('Prodotto'),
-            // Trasformiamo i booleani in 1/0 per riflettere i tuoi sommari numerici
-            ExportColumn::make('is_conventioned')
-                ->label('C - Convenzionata')
-                ->formatStateUsing(fn($state) => $state ? 1 : 0),
-            ExportColumn::make('is_notconventioned')
-                ->label('D - NON Convenz.')
+            ExportColumn::make('principal_name')
+                ->label('Mandante'),
+            ExportColumn::make('name')
+                ->label('Cliente'),
+            ExportColumn::make('CRM_code')
+                ->label('CRM Code'),
+            ExportColumn::make('practice_name')
+                ->label('Practice Name'),
+            // Boolean columns (converted to 1/0)
+            ExportColumn::make('is_cancel')
+                ->label('Stornata')
                 ->formatStateUsing(fn($state) => $state ? 1 : 0),
             ExportColumn::make('is_perfected')
-                ->label('E - Intermediate')
+                ->label('Perfezionata')
+                ->formatStateUsing(fn($state) => $state ? 1 : 0),
+            ExportColumn::make('is_conventioned')
+                ->label('Convenzionata')
+                ->formatStateUsing(fn($state) => $state ? 1 : 0),
+            ExportColumn::make('is_notconventioned')
+                ->label('Non Convenzionata')
                 ->formatStateUsing(fn($state) => $state ? 1 : 0),
             ExportColumn::make('is_working')
-                ->label('F - Lavorazione')
+                ->label('Working')
                 ->formatStateUsing(fn($state) => $state ? 1 : 0),
-            ExportColumn::make('erogato')
-                ->label('G - Erogato'),
-            ExportColumn::make('erogato_lavorazione')
-                ->label('H - Lavorazione'),
-            ExportColumn::make('compenso_cliente')
-                ->label('I - Provv. Cliente'),
+            ExportColumn::make('is_notconvenctioned')
+                ->label('Non Convenctioned')
+                ->formatStateUsing(fn($state) => $state ? 1 : 0),
+            ExportColumn::make('is_previous')
+                ->label('Previous')
+                ->formatStateUsing(fn($state) => $state ? 1 : 0),
+            ExportColumn::make('is_invoice')
+                ->label('Fatturata')
+                ->formatStateUsing(fn($state) => $state ? 1 : 0),
+            ExportColumn::make('is_before')
+                ->label('Before')
+                ->formatStateUsing(fn($state) => $state ? 1 : 0),
+            ExportColumn::make('is_after')
+                ->label('After')
+                ->formatStateUsing(fn($state) => $state ? 1 : 0),
+            // Decimal/Amount columns
+            ExportColumn::make('liquidato')
+                ->label('Liquidato'),
+            ExportColumn::make('liquidato_lavorazione')
+                ->label('Liquidato Lavorazione'),
             ExportColumn::make('compenso')
-                ->label('J - Provv. Istituto'),
+                ->label('Compenso'),
+            ExportColumn::make('compenso_lavorazione')
+                ->label('Compenso Lavorazione'),
+            ExportColumn::make('erogato')
+                ->label('Erogato'),
+            ExportColumn::make('erogato_lavorazione')
+                ->label('Erogato Lavorazione'),
             ExportColumn::make('compenso_premio')
-                ->label('K - Premio'),
+                ->label('Compenso Premio'),
+            ExportColumn::make('compenso_rimborso')
+                ->label('Compenso Rimborso'),
             ExportColumn::make('compenso_assicurazione')
-                ->label('L - Assicurativi'),
-            ExportColumn::make('provvigione')
-                ->label('O - Provv. Rete'),
-            ExportColumn::make('provvigione_assicurazione')
-                ->label('P - Assic. Rete'),
-            ExportColumn::make('is_cancel')
-                ->label('S - N.Rivalse')
-                ->formatStateUsing(fn($state) => $state ? 1 : 0),
+                ->label('Compenso Assicurazione'),
+            ExportColumn::make('compenso_cliente')
+                ->label('Compenso Cliente'),
             ExportColumn::make('storno')
-                ->label('T - Rivalsa'),
-            ExportColumn::make('compenso_rimborso'),
-            ExportColumn::make('provvigione_premio'),
-            ExportColumn::make('provvigione_storno'),
-            ExportColumn::make('provvigione_rimborso'),
-            ExportColumn::make('name')
-                ->label('Mandante'),
-            // Gestione dei nomi clienti (concatena se sono multipli)
-            ExportColumn::make('practice.clients')
-                ->label('Cliente')
-                ->formatStateUsing(fn($state) => $state->pluck('name')->implode(', ')),
-            ExportColumn::make('practice.CRM_code')
-                ->label('Codice'),
-            ExportColumn::make('practice.name')
-                ->label('Pratica'),
-            ExportColumn::make('practice.inserted_at')
+                ->label('Storno'),
+            ExportColumn::make('provvigione')
+                ->label('Provvigione'),
+            ExportColumn::make('provvigione_lavorazione')
+                ->label('Provvigione Lavorazione'),
+            ExportColumn::make('provvigione_premio')
+                ->label('Provvigione Premio'),
+            ExportColumn::make('provvigione_rimborso')
+                ->label('Provvigione Rimborso'),
+            ExportColumn::make('provvigione_assicurazione')
+                ->label('Provvigione Assicurazione'),
+            ExportColumn::make('provvigione_storno')
+                ->label('Provvigione Storno'),
+            // Date columns
+            ExportColumn::make('inserted_at')
                 ->label('Inserita'),
-            ExportColumn::make('practice.erogated_at')
+            ExportColumn::make('accepted_at')
+                ->label('Data Accettazione'),
+            ExportColumn::make('erogated_at')
                 ->label('Erogata'),
-            ExportColumn::make('practice.principal.type')
-                ->label('Tipo fin.'),
-            ExportColumn::make('compenso_lavorazione'),
-            ExportColumn::make('provvigione_lavorazione'),
+            ExportColumn::make('perfected_at')
+                ->label('Data Perfezionamento'),
+            ExportColumn::make('invoice_at')
+                ->label('Fatturata'),
+            ExportColumn::make('canceled_at')
+                ->label('Data Storno'),
+            // Integer columns
+            ExportColumn::make('mese')
+                ->label('Mese'),
+            // Related data columns
         ];
     }
 

@@ -141,6 +141,42 @@ class SalesInvoiceImportService
              *         'p.alternative_number_invoice' => DB::raw('dati_calcolati.matched_s_number')
              *     ]);
              */
+
+            /*
+             * use Illuminate\Support\Facades\DB;
+             *
+             * // 1. Prepariamo la subquery esattamente come l'hai definita
+             * $subquery = DB::table('sales_invoices as s_sub')
+             *     ->select([
+             *         'c_sub.principal_id',
+             *         'c_sub.invoice_at',
+             *         's_sub.number as matched_sales_invoice_number'
+             *     ])
+             *     ->join('principals as p_sub', 'p_sub.vat_number', '=', 's_sub.vat_number')
+             *     ->join('practice_commissions as c_sub', function($join) {
+             *         $join->on('c_sub.principal_id', '=', 'p_sub.id')
+             *              ->on('c_sub.invoice_at', '=', 's_sub.registration_date');
+             *     })
+             *     ->where('c_sub.tipo', 'Istituto')
+             *     ->groupBy([
+             *         'c_sub.principal_id',
+             *         'c_sub.invoice_at',
+             *         's_sub.number',
+             *         's_sub.amount'
+             *     ])
+             *     ->havingRaw('s_sub.amount = SUM(c_sub.amount)');
+             *
+             * // 2. Eseguiamo l'UPDATE unendo la tabella principale
+             * DB::table('practice_commissions as c')
+             *     ->joinSub($subquery, 'dati_calcolati', function ($join) {
+             *         $join->on('c.principal_id', '=', 'dati_calcolati.principal_id')
+             *              ->on('c.invoice_at', '=', 'dati_calcolati.invoice_at');
+             *     })
+             *     // Eseguiamo l'update sul campo corretto
+             *     ->update([
+             *         'c.alternative_number_invoice' => DB::raw('dati_calcolati.matched_sales_invoice_number')
+             *     ]);
+             */
             Log::info('Sales invoices import completed', [
                 'file' => $filePath,
                 'company_id' => $this->companyId,

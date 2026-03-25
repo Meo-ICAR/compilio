@@ -350,7 +350,9 @@ class PracticeOamsTable
                                 DB::raw('SUM(compenso_cliente) as I_Provvigione_Cliente'),
                                 DB::raw('SUM(compenso) as J_Provvigione_Istituto'),
                                 DB::raw('SUM(compenso_lavorazione) as K_Provvigione_Istituto_Lavorazione'),
+                                DB::raw('SUM(compenso_assicurazione) as L_Assicurative'),
                                 DB::raw('SUM(provvigione) as O_Provvigione_Rete'),
+                                DB::raw('SUM(provvigione_assicurazione) as P_Provvig_Assicurative'),
                                 DB::raw('SUM(liquidato) as liquidato'),
                                 DB::raw('SUM(liquidato_lavorazione) as liquidato_Lavorazione'),
                             ])
@@ -376,8 +378,11 @@ class PracticeOamsTable
                                 'H_Erogato_Lavorazione' => $row->H_Erogato_Lavorazione,
                                 'I_Provvigione_Cliente' => $row->I_Provvigione_Cliente,
                                 'J_Provvigione_Istituto' => $row->J_Provvigione_Istituto,
-                                'K_Provvigione_Istituto_Lavorazione' => $row->K_Provvigione_Istituto_Lavorazione,
+                                'K_Provvigione_Istituto_Lavorazione' =>
+                                    $row->K_Provvigione_Istituto_Lavorazione,
+                                'L_Assicurative' => $row->L_Assicurative,
                                 'O_Provvigione_Rete' => $row->O_Provvigione_Rete,
+                                'P_Provvig_Assicurative' => $row->P_Provvig_Assicurative,
                                 'liquidato' => $row->liquidato,
                                 'liquidato_Lavorazione' => $row->liquidato_Lavorazione,
                             ]);
@@ -399,7 +404,9 @@ class PracticeOamsTable
                                         'I_Provvigione_Cliente',
                                         'J_Provvigione_Istituto',
                                         'K_Provvigione_Istituto_Lavorazione',
+                                        'L_Assicurative',
                                         'O_Provvigione_Rete',
+                                        'P_Provvig_Assicurative',
                                         'liquidato',
                                         'liquidato_Lavorazione',
                                     ]);
@@ -426,11 +433,11 @@ class PracticeOamsTable
                                         (float) $row->I_Provvigione_Cliente,
                                         (float) $row->J_Provvigione_Istituto,
                                         (float) $row->K_Provvigione_Istituto_Lavorazione,
-                                        0,
+                                        (float) $row->L_Assicurative,
                                         0,
                                         0,
                                         (float) $row->O_Provvigione_Rete,
-                                        0,
+                                        (float) $row->P_Provvig_Assicurative,
                                         0,
                                         0,
                                         (float) $row->liquidato,
@@ -452,13 +459,13 @@ class PracticeOamsTable
                                         'I-Provv_Cliente',
                                         'J-Provv_Istituto',
                                         'K-Provv_Istituto_Lavorazione',
-                                        '-',  //  L
+                                        'L_Assicurative',  //  L
                                         '-',  //  M
                                         '-',  //  N
                                         'O-Provv_Rete',
-                                        '-',  //  L
-                                        '-',  //  M
-                                        '-',  //  N
+                                        'P_Provvig_Assicurative',  //  P
+                                        '-',  //  Q
+                                        '-',  //  R
                                         'Liquidato',
                                         'Liquidato_lavorazione',
                                     ];

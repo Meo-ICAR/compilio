@@ -135,12 +135,18 @@ class PracticeOamService
                     $compenso = $commissionSums['compenso'];
                     $premio = $commissionSums['premio'];
                     $assicurazione = $commissionSums['assicurazione'];
-
-                    if (!($tipoProdotto == 'Non so')) {
-                        $compenso = $compenso + $premio + $assicurazione;
-                        $premio = 0;
-                        $assicurazione = 0;
+                    $provvigione_assicurazione = $commissionSums['provvigione_assicurazione'];
+                    if ($assicurazione > 0) {
+                        \Log::info('Assicurazione found for practice: ' . $practice->CRM_code);
                     }
+
+                    /*
+                     * if (!($tipoProdotto == 'Non so')) {
+                     *     $compenso = $compenso + $premio + $assicurazione;
+                     *     $premio = 0;
+                     *     $assicurazione = 0;
+                     * }
+                     */
                     if (!$is_perfected) {
                         $commissionSums['compenso_lavorazione'] = $commissionSums['compenso'];
                         $commissionSums['provvigione_lavorazione'] = $commissionSums['provvigione'];
@@ -168,6 +174,13 @@ class PracticeOamService
                     }
 
                     if ($tipoProdotto == 'Mutuo') {
+                        $swap = $liquidato;
+                        $liquidato = $erogato;
+                        $erogato = $swap;
+
+                        $swap = $liquidato_lavorazione;
+                        $liquidato_lavorazione = $erogato_lavorazione;
+                        $erogato_lavorazione = $swap;
                         if ($somma == $comCliente) {
                             $oam_code = $oam_name;
                             //  Log::info("Sync completed for company {$companyId}: {$insertedCount} practice_oam records inserted");
@@ -276,6 +289,7 @@ class PracticeOamService
         $premio = 0;
         $premioagente = 0;
         $assicurazione = 0;
+        $provvigione_assicurazione = 0;
         $storno = 0;
         $somma = 0;
         $erogato = 0;
@@ -315,10 +329,14 @@ class PracticeOamService
             // Agent commissions
             if ($tipo === 'agente') {
                 // Agent premiums
-                if (strpos($name, 'premio') !== false) {
-                    $premioagente += $amount;
+                if ($isInsurance || strpos($name, 'olizza') || strpos($name, 'broker')) {
+                    $provvigione_assicurazione += $amount;
                 } else {
-                    $provvigione += $amount;
+                    if (strpos($name, 'premio') !== false) {
+                        $premioagente += $amount;
+                    } else {
+                        $provvigione += $amount;
+                    }
                 }
             }
 
@@ -338,7 +356,7 @@ class PracticeOamService
             'premioagente' => $premioagente ?: 0,
             'storno' => $storno ?: 0,
             'assicurazione' => $assicurazione ?: 0,
-            'provvigione_assicurazione' => $assicurazione ?: 0,
+            'provvigione_assicurazione' => $provvigione_assicurazione ?: 0,
             'somma' => $compenso + $provvigione + $premio + $premioagente + $cliente + $storno + $assicurazione,
         ];
 

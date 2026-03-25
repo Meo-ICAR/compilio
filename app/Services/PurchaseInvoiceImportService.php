@@ -150,40 +150,68 @@ class PurchaseInvoiceImportService
 
             // 1. Prepariamo la subquery con i calcoli e le join aggiuntive
             // 1. Definiamo la subquery usando gli alias esatti della tua query SQL
-            $subquery = PracticeCommission::from('practice_commissions as p_sub')
+
+            /*
+             * UPDATE practice_commissions c
+             * INNER JOIN (
+             *     -- La tua SELECT riadattata come tabella derivata
+             *     SELECT
+             *         c_sub.agent_id,
+             *         c_sub.invoice_at,
+             *         s_sub.number AS matched_purchase_invoice_number
+             *     FROM purchase_invoices s_sub
+             *     INNER JOIN agents p_sub
+             *         ON p_sub.vat_number = s_sub.vat_number
+             *     INNER JOIN practice_commissions c_sub
+             *         ON c_sub.agent_id = p_sub.id
+             *         AND c_sub.invoice_at = s_sub.document_date
+             *     WHERE c_sub.tipo = 'Agente'
+             *     GROUP BY
+             *         c_sub.agent_id,
+             *         c_sub.invoice_at,
+             *         s_sub.number,
+             *         s_sub.amount
+             *     HAVING s_sub.amount = SUM(c_sub.amount)
+             * ) AS dati_calcolati
+             *     -- Uniamo la tabella originale c usando le chiavi estratte dalla subquery
+             *     ON c.agent_id = dati_calcolati.agent_id
+             *     AND c.invoice_at = dati_calcolati.invoice_at
+             *
+             *
+             * SET c.alternative_number_invoice = dati_calcolati.matched_purchase_invoice_number;
+             */
+            // 1. Costruiamo la subquery (la tabella temporanea con i dati calcolati)
+            $subquery = DB::table('purchase_invoices as s_sub')
                 ->select([
-                    'p_sub.invoice_number',
-                    'p_sub.invoice_at',
-                    'p_sub.agent_id',
-                    's_sub.number as matched_supplier_invoice'  // Aggiornato con s_sub.number
+                    'c_sub.agent_id',
+                    'c_sub.invoice_at',
+                    's_sub.number as matched_purchase_invoice_number'
                 ])
-                ->join('agents as a_sub', 'a_sub.id', '=', 'p_sub.agent_id')
-                ->join('purchase_invoices as s_sub', 's_sub.vat_number', '=', 'a_sub.vat_number')
-                ->where('p_sub.invoice_number', '>', '0')
-                ->where('p_sub.is_payment', 1)
-                ->whereRaw("s_sub.supplier_invoice_number LIKE CONCAT('%', p_sub.invoice_number, '%')")
+                ->join('agents as p_sub', 'p_sub.vat_number', '=', 's_sub.vat_number')
+                ->join('practice_commissions as c_sub', function ($join) {
+                    $join
+                        ->on('c_sub.agent_id', '=', 'p_sub.id')
+                        ->on('c_sub.invoice_at', '=', 's_sub.document_date');
+                })
+                ->where('c_sub.tipo', 'Agente')
                 ->groupBy([
-                    'a_sub.name',
-                    'p_sub.invoice_at',
-                    'p_sub.invoice_number',
-                    'p_sub.agent_id',
+                    'c_sub.agent_id',
+                    'c_sub.invoice_at',
                     's_sub.number',
-                    's_sub.supplier',
                     's_sub.amount'
                 ])
-                ->havingRaw('s_sub.amount = SUM(p_sub.amount)');
+                ->havingRaw('s_sub.amount = SUM(c_sub.amount)');
 
-            // 2. Eseguiamo l'UPDATE sulla tabella principale
-            DB::table('practice_commissions as p')
+            // 2. Eseguiamo l'aggiornamento unendo la tabella principale alla subquery
+            DB::table('practice_commissions as c')
                 ->joinSub($subquery, 'dati_calcolati', function ($join) {
                     $join
-                        ->on('p.invoice_number', '=', 'dati_calcolati.invoice_number')
-                        ->on('p.invoice_at', '=', 'dati_calcolati.invoice_at')
-                        ->on('p.agent_id', '=', 'dati_calcolati.agent_id');
+                        ->on('c.agent_id', '=', 'dati_calcolati.agent_id')
+                        ->on('c.invoice_at', '=', 'dati_calcolati.invoice_at');
                 })
-                ->where('p.is_payment', 1)  // Sicurezza extra richiesta
                 ->update([
-                    'p.alternative_number_invoice' => DB::raw('dati_calcolati.matched_supplier_invoice')
+                    // Usiamo DB::raw per assegnare il valore dinamico estratto dalla join
+                    'c.alternative_number_invoice' => DB::raw('dati_calcolati.matched_purchase_invoice_number')
                 ]);
             Log::info('Purchase invoices import completed', [
                 'file' => $filePath,
