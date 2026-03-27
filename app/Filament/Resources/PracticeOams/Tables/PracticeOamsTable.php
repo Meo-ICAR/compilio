@@ -197,8 +197,8 @@ class PracticeOamsTable
                 TextColumn::make('name')
                     ->label('Mandante')
                     ->sortable(),
-                TextColumn::make('name')
-                    ->label('Cliente')
+                TextColumn::make('practice_name')
+                    ->label('Pratica')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('CRM_code')
@@ -213,12 +213,12 @@ class PracticeOamsTable
                     ->label('Inserita')
                     ->date()
                     ->sortable(),
-                TextColumn::make('erogated_at')
-                    ->label('Erogata')
-                    ->date()
-                    ->sortable(),
                 TextColumn::make('accepted_at')
                     ->label('Accettata')
+                    ->date()
+                    ->sortable(),
+                TextColumn::make('erogated_at')
+                    ->label('Erogata')
                     ->date()
                     ->sortable(),
                 TextColumn::make('compenso_lavorazione')
@@ -227,6 +227,18 @@ class PracticeOamsTable
                     ->summarize(Sum::make()->money('EUR')->label(''))
                     ->sortable(),
                 TextColumn::make('provvigione_lavorazione')
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
+                    ->sortable(),
+                TextColumn::make('liquidato')
+                    ->label('Liquidato')
+                    ->money('EUR')  // Forza Euro e formato italiano
+                    ->alignEnd()
+                    ->summarize(Sum::make()->money('EUR')->label(''))
+                    ->sortable(),
+                TextColumn::make('liquidato_lavorazione')
+                    ->label('Liquidato Lavorazione')
                     ->money('EUR')  // Forza Euro e formato italiano
                     ->alignEnd()
                     ->summarize(Sum::make()->money('EUR')->label(''))
@@ -317,9 +329,15 @@ class PracticeOamsTable
                                 '11' => 'Novembre',
                                 '12' => 'Dicembre',
                             ]),
-                        DateConstraint::make('invoice_at')
+                        DateConstraint::make('inserted_at')
                             ->nullable()
-                            ->label('Fatturate'),
+                            ->label('Inserita'),
+                        DateConstraint::make('accepted_at')
+                            ->nullable()
+                            ->label('Accettata'),
+                        DateConstraint::make('erogated_at')
+                            ->nullable()
+                            ->label('Erogata'),
                     ]),
             ], layout: FiltersLayout::AboveContent)
             ->recordActions([

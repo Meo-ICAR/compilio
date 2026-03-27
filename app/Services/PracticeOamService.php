@@ -52,26 +52,31 @@ class PracticeOamService
             // Step 2: Get practices that meet the criteria
             $practicesQuery = Practice::where('brokerage_fee', '>', 0)
                 ->whereNotIn('tipo_prodotto', ['Polizza', 'Utenza'])
-                ->where(function ($query) use ($endDateCarbon) {
+                ->where(function ($query) use ($endDateCarbon, $startDateCarbon) {
                     $query
-                        ->whereNotNull('sended_at')
-                        ->orWhere('sended_at', '<', $endDateCarbon);
+                        ->where(function ($query) use ($endDateCarbon) {
+                            $query
+                                ->whereNotNull('sended_at')
+                                ->orWhere('sended_at', '<', $endDateCarbon);
+                        })
+                        ->where(function ($query) use ($endDateCarbon) {
+                            $query
+                                ->whereNull('rejected_at')
+                                ->orWhere('rejected_at', '>', $endDateCarbon);
+                        })
+                        ->where(function ($query) use ($startDateCarbon) {
+                            $query
+                                ->whereNull('erogated_at')
+                                ->orWhere('erogated_at', '>', $startDateCarbon);
+                        })
+                        ->where(function ($query) use ($startDateCarbon) {
+                            $query
+                                ->whereNull('invoice_at')
+                                ->orWhere('invoice_at', '>', $startDateCarbon);
+                        });
                 })
-                ->where(function ($query) use ($endDateCarbon) {
-                    $query
-                        ->whereNull('rejected_at')
-                        ->orWhere('rejected_at', '>', $endDateCarbon);
-                })
-                ->where(function ($query) use ($startDateCarbon) {
-                    $query
-                        ->whereNull('erogated_at')
-                        ->orWhere('erogated_at', '>', $startDateCarbon);
-                })
-                ->where(function ($query) use ($startDateCarbon) {
-                    $query
-                        ->whereNull('invoice_at')
-                        ->orWhere('invoice_at', '>', $startDateCarbon);
-                });
+                ->orWhereIn('CRM_code', ['QT01118', 'QT01635', 'QT01649', 'QT01660', 'QT01692']);
+
             // Debug: Log the SQL query
             Log::info('SQL Query: ' . $practicesQuery->toSql());
             Log::info('Query Bindings: ' . json_encode($practicesQuery->getBindings()));
