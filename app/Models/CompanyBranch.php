@@ -25,6 +25,66 @@ class CompanyBranch extends Model
         'updated_at' => 'datetime',
     ];
 
+    // Accessors
+    public function getManagerFullNameAttribute(): string
+    {
+        return trim(($this->manager_first_name ?? '') . ' ' . ($this->manager_last_name ?? ''));
+    }
+
+    public function getManagerDisplayNameAttribute(): string
+    {
+        return $this->manager_full_name ?: 'Nessun responsabile';
+    }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return $this->is_main_office ? 'Sede Legale' : 'Filiale';
+    }
+
+    public function getAddressStringAttribute(): string
+    {
+        return $this->address ? $this->address->full_address : 'Nessun indirizzo';
+    }
+
+    // Scopes
+    public function scopeMain($query)
+    {
+        return $query->where('is_main_office', true);
+    }
+
+    public function scopeSecondary($query)
+    {
+        return $query->where('is_main_office', false);
+    }
+
+    public function scopeByCompany($query, $companyId)
+    {
+        return $query->where('company_id', $companyId);
+    }
+
+    public function scopeWithManager($query)
+    {
+        return $query
+            ->whereNotNull('manager_first_name')
+            ->whereNotNull('manager_last_name');
+    }
+
+    // Business logic methods
+    public function hasManager(): bool
+    {
+        return !empty($this->manager_first_name) && !empty($this->manager_last_name);
+    }
+
+    public function isMain(): bool
+    {
+        return $this->is_main_office;
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return !$this->is_main_office;
+    }
+
     public function address()
     {
         return $this->morphOne(Address::class, 'addressable');

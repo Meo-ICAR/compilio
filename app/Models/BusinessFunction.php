@@ -48,6 +48,14 @@ class BusinessFunction extends Model
         return $this->hasMany(CompanyFunction::class, 'function_id');
     }
 
+    public function companies()
+    {
+        return $this
+            ->belongsToMany(Company::class, 'company_functions', 'business_function_id', 'company_id')
+            ->withPivot(['employee_id', 'client_id', 'is_privacy', 'is_outsourced', 'report_frequency', 'contract_expiry_date', 'notes'])
+            ->withTimestamps();
+    }
+
     public function ropaEntries(): HasMany
     {
         return $this->hasMany(RopaEntry::class, 'function_id');
@@ -163,5 +171,32 @@ class BusinessFunction extends Model
     public function scopeControl($query)
     {
         return $query->where('type', 'Controllo');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('outsourcable_status', '!=', 'no');
+    }
+
+    public function scopeByCompany($query, $companyId)
+    {
+        return $query->whereHas('companies', function ($q) use ($companyId) {
+            $q->where('company_id', $companyId);
+        });
+    }
+
+    public function getActiveCompaniesCountAttribute(): int
+    {
+        return $this->companies()->wherePivot('is_outsourced', false)->count();
+    }
+
+    public function getOutsourcedCompaniesCountAttribute(): int
+    {
+        return $this->companies()->wherePivot('is_outsourced', true)->count();
+    }
+
+    public function canBeOutsourced(): bool
+    {
+        return $this->outsourcable_status === 'yes' || $this->outsourcable_status === 'partial';
     }
 }

@@ -124,11 +124,6 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         return $this->getFirstMediaUrl('logo', 'thumb') ?? asset('images/default-logo.png');
     }
 
-    public function branches()
-    {
-        return $this->hasMany(CompanyBranch::class);
-    }
-
     public function websites()
     {
         return $this->morphMany(Website::class, 'websiteable');
@@ -177,6 +172,14 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
         return $this->hasMany(CompanyFunction::class);
     }
 
+    public function businessFunctions()
+    {
+        return $this
+            ->belongsToMany(BusinessFunction::class, 'company_functions', 'company_id', 'business_function_id')
+            ->withPivot(['employee_id', 'client_id', 'is_privacy', 'is_outsourced', 'report_frequency', 'contract_expiry_date', 'notes'])
+            ->withTimestamps();
+    }
+
     public function principals(): HasMany
     {
         return $this->hasMany(Principal::class);
@@ -219,8 +222,28 @@ class Company extends Model implements HasCurrentTenantLabel, HasMedia
             ->whereNotNull('num_iscr_collaboratori_ii_liv');
     }
 
-    public function companySenders(): HasMany
+    public function branches(): HasMany
     {
-        return $this->hasMany(CompanySender::class);
+        return $this->hasMany(CompanyBranch::class);
+    }
+
+    public function mainBranch()
+    {
+        return $this->branches()->where('is_main_office', true)->first();
+    }
+
+    public function secondaryBranches()
+    {
+        return $this->branches()->where('is_main_office', false);
+    }
+
+    public function getBranchCountAttribute(): int
+    {
+        return $this->branches()->count();
+    }
+
+    public function hasMainBranch(): bool
+    {
+        return $this->branches()->where('is_main_office', true)->exists();
     }
 }
