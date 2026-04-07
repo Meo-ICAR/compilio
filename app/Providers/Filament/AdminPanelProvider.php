@@ -102,7 +102,7 @@ class AdminPanelProvider extends PanelProvider
                     ])
                     ->redirectAfterLoginUsing(function (string $provider, FilamentSocialiteUserContract $socialiteUser, FilamentSocialitePlugin $plugin) {
                         // Change the redirect behaviour here.
-                        $tenant = $user->getTenants($user->panel('admin'))->first();
+                        $tenant = $socialiteUser->getTenants($socialiteUser->panel('admin'))->first();
 
                         if ($tenant) {
                             // 2. Genera l'URL per la dashboard del tenant specifico
@@ -115,7 +115,6 @@ class AdminPanelProvider extends PanelProvider
                         return User::create([
                             'name' => $oauthUser->getName(),
                             'email' => $oauthUser->getEmail(),
-                            'password' => null,  // Password nullable obbligatoria per Socialite
                             'avatar_url' => $oauthUser->getAvatar(),  // Salva l'URL di Google
                             'email_verified_at' => now(),  // Google certifica l'email, quindi la segniamo come verificata
                             'password' => Hash::make(Str::random(32)),  // Password casuale sicura

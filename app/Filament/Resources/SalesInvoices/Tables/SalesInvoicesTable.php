@@ -3,13 +3,13 @@
 namespace App\Filament\Resources\SalesInvoices\Tables;
 
 use App\Filament\Resources\PracticeCommissions\PracticeCommissionResource;
+use App\Filament\Traits\CanExportTable;
 use App\Models\Agent;
 use App\Models\Client;
 use App\Models\Principal;
 use App\Models\SalesInvoice;
 use App\Services\SalesInvoiceCreditNoteImportService;
 use App\Services\SalesInvoiceImportService;
-use App\Filament\Traits\CanExportTable;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -40,7 +40,7 @@ class SalesInvoicesTable
     {
         return $table
             ->selectable()
-            ->paginated(['all', 10, 25, 50, 100])
+            ->paginated(false)
             ->groups([
                 Group::make('customer_name')
                     ->label('Cliente')
@@ -58,11 +58,11 @@ class SalesInvoicesTable
                 TextColumn::make('amount')
                     ->label('Importo Totale')
                     ->money('EUR')
-                    ->summarize(
+                    ->summarize([
                         Sum::make()
                             ->money('EUR')
                             ->label('')
-                    )
+                    ])
                     ->sortable(),
                 TextColumn::make('vat_number')
                     ->label('Partita IVA')
@@ -83,7 +83,7 @@ class SalesInvoicesTable
                     ->label('Importo Residuo')
                     ->money('EUR')
                     ->sortable()
-                    ->color(fn($record) => $record->residual_amount > 0 ? 'warning' : 'success'),
+                    ->color('warning'),
                 TextColumn::make('document_type')
                     ->label('Tipo Doc.')
                     ->searchable()
@@ -95,12 +95,10 @@ class SalesInvoicesTable
             ->filters([
                 SelectFilter::make('document_type')
                     ->label('Tipo Documento')
-                    ->options(function () {
-                        return SalesInvoice::distinct('document_type')
-                            ->whereNotNull('document_type')
-                            ->pluck('document_type', 'document_type')
-                            ->toArray();
-                    }),
+                    ->options(SalesInvoice::distinct('document_type')
+                        ->whereNotNull('document_type')
+                        ->pluck('document_type', 'document_type')
+                        ->toArray()),
                 Filter::make('registration_date')
                     ->label('Data Registrazione')
                     ->form([
@@ -197,9 +195,9 @@ class SalesInvoicesTable
                         } else {
                             // Verifica se esiste un record con questo nome
                             $existingRecord = match ($data['client_type']) {
-                                'App\Models\Client' => Client::where('name', $searchTerm)->first(),
-                                'App\Models\Agent' => Agent::where('name', $searchTerm)->first(),
-                                'App\Models\Principal' => Principal::where('name', $searchTerm)->first(),
+                                'App\Models\Client' => Client::where('name', '=', $searchTerm)->first(['id']),
+                                'App\Models\Agent' => Agent::where('name', '=', $searchTerm)->first(['id']),
+                                'App\Models\Principal' => Principal::where('name', '=', $searchTerm)->first(['id']),
                                 default => null
                             };
 
@@ -281,7 +279,7 @@ class SalesInvoicesTable
                                     return match ($type) {
                                         'App\Models\Client' => Client::pluck('name', 'id')->sort(),
                                         'App\Models\Agent' => Agent::pluck('name', 'id')->sort(),
-                                        'App\Models\Principal' => Principal::whereNull('vat_number')->orWhere('vat_number', '')->pluck('name', 'id')->sort(),
+                                        'App\Models\Principal' => Principal::whereNull('vat_number')->orWhere('vat_number', '=', '')->pluck('name', 'id')->sort(),
                                         default => []
                                     };
                                 })
@@ -298,7 +296,7 @@ class SalesInvoicesTable
                                         'App\Models\Principal' => Principal::where(function ($query) use ($search) {
                                             $query
                                                 ->whereNull('vat_number')
-                                                ->orWhere('vat_number', '');
+                                                ->orWhere('vat_number', '=', '');
                                         })->where('name', 'like', "%{$search}%")->limit(50)->pluck('name', 'id'),
                                         default => []
                                     };
@@ -308,79 +306,85 @@ class SalesInvoicesTable
                             $totalUpdated = 0;
                             $recordId = null;
 
-                            // Se è selezionato "new", crea il record
-                            if ($data['client_id'] === 'new') {
-                                $newRecord = match ($data['client_type']) {
-                                    'App\Models\Client' => Client::create(['name' => $record->customer_name,
-                                        'vat_number' => $record->vat_number]),
-                                    'App\Models\Agent' => Agent::create(['name' => $record->customer_name,
-                                        'vat_number' => $record->vat_number]),
-                                    'App\Models\Principal' => Principal::create(['name' => $record->customer_name,
-                                        'vat_number' => $record->vat_number]),
-                                    default => null
-                                };
-
-                                if ($newRecord) {
-                                    $recordId = $newRecord->id;
+                            // Process each record individually
+                            foreach ($records as $record) {
+                                if (!is_null($record->invoiceable_id)) {
+                                    continue;  // Skip if already linked
                                 }
-                            } else {
-                                // Per i Principal, cerca prima per VAT number, poi crea se non trovato
-                                if ($data['client_type'] === 'App\Models\Principal') {
-                                    $existingPrincipal = Principal::where(function ($query) use ($record) {
-                                        $query
-                                            ->whereNull('vat_number')
-                                            ->orWhere('vat_number', '');
-                                    })->where('name', $record->customer_name)->first();
 
-                                    if ($existingPrincipal) {
-                                        $recordId = $existingPrincipal->id;
-                                    } else {
-                                        // Crea nuovo Principal solo se non esiste
-                                        $newPrincipal = Principal::create(['name' => $record->customer_name,
-                                            'vat_number' => $record->vat_number]);
-                                        $recordId = $newPrincipal->id;
+                                // Reset recordId for each record
+                                $recordId = null;
+
+                                // Se è selezionato "new", crea il record
+                                if ($data['client_id'] === 'new') {
+                                    $newRecord = match ($data['client_type']) {
+                                        'App\Models\Client' => Client::create(['name' => $record->customer_name,
+                                            'vat_number' => $record->vat_number]),
+                                        'App\Models\Agent' => Agent::create(['name' => $record->customer_name,
+                                            'vat_number' => $record->vat_number]),
+                                        'App\Models\Principal' => Principal::create(['name' => $record->customer_name,
+                                            'vat_number' => $record->vat_number]),
+                                        default => null
+                                    };
+
+                                    if ($newRecord) {
+                                        $recordId = $newRecord->id;
                                     }
                                 } else {
-                                    $recordId = $data['client_id'];
-                                }
-                            }
+                                    // Per i Principal, cerca prima per VAT number, poi crea se non trovato
+                                    if ($data['client_type'] === 'App\Models\Principal') {
+                                        $existingPrincipal = Principal::where(function ($query) use ($record) {
+                                            $query
+                                                ->whereNull('vat_number')
+                                                ->orWhere('vat_number', '=', '');
+                                        })->where('name', '=', $record->customer_name)->first(['id']);
 
-                            if ($recordId) {
-                                foreach ($records as $record) {
-                                    if (is_null($record->invoiceable_id)) {
-                                        // Aggiorna il record corrente
-                                        $record->update([
+                                        if ($existingPrincipal) {
+                                            $recordId = $existingPrincipal->id;
+                                        } else {
+                                            // Crea nuovo Principal solo se non esiste
+                                            $newPrincipal = Principal::create(['name' => $record->customer_name,
+                                                'vat_number' => $record->vat_number]);
+                                            $recordId = $newPrincipal->id;
+                                        }
+                                    } else {
+                                        $recordId = $data['client_id'];
+                                    }
+                                }
+
+                                if ($recordId) {
+                                    // Aggiorna il record corrente
+                                    $record->update([
+                                        'invoiceable_type' => $data['client_type'],
+                                        'invoiceable_id' => $recordId,
+                                    ]);
+                                    $totalUpdated++;
+
+                                    // Associa tutte le altre fatture dello stesso cliente
+                                    $additionalUpdated = SalesInvoice::where('customer_name', $record->customer_name)
+                                        ->whereNull('invoiceable_id')
+                                        ->where('id', '!=', $record->id)  // Escludi il record corrente
+                                        ->update([
                                             'invoiceable_type' => $data['client_type'],
                                             'invoiceable_id' => $recordId,
                                         ]);
-                                        $totalUpdated++;
-
-                                        // Associa tutte le altre fatture dello stesso cliente
-                                        $additionalUpdated = SalesInvoice::where('customer_name', $record->customer_name)
-                                            ->whereNull('invoiceable_id')
-                                            ->where('id', '!=', $record->id)  // Escludi il record corrente
-                                            ->update([
-                                                'invoiceable_type' => $data['client_type'],
-                                                'invoiceable_id' => $recordId,
-                                            ]);
-                                        $totalUpdated += $additionalUpdated;
-                                    }
+                                    $totalUpdated += $additionalUpdated;
                                 }
-
-                                $modelType = match ($data['client_type']) {
-                                    'App\Models\Client' => 'Clienti',
-                                    'App\Models\Principal' => 'Mandanti',
-                                    'App\Models\Agent' => 'Agenti',
-                                    default => 'Record'
-                                };
-
-                                $actionText = $data['client_id'] === 'new' ? 'creati e associati' : 'associati';
-                                Notification::make()
-                                    ->title('Fatture associate')
-                                    ->body("{$totalUpdated} fatture {$actionText} correttamente a {$modelType} (incluse tutte quelle degli stessi clienti)")
-                                    ->success()
-                                    ->send();
                             }
+
+                            $modelType = match ($data['client_type']) {
+                                'App\Models\Client' => 'Clienti',
+                                'App\Models\Principal' => 'Mandanti',
+                                'App\Models\Agent' => 'Agenti',
+                                default => 'Record'
+                            };
+
+                            $actionText = $data['client_id'] === 'new' ? 'creati e associati' : 'associati';
+                            Notification::make()
+                                ->title('Fatture associate')
+                                ->body("{$totalUpdated} fatture {$actionText} correttamente a {$modelType} (incluse tutte quelle degli stessi clienti)")
+                                ->success()
+                                ->send();
                         })
                         ->deselectRecordsAfterCompletion(),
                 ]),

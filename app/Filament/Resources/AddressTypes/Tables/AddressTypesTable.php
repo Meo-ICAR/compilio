@@ -26,10 +26,9 @@ class AddressTypesTable
             ->recordActions([
                 EditAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
-                    //   DeleteBulkAction::make(),
-                    $this->getExportBulkAction(),
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

@@ -212,6 +212,7 @@ class MediafacileImportService
          */
 
         $crmCode = $praticaData['CRM_code'];
+        $praticaData['upload_at'] = now();
         if ($crmCode === 'QT06105') {
             //       Log::info('CRM code is QT06105', $praticaData);
         }
@@ -355,21 +356,23 @@ class MediafacileImportService
                 // pratiche da storico
                 $existing->update(['invoice_at' => '2025-01-01']);
             }
-            if (empty($existing->rejected_at)) {
-                if (($tipoProdotto === 'Mutuo') && year($existing->inserted_at) < 2025 && empty($existing->invoice_at)) {
-                    $existing->update(['invoice_at' => '2025-01-01']);
-                }
-                if (!empty($existing->invoice_at) && empty($existing->perfected_at)) {
-                    $existing->update(['perfected_at' => $existing->invoice_at]);
-                }
-                if (!empty($existing->perfected_at) && empty($existing->erogated_at)) {
-                    $existing->update(['erogated_at' => $existing->perfected_at]);
-                }
-                if (!empty($existing->erogated_at) && empty($existing->approved_at)) {
-                    $existing->update(['approved_at' => $existing->erogated_at]);
-                }
-                if (!empty($existing->approved_at) && empty($existing->sended_at)) {
-                    $existing->update(['sended_at' => $existing->approved_at]);
+            if (false) {
+                if (empty($existing->rejected_at)) {
+                    if (($tipoProdotto === 'Mutuo') && year($existing->inserted_at) < 2025 && empty($existing->invoice_at)) {
+                        $existing->update(['invoice_at' => '2025-01-01']);
+                    }
+                    if (!empty($existing->invoice_at) && empty($existing->perfected_at)) {
+                        $existing->update(['perfected_at' => $existing->invoice_at]);
+                    }
+                    if (!empty($existing->perfected_at) && empty($existing->erogated_at)) {
+                        $existing->update(['erogated_at' => $existing->perfected_at]);
+                    }
+                    if (!empty($existing->erogated_at) && empty($existing->approved_at)) {
+                        $existing->update(['approved_at' => $existing->erogated_at]);
+                    }
+                    if (!empty($existing->approved_at) && empty($existing->sended_at)) {
+                        $existing->update(['sended_at' => $existing->approved_at]);
+                    }
                 }
             }
         }  // pratica esiste
@@ -463,7 +466,7 @@ class MediafacileImportService
             }
 
             // If no format works, try Carbon's flexible parsing
-            return new Carbon($dateValue)->format('Y-m-d');
+            return Carbon::parse($dateValue)->format('Y-m-d');
         } catch (\Exception $e) {
             $this->warn('Failed to parse date: ' . $dateValue);
             return null;

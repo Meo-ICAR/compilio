@@ -190,6 +190,7 @@ class SyncPrincipalsFromRuiCollaboratori extends Command
     {
         $intermediarioName = $principalCollaboratore->intermediario ?? '';
         $ruiNumber = $principalCollaboratore->num_iscr_intermediario ?? '';
+        $dipendenteName = '';
 
         if (empty($ruiNumber) || empty($intermediarioName)) {
             return ['processed' => false, 'updated' => false];

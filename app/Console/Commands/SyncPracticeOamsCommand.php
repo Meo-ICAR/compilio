@@ -34,7 +34,7 @@ class SyncPracticeOamsCommand extends Command
         $statsOnly = $this->option('stats');
 
         if (empty($companyId)) {
-            $companyId = Company::first()->id;
+            $companyId = Company::first(['id'])->id;
         }
 
         if (empty($startDate)) {

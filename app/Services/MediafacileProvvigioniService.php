@@ -287,7 +287,7 @@ ORDER BY x.principal_id, x.tipo_prodotto;
          * $provvigioneData['practice_commission_status_id'] = $commissionStatus->internal_id;
          */
         $existing = PracticeCommission::where('CRM_code', $provvigioneData['CRM_code'])->first();
-
+        $provvigioneData['upload_at'] = now();
         if ($existing) {
             $existing->update($provvigioneData);
         } else {
